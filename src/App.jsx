@@ -39,7 +39,7 @@ function Directorio() {
   const [formData, setFormData] = useState({ nombre: '', celular: '' });
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/profesionales/`)
+    fetch(`${import.meta.env.VITE_API_URL}/profesionales`)
       .then(res => res.json())
       .then(data => { 
         setProfesionales(data); 

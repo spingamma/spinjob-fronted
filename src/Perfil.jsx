@@ -22,7 +22,7 @@ function Perfil() {
 
   useEffect(() => {
     // Usamos la variable de entorno para que el fetch sea dinámico
-    fetch(`${API_URL}/profesionales/`)
+    fetch(`${API_URL}/profesionales`)
       .then(res => res.json())
       .then(data => {
         const perfilEncontrado = data.find(p => p.slug === slug);
