@@ -8,7 +8,7 @@ const BotonCircularAccion = ({ icon, label, url, onContact }) => {
     <a 
       href={url} 
       target="_blank" rel="noreferrer" 
-      onClick={onContact} // <- Dispara la lógica de "Calificación Pendiente"
+      onClick={onContact}
       className="group flex flex-col items-center justify-center p-2 text-center transition hover:-translate-y-1 w-[90px]"
     >
       <div className="flex h-20 w-20 md:h-24 md:w-24 items-center justify-center rounded-full bg-[#1A1A1A] text-white shadow-lg transition duration-300 group-hover:scale-105">
@@ -24,12 +24,8 @@ const BotonCircularAccion = ({ icon, label, url, onContact }) => {
 function PlantillaGenerica({ profesional, volverAtras }) {
   const [mostrarCalificar, setMostrarCalificar] = useState(false);
 
-  // ==========================================
-  // 🧠 LÓGICA DE PERSISTENCIA (Local Storage)
-  // ==========================================
   useEffect(() => {
     if (profesional) {
-      // Al cargar el perfil, revisamos si este usuario dejó un contacto pendiente
       const historial = JSON.parse(localStorage.getItem('spingamma_historial') || '{}');
       if (historial[profesional.slug] === 'pendiente') {
         setMostrarCalificar(true);
@@ -37,19 +33,15 @@ function PlantillaGenerica({ profesional, volverAtras }) {
     }
   }, [profesional]);
 
-  // Cuando hace clic en Llamar/WhatsApp
   const registrarContacto = () => {
     setMostrarCalificar(true);
     const historial = JSON.parse(localStorage.getItem('spingamma_historial') || '{}');
-    historial[profesional.slug] = 'pendiente'; // Marcamos como pendiente
+    historial[profesional.slug] = 'pendiente';
     localStorage.setItem('spingamma_historial', JSON.stringify(historial));
   };
 
-  // Cuando finalmente hace clic en Calificar
   const procesarCalificacion = () => {
-    // Ocultamos el botón visualmente de inmediato
     setMostrarCalificar(false);
-    // Lo marcamos como completado para que no vuelva a salir (hasta que contacte de nuevo)
     const historial = JSON.parse(localStorage.getItem('spingamma_historial') || '{}');
     historial[profesional.slug] = 'calificado';
     localStorage.setItem('spingamma_historial', JSON.stringify(historial));
@@ -75,8 +67,7 @@ function PlantillaGenerica({ profesional, volverAtras }) {
 
   const cleanWhatsapp = profesional.whatsapp ? profesional.whatsapp.replace(/[^0-9]/g, '') : null;
   
-  // Link pre-generado hacia SPINGAMMA
-  const wspSpingamma = "59164016676"; // <-- NUEVO NÚMERO ACTUALIZADO
+  const wspSpingamma = "59164016676";
   const msjCalificar = encodeURIComponent(`¡Hola! Quiero calificar al profesional ${profesional.name}.`);
   const linkCalificar = `https://wa.me/${wspSpingamma}?text=${msjCalificar}`;
 
@@ -91,7 +82,7 @@ function PlantillaGenerica({ profesional, volverAtras }) {
 
       <main className="w-full max-w-lg flex flex-col items-center flex-1">
         
-        <div className="relative flex-shrink-0 mb-8">
+        <div className="relative flex-shrink-0 mb-6">
           <div className="w-32 h-32 md:w-36 md:h-36 rounded-full p-[3px] bg-white border border-gray-200 flex items-center justify-center shadow-md mx-auto">
             <div className="w-full h-full rounded-full overflow-hidden bg-gray-100 border-[2px] border-white">
               <img 
@@ -104,10 +95,26 @@ function PlantillaGenerica({ profesional, volverAtras }) {
           </div>
         </div>
 
-        <div className="text-center w-full mb-12 px-2">
+        <div className="text-center w-full mb-10 px-2">
           <h1 style={{ color: colorTema }} className="text-2xl md:text-3xl font-serif font-bold uppercase tracking-widest mb-2">
             {profesional.name}
           </h1>
+          
+          {/* NUEVO: Mostrar Estrellas en el Perfil */}
+          <div className="flex items-center justify-center gap-1.5 mb-2">
+            {profesional.reviews_count > 0 ? (
+              <div className="flex items-center bg-gray-50 px-3 py-1 rounded-full border border-gray-200 shadow-sm">
+                <span className="text-lg text-yellow-500">⭐</span>
+                <span className="font-bold text-gray-800 ml-1">{profesional.rating}</span>
+                <span className="text-xs text-gray-500 font-medium ml-1">({profesional.reviews_count} reseñas)</span>
+              </div>
+            ) : (
+              <span className="text-xs font-bold bg-[#F67927]/10 text-[#F67927] px-3 py-1 rounded-full border border-[#F67927]/20 uppercase tracking-wider">
+                Perfil Nuevo
+              </span>
+            )}
+          </div>
+
           <h2 className="text-sm md:text-base font-medium text-gray-600 mb-6">
             {profesional.title}
           </h2>
@@ -119,12 +126,8 @@ function PlantillaGenerica({ profesional, volverAtras }) {
         <div className="grid grid-cols-2 gap-x-12 gap-y-8 w-full max-w-[280px] mx-auto mb-10">
           {profesional.phone && <BotonCircularAccion icon={icons.call} label="Llamada" url={`tel:${profesional.phone}`} onContact={registrarContacto} />}
           {profesional.whatsapp && <BotonCircularAccion icon={icons.whatsapp} label="WhatsApp" url={`https://wa.me/${cleanWhatsapp}`} onContact={registrarContacto} />}
-          
-          {/* ¡Ahora Facebook y Ubicación también disparan el botón de calificar! */}
           {profesional.facebook && <BotonCircularAccion icon={icons.facebook} label="Facebook" url={profesional.facebook} onContact={registrarContacto} />}
           {profesional.ubicacion_url && <BotonCircularAccion icon={icons.map} label="Ubicación" url={profesional.ubicacion_url} onContact={registrarContacto} />}
-          
-          {/* Nota: Si luego agregas Instagram, TikTok o Website, solo recuerda añadirles onContact={registrarContacto} */}
         </div>
 
         {/* BOTÓN MÁGICO DE CALIFICACIÓN */}
@@ -135,7 +138,7 @@ function PlantillaGenerica({ profesional, volverAtras }) {
               <a 
                 href={linkCalificar}
                 target="_blank" rel="noreferrer"
-                onClick={procesarCalificacion} // <- Al hacer clic, desaparece y se guarda como 'calificado'
+                onClick={procesarCalificacion}
                 className="flex items-center justify-center gap-2 w-full bg-[#F67927] hover:bg-[#e06516] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md hover:-translate-y-0.5"
               >
                 <span className="text-lg">⭐</span> Calificar Profesional
