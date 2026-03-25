@@ -92,7 +92,7 @@ function Directorio() {
               <Briefcase className="text-white" size={24} />
             </div>
             <span className="font-extrabold text-2xl tracking-tight text-white uppercase">
-              SPINGAMMA
+              SPINJOB
             </span>
           </div>
 
