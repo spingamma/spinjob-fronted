@@ -3,7 +3,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { 
   Search, Briefcase, Scale, Stethoscope, Calculator, 
-  PenTool, Laptop, MapPin, CheckCircle2, LayoutGrid, Home, Brain, UserPlus, X, Star, LogOut
+  PenTool, Laptop, MapPin, CheckCircle2, LayoutGrid, Home, Brain, UserPlus, X, Star, LogOut,
+  ChevronDown, ChevronRight, LayoutList
 } from 'lucide-react';
 import Perfil from './Perfil';
 
@@ -14,16 +15,36 @@ const normalizeText = (text) => {
 
 const getCategoryIcon = (categoryName) => {
   const name = normalizeText(categoryName);
-  if (name.includes('abogado') || name.includes('legal')) return <Scale size={26} />;
-  if (name.includes('medic') || name.includes('salud')) return <Stethoscope size={26} />;
-  if (name.includes('conta') || name.includes('finanz')) return <Calculator size={26} />;
-  if (name.includes('diseñ') || name.includes('arte')) return <PenTool size={26} />;
-  if (name.includes('tecno') || name.includes('sistem')) return <Laptop size={26} />;
-  if (name.includes('inmo') || name.includes('casa') || name.includes('prop')) return <Home size={26} />;
-  if (name.includes('psico') || name.includes('mente') || name.includes('terapia')) return <Brain size={26} />;
-  if (name === 'todos') return <LayoutGrid size={26} />;
-  return <Briefcase size={26} />; 
+  if (name.includes('abogado') || name.includes('legal')) return <Scale size={24} />;
+  if (name.includes('medic') || name.includes('salud')) return <Stethoscope size={24} />;
+  if (name.includes('conta') || name.includes('finanz')) return <Calculator size={24} />;
+  if (name.includes('diseñ') || name.includes('arte')) return <PenTool size={24} />;
+  if (name.includes('tecno') || name.includes('sistem')) return <Laptop size={24} />;
+  if (name.includes('inmo') || name.includes('casa') || name.includes('prop')) return <Home size={24} />;
+  if (name.includes('psico') || name.includes('mente') || name.includes('terapia')) return <Brain size={24} />;
+  if (name === 'todos') return <LayoutGrid size={24} />;
+  return <Briefcase size={24} />; 
 };
+
+// SIMULACIÓN DE ESTRUCTURA DE CATEGORÍAS (Para el futuro cuando actualices tu DB)
+const CATEGORIAS_ESTRUCTURADAS = [
+  {
+    nombre: "Leyes y Legal",
+    subcategorias: ["Derecho Familiar", "Derecho Penal", "Laboral", "Notario"]
+  },
+  {
+    nombre: "Hogar y Mantenimiento",
+    subcategorias: ["Plomería", "Electricidad", "Carpintería", "Limpieza"]
+  },
+  {
+    nombre: "Salud y Bienestar",
+    subcategorias: ["Medicina General", "Psicología", "Odontología", "Nutrición"]
+  },
+  {
+    nombre: "Tecnología",
+    subcategorias: ["Desarrollo Web", "Soporte Técnico", "Diseño Gráfico"]
+  }
+];
 
 function Directorio() {
   const [profesionales, setProfesionales] = useState([]);
@@ -32,6 +53,10 @@ function Directorio() {
 
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Estados de modales y UI
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [expandedCategory, setExpandedCategory] = useState(null); // Para el acordeón
 
   // Estados de autenticación
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
@@ -105,14 +130,18 @@ function Directorio() {
     setFormData({ nombre: '', celular: '' });
   };
 
+  const seleccionarCategoriaDesdeModal = (cat) => {
+    setActiveCategory(cat);
+    setIsCategoryModalOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-[#1E3D51] text-white font-sans pb-12 antialiased selection:bg-[#F67927] selection:text-white relative">
       
-      {/* HEADER ULTRA COMPACTO PARA MÓVILES (TODO EN UNA FILA) */}
+      {/* HEADER */}
       <header className="sticky top-0 z-40 bg-[#152a38] border-b border-[#32698F]/30 shadow-md h-16 md:h-20 flex items-center">
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
           
-          {/* Logo (Solo Ícono en Móvil) */}
           <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => navigate('/')}>
             <div className="w-10 h-10 bg-[#F67927] rounded-xl flex items-center justify-center shadow-lg">
               <Briefcase className="text-white w-5 h-5 sm:w-6 sm:h-6" />
@@ -120,7 +149,6 @@ function Directorio() {
             <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-white uppercase hidden md:block ml-3">SPINGAMMA</span>
           </div>
           
-          {/* Buscador (Se expande y ocupa el centro) */}
           <div className="flex-1 max-w-2xl">
             <div className="flex items-center bg-[#32698F] border border-[#32698F] rounded-full shadow-inner py-1.5 px-2.5 focus-within:ring-2 focus-within:ring-[#F67927] transition-all">
               <Search size={16} className="text-[#E6E2DF] mr-1.5 sm:mr-2 flex-shrink-0" />
@@ -134,7 +162,6 @@ function Directorio() {
             </div>
           </div>
 
-          {/* Estado de Usuario / Auth */}
           <div className="flex items-center flex-shrink-0">
             {isLoggedIn ? (
               <div className="flex items-center gap-1.5 sm:gap-2 bg-[#1E3D51] border border-[#32698F]/50 py-1 sm:py-1.5 px-1.5 sm:px-3 rounded-full shadow-sm">
@@ -170,20 +197,34 @@ function Directorio() {
         </div>
       </header>
 
-      {/* STICKY CATEGORÍAS */}
+      {/* BARRA DE CATEGORÍAS UX OPTIMIZADA */}
       <div className="bg-[#1E3D51] shadow-sm sticky top-16 md:top-20 z-30 pt-4 border-b border-[#32698F]/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-6 overflow-x-auto pb-1 scrollbar-hide">
-            {dynamicCategories.map((cat) => {
-              const isActive = activeCategory === cat;
-              return (
-                <button key={cat} onClick={() => setActiveCategory(cat)} className="flex flex-col items-center min-w-max gap-2 pb-3 relative group">
-                  <div className={`transition-colors duration-300 ${isActive ? 'text-[#F67927]' : 'text-[#E6E2DF] group-hover:text-white'}`}>{getCategoryIcon(cat)}</div>
-                  <span className={`text-sm font-medium transition-colors duration-300 ${isActive ? 'text-white font-bold' : 'text-[#E6E2DF] group-hover:text-white'}`}>{cat}</span>
-                  {isActive && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#F67927] rounded-t-md"></div>}
-                </button>
-              );
-            })}
+          <div className="flex items-center justify-between pb-1">
+            
+            {/* Scroll de solo 3 o 4 elementos rápidos */}
+            <div className="flex space-x-5 overflow-x-auto scrollbar-hide flex-1">
+              {dynamicCategories.slice(0, 4).map((cat) => {
+                const isActive = activeCategory === cat;
+                return (
+                  <button key={cat} onClick={() => setActiveCategory(cat)} className="flex flex-col items-center min-w-max gap-1.5 pb-2 relative group">
+                    <div className={`transition-colors duration-300 ${isActive ? 'text-[#F67927]' : 'text-[#E6E2DF] group-hover:text-white'}`}>{getCategoryIcon(cat)}</div>
+                    <span className={`text-[0.8rem] font-medium transition-colors duration-300 ${isActive ? 'text-white font-bold' : 'text-[#E6E2DF] group-hover:text-white'}`}>{cat}</span>
+                    {isActive && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#F67927] rounded-t-md"></div>}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* BOTÓN EXPLORAR (Siempre visible a la derecha) */}
+            <button 
+              onClick={() => setIsCategoryModalOpen(true)}
+              className="flex flex-col items-center gap-1.5 pb-2 ml-4 flex-shrink-0 group border-l border-[#32698F] pl-4"
+            >
+              <div className="text-[#F67927] group-hover:scale-110 transition-transform bg-[#32698F]/30 p-1.5 rounded-lg"><LayoutList size={20} /></div>
+              <span className="text-[0.75rem] font-bold text-[#F67927]">Más</span>
+            </button>
+
           </div>
         </div>
       </div>
@@ -198,7 +239,6 @@ function Directorio() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredProfessionals.map((prof) => (
               <div key={prof.id} onClick={() => handleCardClick(prof.slug)} className="group cursor-pointer flex flex-col h-full bg-[#32698F] rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-[#152a38] transition-all duration-300 p-4 transform hover:-translate-y-1 border border-[#32698F] hover:border-[#F67927]/50">
-                
                 <div className="relative aspect-square overflow-hidden rounded-xl bg-[#1E3D51] mb-4">
                   <img src={prof.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.name)}&background=1E3D51&color=FFFFFF&size=256`} onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.name)}&background=1E3D51&color=FFFFFF&size=256`; }} alt={prof.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   
@@ -243,6 +283,84 @@ function Directorio() {
         )}
       </main>
 
+      {/* =========================================
+          BOTTOM SHEET DE CATEGORÍAS (UX OPTIMIZADO)
+          ========================================= */}
+      {isCategoryModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#152a38]/80 backdrop-blur-sm transition-opacity">
+          {/* Capa de clic para cerrar */}
+          <div className="absolute inset-0" onClick={() => setIsCategoryModalOpen(false)}></div>
+          
+          {/* Contenedor del panel */}
+          <div className="bg-[#1E3D51] w-full sm:w-[450px] sm:rounded-3xl rounded-t-3xl max-h-[85vh] flex flex-col shadow-2xl relative animate-in slide-in-from-bottom-10 sm:zoom-in duration-300">
+            
+            {/* Cabecera del Panel */}
+            <div className="flex items-center justify-between p-5 border-b border-[#32698F]/50">
+              <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
+                <LayoutList className="text-[#F67927]" /> Explorar Categorías
+              </h2>
+              <button onClick={() => setIsCategoryModalOpen(false)} className="text-[#E6E2DF] hover:text-white bg-[#32698F] p-1.5 rounded-full transition-colors hover:bg-[#F67927]">
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Lista Vertical de Categorías (Acordeón) */}
+            <div className="p-4 overflow-y-auto flex-1 space-y-3">
+              
+              {/* Opción 'Todos' fija al principio */}
+              <button 
+                onClick={() => seleccionarCategoriaDesdeModal('Todos')}
+                className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all ${activeCategory === 'Todos' ? 'bg-[#32698F] border-[#F67927] shadow-md' : 'bg-[#152a38] border-transparent hover:border-[#32698F]'}`}
+              >
+                <div className={`${activeCategory === 'Todos' ? 'text-[#F67927]' : 'text-gray-400'}`}><LayoutGrid size={24} /></div>
+                <span className="text-lg font-bold text-white">Todos los Profesionales</span>
+              </button>
+
+              {CATEGORIAS_ESTRUCTURADAS.map((cat, idx) => {
+                const isExpanded = expandedCategory === idx;
+                return (
+                  <div key={idx} className="bg-[#152a38] rounded-2xl border border-transparent overflow-hidden transition-all">
+                    
+                    {/* Botón Principal (Padre) */}
+                    <button 
+                      onClick={() => setExpandedCategory(isExpanded ? null : idx)}
+                      className="w-full flex items-center justify-between p-4 focus:outline-none"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="text-gray-400">{getCategoryIcon(cat.nombre)}</div>
+                        <span className="text-lg font-bold text-white text-left">{cat.nombre}</span>
+                      </div>
+                      <div className={`text-[#F67927] transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                        <ChevronDown size={24} />
+                      </div>
+                    </button>
+
+                    {/* Subcategorías (Hijos) */}
+                    {isExpanded && (
+                      <div className="px-4 pb-4 pt-1 border-t border-[#32698F]/30 bg-[#1A3345] animate-in fade-in duration-200">
+                        <div className="flex flex-col gap-2 mt-2">
+                          {cat.subcategorias.map((sub, sIdx) => (
+                            <button 
+                              key={sIdx}
+                              onClick={() => seleccionarCategoriaDesdeModal(sub)}
+                              className="flex items-center justify-between p-3 rounded-xl bg-[#1E3D51] hover:bg-[#32698F] border border-transparent hover:border-[#F67927]/50 transition-all group"
+                            >
+                              <span className="text-sm font-medium text-[#E6E2DF] group-hover:text-white">{sub}</span>
+                              <ChevronRight size={16} className="text-[#32698F] group-hover:text-[#F67927] transition-colors" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE REGISTRO */}
       {authModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#152a38]/80 backdrop-blur-sm transition-opacity">
           <div className="bg-[#1E3D51] border border-[#32698F] rounded-3xl shadow-2xl max-w-md w-full p-8 relative animate-in fade-in zoom-in duration-300">
