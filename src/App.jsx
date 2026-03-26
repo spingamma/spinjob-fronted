@@ -1,9 +1,9 @@
-// src/App.jsx
+// Archivo: src/App.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { 
   Search, Briefcase, Scale, Stethoscope, Calculator, 
-  PenTool, Laptop, MapPin, CheckCircle2, LayoutGrid, Home, Brain, UserPlus, X, Star
+  PenTool, Laptop, MapPin, CheckCircle2, LayoutGrid, Home, Brain, UserPlus, X, Star, LogOut
 } from 'lucide-react';
 import Perfil from './Perfil';
 
@@ -33,7 +33,16 @@ function Directorio() {
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Estados de autenticación
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
+  const [userName, setUserName] = useState(() => {
+    const stored = localStorage.getItem('spingamma_user');
+    if (stored) {
+      try { return JSON.parse(stored).nombre; } catch(e) { return ''; }
+    }
+    return '';
+  });
+  
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingSlug, setPendingSlug] = useState(null);
   const [formData, setFormData] = useState({ nombre: '', celular: '' });
@@ -45,7 +54,10 @@ function Directorio() {
         setProfesionales(data); 
         setCargando(false); 
       })
-      .catch(err => console.error("Error al cargar profesionales:", err));
+      .catch(err => {
+        console.error("Error al cargar profesionales:", err);
+        setCargando(false);
+      });
   }, []);
 
   const dynamicCategories = useMemo(() => {
@@ -54,7 +66,6 @@ function Directorio() {
     return ['Todos', ...uniqueCategories];
   }, [profesionales]);
 
-  // Motor de Búsqueda Dinámico + ORDENAMIENTO POR ESTRELLAS (Punto 5d)
   const filteredProfessionals = profesionales
     .filter(p => {
       const matchCategory = activeCategory === 'Todos' || p.category === activeCategory;
@@ -63,7 +74,7 @@ function Directorio() {
                           normalizeText(p.title).includes(searchNormalized);
       return matchCategory && matchSearch;
     })
-    .sort((a, b) => (b.rating || 0) - (a.rating || 0)); // Ordena de mayor a menor rating
+    .sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
   const handleCardClick = (slug) => {
     if (isLoggedIn) {
@@ -79,6 +90,7 @@ function Directorio() {
     if (formData.nombre.trim() && formData.celular.trim()) {
       localStorage.setItem('spingamma_user', JSON.stringify(formData));
       setIsLoggedIn(true);
+      setUserName(formData.nombre);
       setAuthModalOpen(false);
       if (pendingSlug) {
         navigate(`/perfil/${pendingSlug}`);
@@ -86,26 +98,80 @@ function Directorio() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('spingamma_user');
+    setIsLoggedIn(false);
+    setUserName('');
+    setFormData({ nombre: '', celular: '' });
+  };
+
   return (
     <div className="min-h-screen bg-[#1E3D51] text-white font-sans pb-12 antialiased selection:bg-[#F67927] selection:text-white relative">
-      <header className="sticky top-0 z-40 bg-[#152a38] border-b border-[#32698F]/30 shadow-md py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+      
+      {/* HEADER ULTRA COMPACTO PARA MÓVILES (TODO EN UNA FILA) */}
+      <header className="sticky top-0 z-40 bg-[#152a38] border-b border-[#32698F]/30 shadow-md h-16 md:h-20 flex items-center">
+        <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
+          
+          {/* Logo (Solo Ícono en Móvil) */}
           <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-10 h-10 bg-[#F67927] rounded-xl flex items-center justify-center mr-3 shadow-lg">
-              <Briefcase className="text-white" size={24} />
+            <div className="w-10 h-10 bg-[#F67927] rounded-xl flex items-center justify-center shadow-lg">
+              <Briefcase className="text-white w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <span className="font-extrabold text-2xl tracking-tight text-white uppercase">SPINGAMMA</span>
+            <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-white uppercase hidden md:block ml-3">SPINGAMMA</span>
           </div>
-          <div className="w-full max-w-lg">
-            <div className="flex items-center bg-[#32698F] border border-[#32698F] rounded-full shadow-inner py-1.5 px-2 focus-within:ring-2 focus-within:ring-[#F67927] transition-all">
-              <div className="pl-3 pr-2 text-[#E6E2DF]"><Search size={20} /></div>
-              <input type="text" placeholder="Buscar por nombre o profesión..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-transparent text-white placeholder-[#E6E2DF]/70 outline-none py-2 text-sm md:text-base" />
+          
+          {/* Buscador (Se expande y ocupa el centro) */}
+          <div className="flex-1 max-w-2xl">
+            <div className="flex items-center bg-[#32698F] border border-[#32698F] rounded-full shadow-inner py-1.5 px-2.5 focus-within:ring-2 focus-within:ring-[#F67927] transition-all">
+              <Search size={16} className="text-[#E6E2DF] mr-1.5 sm:mr-2 flex-shrink-0" />
+              <input 
+                type="text" 
+                placeholder="Buscar profesional..." 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)} 
+                className="w-full bg-transparent text-white placeholder-[#E6E2DF]/70 outline-none text-[13px] sm:text-base" 
+              />
             </div>
           </div>
+
+          {/* Estado de Usuario / Auth */}
+          <div className="flex items-center flex-shrink-0">
+            {isLoggedIn ? (
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-[#1E3D51] border border-[#32698F]/50 py-1 sm:py-1.5 px-1.5 sm:px-3 rounded-full shadow-sm">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#F67927] flex items-center justify-center shadow-inner flex-shrink-0">
+                  <span className="text-white font-bold text-xs sm:text-sm">
+                    {userName ? userName.charAt(0).toUpperCase() : 'U'}
+                  </span>
+                </div>
+                <span className="text-sm text-[#E6E2DF] hidden lg:block mr-1 truncate max-w-[100px]">
+                  Hola, <strong className="text-white font-semibold">{userName.split(' ')[0]}</strong>
+                </span>
+                <div className="w-[1px] h-4 bg-[#32698F] hidden md:block mx-1"></div>
+                <button 
+                  onClick={handleLogout} 
+                  className="flex items-center justify-center text-[#E6E2DF] hover:text-[#F67927] transition-colors p-1"
+                  title="Cerrar sesión"
+                >
+                  <LogOut size={18} />
+                  <span className="hidden md:block ml-1.5 text-sm">Salir</span>
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => setAuthModalOpen(true)} 
+                className="flex items-center justify-center bg-[#32698F] hover:bg-[#F67927] text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-full transition-colors shadow-md"
+              >
+                <UserPlus size={16} className="md:hidden" />
+                <span className="text-sm font-semibold hidden md:block">Ingresar</span>
+              </button>
+            )}
+          </div>
+
         </div>
       </header>
 
-      <div className="bg-[#1E3D51] shadow-sm sticky top-[76px] md:top-[88px] z-30 pt-4 border-b border-[#32698F]/50">
+      {/* STICKY CATEGORÍAS */}
+      <div className="bg-[#1E3D51] shadow-sm sticky top-16 md:top-20 z-30 pt-4 border-b border-[#32698F]/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-6 overflow-x-auto pb-1 scrollbar-hide">
             {dynamicCategories.map((cat) => {
@@ -143,7 +209,6 @@ function Directorio() {
                     </div>
                   )}
 
-                  {/* NUEVO: Etiqueta de Estrellas Flotante */}
                   {prof.reviews_count > 0 && (
                     <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2 py-1.5 rounded-lg flex items-center gap-1 shadow-md">
                       <Star size={14} className="fill-[#F67927] text-[#F67927]" />
@@ -156,7 +221,6 @@ function Directorio() {
                 <div className="flex flex-col flex-1">
                   <div className="flex justify-between items-start mb-1">
                     <h3 className="font-bold text-white text-xl leading-tight line-clamp-1 pr-2">{prof.name}</h3>
-                    {/* Si no tiene reseñas, mostramos "Nuevo" */}
                     {prof.reviews_count === 0 && (
                       <span className="text-[0.65rem] font-bold bg-[#F67927]/20 text-[#F67927] px-2 py-0.5 rounded-full border border-[#F67927]/30">Nuevo</span>
                     )}

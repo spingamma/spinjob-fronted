@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import PlantillaGenerica from './plantillas/PlantillaGenerica';
 
 // 2. Plantillas Premium (Descomentar a medida que se creen)
-// import PlantillaInmobiliaria from './plantillas/PlantillaInmobiliaria';
+import PlantillaInmobiliaria from './plantillas/PlantillaInmobiliaria';
 // import PlantillaJuanPablo from './plantillas/PlantillaJuanPablo';
 
 function Perfil() {
@@ -62,9 +62,9 @@ function Perfil() {
   // ==========================================
   // Aquí es donde "conectaremos" los diseños personalizados.
   // Ejemplo:
-  // if (slug === 'inmobiliaria-san-luis') {
-  //   return <PlantillaInmobiliaria profesional={profesional} volverAtras={volverAtras} />;
-  // }
+  if (slug === 'inmobiliaria-san-luis') {
+    return <PlantillaInmobiliaria profesional={profesional} volverAtras={volverAtras} />;
+   }
   
   // ==========================================
   // 🏢 CLIENTES ESTÁNDAR (El diseño por defecto)

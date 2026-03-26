@@ -1,9 +1,22 @@
-// src/plantillas/PlantillaInmobiliaria.jsx
+// Archivo: src/plantillas/PlantillaInmobiliaria.jsx
 import React, { useEffect, useState } from 'react';
+import { LogOut, UserPlus, X, Share2, QrCode } from 'lucide-react';
 
 function PlantillaInmobiliaria({ profesional, volverAtras }) {
   const [loaded, setLoaded] = useState(false);
   const [mostrarQR, setMostrarQR] = useState(false);
+
+  // Estados de Autenticación
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
+  const [userName, setUserName] = useState(() => {
+    const stored = localStorage.getItem('spingamma_user');
+    if (stored) {
+      try { return JSON.parse(stored).nombre; } catch(e) { return ''; }
+    }
+    return '';
+  });
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [formData, setFormData] = useState({ nombre: '', celular: '' });
 
   // Simulador del Loader
   useEffect(() => {
@@ -13,14 +26,49 @@ function PlantillaInmobiliaria({ profesional, volverAtras }) {
 
   const toggleQR = () => setMostrarQR(!mostrarQR);
 
+  const handleShare = async () => {
+    const shareData = {
+      title: `Perfil de ${profesional.name}`,
+      text: `Conoce el perfil profesional de ${profesional.name} - ${profesional.title} en SpinGamma.`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error("Error al compartir", err);
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert("Enlace copiado al portapapeles");
+    }
+  };
+
+  const handleRegister = (e) => {
+    e.preventDefault();
+    if (formData.nombre.trim() && formData.celular.trim()) {
+      localStorage.setItem('spingamma_user', JSON.stringify(formData));
+      setIsLoggedIn(true);
+      setUserName(formData.nombre);
+      setAuthModalOpen(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('spingamma_user');
+    setIsLoggedIn(false);
+    setUserName('');
+    setFormData({ nombre: '', celular: '' });
+  };
+
   // Asegúrate de que los datos existen antes de renderizar
   if (!profesional) return null;
 
   return (
-    // Agregué h-screen para asegurar que ocupe todo el alto
     <div className="h-screen w-full flex items-center justify-center p-3 sm:p-4 relative overflow-hidden bg-[#11181A] font-sans text-white">
       
-      {/* --- ESTILOS INYECTADOS (Los keyframes y animaciones específicas de esta plantilla) --- */}
+      {/* --- ESTILOS INYECTADOS --- */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
         .font-montserrat { font-family: 'Montserrat', sans-serif; }
@@ -72,35 +120,76 @@ function PlantillaInmobiliaria({ profesional, volverAtras }) {
       )}
 
       {/* --- TARJETA PRINCIPAL --- */}
-      <div className={`relative z-10 w-full max-w-[420px] h-[95vh] sm:h-full max-h-[850px] glass-panel-dark rounded-[2.5rem] p-6 sm:p-8 flex flex-col items-center overflow-y-auto hide-scroll font-montserrat transition-all duration-1000 ${loaded ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}>
+      <div className={`relative z-10 w-full max-w-[420px] h-[95vh] sm:h-full max-h-[850px] glass-panel-dark rounded-[2.5rem] pt-6 p-6 sm:p-8 flex flex-col items-center overflow-y-auto hide-scroll font-montserrat transition-all duration-1000 ${loaded ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}>
         
-        {/* BOTON ATRÁS (Añadido para navegación en React) */}
-        <button onClick={volverAtras} className="absolute top-6 left-6 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-[#425C63] rounded-full p-2 transition-all text-gray-300 hover:text-white z-20">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-        </button>
+        {/* ENCABEZADO SUPERIOR (Botón Atrás y Auth) */}
+        <div className="w-full flex justify-between items-center z-20 mb-2">
+          <button onClick={volverAtras} className="text-sm flex items-center gap-2 text-gray-300 hover:text-white transition-colors p-2">
+            ← <span className="hidden sm:inline">Volver</span><span className="sm:hidden">Volver</span>
+          </button>
 
-        {/* Botones Superiores (QR, Compartir) */}
-        <div className="absolute top-6 right-6 flex gap-3 z-20">
-            <button onClick={toggleQR} className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-[#425C63] rounded-full transition-all text-gray-300 hover:text-white backdrop-blur-sm">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-            </button>
+          <div className="flex items-center gap-2">
+            {isLoggedIn ? (
+              <div className="flex items-center gap-2 bg-white/5 border border-white/10 py-1.5 px-2.5 rounded-full shadow-md backdrop-blur-sm">
+                <div className="w-7 h-7 rounded-full bg-[#C8A721] flex items-center justify-center">
+                  <span className="text-[#11181A] font-bold text-xs">
+                    {userName ? userName.charAt(0).toUpperCase() : 'U'}
+                  </span>
+                </div>
+                <div className="w-[1px] h-4 bg-white/20"></div>
+                <button 
+                  onClick={handleLogout} 
+                  className="text-gray-300 hover:text-white transition-colors p-1"
+                  title="Cerrar sesión"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => setAuthModalOpen(true)} 
+                className="text-[0.65rem] uppercase tracking-wider font-bold flex items-center gap-1.5 bg-[#425C63] hover:bg-[#C8A721] hover:text-[#11181A] text-white py-2 px-3.5 rounded-full transition-all shadow-md"
+              >
+                <UserPlus size={14} /> Ingresar
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* FOTO DE PERFIL */}
-        <div className="relative flex-shrink-0 mt-14 mb-6">
+        {/* CONTENEDOR RELATIVO PARA BOTONES FLOTANTES Y FOTO */}
+        <div className="relative w-full flex flex-col items-center">
+          
+          {/* BOTONES FLOTANTES (Compartir, QR) */}
+          <div className="absolute top-0 right-0 flex items-center gap-2.5 z-20">
+            <button onClick={handleShare} className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-[#425C63] rounded-full transition-all text-gray-300 hover:text-white backdrop-blur-sm shadow-md" title="Compartir">
+              <Share2 size={18} />
+            </button>
+            <button onClick={toggleQR} className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-[#425C63] rounded-full transition-all text-gray-300 hover:text-white backdrop-blur-sm shadow-md" title="Mostrar QR">
+              <QrCode size={18} />
+            </button>
+          </div>
+
+          {/* FOTO DE PERFIL */}
+          <div className="relative flex-shrink-0 mt-10 mb-6">
             <div className="w-36 h-36 sm:w-40 sm:h-40 rounded-full p-[2px] bg-gradient-to-br from-[#425C63] via-[#C8A721]/50 to-[#425C63] flex items-center justify-center shadow-[0_0_30px_rgba(66,92,99,0.5)]">
-                <div className="w-full h-full rounded-full overflow-hidden bg-[#11181A] border-[4px] border-[#1A2629]">
-                    <img src={profesional.image || '/default-avatar.png'} alt={profesional.name} className="w-full h-full object-cover" />
-                </div>
+              <div className="w-full h-full rounded-full overflow-hidden bg-[#11181A] border-[4px] border-[#1A2629]">
+                <img 
+                  src={profesional.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name)}&background=11181A&color=C8A721&size=256`} 
+                  onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name)}&background=11181A&color=C8A721&size=256`; }}
+                  alt={profesional.name} 
+                  className="w-full h-full object-cover" 
+                />
+              </div>
             </div>
+          </div>
         </div>
 
         {/* TEXTOS (Conectados a la BD) */}
         <div className="text-center w-full mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white drop-shadow-md">{profesional.name}</h1>
-            <p className="text-[0.7rem] font-bold tracking-[0.25em] text-[#C8A721] mt-3 uppercase">{profesional.title}</p>
-            <div className="w-12 h-[2px] bg-gradient-to-r from-transparent via-[#425C63] to-transparent mx-auto mt-4 mb-4 opacity-70"></div>
-            <p className="text-gray-300 text-[0.85rem] mt-3 leading-relaxed whitespace-pre-line px-2 font-light">{profesional.description}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white drop-shadow-md">{profesional.name}</h1>
+          <p className="text-[0.7rem] font-bold tracking-[0.25em] text-[#C8A721] mt-3 uppercase">{profesional.title}</p>
+          <div className="w-12 h-[2px] bg-gradient-to-r from-transparent via-[#425C63] to-transparent mx-auto mt-4 mb-4 opacity-70"></div>
+          <p className="text-gray-300 text-[0.85rem] mt-3 leading-relaxed whitespace-pre-line px-2 font-light">{profesional.description}</p>
         </div>
 
         {/* BOTONES REDES (Conditional Rendering) */}
@@ -124,6 +213,60 @@ function PlantillaInmobiliaria({ profesional, volverAtras }) {
               </a>
             )}
 
+            {profesional.website && (
+              <a href={profesional.website} target="_blank" rel="noreferrer" className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#425C63] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#425C63]/20 group-hover:bg-[#425C63] text-[#425C63] group-hover:text-white transition-all mb-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="2" x2="22" y1="12" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                  </div>
+                  <span className="font-semibold text-[0.6rem] text-gray-300 group-hover:text-white uppercase tracking-wider">Web</span>
+              </a>
+            )}
+
+            {profesional.facebook && (
+              <a href={profesional.facebook} target="_blank" rel="noreferrer" className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#1877F2] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#1877F2]/20 group-hover:bg-[#1877F2] text-[#1877F2] group-hover:text-white transition-all mb-2">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  </div>
+                  <span className="font-semibold text-[0.6rem] text-gray-300 group-hover:text-white uppercase tracking-wider">Facebook</span>
+              </a>
+            )}
+
+            {profesional.instagram && (
+              <a href={profesional.instagram} target="_blank" rel="noreferrer" className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#E1306C] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#E1306C]/20 group-hover:bg-[#E1306C] text-[#E1306C] group-hover:text-white transition-all mb-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><rect width="16" height="16" x="4" y="4" rx="4"></rect><circle cx="12" cy="12" r="3"></circle><line x1="16.5" x2="16.5" y1="7.5" y2="7.5"></line></svg>
+                  </div>
+                  <span className="font-semibold text-[0.6rem] text-gray-300 group-hover:text-white uppercase tracking-wider">Instagram</span>
+              </a>
+            )}
+
+            {profesional.tiktok && (
+              <a href={profesional.tiktok} target="_blank" rel="noreferrer" className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-white rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 group-hover:bg-white text-gray-300 group-hover:text-[#11181A] transition-all mb-2">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+                  </div>
+                  <span className="font-semibold text-[0.6rem] text-gray-300 group-hover:text-white uppercase tracking-wider">TikTok</span>
+              </a>
+            )}
+
+            {profesional.linkedin && (
+              <a href={profesional.linkedin} target="_blank" rel="noreferrer" className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#0A66C2] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#0A66C2]/20 group-hover:bg-[#0A66C2] text-[#0A66C2] group-hover:text-white transition-all mb-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                  </div>
+                  <span className="font-semibold text-[0.6rem] text-gray-300 group-hover:text-white uppercase tracking-wider">LinkedIn</span>
+              </a>
+            )}
+
+            {profesional.github && (
+              <a href={profesional.github} target="_blank" rel="noreferrer" className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#425C63] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 group-hover:bg-white text-gray-300 group-hover:text-[#11181A] transition-all mb-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.24c3-.34 6-1.53 6-6.76a5.5 5.5 0 0 0-1.5-3.82 5.2 5.2 0 0 0-.15-3.78s-1.2-.38-3.9 1.45a13.4 13.4 0 0 0-7 0c-2.7-1.83-3.9-1.45-3.9-1.45a5.2 5.2 0 0 0-.15 3.78A5.5 5.5 0 0 0 3 8.2c0 5.22 3 6.42 6 6.76a4.8 4.8 0 0 0-1 3.24v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+                  </div>
+                  <span className="font-semibold text-[0.6rem] text-gray-300 group-hover:text-white uppercase tracking-wider">GitHub</span>
+              </a>
+            )}
+
             {profesional.ubicacion_url && (
               <a href={profesional.ubicacion_url} target="_blank" rel="noreferrer" className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#C8A721] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
                   <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#C8A721]/20 group-hover:bg-[#C8A721] text-[#C8A721] group-hover:text-[#11181A] transition-all mb-2">
@@ -140,18 +283,50 @@ function PlantillaInmobiliaria({ profesional, volverAtras }) {
         </p>
       </div>
 
+      {/* --- MODAL DE REGISTRO --- */}
+      {authModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#11181A]/80 backdrop-blur-md transition-opacity">
+          <div className="bg-gradient-to-b from-[#1A2629] to-[#11181A] border border-[#425C63]/50 rounded-[2rem] shadow-[0_0_50px_rgba(66,92,99,0.3)] max-w-md w-full p-8 relative animate-in fade-in zoom-in duration-300 font-montserrat">
+            <button onClick={() => setAuthModalOpen(false)} className="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors p-2 bg-white/5 rounded-full hover:bg-[#425C63]"><X size={20} /></button>
+            <div className="text-center mb-6 mt-2">
+              <div className="w-20 h-20 bg-[#425C63]/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#C8A721]/50 shadow-inner"><UserPlus size={36} className="text-[#C8A721]" /></div>
+              <h2 className="text-2xl font-bold text-white mb-2 tracking-wide">Comunidad Segura</h2>
+              <p className="text-gray-400 text-sm px-2 font-light">Para garantizar valoraciones reales, regístrate gratis en 10 segundos.</p>
+            </div>
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div>
+                <label className="block text-[0.65rem] font-bold text-[#C8A721] uppercase tracking-[0.1em] mb-1.5 ml-1">Nombre Completo</label>
+                <input required type="text" placeholder="Ej. Ana Pérez" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="w-full bg-[#11181A] border border-[#425C63] text-white px-4 py-3.5 rounded-2xl outline-none focus:border-[#C8A721] focus:ring-1 focus:ring-[#C8A721] placeholder-gray-600 transition-all font-light"/>
+              </div>
+              <div>
+                <label className="block text-[0.65rem] font-bold text-[#C8A721] uppercase tracking-[0.1em] mb-1.5 ml-1">Celular / WhatsApp</label>
+                <input required type="tel" placeholder="Ej. 71234567" value={formData.celular} onChange={(e) => setFormData({...formData, celular: e.target.value})} className="w-full bg-[#11181A] border border-[#425C63] text-white px-4 py-3.5 rounded-2xl outline-none focus:border-[#C8A721] focus:ring-1 focus:ring-[#C8A721] placeholder-gray-600 transition-all font-light"/>
+              </div>
+              <button type="submit" className="w-full bg-[#C8A721] hover:bg-[#e0bb2a] text-[#11181A] font-bold py-4 px-4 rounded-2xl transition-all shadow-lg hover:-translate-y-0.5 mt-6 uppercase tracking-wider text-sm">Registrarme</button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* --- MODAL QR --- */}
       {mostrarQR && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <div className="absolute inset-0 bg-[#11181A]/90 backdrop-blur-md" onClick={toggleQR}></div>
-            <div className="relative bg-gradient-to-b from-[#1A2629] to-[#11181A] border border-[#425C63]/30 p-8 rounded-[2rem] flex flex-col items-center z-10">
-                <button onClick={toggleQR} className="absolute top-4 right-4 text-gray-400 hover:text-white bg-white/5 p-2 rounded-full">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#11181A]/90 backdrop-blur-md transition-opacity">
+            <div className="relative bg-gradient-to-b from-[#1A2629] to-[#11181A] border border-[#425C63]/30 p-8 rounded-[2rem] flex flex-col items-center z-10 font-montserrat shadow-2xl animate-in fade-in zoom-in duration-300">
+                <button onClick={toggleQR} className="absolute top-4 right-4 text-gray-400 hover:text-white bg-white/5 p-2 rounded-full transition-colors hover:bg-[#425C63]">
+                    <X size={20} />
                 </button>
-                <p className="text-[#C8A721] text-[0.65rem] uppercase tracking-[0.25em] mb-6 font-bold">Código QR</p>
-                <div className="bg-white p-3 rounded-2xl">
-                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.href)}&color=11181A&bgcolor=FFFFFF`} alt="QR" className="w-48 h-48" />
+                <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3 border border-[#C8A721]/50 shadow-inner">
+                  <QrCode size={24} className="text-[#C8A721]" />
                 </div>
+                <p className="text-[#C8A721] text-[0.65rem] uppercase tracking-[0.25em] mb-6 font-bold">Código QR</p>
+                <div className="bg-white p-3 rounded-2xl shadow-inner border-[3px] border-[#425C63]">
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.href)}&color=11181A&bgcolor=FFFFFF`} 
+                      alt="Código QR del Perfil" 
+                      className="w-48 h-48 md:w-56 md:h-56 object-contain" 
+                    />
+                </div>
+                <p className="text-gray-400 text-xs mt-6 text-center max-w-[200px] font-light">Escanea para ver el perfil de {profesional.name}</p>
             </div>
         </div>
       )}
