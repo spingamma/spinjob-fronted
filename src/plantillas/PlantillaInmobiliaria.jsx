@@ -18,6 +18,13 @@ function PlantillaInmobiliaria({ profesional, volverAtras }) {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [formData, setFormData] = useState({ nombre: '', celular: '' });
 
+  // EFECTO PARA FORZAR LOGIN SI ENTRA POR QR O URL DIRECTA
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setAuthModalOpen(true);
+    }
+  }, [isLoggedIn]);
+
   // Simulador del Loader
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 800);
@@ -62,8 +69,13 @@ function PlantillaInmobiliaria({ profesional, volverAtras }) {
     setFormData({ nombre: '', celular: '' });
   };
 
-  // Asegúrate de que los datos existen antes de renderizar
   if (!profesional) return null;
+
+  // MENSAJE DE WHATSAPP ACTUALIZADO CON EL NOMBRE DEL USUARIO
+  const cleanWhatsapp = profesional.whatsapp ? profesional.whatsapp.replace(/[^0-9]/g, '') : null;
+  const wspSpingamma = "59164016676";
+  const msjCalificar = encodeURIComponent(`¡Hola! Soy ${userName || 'un usuario'}, quiero calificar al profesional ${profesional.name}.`);
+  const linkCalificar = `https://wa.me/${wspSpingamma}?text=${msjCalificar}`;
 
   return (
     <div className="h-screen w-full flex items-center justify-center p-3 sm:p-4 relative overflow-hidden bg-[#11181A] font-sans text-white">
@@ -159,7 +171,7 @@ function PlantillaInmobiliaria({ profesional, volverAtras }) {
         {/* CONTENEDOR RELATIVO PARA BOTONES FLOTANTES Y FOTO */}
         <div className="relative w-full flex flex-col items-center">
           
-          {/* BOTONES FLOTANTES (Compartir, QR) */}
+          {/* BOTONES FLOTANTES (Compartir, QR en el orden de la imagen) */}
           <div className="absolute top-0 right-0 flex items-center gap-2.5 z-20">
             <button onClick={handleShare} className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-[#425C63] rounded-full transition-all text-gray-300 hover:text-white backdrop-blur-sm shadow-md" title="Compartir">
               <Share2 size={18} />
@@ -287,7 +299,8 @@ function PlantillaInmobiliaria({ profesional, volverAtras }) {
       {authModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#11181A]/80 backdrop-blur-md transition-opacity">
           <div className="bg-gradient-to-b from-[#1A2629] to-[#11181A] border border-[#425C63]/50 rounded-[2rem] shadow-[0_0_50px_rgba(66,92,99,0.3)] max-w-md w-full p-8 relative animate-in fade-in zoom-in duration-300 font-montserrat">
-            <button onClick={() => setAuthModalOpen(false)} className="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors p-2 bg-white/5 rounded-full hover:bg-[#425C63]"><X size={20} /></button>
+            {/* Si rechazan iniciar sesión, regresan al directorio */}
+            <button onClick={() => { setAuthModalOpen(false); volverAtras(); }} className="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors p-2 bg-white/5 rounded-full hover:bg-[#425C63]"><X size={20} /></button>
             <div className="text-center mb-6 mt-2">
               <div className="w-20 h-20 bg-[#425C63]/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#C8A721]/50 shadow-inner"><UserPlus size={36} className="text-[#C8A721]" /></div>
               <h2 className="text-2xl font-bold text-white mb-2 tracking-wide">Comunidad Segura</h2>

@@ -39,6 +39,13 @@ function PlantillaGenerica({ profesional, volverAtras }) {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [formData, setFormData] = useState({ nombre: '', celular: '' });
 
+  // EFECTO PARA FORZAR LOGIN SI ENTRA POR QR O URL DIRECTA
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setAuthModalOpen(true);
+    }
+  }, [isLoggedIn]);
+
   useEffect(() => {
     if (profesional) {
       const historial = JSON.parse(localStorage.getItem('spingamma_historial') || '{}');
@@ -102,7 +109,6 @@ function PlantillaGenerica({ profesional, volverAtras }) {
 
   if (!profesional) return null;
 
-  // Adaptamos el fallback a los colores oscuros de la app principal
   const imgFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name)}&background=1E3D51&color=FFFFFF&size=256`;
 
   const icons = {
@@ -114,13 +120,14 @@ function PlantillaGenerica({ profesional, volverAtras }) {
     linkedin: <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>,
     tiktok: <svg className="h-8 w-8" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>,
     github: <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.24c3-.34 6-1.53 6-6.76a5.5 5.5 0 0 0-1.5-3.82 5.2 5.2 0 0 0-.15-3.78s-1.2-.38-3.9 1.45a13.4 13.4 0 0 0-7 0c-2.7-1.83-3.9-1.45-3.9-1.45a5.2 5.2 0 0 0-.15 3.78A5.5 5.5 0 0 0 3 8.2c0 5.22 3 6.42 6 6.76a4.8 4.8 0 0 0-1 3.24v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>,
-    website: <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="2" x2="22" y1="12" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+    website: <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="2" x2="22" y1="12" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path></svg>
   };
 
   const cleanWhatsapp = profesional.whatsapp ? profesional.whatsapp.replace(/[^0-9]/g, '') : null;
-  
   const wspSpingamma = "59164016676";
-  const msjCalificar = encodeURIComponent(`¡Hola! Quiero calificar al profesional ${profesional.name}.`);
+  
+  // MENSAJE DE WHATSAPP ACTUALIZADO CON EL NOMBRE DEL USUARIO
+  const msjCalificar = encodeURIComponent(`¡Hola! Soy ${userName || 'un usuario'}, quiero calificar al profesional ${profesional.name}.`);
   const linkCalificar = `https://wa.me/${wspSpingamma}?text=${msjCalificar}`;
 
   return (
@@ -133,7 +140,6 @@ function PlantillaGenerica({ profesional, volverAtras }) {
         </button>
 
         <div className="flex items-center flex-shrink-0">
-          {/* Autenticación */}
           {isLoggedIn ? (
             <div className="flex items-center gap-3 bg-[#152a38] border border-[#32698F]/50 py-1.5 px-3 rounded-full shadow-sm">
               <div className="flex items-center gap-2">
@@ -168,7 +174,7 @@ function PlantillaGenerica({ profesional, volverAtras }) {
 
       <main className="w-full max-w-lg flex flex-col items-center flex-1 relative pt-2">
         
-        {/* BOTONES FLOTANTES: Compartir y QR (Alineados a la derecha bajo el header) */}
+        {/* BOTONES FLOTANTES: Compartir y QR (Orden: Share, QR) */}
         <div className="absolute top-0 right-2 flex items-center gap-2.5 z-10">
           <button 
             onClick={handleShare} 
@@ -186,7 +192,7 @@ function PlantillaGenerica({ profesional, volverAtras }) {
           </button>
         </div>
 
-        {/* FOTO DE PERFIL (Con margen top para no pisar los botones) */}
+        {/* FOTO DE PERFIL */}
         <div className="relative flex-shrink-0 mb-6 mt-8">
           <div className="w-32 h-32 md:w-36 md:h-36 rounded-full p-[3px] bg-[#1E3D51] border border-[#32698F] flex items-center justify-center shadow-lg shadow-[#152a38]/50 mx-auto">
             <div className="w-full h-full rounded-full overflow-hidden bg-[#32698F] border-[2px] border-[#1E3D51]">
@@ -265,13 +271,14 @@ function PlantillaGenerica({ profesional, volverAtras }) {
 
       {/* Modal de Registro Compartido */}
       {authModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#152a38]/90 backdrop-blur-sm transition-opacity">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#152a38]/90 backdrop-blur-sm transition-opacity">
           <div className="bg-[#1E3D51] border border-[#32698F] rounded-3xl shadow-2xl max-w-md w-full p-8 relative animate-in fade-in zoom-in duration-300">
-            <button onClick={() => setAuthModalOpen(false)} className="absolute top-5 right-5 text-[#E6E2DF] hover:text-white transition-colors p-2 bg-[#32698F] rounded-full hover:bg-[#F67927]"><X size={20} /></button>
+            {/* Si rechazan iniciar sesión, regresan al directorio */}
+            <button onClick={() => { setAuthModalOpen(false); volverAtras(); }} className="absolute top-5 right-5 text-[#E6E2DF] hover:text-white transition-colors p-2 bg-[#32698F] rounded-full hover:bg-[#F67927]"><X size={20} /></button>
             <div className="text-center mb-6 mt-2">
               <div className="w-20 h-20 bg-[#32698F] rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#F67927] shadow-inner"><UserPlus size={36} className="text-[#F67927]" /></div>
               <h2 className="text-2xl font-extrabold text-white mb-2">Comunidad Segura</h2>
-              <p className="text-[#E6E2DF] text-sm px-2">Para garantizar valoraciones reales, regístrate gratis en 10 segundos.</p>
+              <p className="text-[#E6E2DF] text-sm px-2">Para ver perfiles y garantizar valoraciones reales, regístrate gratis en 10 segundos.</p>
             </div>
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
