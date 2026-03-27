@@ -1,6 +1,7 @@
+// Archivo: src/plantillas/PlantillaGenerica.jsx
 import { 
   ArrowLeft, Share2, QrCode, MapPin, Phone, MessageCircle, 
-  Facebook, Instagram, Linkedin, Globe, Github, X, CheckCircle2, Star
+  Facebook, Instagram, Linkedin, Globe, Github, X, CheckCircle2, Star, LogOut, UserPlus
 } from 'lucide-react';
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
 
@@ -8,11 +9,11 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
   
   // 🚀 EXTRAÍDO AL HOOK: Lógica centralizada
   const {
-    mostrarQR, toggleQR, mostrarCalificacion,
+    mostrarQR, toggleQR, mostrarCalificacion, isLoggedIn, userName, handleLogout,
     handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion
   } = useAccionesPerfil(profesional, onProtectedAction);
 
-  // 🧹 LIMPIEZA Y FORMATEO DE ENLACES (Mantenemos esto aquí porque es formateo de UI)
+  // 🧹 LIMPIEZA Y FORMATEO DE ENLACES
   const cleanPhone = profesional?.phone?.replace(/[^0-9]/g, '');
   const cleanWa = profesional?.whatsapp?.replace(/[^0-9]/g, '');
   
@@ -28,7 +29,6 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
     ubicacion: profesional?.ubicacion_url
   };
 
-  // 🔗 COMPONENTE DE BOTÓN SOCIAL REDUCIDO (Ahora usa el Hook)
   const SocialButton = ({ icon: Icon, label, url, colorClass }) => {
     if (!url) return null;
 
@@ -52,26 +52,52 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       <div className="relative h-48 sm:h-64 bg-gradient-to-br from-[#1E3D51] to-[#32698F] overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay"></div>
         
-        <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-10">
+        {/* Barra de Navegación Superior */}
+        <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-start z-10">
           <button 
             onClick={volverAtras} 
-            className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white hover:text-[#1E3D51] text-white border border-white/30 transition-all shadow-lg"
+            className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white text-[#1E3D51] border border-gray-200 transition-all shadow-md shrink-0"
           >
-            <ArrowLeft size={20} className="currentColor" />
+            <ArrowLeft size={20} />
           </button>
-          <div className="flex gap-3">
-            <button 
-              onClick={toggleQR} 
-              className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white hover:text-[#1E3D51] text-white border border-white/30 transition-all shadow-lg"
-            >
-              <QrCode size={18} className="currentColor" />
-            </button>
-            <button 
-              onClick={handleShare} 
-              className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white hover:text-[#1E3D51] text-white border border-white/30 transition-all shadow-lg"
-            >
-              <Share2 size={18} className="currentColor" />
-            </button>
+          
+          <div className="flex flex-col items-end gap-3">
+            {/* 🚀 BOTÓN LOGOUT TIPO PILL EN LA ESQUINA SUPERIOR */}
+            {isLoggedIn ? (
+               <button 
+                 onClick={handleLogout} 
+                 className="flex items-center gap-2 bg-white/90 backdrop-blur-md border border-gray-200 p-1 pr-3 rounded-full hover:bg-white transition-all shadow-md group"
+                 title="Cerrar sesión"
+               >
+                 <div className="w-8 h-8 rounded-full bg-[#B95221] flex items-center justify-center text-white font-bold text-sm font-sans">
+                   {userName ? userName.charAt(0).toUpperCase() : 'U'}
+                 </div>
+                 <LogOut size={16} className="text-gray-500 group-hover:text-red-500 transition-colors" />
+               </button>
+            ) : (
+               <button 
+                 onClick={() => onProtectedAction(null)} 
+                 className="h-10 px-4 bg-white/90 backdrop-blur-md border border-gray-200 rounded-full flex items-center justify-center hover:bg-white transition-all text-xs font-bold uppercase text-[#1E3D51] tracking-widest gap-2 shadow-md"
+               >
+                 <UserPlus size={16} className="text-[#B95221]"/> Ingresar
+               </button>
+            )}
+
+            {/* 🚀 BOTONES QR Y COMPARTIR ABAJO DEL LOGOUT */}
+            <div className="flex gap-2 sm:gap-3">
+              <button 
+                onClick={toggleQR} 
+                className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white text-[#1E3D51] border border-gray-200 transition-all shadow-md"
+              >
+                <QrCode size={18} />
+              </button>
+              <button 
+                onClick={handleShare} 
+                className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white text-[#1E3D51] border border-gray-200 transition-all shadow-md"
+              >
+                <Share2 size={18} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -129,7 +155,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             <h3 className="text-lg font-bold text-[#1E3D51] mb-3 flex items-center gap-2">
               <span className="w-1.5 h-6 bg-[#B95221] rounded-full"></span> Acerca de mí
             </h3>
-            <p className="text-gray-600 leading-relaxed whitespace-pre-wrap text-sm sm:text-base">
+            {/* 🚀 WHITESPACE-PRE-LINE para respetar saltos de línea de la BD */}
+            <p className="text-gray-600 leading-relaxed whitespace-pre-line text-sm sm:text-base">
               {profesional.description}
             </p>
           </div>

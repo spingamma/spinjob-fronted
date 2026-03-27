@@ -1,8 +1,9 @@
+// Archivo: src/plantillas/PlantillaInmobiliaria.jsx
 import React, { useEffect, useState } from 'react';
 import { LogOut, UserPlus, X, Share2, QrCode, Star } from 'lucide-react';
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
 
-function PlantillaInmobiliaria({ profesional, volverAtras, onProtectedAction }) {
+export default function PlantillaInmobiliaria({ profesional, volverAtras, onProtectedAction }) {
   const [loaded, setLoaded] = useState(false);
 
   // 🚀 EXTRAÍDO AL HOOK: Lógica de UI limpia y enfocada en diseño
@@ -75,44 +76,45 @@ function PlantillaInmobiliaria({ profesional, volverAtras, onProtectedAction }) 
       <div className={`relative z-10 w-full max-w-[420px] h-[95vh] sm:h-full max-h-[850px] glass-panel-dark rounded-[2.5rem] pt-6 p-6 sm:p-8 flex flex-col items-center overflow-y-auto hide-scroll font-montserrat transition-all duration-1000 pb-28 ${loaded ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}>
         
         {/* ENCABEZADO SUPERIOR */}
-        <div className="w-full flex justify-between items-center z-20 mb-2">
-          <button onClick={volverAtras} className="text-sm flex items-center gap-2 text-gray-300 hover:text-white transition-colors p-2">
+        <div className="w-full flex justify-between items-start z-20 mb-2">
+          <button onClick={volverAtras} className="text-sm flex items-center gap-2 text-gray-300 hover:text-white transition-colors p-2 shrink-0">
             ← <span className="hidden sm:inline">Volver</span><span className="sm:hidden">Volver</span>
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col items-end gap-3">
+             {/* 🚀 BOTÓN LOGOUT TIPO PILL EN LA ESQUINA SUPERIOR */}
             {isLoggedIn ? (
-              <div className="flex items-center gap-2 bg-white/5 border border-white/10 py-1.5 px-2.5 rounded-full shadow-md backdrop-blur-sm">
-                <div className="w-7 h-7 rounded-full bg-[#C8A721] flex items-center justify-center">
-                  <span className="text-[#11181A] font-bold text-xs">
-                    {userName ? userName.charAt(0).toUpperCase() : 'U'}
-                  </span>
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-white/5 border border-white/10 p-1 pr-3 rounded-full hover:border-red-400/50 transition-all shadow-lg backdrop-blur-sm group"
+                title="Cerrar sesión"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#C8A721] flex items-center justify-center text-[#11181A] font-bold text-sm font-sans">
+                  {userName ? userName.charAt(0).toUpperCase() : 'U'}
                 </div>
-                <div className="w-[1px] h-4 bg-white/20"></div>
-                <button onClick={handleLogout} className="text-gray-300 hover:text-white transition-colors p-1" title="Cerrar sesión">
-                  <LogOut size={16} />
-                </button>
-              </div>
+                <LogOut size={16} className="text-gray-300 group-hover:text-red-400 transition-colors" />
+              </button>
             ) : (
               <button onClick={() => onProtectedAction(null)} className="text-[0.65rem] uppercase tracking-wider font-bold flex items-center gap-1.5 bg-[#425C63] hover:bg-[#C8A721] hover:text-[#11181A] text-white py-2 px-3.5 rounded-full transition-all shadow-md">
                 <UserPlus size={14} /> Ingresar
               </button>
             )}
+
+            {/* 🚀 BOTONES QR Y COMPARTIR ABAJO DEL LOGOUT */}
+            <div className="flex gap-2.5">
+              <button onClick={toggleQR} className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-[#425C63] rounded-full transition-all text-gray-300 hover:text-white backdrop-blur-sm shadow-md" title="Mostrar QR">
+                <QrCode size={18} />
+              </button>
+              <button onClick={handleShare} className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-[#425C63] rounded-full transition-all text-gray-300 hover:text-white backdrop-blur-sm shadow-md" title="Compartir">
+                <Share2 size={18} />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* CONTENEDOR FOTO Y ACCIONES FLOTANTES */}
+        {/* CONTENEDOR FOTO */}
         <div className="relative w-full flex flex-col items-center">
-          <div className="absolute top-0 right-0 flex items-center gap-2.5 z-20">
-            <button onClick={handleShare} className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-[#425C63] rounded-full transition-all text-gray-300 hover:text-white backdrop-blur-sm shadow-md" title="Compartir">
-              <Share2 size={18} />
-            </button>
-            <button onClick={toggleQR} className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-[#425C63] rounded-full transition-all text-gray-300 hover:text-white backdrop-blur-sm shadow-md" title="Mostrar QR">
-              <QrCode size={18} />
-            </button>
-          </div>
-
-          <div className="relative flex-shrink-0 mt-10 mb-6">
+          <div className="relative flex-shrink-0 mt-6 mb-6">
             <div className="w-36 h-36 sm:w-40 sm:h-40 rounded-full p-[2px] bg-gradient-to-br from-[#425C63] via-[#C8A721]/50 to-[#425C63] flex items-center justify-center shadow-[0_0_30px_rgba(66,92,99,0.5)]">
               <div className="w-full h-full rounded-full overflow-hidden bg-[#11181A] border-[4px] border-[#1A2629]">
                 <img 
@@ -271,5 +273,3 @@ function PlantillaInmobiliaria({ profesional, volverAtras, onProtectedAction }) 
     </div>
   );
 }
-
-export default PlantillaInmobiliaria;

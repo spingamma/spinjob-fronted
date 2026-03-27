@@ -1,3 +1,4 @@
+// Archivo: src/App.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { 
@@ -29,6 +30,7 @@ const getCategoryIcon = (categoryName) => {
 function Directorio() {
   const [profesionales, setProfesionales] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [errorBackend, setErrorBackend] = useState(false); // 🚀 ESTADO PARA MANEJAR CAÍDA DEL SERVIDOR
   const navigate = useNavigate();
 
   const [activeCategory, setActiveCategory] = useState('Todos');
@@ -51,14 +53,21 @@ function Directorio() {
   const [pendingSlug, setPendingSlug] = useState(null);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/profesionales`)
-      .then(res => res.json())
+    // 🚀 MEJORA: Fallback seguro y uso de "/" final para evitar errores 307 de FastAPI
+    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+    fetch(`${API_URL}/profesionales/`)
+      .then(res => {
+        if (!res.ok) throw new Error("Error en red");
+        return res.json();
+      })
       .then(data => { 
         setProfesionales(data); 
         setCargando(false); 
       })
       .catch(err => {
         console.error("Error al cargar profesionales:", err);
+        setErrorBackend(true);
         setCargando(false);
       });
   }, []);
@@ -213,6 +222,16 @@ function Directorio() {
           <div className="text-center py-20 flex flex-col items-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#B95221] mb-4"></div>
             <p className="text-gray-500 font-medium text-lg">Cargando directorio SPINGAMMA...</p>
+          </div>
+        ) : errorBackend ? (
+          <div className="text-center py-20 flex flex-col items-center animate-in fade-in zoom-in duration-300">
+             <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6 shadow-inner border border-red-100">
+                <X size={40} className="text-red-500" />
+             </div>
+             <h2 className="text-2xl font-extrabold text-[#1E3D51] mb-3">Error de Conexión</h2>
+             <p className="text-gray-500 max-w-md mx-auto leading-relaxed">
+               No pudimos conectar con el servidor backend. Verifica que FastAPI esté corriendo (<code className="bg-gray-100 px-1 py-0.5 rounded text-gray-800">uvicorn main:app --reload</code>) en el puerto correcto.
+             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
