@@ -1,121 +1,40 @@
-import { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Share2, QrCode, MapPin, Phone, MessageCircle, 
   Facebook, Instagram, Linkedin, Globe, Github, X, CheckCircle2, Star
 } from 'lucide-react';
+import useAccionesPerfil from '../hooks/useAccionesPerfil';
 
 export default function PlantillaGenerica({ profesional, volverAtras, onProtectedAction }) {
-  const [showQR, setShowQR] = useState(false);
   
-  // 💾 PERSISTENCIA: Claves para el almacenamiento local basado en el slug
-  const pendingRateKey = `spingamma_pending_rate_${profesional?.slug}`;
-  const hasRatedKey = `spingamma_has_rated_${profesional?.slug}`;
-  const pendingInteractionKey = `spingamma_pending_interaction_${profesional?.slug}`;
+  // 🚀 EXTRAÍDO AL HOOK: Lógica centralizada
+  const {
+    mostrarQR, toggleQR, mostrarCalificacion,
+    handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion
+  } = useAccionesPerfil(profesional, onProtectedAction);
 
-  // ESTADO: Lee del localStorage para saber si el panel debe seguir visible tras recargar
-  const [mostrarCalificacion, setMostrarCalificacion] = useState(() => {
-    if (!profesional) return false;
-    const isPending = localStorage.getItem(pendingRateKey) === 'true';
-    const hasRated = localStorage.getItem(hasRatedKey) === 'true';
-    return isPending && !hasRated;
-  });
-
-  // 🧹 LIMPIEZA Y FORMATEO DE ENLACES
-  const cleanPhone = profesional.phone?.replace(/[^0-9]/g, '');
-  const cleanWa = profesional.whatsapp?.replace(/[^0-9]/g, '');
+  // 🧹 LIMPIEZA Y FORMATEO DE ENLACES (Mantenemos esto aquí porque es formateo de UI)
+  const cleanPhone = profesional?.phone?.replace(/[^0-9]/g, '');
+  const cleanWa = profesional?.whatsapp?.replace(/[^0-9]/g, '');
   
   const links = {
     phone: cleanPhone ? `tel:${cleanPhone}` : null,
     whatsapp: cleanWa ? `https://wa.me/${cleanWa}` : null,
-    facebook: profesional.facebook,
-    instagram: profesional.instagram,
-    linkedin: profesional.linkedin,
-    website: profesional.website,
-    github: profesional.github,
-    tiktok: profesional.tiktok,
-    ubicacion: profesional.ubicacion_url
+    facebook: profesional?.facebook,
+    instagram: profesional?.instagram,
+    linkedin: profesional?.linkedin,
+    website: profesional?.website,
+    github: profesional?.github,
+    tiktok: profesional?.tiktok,
+    ubicacion: profesional?.ubicacion_url
   };
 
-  // 🚀 COMPARTIR NATIVO (NO REQUIERE LOGIN)
-  const handleShare = async () => {
-    const shareData = {
-      title: `${profesional.name} - ${profesional.title}`,
-      text: `Conoce el perfil profesional de ${profesional.name} en SpinGamma.`,
-      url: window.location.href,
-    };
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        alert('Enlace copiado al portapapeles');
-      }
-    } catch (err) {
-      console.error('Error al compartir:', err);
-    }
-  };
-
-  // 📊 MÉTRICAS: Registrar clic silenciosamente en la DB
-  const registrarInteraccionBackend = (platformName) => {
-    const userStr = localStorage.getItem('spingamma_user');
-    if (!userStr || !profesional) return;
-
-    try {
-        const userObj = JSON.parse(userStr);
-        const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-
-        fetch(`${API_URL}/profesionales/${profesional.slug}/interaccion`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                user_phone: userObj.celular,
-                user_name: userObj.nombre,
-                platform: platformName
-            })
-        }).catch(err => console.error("Error silencioso registrando métrica:", err));
-
-    } catch (error) {}
-  };
-
-  // 🔄 EFECTO CORE: Capturar interacción si el usuario se acaba de logear
-  useEffect(() => {
-    const userStr = localStorage.getItem('spingamma_user');
-    const pendingPlatform = localStorage.getItem(pendingInteractionKey);
-
-    if (userStr && pendingPlatform) {
-      registrarInteraccionBackend(pendingPlatform);
-      localStorage.removeItem(pendingInteractionKey);
-
-      if (localStorage.getItem(hasRatedKey) !== 'true') {
-        localStorage.setItem(pendingRateKey, 'true');
-        setMostrarCalificacion(true);
-      }
-    }
-  }); 
-
-  // 🔗 COMPONENTE DE BOTÓN SOCIAL PROTEGIDO
+  // 🔗 COMPONENTE DE BOTÓN SOCIAL REDUCIDO (Ahora usa el Hook)
   const SocialButton = ({ icon: Icon, label, url, colorClass }) => {
     if (!url) return null;
 
-    const handleClick = () => {
-      const isLogged = localStorage.getItem('spingamma_user');
-      
-      if (isLogged) {
-        registrarInteraccionBackend(label);
-        if (localStorage.getItem(hasRatedKey) !== 'true') {
-          localStorage.setItem(pendingRateKey, 'true');
-          setMostrarCalificacion(true);
-        }
-      } else {
-        localStorage.setItem(pendingInteractionKey, label);
-      }
-      onProtectedAction(url);
-    };
-
     return (
       <button 
-        onClick={handleClick}
+        onClick={(e) => handleLinkClick(e, label, url)}
         className={`flex flex-col items-center justify-center p-4 bg-white border border-gray-200 rounded-2xl transition-all group shadow-sm hover:shadow-md hover:border-[#B95221]/30 hover:-translate-y-1 ${colorClass}`}
       >
         <Icon size={28} className="mb-2 transition-transform group-hover:scale-110" />
@@ -124,34 +43,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
     );
   };
 
-  // 🌟 FUNCIÓN CORE: Redirigir a WhatsApp de SpinGamma para calificar
-  const handleCalificarClick = () => {
-    const userStr = localStorage.getItem('spingamma_user');
-    let userName = 'un usuario';
-    
-    if (userStr) {
-        try {
-            const userObj = JSON.parse(userStr);
-            userName = userObj.nombre || 'un usuario';
-        } catch (e) {}
-    }
-
-    const spingammaWhatsapp = "59164016676"; 
-    const mensaje = `Hola SpinGamma, soy ${userName}. Quiero calificar el perfil profesional de ${profesional.name}.`;
-    const url = `https://wa.me/${spingammaWhatsapp}?text=${encodeURIComponent(mensaje)}`;
-
-    window.open(url, '_blank', 'noopener,noreferrer');
-    
-    // Marcar como calificado definitivamente
-    localStorage.setItem(hasRatedKey, 'true');
-    localStorage.removeItem(pendingRateKey);
-    setMostrarCalificacion(false);
-  };
-
-  const handleCerrarPanel = () => {
-    localStorage.removeItem(pendingRateKey);
-    setMostrarCalificacion(false);
-  };
+  if (!profesional) return null;
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-[#1E3D51] pb-24 font-sans antialiased selection:bg-[#B95221] selection:text-white relative">
@@ -169,7 +61,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           </button>
           <div className="flex gap-3">
             <button 
-              onClick={() => setShowQR(true)} 
+              onClick={toggleQR} 
               className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white hover:text-[#1E3D51] text-white border border-white/30 transition-all shadow-lg"
             >
               <QrCode size={18} className="currentColor" />
@@ -209,7 +101,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           </div>
         </div>
 
-        {/* 🌟 ESTADÍSTICAS Y UBICACIÓN (AQUÍ SE MOVIÓ LA CATEGORÍA) */}
+        {/* 🌟 ESTADÍSTICAS Y UBICACIÓN */}
         <div className="flex flex-wrap justify-center sm:justify-start gap-3 mb-8">
           {profesional.reviews_count > 0 && (
             <div className="flex items-center gap-1.5 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
@@ -258,7 +150,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           </div>
         </div>
 
-        {/* 🚀 FOOTER SPINGAMMA (AUTORIDAD) */}
+        {/* 🚀 FOOTER SPINGAMMA */}
         <div className="mt-12 mb-8 text-center flex flex-col items-center justify-center">
             <a 
               href="https://spingamma.github.io/spingamma-landing/" 
@@ -276,11 +168,11 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       {/* ==========================================
           MODAL DE CÓDIGO QR
           ========================================== */}
-      {showQR && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E3D51]/50 backdrop-blur-sm transition-opacity">
-          <div className="bg-white border border-gray-200 rounded-3xl shadow-2xl max-w-sm w-full p-8 relative animate-in zoom-in duration-300 flex flex-col items-center">
+      {mostrarQR && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1E3D51]/50 backdrop-blur-sm transition-opacity" onClick={toggleQR}>
+          <div className="bg-white border border-gray-200 rounded-3xl shadow-2xl max-w-sm w-full p-8 relative animate-in zoom-in duration-300 flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
             <button 
-              onClick={() => setShowQR(false)} 
+              onClick={toggleQR} 
               className="absolute top-4 right-4 text-gray-400 hover:text-[#1E3D51] transition-colors p-2 bg-gray-100 rounded-full hover:bg-gray-200"
             >
               <X size={20} />
@@ -310,7 +202,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       )}
 
       {/* ==========================================
-          PANEL DE CALIFICACIÓN FLOTANTE (PERSISTENTE)
+          PANEL DE CALIFICACIÓN FLOTANTE
           ========================================== */}
       {mostrarCalificacion && localStorage.getItem('spingamma_user') && (
           <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.1)] z-50 animate-in slide-in-from-bottom-10 duration-300">
@@ -326,7 +218,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
                       <Star size={16} className="fill-white" /> Calificar
                   </button>
                   <button
-                      onClick={handleCerrarPanel}
+                      onClick={handleCerrarPanelCalificacion}
                       className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 rounded-full transition-colors"
                       title="Cerrar"
                   >

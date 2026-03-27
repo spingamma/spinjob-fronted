@@ -1,135 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { LogOut, UserPlus, X, Share2, QrCode, Star, ArrowLeft } from 'lucide-react';
+import useAccionesPerfil from '../hooks/useAccionesPerfil';
 
 function PlantillaAbogado({ profesional, volverAtras, onProtectedAction }) {
   const [loaded, setLoaded] = useState(false);
-  const [mostrarQR, setMostrarQR] = useState(false);
 
-  // 💾 PERSISTENCIA Y MÉTRICAS: Claves para el almacenamiento local
-  const pendingRateKey = `spingamma_pending_rate_${profesional?.slug}`;
-  const hasRatedKey = `spingamma_has_rated_${profesional?.slug}`;
-  const pendingInteractionKey = `spingamma_pending_interaction_${profesional?.slug}`;
+  // 🚀 EXTRAÍDO AL HOOK: Toda la lógica de negocio resuelta
+  const {
+    mostrarQR, toggleQR, mostrarCalificacion, isLoggedIn, userName,
+    handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion, handleLogout
+  } = useAccionesPerfil(profesional, onProtectedAction);
 
-  const [mostrarCalificacion, setMostrarCalificacion] = useState(() => {
-    if (!profesional) return false;
-    const isPending = localStorage.getItem(pendingRateKey) === 'true';
-    const hasRated = localStorage.getItem(hasRatedKey) === 'true';
-    return isPending && !hasRated;
-  });
-
-  // Estados de Autenticación
-  const isLoggedIn = localStorage.getItem('spingamma_user') !== null;
-  const userName = (() => {
-    const stored = localStorage.getItem('spingamma_user');
-    if (stored) {
-      try { return JSON.parse(stored).nombre; } catch(e) { return ''; }
-    }
-    return '';
-  })();
-
-  // Simulador del Loader
+  // Simulador del Loader visual (Propio de la UI de esta plantilla)
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 800);
     return () => clearTimeout(timer);
   }, []);
-
-  // Escuchar cuando el usuario termina de logearse por onProtectedAction
-  useEffect(() => {
-    const userStr = localStorage.getItem('spingamma_user');
-    const pendingPlatform = localStorage.getItem(pendingInteractionKey);
-
-    if (userStr && pendingPlatform) {
-      registrarInteraccionBackend(pendingPlatform);
-      localStorage.removeItem(pendingInteractionKey);
-
-      if (localStorage.getItem(hasRatedKey) !== 'true') {
-        localStorage.setItem(pendingRateKey, 'true');
-        setMostrarCalificacion(true);
-      }
-    }
-  });
-
-  const toggleQR = () => setMostrarQR(!mostrarQR);
-
-  const handleShare = async () => {
-    const shareData = {
-      title: `Perfil de ${profesional.name}`,
-      text: `Conoce el perfil profesional de ${profesional.name} - ${profesional.title} en SpinGamma.`,
-      url: window.location.href,
-    };
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch (err) {
-        console.error("Error al compartir", err);
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert("Enlace copiado al portapapeles");
-    }
-  };
-
-  // 📊 MÉTRICAS: Registrar clic silenciosamente en la DB
-  const registrarInteraccionBackend = (platformName) => {
-    const userStr = localStorage.getItem('spingamma_user');
-    if (!userStr || !profesional) return;
-
-    try {
-        const userObj = JSON.parse(userStr);
-        const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-
-        fetch(`${API_URL}/profesionales/${profesional.slug}/interaccion`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                user_phone: userObj.celular,
-                user_name: userObj.nombre,
-                platform: platformName
-            })
-        }).catch(err => console.error("Error silencioso registrando métrica:", err));
-    } catch (error) {}
-  };
-
-  // 🔗 INTERCEPTOR DE CLICS EN REDES QUE DELEGA A PERFIL.JSX
-  const handleLinkClick = (e, platformName, url) => {
-    e.preventDefault(); 
-    const isLogged = localStorage.getItem('spingamma_user');
-
-    if (isLogged) {
-      registrarInteraccionBackend(platformName);
-      if (localStorage.getItem(hasRatedKey) !== 'true') {
-        localStorage.setItem(pendingRateKey, 'true');
-        setMostrarCalificacion(true);
-      }
-      onProtectedAction(url);
-    } else {
-      localStorage.setItem(pendingInteractionKey, platformName);
-      onProtectedAction(url); // Abre el modal manejado por Perfil.jsx
-    }
-  };
-
-  const handleCalificarClick = () => {
-    const spingammaWhatsapp = "59164016676"; 
-    const mensaje = `Hola SpinGamma, soy ${userName || 'un usuario'}. Quiero calificar el perfil profesional de ${profesional.name}.`;
-    const url = `https://wa.me/${spingammaWhatsapp}?text=${encodeURIComponent(mensaje)}`;
-
-    window.open(url, '_blank', 'noopener,noreferrer');
-    
-    localStorage.setItem(hasRatedKey, 'true');
-    localStorage.removeItem(pendingRateKey);
-    setMostrarCalificacion(false);
-  };
-
-  const handleCerrarPanelCalificacion = () => {
-    localStorage.removeItem(pendingRateKey);
-    setMostrarCalificacion(false);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('spingamma_user');
-    window.location.reload(); // Recarga simple para reflejar el estado en toda la app
-  };
 
   if (!profesional) return null;
 
