@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { LogOut, UserPlus, X, Share2, QrCode, Star, ArrowLeft } from 'lucide-react';
 
-function PlantillaAbogado({ profesional, volverAtras }) {
+function PlantillaAbogado({ profesional, volverAtras, onProtectedAction }) {
   const [loaded, setLoaded] = useState(false);
   const [mostrarQR, setMostrarQR] = useState(false);
 
@@ -18,23 +18,36 @@ function PlantillaAbogado({ profesional, volverAtras }) {
   });
 
   // Estados de Autenticación
-  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
-  const [userName, setUserName] = useState(() => {
+  const isLoggedIn = localStorage.getItem('spingamma_user') !== null;
+  const userName = (() => {
     const stored = localStorage.getItem('spingamma_user');
     if (stored) {
       try { return JSON.parse(stored).nombre; } catch(e) { return ''; }
     }
     return '';
-  });
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ nombre: '', celular: '' });
-  const [pendingUrl, setPendingUrl] = useState(null);
+  })();
 
   // Simulador del Loader
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 800);
     return () => clearTimeout(timer);
   }, []);
+
+  // Escuchar cuando el usuario termina de logearse por onProtectedAction
+  useEffect(() => {
+    const userStr = localStorage.getItem('spingamma_user');
+    const pendingPlatform = localStorage.getItem(pendingInteractionKey);
+
+    if (userStr && pendingPlatform) {
+      registrarInteraccionBackend(pendingPlatform);
+      localStorage.removeItem(pendingInteractionKey);
+
+      if (localStorage.getItem(hasRatedKey) !== 'true') {
+        localStorage.setItem(pendingRateKey, 'true');
+        setMostrarCalificacion(true);
+      }
+    }
+  });
 
   const toggleQR = () => setMostrarQR(!mostrarQR);
 
@@ -78,34 +91,26 @@ function PlantillaAbogado({ profesional, volverAtras }) {
     } catch (error) {}
   };
 
-  // 🔗 INTERCEPTOR DE CLICS EN REDES (Lógica idéntica a las otras plantillas)
+  // 🔗 INTERCEPTOR DE CLICS EN REDES QUE DELEGA A PERFIL.JSX
   const handleLinkClick = (e, platformName, url) => {
     e.preventDefault(); 
-    
     const isLogged = localStorage.getItem('spingamma_user');
 
     if (isLogged) {
       registrarInteraccionBackend(platformName);
-      
       if (localStorage.getItem(hasRatedKey) !== 'true') {
         localStorage.setItem(pendingRateKey, 'true');
         setMostrarCalificacion(true);
       }
-
-      if (url.startsWith('tel:') || url.startsWith('mailto:')) {
-        window.location.href = url;
-      } else {
-        window.open(url, '_blank', 'noopener,noreferrer');
-      }
+      onProtectedAction(url);
     } else {
       localStorage.setItem(pendingInteractionKey, platformName);
-      setPendingUrl(url);
-      setAuthModalOpen(true);
+      onProtectedAction(url); // Abre el modal manejado por Perfil.jsx
     }
   };
 
   const handleCalificarClick = () => {
-    const spingammaWhatsapp = "59175266095"; 
+    const spingammaWhatsapp = "59164016676"; 
     const mensaje = `Hola SpinGamma, soy ${userName || 'un usuario'}. Quiero calificar el perfil profesional de ${profesional.name}.`;
     const url = `https://wa.me/${spingammaWhatsapp}?text=${encodeURIComponent(mensaje)}`;
 
@@ -121,41 +126,9 @@ function PlantillaAbogado({ profesional, volverAtras }) {
     setMostrarCalificacion(false);
   };
 
-  const handleRegister = (e) => {
-    e.preventDefault();
-    if (formData.nombre.trim() && formData.celular.trim()) {
-      localStorage.setItem('spingamma_user', JSON.stringify(formData));
-      setIsLoggedIn(true);
-      setUserName(formData.nombre);
-      setAuthModalOpen(false);
-
-      const pendingPlatform = localStorage.getItem(pendingInteractionKey);
-      if (pendingPlatform) {
-        registrarInteraccionBackend(pendingPlatform);
-        localStorage.removeItem(pendingInteractionKey);
-
-        if (localStorage.getItem(hasRatedKey) !== 'true') {
-          localStorage.setItem(pendingRateKey, 'true');
-          setMostrarCalificacion(true);
-        }
-      }
-
-      if (pendingUrl) {
-        if (pendingUrl.startsWith('tel:') || pendingUrl.startsWith('mailto:')) {
-          window.location.href = pendingUrl;
-        } else {
-          window.open(pendingUrl, '_blank', 'noopener,noreferrer');
-        }
-        setPendingUrl(null);
-      }
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('spingamma_user');
-    setIsLoggedIn(false);
-    setUserName('');
-    setFormData({ nombre: '', celular: '' });
+    window.location.reload(); // Recarga simple para reflejar el estado en toda la app
   };
 
   if (!profesional) return null;
@@ -226,7 +199,7 @@ function PlantillaAbogado({ profesional, volverAtras }) {
               </div>
             ) : (
               <button 
-                onClick={() => { setPendingUrl(null); setAuthModalOpen(true); }} 
+                onClick={() => onProtectedAction(null)} // Invoca al modal sin URL destino
                 className="text-[0.55rem] uppercase tracking-wider font-bold flex items-center gap-1.5 bg-[#1a1a1a] border border-[#E9CE3F]/30 hover:border-[#E9CE3F] text-[#E9CE3F] py-1 px-3 rounded-full transition-all shadow-md"
               >
                 <UserPlus size={12} /> Ingresar
@@ -275,7 +248,7 @@ function PlantillaAbogado({ profesional, volverAtras }) {
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[125%] h-[125%] border border-white/[0.03] rounded-full"></div>
         </div>
 
-        {/* REDES SOCIALES (GRID 3 COLUMNAS IDÉNTICO AL DISEÑO PROPORCIONADO) */}
+        {/* REDES SOCIALES (GRID) */}
         <div className="grid grid-cols-3 gap-6 w-fit mx-auto z-10 mb-10">
             {profesional.phone && (
               <a href={`tel:${profesional.phone}`} onClick={(e) => handleLinkClick(e, 'Llamar', `tel:${profesional.phone}`)} className="btn-social w-14 h-14 rounded-full text-[#E9CE3F]">
@@ -307,7 +280,6 @@ function PlantillaAbogado({ profesional, volverAtras }) {
                   <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
               </a>
             )}
-            {/* Si agregas Linkedin o Github a la DB, también usa iconos lucide o SVG similares aquí */}
         </div>
 
         {/* CTA DE AGENDAR */}
@@ -325,39 +297,6 @@ function PlantillaAbogado({ profesional, volverAtras }) {
             Tecnología desarrollada por SPINGAMMA
         </a>
       </div>
-
-      {/* --- MODAL DE REGISTRO (TEMA DARK/GOLD) --- */}
-      {authModalOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
-          <div className="bg-[#1a1a1a] border border-[#E9CE3F]/30 rounded-3xl shadow-[0_0_50px_rgba(233,206,63,0.1)] max-w-md w-full p-8 relative animate-in fade-in zoom-in duration-300 font-cinzel">
-            <button 
-              onClick={() => { 
-                setAuthModalOpen(false); 
-                localStorage.removeItem(pendingInteractionKey); 
-              }} 
-              className="absolute top-5 right-5 text-gray-500 hover:text-[#E9CE3F] transition-colors p-2 bg-[#121212] rounded-full"
-            >
-              <X size={20} />
-            </button>
-            <div className="text-center mb-6 mt-2">
-              <div className="w-16 h-16 bg-[#121212] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#E9CE3F]/50 shadow-inner"><UserPlus size={28} className="text-[#E9CE3F]" /></div>
-              <h2 className="text-xl font-bold text-white mb-2 tracking-wide uppercase">Acceso Seguro</h2>
-              <p className="text-gray-400 text-xs px-2 font-sans">Para garantizar interacciones reales y profesionales, regístrate en segundos.</p>
-            </div>
-            <form onSubmit={handleRegister} className="space-y-4 font-sans">
-              <div>
-                <label className="block text-[0.60rem] font-bold text-[#E9CE3F] uppercase tracking-[0.1em] mb-1.5 ml-1">Nombre Completo</label>
-                <input required type="text" placeholder="Ej. Ana Pérez" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="w-full bg-[#121212] border border-[#333] text-white px-4 py-3 rounded-xl outline-none focus:border-[#E9CE3F] focus:ring-1 focus:ring-[#E9CE3F] placeholder-gray-600 transition-all font-light text-sm"/>
-              </div>
-              <div>
-                <label className="block text-[0.60rem] font-bold text-[#E9CE3F] uppercase tracking-[0.1em] mb-1.5 ml-1">Celular / WhatsApp</label>
-                <input required type="tel" placeholder="Ej. 71234567" value={formData.celular} onChange={(e) => setFormData({...formData, celular: e.target.value})} className="w-full bg-[#121212] border border-[#333] text-white px-4 py-3 rounded-xl outline-none focus:border-[#E9CE3F] focus:ring-1 focus:ring-[#E9CE3F] placeholder-gray-600 transition-all font-light text-sm"/>
-              </div>
-              <button type="submit" className="w-full bg-[#E9CE3F] hover:bg-[#B59B27] text-[#121212] font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg hover:-translate-y-0.5 mt-6 uppercase tracking-wider text-xs font-cinzel">Registrarme</button>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* --- PANEL DE CALIFICACIÓN FLOTANTE (DARK THEME) --- */}
       {mostrarCalificacion && isLoggedIn && (

@@ -136,7 +136,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         } catch (e) {}
     }
 
-    const spingammaWhatsapp = "59175266095"; 
+    const spingammaWhatsapp = "59164016676"; 
     const mensaje = `Hola SpinGamma, soy ${userName}. Quiero calificar el perfil profesional de ${profesional.name}.`;
     const url = `https://wa.me/${spingammaWhatsapp}?text=${encodeURIComponent(mensaje)}`;
 

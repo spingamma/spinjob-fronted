@@ -6,6 +6,7 @@ import {
   ChevronDown, ChevronRight, LayoutList
 } from 'lucide-react';
 import Perfil from './Perfil';
+import AuthModal from './components/AuthModal';
 
 const normalizeText = (text) => {
   if (!text) return '';
@@ -25,26 +26,6 @@ const getCategoryIcon = (categoryName) => {
   return <Briefcase size={24} />; 
 };
 
-// SIMULACIÓN DE ESTRUCTURA DE CATEGORÍAS (Para el futuro cuando actualices tu DB)
-const CATEGORIAS_ESTRUCTURADAS = [
-  {
-    nombre: "Leyes y Legal",
-    subcategorias: ["Derecho Familiar", "Derecho Penal", "Laboral", "Notario"]
-  },
-  {
-    nombre: "Hogar y Mantenimiento",
-    subcategorias: ["Plomería", "Electricidad", "Carpintería", "Limpieza"]
-  },
-  {
-    nombre: "Salud y Bienestar",
-    subcategorias: ["Medicina General", "Psicología", "Odontología", "Nutrición"]
-  },
-  {
-    nombre: "Tecnología",
-    subcategorias: ["Desarrollo Web", "Soporte Técnico", "Diseño Gráfico"]
-  }
-];
-
 function Directorio() {
   const [profesionales, setProfesionales] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -55,7 +36,6 @@ function Directorio() {
 
   // Estados de modales y UI
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [expandedCategory, setExpandedCategory] = useState(null); // Para el acordeón
 
   // Estados de autenticación
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
@@ -69,7 +49,6 @@ function Directorio() {
   
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingSlug, setPendingSlug] = useState(null);
-  const [formData, setFormData] = useState({ nombre: '', celular: '' });
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/profesionales`)
@@ -84,11 +63,15 @@ function Directorio() {
       });
   }, []);
 
+  // 🚀 Categorías dinámicas obtenidas directamente de la BD
   const dynamicCategories = useMemo(() => {
     const categoriesFromDB = profesionales.map(p => p.category).filter(Boolean);
-    const uniqueCategories = [...new Set(categoriesFromDB)];
-    return ['Todos', ...uniqueCategories];
+    const uniqueCategories = [...new Set(categoriesFromDB)].sort();
+    return uniqueCategories;
   }, [profesionales]);
+
+  // Construir array completo para la barra superior
+  const topBarCategories = ['Todos', ...dynamicCategories];
 
   const filteredProfessionals = profesionales
     .filter(p => {
@@ -109,16 +92,14 @@ function Directorio() {
     }
   };
 
-  const handleRegister = (e) => {
-    e.preventDefault();
-    if (formData.nombre.trim() && formData.celular.trim()) {
-      localStorage.setItem('spingamma_user', JSON.stringify(formData));
-      setIsLoggedIn(true);
-      setUserName(formData.nombre);
-      setAuthModalOpen(false);
-      if (pendingSlug) {
-        navigate(`/perfil/${pendingSlug}`);
-      }
+  const handleRegisterSuccess = (formData) => {
+    localStorage.setItem('spingamma_user', JSON.stringify(formData));
+    setIsLoggedIn(true);
+    setUserName(formData.nombre);
+    setAuthModalOpen(false);
+    if (pendingSlug) {
+      navigate(`/perfil/${pendingSlug}`);
+      setPendingSlug(null);
     }
   };
 
@@ -126,7 +107,6 @@ function Directorio() {
     localStorage.removeItem('spingamma_user');
     setIsLoggedIn(false);
     setUserName('');
-    setFormData({ nombre: '', celular: '' });
   };
 
   const seleccionarCategoriaDesdeModal = (cat) => {
@@ -203,7 +183,7 @@ function Directorio() {
             
             {/* Scroll de solo 3 o 4 elementos rápidos */}
             <div className="flex space-x-5 overflow-x-auto scrollbar-hide flex-1">
-              {dynamicCategories.slice(0, 4).map((cat) => {
+              {topBarCategories.slice(0, 4).map((cat) => {
                 const isActive = activeCategory === cat;
                 return (
                   <button key={cat} onClick={() => setActiveCategory(cat)} className="flex flex-col items-center min-w-max gap-1.5 pb-2 relative group">
@@ -283,7 +263,7 @@ function Directorio() {
       </main>
 
       {/* =========================================
-          BOTTOM SHEET DE CATEGORÍAS (UX OPTIMIZADO)
+          BOTTOM SHEET DE CATEGORÍAS (DINÁMICO)
           ========================================= */}
       {isCategoryModalOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#1E3D51]/50 backdrop-blur-sm transition-opacity">
@@ -303,10 +283,9 @@ function Directorio() {
               </button>
             </div>
 
-            {/* Lista Vertical de Categorías (Acordeón) */}
+            {/* Lista Vertical Dinámica desde la DB */}
             <div className="p-4 overflow-y-auto flex-1 space-y-3">
               
-              {/* Opción 'Todos' fija al principio */}
               <button 
                 onClick={() => seleccionarCategoriaDesdeModal('Todos')}
                 className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all ${activeCategory === 'Todos' ? 'bg-orange-50 border-[#B95221] shadow-sm' : 'bg-white border-gray-100 hover:border-[#32698F]/30 hover:bg-gray-50'}`}
@@ -315,43 +294,17 @@ function Directorio() {
                 <span className={`text-lg font-bold ${activeCategory === 'Todos' ? 'text-[#B95221]' : 'text-[#1E3D51]'}`}>Todos los Profesionales</span>
               </button>
 
-              {CATEGORIAS_ESTRUCTURADAS.map((cat, idx) => {
-                const isExpanded = expandedCategory === idx;
+              {dynamicCategories.map((cat, idx) => {
+                const isActive = activeCategory === cat;
                 return (
-                  <div key={idx} className="bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all shadow-sm">
-                    
-                    {/* Botón Principal (Padre) */}
-                    <button 
-                      onClick={() => setExpandedCategory(isExpanded ? null : idx)}
-                      className="w-full flex items-center justify-between p-4 focus:outline-none hover:bg-gray-50"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="text-[#32698F]">{getCategoryIcon(cat.nombre)}</div>
-                        <span className="text-lg font-bold text-[#1E3D51] text-left">{cat.nombre}</span>
-                      </div>
-                      <div className={`text-[#B95221] transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
-                        <ChevronDown size={24} />
-                      </div>
-                    </button>
-
-                    {/* Subcategorías (Hijos) */}
-                    {isExpanded && (
-                      <div className="px-4 pb-4 pt-1 border-t border-gray-100 bg-gray-50 animate-in fade-in duration-200">
-                        <div className="flex flex-col gap-2 mt-2">
-                          {cat.subcategorias.map((sub, sIdx) => (
-                            <button 
-                              key={sIdx}
-                              onClick={() => seleccionarCategoriaDesdeModal(sub)}
-                              className="flex items-center justify-between p-3 rounded-xl bg-white hover:bg-orange-50 border border-transparent hover:border-[#B95221]/30 transition-all group shadow-sm"
-                            >
-                              <span className="text-sm font-medium text-gray-600 group-hover:text-[#B95221]">{sub}</span>
-                              <ChevronRight size={16} className="text-[#32698F] group-hover:text-[#B95221] transition-colors" />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <button 
+                    key={idx}
+                    onClick={() => seleccionarCategoriaDesdeModal(cat)}
+                    className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all ${isActive ? 'bg-orange-50 border-[#B95221] shadow-sm' : 'bg-white border-gray-100 hover:border-[#32698F]/30 hover:bg-gray-50'}`}
+                  >
+                    <div className={`${isActive ? 'text-[#B95221]' : 'text-[#32698F]'}`}>{getCategoryIcon(cat)}</div>
+                    <span className={`text-lg font-bold text-left ${isActive ? 'text-[#B95221]' : 'text-[#1E3D51]'}`}>{cat}</span>
+                  </button>
                 );
               })}
             </div>
@@ -359,32 +312,15 @@ function Directorio() {
         </div>
       )}
 
-      {/* MODAL DE REGISTRO */}
-      {authModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E3D51]/80 backdrop-blur-sm transition-opacity">
-          <div className="bg-white border border-gray-200 rounded-3xl shadow-2xl max-w-md w-full p-8 relative animate-in fade-in zoom-in duration-300">
-            <button onClick={() => setAuthModalOpen(false)} className="absolute top-5 right-5 text-gray-400 hover:text-[#1E3D51] transition-colors p-2 bg-gray-100 rounded-full hover:bg-gray-200"><X size={20} /></button>
-            <div className="text-center mb-6 mt-2">
-              <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#B95221] shadow-inner"><UserPlus size={36} className="text-[#B95221]" /></div>
-              <h2 className="text-2xl font-extrabold text-[#1E3D51] mb-2">Comunidad Segura</h2>
-              <p className="text-gray-500 text-sm px-2">Para ver perfiles y garantizar valoraciones reales, regístrate gratis en 10 segundos.</p>
-            </div>
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-[#B95221] uppercase tracking-wide mb-1">Nombre Completo</label>
-                <input required type="text" placeholder="Ej. Ana Pérez" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="w-full bg-gray-50 border border-gray-200 text-[#1E3D51] px-4 py-3 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] placeholder-gray-400 transition-all"/>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-[#B95221] uppercase tracking-wide mb-1">Celular / WhatsApp</label>
-                <input required type="tel" placeholder="Ej. 71234567" value={formData.celular} onChange={(e) => setFormData({...formData, celular: e.target.value})} className="w-full bg-gray-50 border border-gray-200 text-[#1E3D51] px-4 py-3 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] placeholder-gray-400 transition-all"/>
-              </div>
-              <button type="submit" className="w-full bg-[#B95221] hover:bg-[#9A4219] text-white font-bold py-4 px-4 rounded-xl transition-all shadow-md hover:-translate-y-0.5 mt-4">Ver Profesional</button>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* MODAL DE REGISTRO REUTILIZABLE */}
+      <AuthModal 
+        isOpen={authModalOpen} 
+        onClose={() => setAuthModalOpen(false)} 
+        onSuccess={handleRegisterSuccess} 
+        isDarkTheme={false} 
+      />
       
-      {/* 🚀 FOOTER POWERED BY SPINGAMMA - DIRECTORIO */}
+      {/* FOOTER */}
       <footer className="mt-20 bg-white border-t border-gray-200 py-8 text-center flex flex-col items-center justify-center">
         <a 
           href="https://spingamma.github.io/spingamma-landing/" 

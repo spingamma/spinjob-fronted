@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { LogOut, UserPlus, X, Share2, QrCode, Star } from 'lucide-react';
 
-function PlantillaInmobiliaria({ profesional, volverAtras }) {
+function PlantillaInmobiliaria({ profesional, volverAtras, onProtectedAction }) {
   const [loaded, setLoaded] = useState(false);
   const [mostrarQR, setMostrarQR] = useState(false);
 
@@ -18,25 +18,36 @@ function PlantillaInmobiliaria({ profesional, volverAtras }) {
   });
 
   // Estados de Autenticación
-  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
-  const [userName, setUserName] = useState(() => {
+  const isLoggedIn = localStorage.getItem('spingamma_user') !== null;
+  const userName = (() => {
     const stored = localStorage.getItem('spingamma_user');
     if (stored) {
       try { return JSON.parse(stored).nombre; } catch(e) { return ''; }
     }
     return '';
-  });
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ nombre: '', celular: '' });
-  const [pendingUrl, setPendingUrl] = useState(null);
-
-  // 🛑 ELIMINAMOS EL EFECTO QUE FORZABA EL LOGIN AL ENTRAR. AHORA ES A DEMANDA (EN LOS BOTONES).
+  })();
 
   // Simulador del Loader
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 800);
     return () => clearTimeout(timer);
   }, []);
+
+  // Escuchar cuando el usuario termina de logearse por onProtectedAction
+  useEffect(() => {
+    const userStr = localStorage.getItem('spingamma_user');
+    const pendingPlatform = localStorage.getItem(pendingInteractionKey);
+
+    if (userStr && pendingPlatform) {
+      registrarInteraccionBackend(pendingPlatform);
+      localStorage.removeItem(pendingInteractionKey);
+
+      if (localStorage.getItem(hasRatedKey) !== 'true') {
+        localStorage.setItem(pendingRateKey, 'true');
+        setMostrarCalificacion(true);
+      }
+    }
+  });
 
   const toggleQR = () => setMostrarQR(!mostrarQR);
 
@@ -80,38 +91,26 @@ function PlantillaInmobiliaria({ profesional, volverAtras }) {
     } catch (error) {}
   };
 
-  // 🔗 INTERCEPTOR DE CLICS EN REDES (Misma lógica que la Genérica)
+  // 🔗 INTERCEPTOR DE CLICS EN REDES QUE DELEGA A PERFIL.JSX
   const handleLinkClick = (e, platformName, url) => {
-    e.preventDefault(); // Prevenimos el salto automático
-    
+    e.preventDefault(); 
     const isLogged = localStorage.getItem('spingamma_user');
 
     if (isLogged) {
-      // 1. Registrar interacción
       registrarInteraccionBackend(platformName);
-      
-      // 2. Mostrar panel de calificación si no ha calificado
       if (localStorage.getItem(hasRatedKey) !== 'true') {
         localStorage.setItem(pendingRateKey, 'true');
         setMostrarCalificacion(true);
       }
-
-      // 3. Ejecutar acción nativa
-      if (url.startsWith('tel:') || url.startsWith('mailto:')) {
-        window.location.href = url;
-      } else {
-        window.open(url, '_blank', 'noopener,noreferrer');
-      }
+      onProtectedAction(url);
     } else {
-      // 1. Guardar intención y pedir login (MODAL OSCURO MANTIENE DISEÑO)
       localStorage.setItem(pendingInteractionKey, platformName);
-      setPendingUrl(url);
-      setAuthModalOpen(true);
+      onProtectedAction(url); // Abre el modal manejado por Perfil.jsx
     }
   };
 
   const handleCalificarClick = () => {
-    const spingammaWhatsapp = "59175266095"; 
+    const spingammaWhatsapp = "59164016676"; 
     const mensaje = `Hola SpinGamma, soy ${userName || 'un usuario'}. Quiero calificar el perfil profesional de ${profesional.name}.`;
     const url = `https://wa.me/${spingammaWhatsapp}?text=${encodeURIComponent(mensaje)}`;
 
@@ -128,44 +127,9 @@ function PlantillaInmobiliaria({ profesional, volverAtras }) {
     setMostrarCalificacion(false);
   };
 
-  // 📝 MANEJADOR DE REGISTRO DENTRO DEL MODAL OSCURO PREMIUM
-  const handleRegister = (e) => {
-    e.preventDefault();
-    if (formData.nombre.trim() && formData.celular.trim()) {
-      localStorage.setItem('spingamma_user', JSON.stringify(formData));
-      setIsLoggedIn(true);
-      setUserName(formData.nombre);
-      setAuthModalOpen(false);
-
-      // Si el usuario intentó acceder a una red antes de logearse:
-      const pendingPlatform = localStorage.getItem(pendingInteractionKey);
-      if (pendingPlatform) {
-        registrarInteraccionBackend(pendingPlatform);
-        localStorage.removeItem(pendingInteractionKey);
-
-        if (localStorage.getItem(hasRatedKey) !== 'true') {
-          localStorage.setItem(pendingRateKey, 'true');
-          setMostrarCalificacion(true);
-        }
-      }
-
-      // Continuar con la redirección que estaba en pausa
-      if (pendingUrl) {
-        if (pendingUrl.startsWith('tel:') || pendingUrl.startsWith('mailto:')) {
-          window.location.href = pendingUrl;
-        } else {
-          window.open(pendingUrl, '_blank', 'noopener,noreferrer');
-        }
-        setPendingUrl(null);
-      }
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('spingamma_user');
-    setIsLoggedIn(false);
-    setUserName('');
-    setFormData({ nombre: '', celular: '' });
+    window.location.reload(); // Recarga simple para reflejar el estado en toda la app
   };
 
   if (!profesional) return null;
@@ -252,10 +216,7 @@ function PlantillaInmobiliaria({ profesional, volverAtras }) {
               </div>
             ) : (
               <button 
-                onClick={() => {
-                  setPendingUrl(null); // Solo logearse, sin redirección
-                  setAuthModalOpen(true);
-                }} 
+                onClick={() => onProtectedAction(null)} 
                 className="text-[0.65rem] uppercase tracking-wider font-bold flex items-center gap-1.5 bg-[#425C63] hover:bg-[#C8A721] hover:text-[#11181A] text-white py-2 px-3.5 rounded-full transition-all shadow-md"
               >
                 <UserPlus size={14} /> Ingresar
@@ -459,39 +420,6 @@ function PlantillaInmobiliaria({ profesional, volverAtras }) {
                   </button>
               </div>
           </div>
-      )}
-
-      {/* --- MODAL DE REGISTRO --- */}
-      {authModalOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#11181A]/80 backdrop-blur-md transition-opacity">
-          <div className="bg-gradient-to-b from-[#1A2629] to-[#11181A] border border-[#425C63]/50 rounded-[2rem] shadow-[0_0_50px_rgba(66,92,99,0.3)] max-w-md w-full p-8 relative animate-in fade-in zoom-in duration-300 font-montserrat">
-            <button 
-              onClick={() => { 
-                setAuthModalOpen(false); 
-                localStorage.removeItem(pendingInteractionKey); 
-              }} 
-              className="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors p-2 bg-white/5 rounded-full hover:bg-[#425C63]"
-            >
-              <X size={20} />
-            </button>
-            <div className="text-center mb-6 mt-2">
-              <div className="w-20 h-20 bg-[#425C63]/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#C8A721]/50 shadow-inner"><UserPlus size={36} className="text-[#C8A721]" /></div>
-              <h2 className="text-2xl font-bold text-white mb-2 tracking-wide">Comunidad Segura</h2>
-              <p className="text-gray-400 text-sm px-2 font-light">Para garantizar valoraciones reales, regístrate gratis en 10 segundos.</p>
-            </div>
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div>
-                <label className="block text-[0.65rem] font-bold text-[#C8A721] uppercase tracking-[0.1em] mb-1.5 ml-1">Nombre Completo</label>
-                <input required type="text" placeholder="Ej. Ana Pérez" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="w-full bg-[#11181A] border border-[#425C63] text-white px-4 py-3.5 rounded-2xl outline-none focus:border-[#C8A721] focus:ring-1 focus:ring-[#C8A721] placeholder-gray-600 transition-all font-light"/>
-              </div>
-              <div>
-                <label className="block text-[0.65rem] font-bold text-[#C8A721] uppercase tracking-[0.1em] mb-1.5 ml-1">Celular / WhatsApp</label>
-                <input required type="tel" placeholder="Ej. 71234567" value={formData.celular} onChange={(e) => setFormData({...formData, celular: e.target.value})} className="w-full bg-[#11181A] border border-[#425C63] text-white px-4 py-3.5 rounded-2xl outline-none focus:border-[#C8A721] focus:ring-1 focus:ring-[#C8A721] placeholder-gray-600 transition-all font-light"/>
-              </div>
-              <button type="submit" className="w-full bg-[#C8A721] hover:bg-[#e0bb2a] text-[#11181A] font-bold py-4 px-4 rounded-2xl transition-all shadow-lg hover:-translate-y-0.5 mt-6 uppercase tracking-wider text-sm">Registrarme</button>
-            </form>
-          </div>
-        </div>
       )}
 
       {/* --- MODAL QR --- */}
