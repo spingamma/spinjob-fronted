@@ -6,6 +6,18 @@ import {
 
 export default function PlantillaGenerica({ profesional, volverAtras, onProtectedAction }) {
   const [showQR, setShowQR] = useState(false);
+  
+  // 💾 PERSISTENCIA: Claves para el almacenamiento local basado en el slug
+  const pendingRateKey = `spingamma_pending_rate_${profesional?.slug}`;
+  const hasRatedKey = `spingamma_has_rated_${profesional?.slug}`;
+
+  // ESTADO: Lee del localStorage para saber si el panel debe seguir visible tras recargar
+  const [mostrarCalificacion, setMostrarCalificacion] = useState(() => {
+    if (!profesional) return false;
+    const isPending = localStorage.getItem(pendingRateKey) === 'true';
+    const hasRated = localStorage.getItem(hasRatedKey) === 'true';
+    return isPending && !hasRated;
+  });
 
   // 🧹 LIMPIEZA Y FORMATEO DE ENLACES
   const cleanPhone = profesional.phone?.replace(/[^0-9]/g, '');
@@ -43,12 +55,55 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
     }
   };
 
+  // 📊 MÉTRICAS: Registrar clic silenciosamente en la DB
+  const registrarInteraccionBackend = (platformName) => {
+    const userStr = localStorage.getItem('spingamma_user');
+    if (!userStr || !profesional) return;
+
+    try {
+        const userObj = JSON.parse(userStr);
+        const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+        // Lanzamos el fetch sin await para no bloquear la navegación del usuario
+        fetch(`${API_URL}/profesionales/${profesional.slug}/interaccion`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_phone: userObj.celular,
+                user_name: userObj.nombre,
+                platform: platformName
+            })
+        }).catch(err => console.error("Error silencioso registrando métrica:", err));
+
+    } catch (error) {
+        console.error("Error al registrar interacción", error);
+    }
+  };
+
   // 🔗 COMPONENTE DE BOTÓN SOCIAL PROTEGIDO
   const SocialButton = ({ icon: Icon, label, url, colorClass }) => {
     if (!url) return null;
+
+    const handleClick = () => {
+      onProtectedAction(url);
+      
+      const isLogged = localStorage.getItem('spingamma_user');
+      
+      if (isLogged) {
+        // 1. Guardar métrica en Backend
+        registrarInteraccionBackend(label);
+
+        // 2. Activar panel de calificación si no ha calificado antes
+        if (localStorage.getItem(hasRatedKey) !== 'true') {
+          localStorage.setItem(pendingRateKey, 'true');
+          setMostrarCalificacion(true);
+        }
+      }
+    };
+
     return (
       <button 
-        onClick={() => onProtectedAction(url)}
+        onClick={handleClick}
         className={`flex flex-col items-center justify-center p-4 bg-white border border-gray-200 rounded-2xl transition-all group shadow-sm hover:shadow-md hover:border-[#B95221]/30 hover:-translate-y-1 ${colorClass}`}
       >
         <Icon size={28} className="mb-2 transition-transform group-hover:scale-110" />
@@ -57,15 +112,45 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
     );
   };
 
+  // 🌟 FUNCIÓN CORE: Redirigir a WhatsApp de SpinGamma para calificar
+  const handleCalificarClick = () => {
+    const userStr = localStorage.getItem('spingamma_user');
+    let userName = 'un usuario';
+    
+    if (userStr) {
+        try {
+            const userObj = JSON.parse(userStr);
+            userName = userObj.nombre || 'un usuario';
+        } catch (e) {
+            console.error("Error al parsear la información del usuario", e);
+        }
+    }
+
+    const spingammaWhatsapp = "59175266095"; 
+    const mensaje = `Hola SpinGamma, soy ${userName}. Quiero calificar el perfil profesional de ${profesional.name}.`;
+    const url = `https://wa.me/${spingammaWhatsapp}?text=${encodeURIComponent(mensaje)}`;
+
+    window.open(url, '_blank', 'noopener,noreferrer');
+    
+    // Marcar como calificado definitivamente
+    localStorage.setItem(hasRatedKey, 'true');
+    localStorage.removeItem(pendingRateKey);
+    setMostrarCalificacion(false);
+  };
+
+  // ❌ FUNCIÓN CORE: Cerrar el panel
+  const handleCerrarPanel = () => {
+    localStorage.removeItem(pendingRateKey);
+    setMostrarCalificacion(false);
+  };
+
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-[#1E3D51] pb-20 font-sans antialiased selection:bg-[#B95221] selection:text-white relative">
+    <div className="min-h-screen bg-[#F8F9FA] text-[#1E3D51] pb-24 font-sans antialiased selection:bg-[#B95221] selection:text-white relative">
       
       {/* 🖼️ HEADER Y FOTO DE PORTADA */}
       <div className="relative h-48 sm:h-64 bg-gradient-to-br from-[#1E3D51] to-[#32698F] overflow-hidden">
-        {/* Patrón de fondo sutil */}
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay"></div>
         
-        {/* Barra superior de controles */}
         <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-10">
           <button 
             onClick={volverAtras} 
@@ -162,10 +247,23 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           </div>
         </div>
 
+        {/* 🚀 FOOTER SPINGAMMA (AUTORIDAD) */}
+        <div className="mt-12 mb-8 text-center flex flex-col items-center justify-center">
+            <a 
+              href="https://spingamma.github.io/spingamma-landing/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity"
+            >
+              <span className="text-xs text-gray-500 font-medium">Tecnología desarrollada por</span>
+              <span className="text-sm font-extrabold text-[#1E3D51] tracking-wider group-hover:text-[#B95221] transition-colors">SPINGAMMA</span>
+            </a>
+        </div>
+
       </div>
 
       {/* ==========================================
-          MODAL DE CÓDIGO QR (NO PROTEGIDO)
+          MODAL DE CÓDIGO QR
           ========================================== */}
       {showQR && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E3D51]/50 backdrop-blur-sm transition-opacity">
@@ -198,6 +296,33 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             </button>
           </div>
         </div>
+      )}
+
+      {/* ==========================================
+          PANEL DE CALIFICACIÓN FLOTANTE
+          ========================================== */}
+      {mostrarCalificacion && localStorage.getItem('spingamma_user') && (
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.1)] z-50 animate-in slide-in-from-bottom-10 duration-300">
+              <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
+                  <div className="flex-1">
+                      <p className="text-sm font-bold text-[#1E3D51]">¿Qué te pareció mi perfil?</p>
+                      <p className="text-xs text-gray-500 font-medium hidden sm:block">Tu opinión ayuda a otros profesionales.</p>
+                  </div>
+                  <button
+                      onClick={handleCalificarClick}
+                      className="px-6 py-2.5 rounded-full bg-[#B95221] hover:bg-[#9A4219] text-white font-bold text-sm shadow-md transition-all hover:-translate-y-0.5 whitespace-nowrap flex items-center gap-1.5"
+                  >
+                      <Star size={16} className="fill-white" /> Calificar
+                  </button>
+                  <button
+                      onClick={handleCerrarPanel}
+                      className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 rounded-full transition-colors"
+                      title="Cerrar"
+                  >
+                      <X size={18} />
+                  </button>
+              </div>
+          </div>
       )}
     </div>
   );

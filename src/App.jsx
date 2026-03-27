@@ -1,4 +1,3 @@
-// Archivo: src/App.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { 
@@ -384,7 +383,20 @@ function Directorio() {
           </div>
         </div>
       )}
-      <footer className="mt-20 bg-white border-t border-gray-200 py-8 text-center text-sm text-gray-500"><p className="font-bold mb-1 tracking-wider text-[#1E3D51]">SPINGAMMA</p><p>© 2026 Todos los derechos reservados.</p></footer>
+      
+      {/* 🚀 FOOTER POWERED BY SPINGAMMA - DIRECTORIO */}
+      <footer className="mt-20 bg-white border-t border-gray-200 py-8 text-center flex flex-col items-center justify-center">
+        <a 
+          href="https://spingamma.github.io/spingamma-landing/" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="group flex flex-col items-center gap-1 opacity-80 hover:opacity-100 transition-opacity"
+        >
+          <span className="text-xs text-gray-400 font-medium">Potenciado por</span>
+          <span className="font-extrabold tracking-wider text-[#1E3D51] group-hover:text-[#B95221] transition-colors">SPINGAMMA</span>
+        </a>
+        <p className="text-xs text-gray-400 mt-3">© {new Date().getFullYear()} Todos los derechos reservados.</p>
+      </footer>
     </div>
   );
 }
