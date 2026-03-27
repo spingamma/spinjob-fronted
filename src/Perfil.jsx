@@ -7,6 +7,7 @@ import { UserPlus, X } from 'lucide-react';
 // ==========================================
 import PlantillaGenerica from './plantillas/PlantillaGenerica';
 import PlantillaInmobiliaria from './plantillas/PlantillaInmobiliaria';
+import PlantillaAbogado from './plantillas/PlantillaAbogado';
 
 function Perfil() {
   const { slug } = useParams();
@@ -132,6 +133,12 @@ function Perfil() {
       {/* RENDERIZADO DE PLANTILLAS */}
       {slug === 'inmobiliaria-san-luis' ? (
         <PlantillaInmobiliaria 
+          profesional={profesional} 
+          volverAtras={volverAtras} 
+          onProtectedAction={handleProtectedAction} 
+        />
+      ) : slug === 'juan-pablo-jurado-morales' ? (
+        <PlantillaAbogado 
           profesional={profesional} 
           volverAtras={volverAtras} 
           onProtectedAction={handleProtectedAction} 

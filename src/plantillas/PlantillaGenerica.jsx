@@ -65,7 +65,6 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         const userObj = JSON.parse(userStr);
         const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
-        // Lanzamos el fetch sin await para no bloquear la navegación del usuario
         fetch(`${API_URL}/profesionales/${profesional.slug}/interaccion`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -187,8 +186,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
 
       {/* 🧑‍💼 INFO PRINCIPAL DEL PERFIL */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 relative z-20">
-        <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6 mb-6">
-          {/* EL MARGEN NEGATIVO SOLO DEBE AFECTAR AL AVATAR, NO AL CONTENEDOR PRINCIPAL */}
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6">
           <div className="relative -mt-16 sm:-mt-20 shrink-0">
             <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white overflow-hidden bg-white shadow-xl">
               <img 
@@ -205,16 +203,13 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             )}
           </div>
           
-          <div className="text-center sm:text-left flex-1 pb-2 mt-4 sm:mt-0">
-            <div className="inline-block bg-orange-50 text-[#B95221] px-3 py-1 rounded-full text-xs font-bold mb-2 border border-[#B95221]/20">
-              {profesional.category}
-            </div>
+          <div className="text-center sm:text-left flex-1 pb-2 mt-4 sm:mt-20">
             <h1 className="text-3xl font-extrabold text-[#1E3D51] leading-tight mb-1">{profesional.name}</h1>
             <h2 className="text-gray-500 text-lg font-medium">{profesional.title}</h2>
           </div>
         </div>
 
-        {/* 🌟 ESTADÍSTICAS Y UBICACIÓN */}
+        {/* 🌟 ESTADÍSTICAS Y UBICACIÓN (AQUÍ SE MOVIÓ LA CATEGORÍA) */}
         <div className="flex flex-wrap justify-center sm:justify-start gap-3 mb-8">
           {profesional.reviews_count > 0 && (
             <div className="flex items-center gap-1.5 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
@@ -227,6 +222,11 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             <div className="flex items-center gap-1.5 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm text-gray-600">
               <MapPin size={18} className="text-[#B95221]" />
               <span className="text-sm font-medium">{profesional.location}</span>
+            </div>
+          )}
+          {profesional.category && (
+            <div className="flex items-center gap-1.5 bg-orange-50 px-4 py-2 rounded-xl border border-[#B95221]/20 shadow-sm text-[#B95221]">
+               <span className="text-sm font-bold">{profesional.category}</span>
             </div>
           )}
         </div>
