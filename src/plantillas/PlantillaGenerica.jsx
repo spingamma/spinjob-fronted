@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Share2, QrCode, MapPin, Phone, MessageCircle, 
   Facebook, Instagram, Linkedin, Globe, Github, X, CheckCircle2, Star
@@ -10,6 +10,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
   // 💾 PERSISTENCIA: Claves para el almacenamiento local basado en el slug
   const pendingRateKey = `spingamma_pending_rate_${profesional?.slug}`;
   const hasRatedKey = `spingamma_has_rated_${profesional?.slug}`;
+  const pendingInteractionKey = `spingamma_pending_interaction_${profesional?.slug}`;
 
   // ESTADO: Lee del localStorage para saber si el panel debe seguir visible tras recargar
   const [mostrarCalificacion, setMostrarCalificacion] = useState(() => {
@@ -75,30 +76,42 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             })
         }).catch(err => console.error("Error silencioso registrando métrica:", err));
 
-    } catch (error) {
-        console.error("Error al registrar interacción", error);
-    }
+    } catch (error) {}
   };
+
+  // 🔄 EFECTO CORE: Capturar interacción si el usuario se acaba de logear
+  useEffect(() => {
+    const userStr = localStorage.getItem('spingamma_user');
+    const pendingPlatform = localStorage.getItem(pendingInteractionKey);
+
+    if (userStr && pendingPlatform) {
+      registrarInteraccionBackend(pendingPlatform);
+      localStorage.removeItem(pendingInteractionKey);
+
+      if (localStorage.getItem(hasRatedKey) !== 'true') {
+        localStorage.setItem(pendingRateKey, 'true');
+        setMostrarCalificacion(true);
+      }
+    }
+  }); 
 
   // 🔗 COMPONENTE DE BOTÓN SOCIAL PROTEGIDO
   const SocialButton = ({ icon: Icon, label, url, colorClass }) => {
     if (!url) return null;
 
     const handleClick = () => {
-      onProtectedAction(url);
-      
       const isLogged = localStorage.getItem('spingamma_user');
       
       if (isLogged) {
-        // 1. Guardar métrica en Backend
         registrarInteraccionBackend(label);
-
-        // 2. Activar panel de calificación si no ha calificado antes
         if (localStorage.getItem(hasRatedKey) !== 'true') {
           localStorage.setItem(pendingRateKey, 'true');
           setMostrarCalificacion(true);
         }
+      } else {
+        localStorage.setItem(pendingInteractionKey, label);
       }
+      onProtectedAction(url);
     };
 
     return (
@@ -121,9 +134,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         try {
             const userObj = JSON.parse(userStr);
             userName = userObj.nombre || 'un usuario';
-        } catch (e) {
-            console.error("Error al parsear la información del usuario", e);
-        }
+        } catch (e) {}
     }
 
     const spingammaWhatsapp = "59175266095"; 
@@ -138,7 +149,6 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
     setMostrarCalificacion(false);
   };
 
-  // ❌ FUNCIÓN CORE: Cerrar el panel
   const handleCerrarPanel = () => {
     localStorage.removeItem(pendingRateKey);
     setMostrarCalificacion(false);
@@ -176,9 +186,10 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       </div>
 
       {/* 🧑‍💼 INFO PRINCIPAL DEL PERFIL */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 -mt-16 relative z-20">
-        <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 mb-6">
-          <div className="relative">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 relative z-20">
+        <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6 mb-6">
+          {/* EL MARGEN NEGATIVO SOLO DEBE AFECTAR AL AVATAR, NO AL CONTENEDOR PRINCIPAL */}
+          <div className="relative -mt-16 sm:-mt-20 shrink-0">
             <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white overflow-hidden bg-white shadow-xl">
               <img 
                 src={profesional.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name)}&background=F8F9FA&color=1E3D51&size=256`} 
@@ -299,7 +310,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       )}
 
       {/* ==========================================
-          PANEL DE CALIFICACIÓN FLOTANTE
+          PANEL DE CALIFICACIÓN FLOTANTE (PERSISTENTE)
           ========================================== */}
       {mostrarCalificacion && localStorage.getItem('spingamma_user') && (
           <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.1)] z-50 animate-in slide-in-from-bottom-10 duration-300">
