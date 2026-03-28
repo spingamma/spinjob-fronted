@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import Perfil from './Perfil';
 import AuthModal from './components/AuthModal';
+import InstallPrompt from './components/InstallPrompt';
 
 const normalizeText = (text) => {
   if (!text) return '';
@@ -30,16 +31,14 @@ const getCategoryIcon = (categoryName) => {
 function Directorio() {
   const [profesionales, setProfesionales] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [errorBackend, setErrorBackend] = useState(false); // 🚀 ESTADO PARA MANEJAR CAÍDA DEL SERVIDOR
+  const [errorBackend, setErrorBackend] = useState(false);
   const navigate = useNavigate();
 
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Estados de modales y UI
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
-  // Estados de autenticación
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
   const [userName, setUserName] = useState(() => {
     const stored = localStorage.getItem('spingamma_user');
@@ -53,7 +52,6 @@ function Directorio() {
   const [pendingSlug, setPendingSlug] = useState(null);
 
   useEffect(() => {
-    // 🚀 MEJORA: Fallback seguro y uso de "/" final para evitar errores 307 de FastAPI
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
     fetch(`${API_URL}/profesionales/`)
@@ -72,14 +70,12 @@ function Directorio() {
       });
   }, []);
 
-  // 🚀 Categorías dinámicas obtenidas directamente de la BD
   const dynamicCategories = useMemo(() => {
     const categoriesFromDB = profesionales.map(p => p.category).filter(Boolean);
     const uniqueCategories = [...new Set(categoriesFromDB)].sort();
     return uniqueCategories;
   }, [profesionales]);
 
-  // Construir array completo para la barra superior
   const topBarCategories = ['Todos', ...dynamicCategories];
 
   const filteredProfessionals = profesionales
@@ -185,12 +181,10 @@ function Directorio() {
         </div>
       </header>
 
-      {/* BARRA DE CATEGORÍAS UX OPTIMIZADA */}
+      {/* BARRA DE CATEGORÍAS */}
       <div className="bg-white shadow-sm sticky top-16 md:top-20 z-30 pt-4 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between pb-1">
-            
-            {/* Scroll de solo 3 o 4 elementos rápidos */}
             <div className="flex space-x-5 overflow-x-auto scrollbar-hide flex-1">
               {topBarCategories.slice(0, 4).map((cat) => {
                 const isActive = activeCategory === cat;
@@ -204,7 +198,6 @@ function Directorio() {
               })}
             </div>
 
-            {/* BOTÓN EXPLORAR (Siempre visible a la derecha) */}
             <button 
               onClick={() => setIsCategoryModalOpen(true)}
               className="flex flex-col items-center gap-1.5 pb-2 ml-4 flex-shrink-0 group border-l border-gray-200 pl-4"
@@ -212,7 +205,6 @@ function Directorio() {
               <div className="text-[#B95221] group-hover:scale-110 transition-transform bg-[#B95221]/10 p-1.5 rounded-lg"><LayoutList size={20} /></div>
               <span className="text-[0.75rem] font-bold text-[#B95221]">Más</span>
             </button>
-
           </div>
         </div>
       </div>
@@ -281,18 +273,11 @@ function Directorio() {
         )}
       </main>
 
-      {/* =========================================
-          BOTTOM SHEET DE CATEGORÍAS (DINÁMICO)
-          ========================================= */}
+      {/* CATEGORÍAS MODAL */}
       {isCategoryModalOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#1E3D51]/50 backdrop-blur-sm transition-opacity">
-          {/* Capa de clic para cerrar */}
           <div className="absolute inset-0" onClick={() => setIsCategoryModalOpen(false)}></div>
-          
-          {/* Contenedor del panel */}
           <div className="bg-white w-full sm:w-[450px] sm:rounded-3xl rounded-t-3xl max-h-[85vh] flex flex-col shadow-2xl relative animate-in slide-in-from-bottom-10 sm:zoom-in duration-300">
-            
-            {/* Cabecera del Panel */}
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <h2 className="text-xl font-extrabold text-[#1E3D51] flex items-center gap-2">
                 <LayoutList className="text-[#B95221]" /> Explorar Categorías
@@ -301,10 +286,7 @@ function Directorio() {
                 <X size={20} />
               </button>
             </div>
-
-            {/* Lista Vertical Dinámica desde la DB */}
             <div className="p-4 overflow-y-auto flex-1 space-y-3">
-              
               <button 
                 onClick={() => seleccionarCategoriaDesdeModal('Todos')}
                 className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all ${activeCategory === 'Todos' ? 'bg-orange-50 border-[#B95221] shadow-sm' : 'bg-white border-gray-100 hover:border-[#32698F]/30 hover:bg-gray-50'}`}
@@ -331,7 +313,7 @@ function Directorio() {
         </div>
       )}
 
-      {/* MODAL DE REGISTRO REUTILIZABLE */}
+      {/* MODAL AUTH */}
       <AuthModal 
         isOpen={authModalOpen} 
         onClose={() => setAuthModalOpen(false)} 
@@ -352,6 +334,9 @@ function Directorio() {
         </a>
         <p className="text-xs text-gray-400 mt-3">© {new Date().getFullYear()} Todos los derechos reservados.</p>
       </footer>
+
+      {/* 🚀 EL BANNER DE INSTALACIÓN INYECTADO AQUÍ */}
+      <InstallPrompt />
     </div>
   );
 }
