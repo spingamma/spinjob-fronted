@@ -4,7 +4,7 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import { 
   Search, Briefcase, Scale, Stethoscope, Calculator, 
   PenTool, Laptop, MapPin, CheckCircle2, LayoutGrid, Home, Brain, UserPlus, X, Star, LogOut,
-  ChevronDown, ChevronRight, LayoutList
+  LayoutList
 } from 'lucide-react';
 import Perfil from './Perfil';
 import AuthModal from './components/AuthModal';
@@ -31,7 +31,7 @@ const getCategoryIcon = (categoryName) => {
 function Directorio() {
   const [profesionales, setProfesionales] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [errorBackend, setErrorBackend] = useState(false);
+  const [mensajeCarga, setMensajeCarga] = useState("Cargando directorio SPINJOB...");
   const navigate = useNavigate();
 
   const [activeCategory, setActiveCategory] = useState('Todos');
@@ -52,22 +52,43 @@ function Directorio() {
   const [pendingSlug, setPendingSlug] = useState(null);
 
   useEffect(() => {
+    let isMounted = true;
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
-    fetch(`${API_URL}/profesionales/`)
-      .then(res => {
+    const cargarDirectorio = async (intentos = 0) => {
+      try {
+        const res = await fetch(`${API_URL}/profesionales/`);
         if (!res.ok) throw new Error("Error en red");
-        return res.json();
-      })
-      .then(data => { 
-        setProfesionales(data); 
-        setCargando(false); 
-      })
-      .catch(err => {
-        console.error("Error al cargar profesionales:", err);
-        setErrorBackend(true);
-        setCargando(false);
-      });
+        
+        const data = await res.json();
+        if (isMounted) {
+          setProfesionales(data);
+          setCargando(false);
+        }
+      } catch (err) {
+        // Log silencioso solo para ti en la consola
+        console.warn(`Intento ${intentos + 1} fallido. El backend podría estar despertando...`, err);
+        
+        if (intentos < 12 && isMounted) {
+          // Cambiar mensaje para calmar al usuario mientras Render despierta (toma ~40 seg)
+          if (intentos === 2) setMensajeCarga("Despertando conexión segura, por favor espera...");
+          if (intentos === 5) setMensajeCarga("Preparando el directorio de profesionales...");
+          if (intentos === 8) setMensajeCarga("Casi listo, sincronizando tarjetas...");
+          
+          // Reintentar cada 4 segundos
+          setTimeout(() => cargarDirectorio(intentos + 1), 4000);
+        } else if (isMounted) {
+          // Falla silenciosa si no despierta después de casi un minuto
+          console.error("Error definitivo de conexión backend:", err);
+          setProfesionales([]);
+          setCargando(false);
+        }
+      }
+    };
+
+    cargarDirectorio();
+
+    return () => { isMounted = false; };
   }, []);
 
   const dynamicCategories = useMemo(() => {
@@ -130,7 +151,8 @@ function Directorio() {
             <div className="w-10 h-10 bg-[#B95221] rounded-xl flex items-center justify-center shadow-md">
               <Briefcase className="text-white w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-[#1E3D51] uppercase hidden md:block ml-3">SPINGAMMA</span>
+            {/* 🚀 MARCA ACTUALIZADA A SPINJOB */}
+            <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-[#1E3D51] uppercase hidden md:block ml-3">SPINJOB</span>
           </div>
           
           <div className="flex-1 max-w-2xl">
@@ -213,16 +235,19 @@ function Directorio() {
         {cargando ? (
           <div className="text-center py-20 flex flex-col items-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#B95221] mb-4"></div>
-            <p className="text-gray-500 font-medium text-lg">Cargando directorio SPINGAMMA...</p>
+            {/* 🚀 MENSAJE DINÁMICO QUE CAMBIA CON EL TIEMPO */}
+            <p className="text-[#1E3D51] font-bold text-lg mb-2">{mensajeCarga}</p>
+            <p className="text-gray-500 text-sm animate-pulse">Asegurando la mejor experiencia...</p>
           </div>
-        ) : errorBackend ? (
+        ) : profesionales.length === 0 ? (
+          // 🚀 FALLA SILENCIOSA: Si falla todo, se muestra esto en vez del error rojo de código
           <div className="text-center py-20 flex flex-col items-center animate-in fade-in zoom-in duration-300">
-             <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6 shadow-inner border border-red-100">
-                <X size={40} className="text-red-500" />
+             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6 shadow-inner border border-gray-100">
+                <Search size={40} className="text-gray-400" />
              </div>
-             <h2 className="text-2xl font-extrabold text-[#1E3D51] mb-3">Error de Conexión</h2>
+             <h2 className="text-2xl font-extrabold text-[#1E3D51] mb-3">Directorio en preparación</h2>
              <p className="text-gray-500 max-w-md mx-auto leading-relaxed">
-               No pudimos conectar con el servidor backend. Verifica que FastAPI esté corriendo (<code className="bg-gray-100 px-1 py-0.5 rounded text-gray-800">uvicorn main:app --reload</code>) en el puerto correcto.
+               No hay profesionales disponibles en este momento. Por favor, intenta actualizar la página en un minuto.
              </p>
           </div>
         ) : (
@@ -324,18 +349,18 @@ function Directorio() {
       {/* FOOTER */}
       <footer className="mt-20 bg-white border-t border-gray-200 py-8 text-center flex flex-col items-center justify-center">
         <a 
-          href="https://spingamma.github.io/spingamma-landing/" 
+          href="https://spingamma.com" 
           target="_blank" 
           rel="noopener noreferrer" 
           className="group flex flex-col items-center gap-1 opacity-80 hover:opacity-100 transition-opacity"
         >
           <span className="text-xs text-gray-400 font-medium">Potenciado por</span>
-          <span className="font-extrabold tracking-wider text-[#1E3D51] group-hover:text-[#B95221] transition-colors">SPINGAMMA</span>
+          <span className="font-extrabold tracking-wider text-[#1E3D51] group-hover:text-[#B95221] transition-colors">SPINJOB</span>
         </a>
         <p className="text-xs text-gray-400 mt-3">© {new Date().getFullYear()} Todos los derechos reservados.</p>
       </footer>
 
-      {/* 🚀 EL BANNER DE INSTALACIÓN INYECTADO AQUÍ */}
+      {/* PWA BANNER DE INSTALACIÓN */}
       <InstallPrompt />
     </div>
   );

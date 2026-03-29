@@ -39,13 +39,13 @@ export default defineConfig({
         ]
       },
       manifest: {
-        name: "SpinGamma Directorio",
-        short_name: "SpinGamma",
+        name: "SpinJob Directorio", // 🚀 CAMBIADO AQUÍ
+        short_name: "SpinJob",      // 🚀 CAMBIADO AQUÍ (Nombre en el ícono del celular)
         start_url: "/",
         display: "standalone",
         background_color: "#FFFFFF",
         theme_color: "#1E3D51",
-        description: "Directorio de Tarjetas Digitales SpinGamma",
+        description: "Directorio de Tarjetas Digitales SpinJob", // 🚀 CAMBIADO AQUÍ
         icons: [
           {
             src: "/icon-192.png",

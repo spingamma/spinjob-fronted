@@ -113,8 +113,8 @@ export default function InstallPrompt() {
           
           <div className="flex-1 pr-4">
             <h3 className="text-white font-bold text-[15px] leading-tight mb-1">
-              Instala SpinGamma
-            </h3>
+  Instala SpinJob
+</h3>
             
             {isIOS ? (
               <div className="text-[#E6E2DF] text-xs leading-relaxed">
