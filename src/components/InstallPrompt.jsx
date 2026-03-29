@@ -7,7 +7,7 @@ export default function InstallPrompt() {
   // 🚀 SWITCH MAESTRO DE INSTALACIÓN
   // Cambia esto a "true" cuando compres tu dominio oficial
   // ==========================================
-  const IS_PWA_ENABLED = false; 
+  const IS_PWA_ENABLED = true; 
 
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
