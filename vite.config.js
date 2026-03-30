@@ -1,40 +1,31 @@
 // Archivo: vite.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite' 
+import tailwindcss from '@tailwindcss/vite' // 🚀 1. RECUPERAMOS TAILWIND
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(), 
+    tailwindcss(), // 🚀 2. AQUÍ VUELVE LA MAGIA DEL DISEÑO
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
-        cacheId: 'spinjob-v3-stable', 
-        cleanupOutdatedCaches: true,
-        skipWaiting: true,
-        clientsClaim: true,
-        // 🚨 EVITA EL BUCLE: No cachear el documento principal para rutas de perfil
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api/], 
         runtimeCaching: [
           {
-            // Caché para la API de profesionales
-            urlPattern: ({ url }) => url.pathname.startsWith('/profesionales'),
-            handler: 'NetworkFirst', 
+            urlPattern: /.*\/profesionales.*/i,
+            handler: 'NetworkFirst',
             options: {
-              cacheName: 'api-data-cache',
+              cacheName: 'api-profesionales-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 días
-              }
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 días offline
+              },
             },
           },
           {
-            // Caché para imágenes de Cloudinary y Avatares
             urlPattern: /^https:\/\/(res\.cloudinary\.com|ui-avatars\.com)\/.*/i,
             handler: 'CacheFirst',
             options: {
@@ -48,13 +39,13 @@ export default defineConfig({
         ]
       },
       manifest: {
-        name: "SpinJob Directorio",
-        short_name: "SpinJob",      
+        name: "SpinJob Directorio", // 🚀 CAMBIADO AQUÍ
+        short_name: "SpinJob",      // 🚀 CAMBIADO AQUÍ (Nombre en el ícono del celular)
         start_url: "/",
         display: "standalone",
         background_color: "#FFFFFF",
         theme_color: "#1E3D51",
-        description: "Directorio de Tarjetas Digitales SpinJob",
+        description: "Directorio de Tarjetas Digitales SpinJob", // 🚀 CAMBIADO AQUÍ
         icons: [
           {
             src: "/icon-192.png",
