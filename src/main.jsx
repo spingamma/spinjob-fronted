@@ -5,18 +5,23 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './index.css'
 
-window.onerror = function(message) {
-  if (message.includes('initialization') || message.includes('loading chunk')) {
-    console.warn("Detectado error de caché. Limpiando Service Workers...");
-    navigator.serviceWorker.getRegistrations().then(registrations => {
-      for (let registration of registrations) {
-        registration.unregister();
-      }
-      // Forzar recarga limpia desde el servidor
-      window.location.reload(true);
-    });
+// 🚀 LIMPIEZA DE SERVICE WORKER EN CASO DE BUCLE O ERROR
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    for (let registration of registrations) {
+      // Si el dominio cambió o hay error de carga, forzamos actualización
+      registration.update();
+    }
+  });
+}
+
+// Capturar errores de carga de trozos (chunks) para limpiar caché
+window.addEventListener('error', (e) => {
+  if (e.message.includes('Loading chunk') || e.message.includes('initialization')) {
+    console.warn("Error de inicialización detectado. Limpiando...");
+    location.reload(true);
   }
-};
+}, true);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

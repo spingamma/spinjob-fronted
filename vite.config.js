@@ -1,42 +1,47 @@
 // Archivo: vite.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from '@tailwindcss/vite' 
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(),
+    tailwindcss(), 
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
-        cacheId: 'spinjob-v2-final', // 🚀 Cambiamos el ID para invalidar TODO
-        cleanupOutdatedCaches: true,  // 🚀 Borra la caché de SpinGamma automáticamente
-        skipWaiting: true,            // 🚀 Fuerza a la nueva versión a tomar el control
-        clientsClaim: true,           // 🚀 Toma el control de la página inmediatamente
+        cacheId: 'spinjob-v3-stable', 
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
+        // 🚨 EVITA EL BUCLE: No cachear el documento principal para rutas de perfil
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api/], 
         runtimeCaching: [
           {
-            urlPattern: /.*\/profesionales.*/i,
-            handler: 'NetworkFirst',
+            // Caché para la API de profesionales
+            urlPattern: ({ url }) => url.pathname.startsWith('/profesionales'),
+            handler: 'NetworkFirst', 
             options: {
-              cacheName: 'api-profesionales-cache',
+              cacheName: 'api-data-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 7
-              },
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 días
+              }
             },
           },
           {
+            // Caché para imágenes de Cloudinary y Avatares
             urlPattern: /^https:\/\/(res\.cloudinary\.com|ui-avatars\.com)\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'imagenes-externas',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 días
               }
             }
           }
@@ -44,7 +49,7 @@ export default defineConfig({
       },
       manifest: {
         name: "SpinJob Directorio",
-        short_name: "SpinJob",
+        short_name: "SpinJob",      
         start_url: "/",
         display: "standalone",
         background_color: "#FFFFFF",
