@@ -1,18 +1,20 @@
 // Archivo: vite.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite' // 🚀 1. RECUPERAMOS TAILWIND
+import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(), // 🚀 2. AQUÍ VUELVE LA MAGIA DEL DISEÑO
+    tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+        cacheId: 'spinjob-v2',
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /.*\/profesionales.*/i,
@@ -21,7 +23,7 @@ export default defineConfig({
               cacheName: 'api-profesionales-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 días offline
+                maxAgeSeconds: 60 * 60 * 24 * 7
               },
             },
           },
@@ -32,20 +34,20 @@ export default defineConfig({
               cacheName: 'imagenes-externas',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 días
+                maxAgeSeconds: 60 * 60 * 24 * 30
               }
             }
           }
         ]
       },
       manifest: {
-        name: "SpinJob Directorio", // 🚀 CAMBIADO AQUÍ
-        short_name: "SpinJob",      // 🚀 CAMBIADO AQUÍ (Nombre en el ícono del celular)
+        name: "SpinJob Directorio",
+        short_name: "SpinJob",
         start_url: "/",
         display: "standalone",
         background_color: "#FFFFFF",
         theme_color: "#1E3D51",
-        description: "Directorio de Tarjetas Digitales SpinJob", // 🚀 CAMBIADO AQUÍ
+        description: "Directorio de Tarjetas Digitales SpinJob",
         icons: [
           {
             src: "/icon-192.png",
