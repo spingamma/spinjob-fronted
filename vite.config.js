@@ -13,8 +13,10 @@ export default defineConfig({
       injectRegister: 'auto',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
-        cacheId: 'spinjob-v2',
-        cleanupOutdatedCaches: true,
+        cacheId: 'spinjob-v2-final', // 🚀 Cambiamos el ID para invalidar TODO
+        cleanupOutdatedCaches: true,  // 🚀 Borra la caché de SpinGamma automáticamente
+        skipWaiting: true,            // 🚀 Fuerza a la nueva versión a tomar el control
+        clientsClaim: true,           // 🚀 Toma el control de la página inmediatamente
         runtimeCaching: [
           {
             urlPattern: /.*\/profesionales.*/i,
