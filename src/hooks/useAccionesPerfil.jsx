@@ -5,14 +5,11 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
   const [mostrarQR, setMostrarQR] = useState(false);
 
   const pendingRateKey = `spingamma_pending_rate_${profesional?.slug}`;
-  const hasRatedKey = `spingamma_has_rated_${profesional?.slug}`;
   const pendingInteractionKey = `spingamma_pending_interaction_${profesional?.slug}`;
 
   const [mostrarCalificacion, setMostrarCalificacion] = useState(() => {
     if (!profesional) return false;
-    const isPending = localStorage.getItem(pendingRateKey) === 'true';
-    const hasRated = localStorage.getItem(hasRatedKey) === 'true';
-    return isPending && !hasRated;
+    return localStorage.getItem(pendingRateKey) === 'true';
   });
 
   const isLoggedIn = localStorage.getItem('spingamma_user') !== null;
@@ -32,10 +29,8 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
       registrarInteraccionBackend(pendingPlatform);
       localStorage.removeItem(pendingInteractionKey);
 
-      if (localStorage.getItem(hasRatedKey) !== 'true') {
-        localStorage.setItem(pendingRateKey, 'true');
-        setMostrarCalificacion(true);
-      }
+      localStorage.setItem(pendingRateKey, 'true');
+      setMostrarCalificacion(true);
     }
   });
 
@@ -87,16 +82,16 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
 
     if (isLogged) {
       registrarInteraccionBackend(platformName);
-      if (localStorage.getItem(hasRatedKey) !== 'true') {
-        localStorage.setItem(pendingRateKey, 'true');
-        setMostrarCalificacion(true);
-      }
+      
+      localStorage.setItem(pendingRateKey, 'true');
+      setMostrarCalificacion(true);
+      
       onProtectedAction(url);
     } else {
       localStorage.setItem(pendingInteractionKey, platformName);
       onProtectedAction(url);
     }
-  }, [onProtectedAction, registrarInteraccionBackend, hasRatedKey, pendingRateKey, pendingInteractionKey]);
+  }, [onProtectedAction, registrarInteraccionBackend, pendingRateKey, pendingInteractionKey]);
 
   const handleCalificarClick = useCallback(() => {
     if (!profesional) return;
@@ -106,10 +101,9 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
 
     window.open(url, '_blank', 'noopener,noreferrer');
 
-    localStorage.setItem(hasRatedKey, 'true');
     localStorage.removeItem(pendingRateKey);
     setMostrarCalificacion(false);
-  }, [profesional, userName, hasRatedKey, pendingRateKey]);
+  }, [profesional, userName, pendingRateKey]);
 
   const handleCerrarPanelCalificacion = useCallback(() => {
     localStorage.removeItem(pendingRateKey);
