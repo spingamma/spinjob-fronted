@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(), // 🚀 2. AQUÍ VUELVE LA MAGIA DEL DISEÑO
     VitePWA({
       registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      injectRegister: 'script-defer', // 🚀 ¡LÍNEA MÁGICA PARA LIGHTHOUSE! (Antes estaba en 'auto')
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
         runtimeCaching: [

@@ -1,14 +1,17 @@
 // Archivo: src/App.jsx
-import { useState, useEffect, useMemo } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo, Suspense, lazy } from 'react';
+// 🚀 CORRECCIÓN: Agregamos Link aquí para que no de error
+import { Routes, Route, useNavigate, Link } from 'react-router-dom'; 
 import { 
   Search, Briefcase, Scale, Stethoscope, Calculator, 
   PenTool, Laptop, MapPin, CheckCircle2, LayoutGrid, Home, Brain, UserPlus, X, Star, LogOut,
   LayoutList
 } from 'lucide-react';
-import Perfil from './Perfil';
 import AuthModal from './components/AuthModal';
 import InstallPrompt from './components/InstallPrompt';
+
+// Lazy load Perfil
+const Perfil = lazy(() => import('./Perfil'));  
 
 const normalizeText = (text) => {
   if (!text) return '';
@@ -36,7 +39,6 @@ function Directorio() {
 
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
-
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
@@ -66,28 +68,17 @@ function Directorio() {
           setCargando(false);
         }
       } catch (err) {
-        // Log silencioso solo para ti en la consola
-        console.warn(`Intento ${intentos + 1} fallido. El backend podría estar despertando...`, err);
-        
+        console.warn(`Intento ${intentos + 1} fallido...`, err);
         if (intentos < 12 && isMounted) {
-          // Cambiar mensaje para calmar al usuario mientras Render despierta (toma ~40 seg)
-          if (intentos === 2) setMensajeCarga("Despertando conexión segura, por favor espera...");
-          if (intentos === 5) setMensajeCarga("Preparando el directorio de profesionales...");
-          if (intentos === 8) setMensajeCarga("Casi listo, sincronizando tarjetas...");
-          
-          // Reintentar cada 4 segundos
+          if (intentos === 2) setMensajeCarga("Despertando conexión segura...");
           setTimeout(() => cargarDirectorio(intentos + 1), 4000);
         } else if (isMounted) {
-          // Falla silenciosa si no despierta después de casi un minuto
-          console.error("Error definitivo de conexión backend:", err);
           setProfesionales([]);
           setCargando(false);
         }
       }
     };
-
     cargarDirectorio();
-
     return () => { isMounted = false; };
   }, []);
 
@@ -109,13 +100,15 @@ function Directorio() {
     })
     .sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
-  const handleCardClick = (slug) => {
-    if (isLoggedIn) {
-      navigate(`/perfil/${slug}`);
-    } else {
-      setPendingSlug(slug);
-      setAuthModalOpen(true);
-    }
+  const handleLogout = () => {
+    localStorage.removeItem('spingamma_user');
+    setIsLoggedIn(false);
+    setUserName('');
+  };
+
+  const seleccionarCategoriaDesdeModal = (cat) => {
+    setActiveCategory(cat);
+    setIsCategoryModalOpen(false);
   };
 
   const handleRegisterSuccess = (formData) => {
@@ -129,16 +122,20 @@ function Directorio() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('spingamma_user');
-    setIsLoggedIn(false);
-    setUserName('');
+  const handleCardClick = (slug) => {
+    setPendingSlug(slug);
+    setAuthModalOpen(true);
   };
 
-  const seleccionarCategoriaDesdeModal = (cat) => {
-    setActiveCategory(cat);
-    setIsCategoryModalOpen(false);
-  };
+  const handleCalificar = async () => {
+    if (response.ok) {
+      setProfesional(prev => ({
+        ...prev,
+        reviews_count: (prev.reviews_count || 0) + 1,
+        rating: nuevaMedia
+      }));
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-[#1E3D51] font-sans pb-12 antialiased selection:bg-[#B95221] selection:text-white relative">
@@ -151,7 +148,6 @@ function Directorio() {
             <div className="w-10 h-10 bg-[#B95221] rounded-xl flex items-center justify-center shadow-md">
               <Briefcase className="text-white w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            {/* 🚀 MARCA ACTUALIZADA A SPINJOB */}
             <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-[#1E3D51] uppercase hidden md:block ml-3">SPINJOB</span>
           </div>
           
@@ -160,8 +156,9 @@ function Directorio() {
               <Search size={16} className="text-[#32698F] mr-1.5 sm:mr-2 flex-shrink-0" />
               <input 
                 type="text" 
+                aria-label="Buscar profesional por nombre o especialidad" 
                 placeholder="Buscar profesional..." 
-                value={searchTerm} 
+                value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)} 
                 className="w-full bg-transparent text-[#1E3D51] placeholder-gray-400 outline-none text-[13px] sm:text-base" 
               />
@@ -182,6 +179,7 @@ function Directorio() {
                 <div className="w-[1px] h-4 bg-gray-200 hidden md:block mx-1"></div>
                 <button 
                   onClick={handleLogout} 
+                  aria-label="Cerrar sesión de usuario"
                   className="flex items-center justify-center text-gray-500 hover:text-[#B95221] transition-colors p-1"
                   title="Cerrar sesión"
                 >
@@ -199,7 +197,6 @@ function Directorio() {
               </button>
             )}
           </div>
-
         </div>
       </header>
 
@@ -219,7 +216,6 @@ function Directorio() {
                 );
               })}
             </div>
-
             <button 
               onClick={() => setIsCategoryModalOpen(true)}
               className="flex flex-col items-center gap-1.5 pb-2 ml-4 flex-shrink-0 group border-l border-gray-200 pl-4"
@@ -235,64 +231,46 @@ function Directorio() {
         {cargando ? (
           <div className="text-center py-20 flex flex-col items-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#B95221] mb-4"></div>
-            {/* 🚀 MENSAJE DINÁMICO QUE CAMBIA CON EL TIEMPO */}
             <p className="text-[#1E3D51] font-bold text-lg mb-2">{mensajeCarga}</p>
-            <p className="text-gray-500 text-sm animate-pulse">Asegurando la mejor experiencia...</p>
-          </div>
-        ) : profesionales.length === 0 ? (
-          // 🚀 FALLA SILENCIOSA: Si falla todo, se muestra esto en vez del error rojo de código
-          <div className="text-center py-20 flex flex-col items-center animate-in fade-in zoom-in duration-300">
-             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6 shadow-inner border border-gray-100">
-                <Search size={40} className="text-gray-400" />
-             </div>
-             <h2 className="text-2xl font-extrabold text-[#1E3D51] mb-3">Directorio en preparación</h2>
-             <p className="text-gray-500 max-w-md mx-auto leading-relaxed">
-               No hay profesionales disponibles en este momento. Por favor, intenta actualizar la página en un minuto.
-             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredProfessionals.map((prof) => (
-              <div key={prof.id} onClick={() => handleCardClick(prof.slug)} className="group cursor-pointer flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-4 transform hover:-translate-y-1 border border-gray-100 hover:border-[#B95221]/30">
+              <Link 
+                key={prof.slug} 
+                to={isLoggedIn ? `/perfil/${prof.slug}` : "#"} // Si no está logueado, no navega
+                onClick={(e) => {
+                  if (!isLoggedIn) {
+                    e.preventDefault(); // Evita que el Link navegue
+                    handleCardClick(prof.slug); // Abre el modal
+                  }
+                }}
+                className="group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-4 transform hover:-translate-y-1 border border-gray-100 hover:border-[#B95221]/30"
+              >
                 <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-50 mb-4">
-                  <img src={prof.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.name)}&background=F8F9FA&color=1E3D51&size=256`} onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.name)}&background=F8F9FA&color=1E3D51&size=256`; }} alt={prof.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  
+                  <img 
+                    src={prof.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.name)}&background=F8F9FA&color=1E3D51&size=256`} 
+                    alt={`Foto de perfil de ${prof.name}`} // 🚀 ACCESIBILIDAD FIX
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                  />
                   {prof.verified && (
                     <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-gray-100">
                       <CheckCircle2 size={16} className="text-[#B95221]" />
                       <span className="text-xs font-bold text-[#1E3D51] uppercase tracking-wider">Verificado</span>
                     </div>
                   )}
-
                   {prof.reviews_count > 0 && (
                      <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2 py-1.5 rounded-lg flex items-center gap-1 shadow-sm border border-gray-100">
                       <Star size={14} className="fill-[#B95221] text-[#B95221]" />
                       <span className="text-sm font-bold text-gray-900">{prof.rating}</span>
-                      <span className="text-[0.65rem] font-bold text-gray-400 ml-0.5">({prof.reviews_count})</span>
                     </div>
                   )}
                 </div>
-
                 <div className="flex flex-col flex-1">
-                  <div className="flex justify-between items-start mb-1">
-                    <h3 className="font-bold text-[#1E3D51] text-xl leading-tight line-clamp-1 pr-2">{prof.name}</h3>
-                    {prof.reviews_count === 0 && (
-                      <span className="text-[0.65rem] font-bold bg-[#B95221]/10 text-[#B95221] px-2 py-0.5 rounded-full border border-[#B95221]/20">Nuevo</span>
-                    )}
-                  </div>
-                  
+                  <h3 className="font-bold text-[#1E3D51] text-xl leading-tight line-clamp-1 pr-2">{prof.name}</h3>
                   <p className="text-[#B95221] font-semibold text-sm mb-3 line-clamp-2 leading-snug">{prof.title}</p>
-                  <div className="mt-auto pt-3 border-t border-gray-100">
-                    {prof.location && (
-                      <div className="flex items-center text-gray-500 text-sm mb-2">
-                        <MapPin size={16} className="mr-1.5 flex-shrink-0 text-[#B95221]" />
-                        <span className="truncate">{prof.location}</span>
-                      </div>
-                    )}
-                    <p className="text-gray-600 text-sm line-clamp-2">{prof.description}</p>
-                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
@@ -300,78 +278,63 @@ function Directorio() {
 
       {/* CATEGORÍAS MODAL */}
       {isCategoryModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#1E3D51]/50 backdrop-blur-sm transition-opacity">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#1E3D51]/50 backdrop-blur-sm">
           <div className="absolute inset-0" onClick={() => setIsCategoryModalOpen(false)}></div>
-          <div className="bg-white w-full sm:w-[450px] sm:rounded-3xl rounded-t-3xl max-h-[85vh] flex flex-col shadow-2xl relative animate-in slide-in-from-bottom-10 sm:zoom-in duration-300">
+          <div className="bg-white w-full sm:w-[450px] sm:rounded-3xl rounded-t-3xl max-h-[85vh] flex flex-col shadow-2xl relative">
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
-              <h2 className="text-xl font-extrabold text-[#1E3D51] flex items-center gap-2">
-                <LayoutList className="text-[#B95221]" /> Explorar Categorías
-              </h2>
-              <button onClick={() => setIsCategoryModalOpen(false)} className="text-gray-400 hover:text-[#1E3D51] bg-gray-100 p-1.5 rounded-full transition-colors hover:bg-gray-200">
+              <h2 className="text-xl font-extrabold text-[#1E3D51] flex items-center gap-2">Explorar Categorías</h2>
+              <button 
+                onClick={() => setIsCategoryModalOpen(false)} 
+                aria-label="Cerrar"
+                className="text-gray-400 bg-gray-100 p-1.5 rounded-full"
+              >
                 <X size={20} />
               </button>
             </div>
             <div className="p-4 overflow-y-auto flex-1 space-y-3">
-              <button 
-                onClick={() => seleccionarCategoriaDesdeModal('Todos')}
-                className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all ${activeCategory === 'Todos' ? 'bg-orange-50 border-[#B95221] shadow-sm' : 'bg-white border-gray-100 hover:border-[#32698F]/30 hover:bg-gray-50'}`}
-              >
-                <div className={`${activeCategory === 'Todos' ? 'text-[#B95221]' : 'text-[#32698F]'}`}><LayoutGrid size={24} /></div>
-                <span className={`text-lg font-bold ${activeCategory === 'Todos' ? 'text-[#B95221]' : 'text-[#1E3D51]'}`}>Todos los Profesionales</span>
-              </button>
-
-              {dynamicCategories.map((cat, idx) => {
-                const isActive = activeCategory === cat;
-                return (
-                  <button 
-                    key={idx}
-                    onClick={() => seleccionarCategoriaDesdeModal(cat)}
-                    className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all ${isActive ? 'bg-orange-50 border-[#B95221] shadow-sm' : 'bg-white border-gray-100 hover:border-[#32698F]/30 hover:bg-gray-50'}`}
-                  >
-                    <div className={`${isActive ? 'text-[#B95221]' : 'text-[#32698F]'}`}>{getCategoryIcon(cat)}</div>
-                    <span className={`text-lg font-bold text-left ${isActive ? 'text-[#B95221]' : 'text-[#1E3D51]'}`}>{cat}</span>
-                  </button>
-                );
-              })}
+              {topBarCategories.map((cat, idx) => (
+                <button 
+                  key={idx}
+                  onClick={() => seleccionarCategoriaDesdeModal(cat)}
+                  className="w-full flex items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:bg-gray-50"
+                >
+                  <div className="text-[#32698F]">{getCategoryIcon(cat)}</div>
+                  <span className="text-lg font-bold text-[#1E3D51]">{cat}</span>
+                </button>
+              ))}
             </div>
           </div>
         </div>
       )}
-
       {/* MODAL AUTH */}
       <AuthModal 
         isOpen={authModalOpen} 
         onClose={() => setAuthModalOpen(false)} 
         onSuccess={handleRegisterSuccess} 
-        isDarkTheme={false} 
       />
       
-      {/* FOOTER */}
-      <footer className="mt-20 bg-white border-t border-gray-200 py-8 text-center flex flex-col items-center justify-center">
-        <a 
-          href="https://spingamma.com" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="group flex flex-col items-center gap-1 opacity-80 hover:opacity-100 transition-opacity"
-        >
-          <span className="text-xs text-gray-400 font-medium">Potenciado por</span>
-          <span className="font-extrabold tracking-wider text-[#1E3D51] group-hover:text-[#B95221] transition-colors">SPINJOB</span>
-        </a>
-        <p className="text-xs text-gray-400 mt-3">© {new Date().getFullYear()} Todos los derechos reservados.</p>
-      </footer>
-
       {/* PWA BANNER DE INSTALACIÓN */}
       <InstallPrompt />
     </div>
-  );
-}
+  ); // <--- Aquí termina el return
+} // <--- Aquí termina la función Directorio
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Directorio />} />
-      <Route path="/perfil/:slug" element={<Perfil />} />
-    </Routes>
+    <Suspense fallback={
+      <div 
+        className="min-h-screen flex items-center justify-center bg-[#F8F9FA]"
+        role="status" 
+        aria-label="Cargando aplicación..."
+      >
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B95221]"></div>
+      </div>
+    }>
+      <Routes>
+        <Route path="/" element={<Directorio />} />
+        <Route path="/perfil/:slug" element={<Perfil />} />
+      </Routes>
+    </Suspense>
   );
 }
 

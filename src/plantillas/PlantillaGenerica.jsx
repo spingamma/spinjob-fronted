@@ -35,6 +35,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
     return (
       <button 
         onClick={(e) => handleLinkClick(e, label, url)}
+        aria-label={`Ir a ${label}`}
         className={`flex flex-col items-center justify-center p-4 bg-white border border-gray-200 rounded-2xl transition-all group shadow-sm hover:shadow-md hover:border-[#B95221]/30 hover:-translate-y-1 ${colorClass}`}
       >
         <Icon size={28} className="mb-2 transition-transform group-hover:scale-110" />
@@ -55,7 +56,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         {/* Barra de Navegación Superior */}
         <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-start z-10">
           <button 
-            onClick={volverAtras} 
+            onClick={volverAtras}
+            aria-label="Volver al directorio"
             className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white text-[#1E3D51] border border-gray-200 transition-all shadow-md shrink-0"
           >
             <ArrowLeft size={20} />
@@ -66,6 +68,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             {isLoggedIn ? (
                <button 
                  onClick={handleLogout} 
+                 aria-label="Cerrar sesión"
                  className="flex items-center gap-2 bg-white/90 backdrop-blur-md border border-gray-200 p-1 pr-3 rounded-full hover:bg-white transition-all shadow-md group"
                  title="Cerrar sesión"
                >
@@ -77,6 +80,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             ) : (
                <button 
                  onClick={() => onProtectedAction(null)} 
+                 aria-label="Ingresar para ver más detalles"
                  className="h-10 px-4 bg-white/90 backdrop-blur-md border border-gray-200 rounded-full flex items-center justify-center hover:bg-white transition-all text-xs font-bold uppercase text-[#1E3D51] tracking-widest gap-2 shadow-md"
                >
                  <UserPlus size={16} className="text-[#B95221]"/> Ingresar
@@ -86,13 +90,15 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             {/* 🚀 BOTONES QR Y COMPARTIR ABAJO DEL LOGOUT */}
             <div className="flex gap-2 sm:gap-3">
               <button 
-                onClick={toggleQR} 
+                onClick={toggleQR}
+                aria-label="Mostrar código QR de este perfil"
                 className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white text-[#1E3D51] border border-gray-200 transition-all shadow-md"
               >
                 <QrCode size={18} />
               </button>
               <button 
-                onClick={handleShare} 
+                onClick={handleShare}
+                aria-label="Compartir este perfil"
                 className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white text-[#1E3D51] border border-gray-200 transition-all shadow-md"
               >
                 <Share2 size={18} />
@@ -110,7 +116,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               <img 
                 src={profesional.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name)}&background=F8F9FA&color=1E3D51&size=256`} 
                 onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name)}&background=F8F9FA&color=1E3D51&size=256`; }}
-                alt={profesional.name} 
+                alt={`Foto de perfil de ${profesional.name}, ${profesional.title}`} 
                 className="w-full h-full object-cover"
               />
             </div>
@@ -183,6 +189,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               href="https://spingamma.github.io/spingamma-landing/" 
               target="_blank" 
               rel="noopener noreferrer"
+              aria-label="Ir a la página de SpinGamma"
               className="group flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity"
             >
               <span className="text-xs text-gray-500 font-medium">Tecnología desarrollada por</span>
@@ -199,7 +206,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1E3D51]/50 backdrop-blur-sm transition-opacity" onClick={toggleQR}>
           <div className="bg-white border border-gray-200 rounded-3xl shadow-2xl max-w-sm w-full p-8 relative animate-in zoom-in duration-300 flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
             <button 
-              onClick={toggleQR} 
+              onClick={toggleQR}
+              aria-label="Cerrar modal de código QR"
               className="absolute top-4 right-4 text-gray-400 hover:text-[#1E3D51] transition-colors p-2 bg-gray-100 rounded-full hover:bg-gray-200"
             >
               <X size={20} />
@@ -213,13 +221,14 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
               <img 
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.href)}&color=1E3D51`} 
-                alt="QR Code" 
+                alt={`Código QR para el perfil de ${profesional.name}`} 
                 className="w-48 h-48"
               />
             </div>
             
             <button 
               onClick={handleShare}
+              aria-label="Compartir enlace de perfil"
               className="mt-8 w-full bg-[#B95221] hover:bg-[#9A4219] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
             >
               <Share2 size={18} /> Enviar enlace en su lugar
@@ -240,12 +249,14 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
                   </div>
                   <button
                       onClick={handleCalificarClick}
+                      aria-label="Calificar perfil de este profesional"
                       className="px-6 py-2.5 rounded-full bg-[#B95221] hover:bg-[#9A4219] text-white font-bold text-sm shadow-md transition-all hover:-translate-y-0.5 whitespace-nowrap flex items-center gap-1.5"
                   >
                       <Star size={16} className="fill-white" /> Calificar
                   </button>
                   <button
                       onClick={handleCerrarPanelCalificacion}
+                      aria-label="Cerrar panel de calificación"
                       className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 rounded-full transition-colors"
                       title="Cerrar"
                   >
