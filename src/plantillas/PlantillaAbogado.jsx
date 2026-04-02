@@ -5,6 +5,7 @@ import {
   Phone, MessageCircle, MapPin, Globe, Facebook, Instagram, Linkedin 
 } from 'lucide-react';
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
+import ReviewModal from '../components/ReviewModal';
 
 export default function PlantillaAbogado({ profesional, volverAtras, onProtectedAction }) {
   const [loaded, setLoaded] = useState(false);
@@ -12,7 +13,8 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
   // 🚀 Lógica de negocio centralizada
   const {
     mostrarQR, toggleQR, mostrarCalificacion, isLoggedIn, userName,
-    handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion, handleLogout
+    handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion, handleLogout,
+    mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview
   } = useAccionesPerfil(profesional, onProtectedAction);
 
   useEffect(() => {
@@ -215,6 +217,16 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
               Tecnología desarrollada por SPINGAMMA
           </a>
       </footer>
+
+      {/* Modal de Calificación */}
+      <ReviewModal 
+        isOpen={mostrarModalCalificando}
+        onClose={() => setMostrarModalCalificando(false)}
+        onSubmit={handleSubmitReview}
+        isSubmitting={isSubmittingReview}
+        calificacionPrevia={calificacionPrevia}
+        profesionalName={profesional.name}
+      />
     </div>
   );
 }

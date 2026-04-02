@@ -4,13 +4,15 @@ import {
   Facebook, Instagram, Linkedin, Globe, Github, X, CheckCircle2, Star, LogOut, UserPlus
 } from 'lucide-react';
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
+import ReviewModal from '../components/ReviewModal';
 
 export default function PlantillaGenerica({ profesional, volverAtras, onProtectedAction }) {
   
   // 🚀 EXTRAÍDO AL HOOK: Lógica centralizada
   const {
     mostrarQR, toggleQR, mostrarCalificacion, isLoggedIn, userName, handleLogout,
-    handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion
+    handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion,
+    mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview
   } = useAccionesPerfil(profesional, onProtectedAction);
 
   // 🧹 LIMPIEZA Y FORMATEO DE ENLACES
@@ -265,6 +267,18 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               </div>
           </div>
       )}
+
+      {/* ==========================================
+          MODAL DE CALIFICACIÓN (NUEVO)
+          ========================================== */}
+      <ReviewModal 
+        isOpen={mostrarModalCalificando}
+        onClose={() => setMostrarModalCalificando(false)}
+        onSubmit={handleSubmitReview}
+        isSubmitting={isSubmittingReview}
+        calificacionPrevia={calificacionPrevia}
+        profesionalName={profesional.name}
+      />
     </div>
   );
 }

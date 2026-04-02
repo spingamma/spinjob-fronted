@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { LogOut, UserPlus, X, Share2, QrCode, Star } from 'lucide-react';
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
+import ReviewModal from '../components/ReviewModal';
 
 export default function PlantillaInmobiliaria({ profesional, volverAtras, onProtectedAction }) {
   const [loaded, setLoaded] = useState(false);
@@ -9,7 +10,8 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
   // 🚀 EXTRAÍDO AL HOOK: Lógica de UI limpia y enfocada en diseño
   const {
     mostrarQR, toggleQR, mostrarCalificacion, isLoggedIn, userName,
-    handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion, handleLogout
+    handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion, handleLogout,
+    mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview
   } = useAccionesPerfil(profesional, onProtectedAction);
 
   // Simulador del Loader
@@ -270,6 +272,15 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
         </div>
       )}
 
+      {/* --- MODAL DE CALIFICACIÓN --- */}
+      <ReviewModal 
+        isOpen={mostrarModalCalificando}
+        onClose={() => setMostrarModalCalificando(false)}
+        onSubmit={handleSubmitReview}
+        isSubmitting={isSubmittingReview}
+        calificacionPrevia={calificacionPrevia}
+        profesionalName={profesional.name}
+      />
     </div>
   );
 }
