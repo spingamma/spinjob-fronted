@@ -73,16 +73,15 @@ function Perfil() {
   // 🛡️ MANEJADOR DE ENLACES PROTEGIDOS
   // ==========================================
   const handleProtectedAction = (url) => {
-    if (!url) return;
-    
     if (isLoggedIn) {
+      if (!url) return;
       if (url.startsWith('tel:') || url.startsWith('mailto:')) {
         window.location.href = url;
       } else {
         window.open(url, '_blank', 'noopener,noreferrer');
       }
     } else {
-      setPendingUrl(url);
+      setPendingUrl(url || null);
       setAuthModalOpen(true);
     }
   };

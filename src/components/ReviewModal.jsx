@@ -65,7 +65,7 @@ export default function ReviewModal({
   const isEditing = !!calificacionPrevia;
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-[#1E3D51]/60 backdrop-blur-md transition-opacity">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-[#1E3D51]/60 backdrop-blur-md transition-opacity" onClick={onClose}>
       <div 
         className="bg-white border border-gray-100 rounded-[2rem] shadow-2xl w-full max-w-lg relative animate-in zoom-in-95 duration-300 overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
@@ -75,10 +75,11 @@ export default function ReviewModal({
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay"></div>
           
           <button 
+            type="button"
             onClick={onClose}
             disabled={isSubmitting}
             aria-label="Cerrar modal de calificación"
-            className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm disabled:opacity-50"
+            className="absolute top-4 right-4 z-20 text-white/80 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm disabled:opacity-50"
           >
             <X size={20} />
           </button>

@@ -1,11 +1,11 @@
 // Archivo: src/App.jsx
-import { useState, useEffect, useMemo, Suspense, lazy } from 'react';
+import { useState, useEffect, useMemo, Suspense, lazy, useRef, useCallback } from 'react';
 // 🚀 CORRECCIÓN: Agregamos Link aquí para que no de error
 import { Routes, Route, useNavigate, Link } from 'react-router-dom'; 
 import { 
   Search, Briefcase, Scale, Stethoscope, Calculator, 
   PenTool, Laptop, MapPin, CheckCircle2, LayoutGrid, Home, Brain, UserPlus, X, Star, LogOut,
-  LayoutList
+  LayoutList, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import AuthModal from './components/AuthModal';
 import InstallPrompt from './components/InstallPrompt';
@@ -36,7 +36,6 @@ function Directorio() {
   const [cargando, setCargando] = useState(true);
   const [mensajeCarga, setMensajeCarga] = useState("Cargando directorio SPINJOB...");
   const navigate = useNavigate();
-
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -89,6 +88,29 @@ function Directorio() {
   }, [profesionales]);
 
   const topBarCategories = ['Todos', ...dynamicCategories];
+
+  const carouselRef = useRef(null);
+
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const updateScrollButtons = useCallback(() => {
+    if (carouselRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Timeout to allow DOM layout to render sizes properly
+    const timer = setTimeout(updateScrollButtons, 100);
+    window.addEventListener('resize', updateScrollButtons);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateScrollButtons);
+    };
+  }, [updateScrollButtons, dynamicCategories]);
 
   const filteredProfessionals = profesionales
     .filter(p => {
@@ -202,10 +224,37 @@ function Directorio() {
 
       {/* BARRA DE CATEGORÍAS */}
       <div className="bg-white shadow-sm sticky top-16 md:top-20 z-30 pt-4 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between pb-1">
-            <div className="flex space-x-5 overflow-x-auto scrollbar-hide flex-1">
-              {topBarCategories.slice(0, 4).map((cat) => {
+        <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between pb-1 relative">
+            
+            {/* BOTÓN ESTÁTICO 'TODOS' */}
+            <button 
+              onClick={() => setActiveCategory('Todos')} 
+              className="flex flex-col items-center gap-1.5 pb-2 pr-2 sm:pr-4 border-r border-gray-200 flex-shrink-0 group relative"
+            >
+              <div className={`transition-colors duration-300 ${activeCategory === 'Todos' ? 'text-[#B95221]' : 'text-[#32698F] group-hover:text-[#1E3D51]'}`}>{getCategoryIcon('Todos')}</div>
+              <span className={`text-[0.8rem] font-medium transition-colors duration-300 ${activeCategory === 'Todos' ? 'text-[#1E3D51] font-bold' : 'text-gray-500 group-hover:text-[#1E3D51]'}`}>Todos</span>
+              {activeCategory === 'Todos' && <div className="absolute bottom-0 left-0 right-2 sm:right-4 h-[3px] bg-[#B95221] rounded-t-md"></div>}
+            </button>
+
+            {/* BOTÓN SCROLL IZQ (MÓVIL) */}
+            <button 
+              onClick={() => carouselRef.current?.scrollBy({ left: -150, behavior: 'smooth' })}
+              disabled={!canScrollLeft}
+              className={`md:hidden flex items-center justify-center p-1 rounded-full z-10 bg-white border border-gray-100 mx-1 flex-shrink-0 transition-all duration-300
+                ${canScrollLeft ? 'text-[#B95221] hover:bg-gray-50 shadow-[0_0_8px_rgba(0,0,0,0.1)] cursor-pointer hover:scale-105' : 'text-gray-300 opacity-40 cursor-not-allowed shadow-none'}
+              `}
+            >
+              <ChevronLeft size={16} />
+            </button>
+
+            {/* CONTENEDOR CARRUSEL */}
+            <div 
+              ref={carouselRef} 
+              onScroll={updateScrollButtons}
+              className="flex space-x-5 overflow-x-auto scrollbar-hide flex-1 px-2 sm:px-4 scroll-smooth"
+            >
+              {dynamicCategories.map((cat) => {
                 const isActive = activeCategory === cat;
                 return (
                   <button key={cat} onClick={() => setActiveCategory(cat)} className="flex flex-col items-center min-w-max gap-1.5 pb-2 relative group">
@@ -216,9 +265,22 @@ function Directorio() {
                 );
               })}
             </div>
+
+            {/* BOTÓN SCROLL DER (MÓVIL) */}
+            <button 
+              onClick={() => carouselRef.current?.scrollBy({ left: 150, behavior: 'smooth' })}
+              disabled={!canScrollRight}
+              className={`md:hidden flex items-center justify-center p-1 rounded-full z-10 bg-white border border-gray-100 mx-1 flex-shrink-0 transition-all duration-300
+                ${canScrollRight ? 'text-[#B95221] hover:bg-gray-50 shadow-[0_0_8px_rgba(0,0,0,0.1)] cursor-pointer hover:scale-105' : 'text-gray-300 opacity-40 cursor-not-allowed shadow-none'}
+              `}
+            >
+              <ChevronRight size={16} />
+            </button>
+
+            {/* BOTÓN ESTÁTICO 'MÁS' */}
             <button 
               onClick={() => setIsCategoryModalOpen(true)}
-              className="flex flex-col items-center gap-1.5 pb-2 ml-4 flex-shrink-0 group border-l border-gray-200 pl-4"
+              className="flex flex-col items-center gap-1.5 pb-2 flex-shrink-0 group border-l border-gray-200 pl-2 sm:pl-4 relative"
             >
               <div className="text-[#B95221] group-hover:scale-110 transition-transform bg-[#B95221]/10 p-1.5 rounded-lg"><LayoutList size={20} /></div>
               <span className="text-[0.75rem] font-bold text-[#B95221]">Más</span>
