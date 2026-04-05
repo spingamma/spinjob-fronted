@@ -70,18 +70,20 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+      const token = localStorage.getItem('spingamma_token');
 
       fetch(`${API_URL}/profesionales/${profesional.slug}/interaccion`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
-          user_phone: userObj.celular,
-          user_name: userName,
           platform: platformName
         })
       }).catch(err => console.error("Error silencioso registrando métrica:", err));
     } catch (error) {}
-  }, [profesional, userObj, userName]);
+  }, [profesional, userObj]);
 
   const handleLinkClick = useCallback((e, platformName, url) => {
     e.preventDefault();
@@ -129,7 +131,12 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
       // (por si el admin ya lo aprobó pero el frontend no refrescó su sesión)
       if (!isVerifiedStrict) {
         // Asumimos un endpoint rápido de status del usuario
-        const verifyRes = await fetch(`${API_URL}/usuarios/status?user_phone=${userObj.celular}`);
+        const token = localStorage.getItem('spingamma_token');
+        const verifyRes = await fetch(`${API_URL}/usuarios/status`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (verifyRes.ok) {
           const verifyData = await verifyRes.json();
           if (verifyData.is_verified === true || verifyData.is_verified === "true" || verifyData.is_verified === 1) {
@@ -150,7 +157,12 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
       }
 
       // 2. Si pasamos hasta aquí, el usuario ESTÁ VERIFICADO (ya sea en localStorage o porque el endpoint lo confirmó)
-      const res = await fetch(`${API_URL}/profesionales/${profesional.slug}/resenas/me?user_phone=${userObj.celular}`);
+      const token = localStorage.getItem('spingamma_token');
+      const res = await fetch(`${API_URL}/profesionales/${profesional.slug}/resenas/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (res.ok) {
         const data = await res.json();
         setCalificacionPrevia(data.rating ? data : null);
@@ -178,10 +190,9 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+      const token = localStorage.getItem('spingamma_token');
       
       const formData = new FormData();
-      formData.append('user_phone', userObj.celular);
-      formData.append('user_name', userObj.nombre);
       formData.append('rating', rating);
       if (description) formData.append('descripcion', description);
       if (imageFile) formData.append('image', imageFile);
@@ -192,6 +203,9 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
       
       const res = await fetch(endpoint, {
         method,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData,
       });
       

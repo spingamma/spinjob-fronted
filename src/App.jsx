@@ -283,7 +283,7 @@ function Directorio() {
               className="flex flex-col items-center gap-1.5 pb-2 flex-shrink-0 group border-l border-gray-200 pl-2 sm:pl-4 relative"
             >
               <div className="text-[#B95221] group-hover:scale-110 transition-transform bg-[#B95221]/10 p-1.5 rounded-lg"><LayoutList size={20} /></div>
-              <span className="text-[0.75rem] font-bold text-[#B95221]">Más</span>
+              <span className="text-[0.75rem] font-bold text-[#B95221]">Menu</span>
             </button>
           </div>
         </div>
