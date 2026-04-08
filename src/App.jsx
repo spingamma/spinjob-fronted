@@ -1,17 +1,19 @@
 // Archivo: src/App.jsx
 import { useState, useEffect, useMemo, Suspense, lazy, useRef, useCallback } from 'react';
-// 🚀 CORRECCIÓN: Agregamos Link aquí para que no de error
 import { Routes, Route, useNavigate, Link } from 'react-router-dom'; 
 import { 
   Search, Briefcase, Scale, Stethoscope, Calculator, 
   PenTool, Laptop, MapPin, CheckCircle2, LayoutGrid, Home, Brain, UserPlus, X, Star, LogOut,
-  LayoutList, ChevronLeft, ChevronRight
+  LayoutList, ChevronLeft, ChevronRight, ChevronDown, Building, Shield
 } from 'lucide-react';
 import AuthModal from './components/AuthModal';
 import InstallPrompt from './components/InstallPrompt';
 
-// Lazy load Perfil
+// Lazy load de Vistas
 const Perfil = lazy(() => import('./Perfil'));  
+const CrearNegocio = lazy(() => import('./CrearNegocio'));
+const MisNegocios = lazy(() => import('./MisNegocios'));
+const AdminPanel = lazy(() => import('./AdminPanel'));
 
 const normalizeText = (text) => {
   if (!text) return '';
@@ -36,10 +38,16 @@ function Directorio() {
   const [cargando, setCargando] = useState(true);
   const [mensajeCarga, setMensajeCarga] = useState("Cargando directorio SPINJOB...");
   const navigate = useNavigate();
+  
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
+  // Filtros Avanzados
+  const [activeLocation, setActiveLocation] = useState('Todas');
+  const [activeRating, setActiveRating] = useState('Todos');
+
+  // Estados de Autenticación
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
   const [userName, setUserName] = useState(() => {
     const stored = localStorage.getItem('spingamma_user');
@@ -49,8 +57,18 @@ function Directorio() {
     return '';
   });
   
+  // NUEVO: Estado para saber si es Admin
+  const [isAdmin, setIsAdmin] = useState(() => {
+    const stored = localStorage.getItem('spingamma_user');
+    if (stored) {
+      try { return JSON.parse(stored).is_admin === true; } catch(e) { return false; }
+    }
+    return false;
+  });
+  
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingSlug, setPendingSlug] = useState(null);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -67,7 +85,6 @@ function Directorio() {
           setCargando(false);
         }
       } catch (err) {
-        console.warn(`Intento ${intentos + 1} fallido...`, err);
         if (intentos < 12 && isMounted) {
           if (intentos === 2) setMensajeCarga("Despertando conexión segura...");
           setTimeout(() => cargarDirectorio(intentos + 1), 4000);
@@ -89,6 +106,12 @@ function Directorio() {
 
   const topBarCategories = ['Todos', ...dynamicCategories];
 
+  const uniqueLocations = useMemo(() => {
+    const locationsFromDB = profesionales.map(p => p.location).filter(Boolean);
+    const unique = [...new Set(locationsFromDB)].sort();
+    return ['Todas', ...unique];
+  }, [profesionales]);
+
   const carouselRef = useRef(null);
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -103,7 +126,6 @@ function Directorio() {
   }, []);
 
   useEffect(() => {
-    // Timeout to allow DOM layout to render sizes properly
     const timer = setTimeout(updateScrollButtons, 100);
     window.addEventListener('resize', updateScrollButtons);
     return () => {
@@ -118,7 +140,14 @@ function Directorio() {
       const searchNormalized = normalizeText(searchTerm);
       const matchSearch = normalizeText(p.name).includes(searchNormalized) || 
                           normalizeText(p.title).includes(searchNormalized);
-      return matchCategory && matchSearch;
+      const matchLocation = activeLocation === 'Todas' || p.location === activeLocation;
+      
+      let matchRating = true;
+      if (activeRating === '5 Estrellas') matchRating = (p.rating || 0) >= 5;
+      else if (activeRating === '4+ Estrellas') matchRating = (p.rating || 0) >= 4;
+      else if (activeRating === '3+ Estrellas') matchRating = (p.rating || 0) >= 3;
+
+      return matchCategory && matchSearch && matchLocation && matchRating;
     })
     .sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
@@ -126,6 +155,7 @@ function Directorio() {
     localStorage.removeItem('spingamma_user');
     setIsLoggedIn(false);
     setUserName('');
+    setIsAdmin(false);
   };
 
   const seleccionarCategoriaDesdeModal = (cat) => {
@@ -137,6 +167,8 @@ function Directorio() {
     localStorage.setItem('spingamma_user', JSON.stringify(formData));
     setIsLoggedIn(true);
     setUserName(formData.nombre);
+    // NUEVO: Leemos si el backend nos dijo que es admin
+    setIsAdmin(formData.is_admin === true);
     setAuthModalOpen(false);
     if (pendingSlug) {
       navigate(`/perfil/${pendingSlug}`);
@@ -148,16 +180,6 @@ function Directorio() {
     setPendingSlug(slug);
     setAuthModalOpen(true);
   };
-
-  const handleCalificar = async () => {
-    if (response.ok) {
-      setProfesional(prev => ({
-        ...prev,
-        reviews_count: (prev.reviews_count || 0) + 1,
-        rating: nuevaMedia
-      }));
-    }
-  }
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-[#1E3D51] font-sans pb-12 antialiased selection:bg-[#B95221] selection:text-white relative">
@@ -178,7 +200,7 @@ function Directorio() {
               <Search size={16} className="text-[#32698F] mr-1.5 sm:mr-2 flex-shrink-0" />
               <input 
                 type="text" 
-                aria-label="Buscar profesional por nombre o especialidad" 
+                aria-label="Buscar profesional" 
                 placeholder="Buscar profesional..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)} 
@@ -187,28 +209,68 @@ function Directorio() {
             </div>
           </div>
 
-          <div className="flex items-center flex-shrink-0">
+          {/* ZONA DE USUARIO / MENÚ DESPLEGABLE */}
+          <div className="flex items-center flex-shrink-0 relative">
             {isLoggedIn ? (
-              <div className="flex items-center gap-1.5 sm:gap-2 bg-white border border-gray-200 py-1 sm:py-1.5 px-1.5 sm:px-3 rounded-full shadow-sm">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#B95221] flex items-center justify-center shadow-inner flex-shrink-0">
-                  <span className="text-white font-bold text-xs sm:text-sm">
-                    {userName ? userName.charAt(0).toUpperCase() : 'U'}
-                  </span>
+              <>
+                {isUserMenuOpen && (
+                  <div className="fixed inset-0 z-40" onClick={() => setIsUserMenuOpen(false)}></div>
+                )}
+
+                <div className="relative z-50">
+                  <button 
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center gap-1.5 sm:gap-2 bg-white hover:bg-gray-50 border border-gray-200 py-1 sm:py-1.5 px-1.5 sm:px-3 rounded-full shadow-sm transition-all"
+                  >
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#B95221] flex items-center justify-center shadow-inner flex-shrink-0">
+                      <span className="text-white font-bold text-xs sm:text-sm">
+                        {userName ? userName.charAt(0).toUpperCase() : 'U'}
+                      </span>
+                    </div>
+                    <span className="text-sm text-gray-600 hidden lg:block mr-1 truncate max-w-[100px]">
+                      Hola, <strong className="text-[#1E3D51] font-semibold">{userName.split(' ')[0]}</strong>
+                    </span>
+                    <ChevronDown size={16} className={`text-gray-400 transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* MENÚ FLOTANTE */}
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="p-2 space-y-1">
+                        
+                        <Link 
+                          to="/mis-negocios" 
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-[#1E3D51] hover:bg-orange-50 hover:text-[#B95221] rounded-xl transition-colors"
+                        >
+                          <Building size={18} /> Mis Negocios
+                        </Link>
+                        
+                        {/* NUEVO: ESTE BOTÓN AHORA SOLO SE RENDERIZA SI ES ADMIN */}
+                        {isAdmin && (
+                          <Link 
+                            to="/admin" 
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                          >
+                            <Shield size={18} /> Panel Admin
+                          </Link>
+                        )}
+
+                        <div className="h-[1px] bg-gray-100 my-1"></div>
+
+                        <button 
+                          onClick={() => { handleLogout(); setIsUserMenuOpen(false); }} 
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-50 hover:text-gray-700 rounded-xl transition-colors"
+                        >
+                          <LogOut size={18} /> Cerrar sesión
+                        </button>
+
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <span className="text-sm text-gray-600 hidden lg:block mr-1 truncate max-w-[100px]">
-                  Hola, <strong className="text-[#1E3D51] font-semibold">{userName.split(' ')[0]}</strong>
-                </span>
-                <div className="w-[1px] h-4 bg-gray-200 hidden md:block mx-1"></div>
-                <button 
-                  onClick={handleLogout} 
-                  aria-label="Cerrar sesión de usuario"
-                  className="flex items-center justify-center text-gray-500 hover:text-[#B95221] transition-colors p-1"
-                  title="Cerrar sesión"
-                >
-                  <LogOut size={18} />
-                  <span className="hidden md:block ml-1.5 text-sm">Salir</span>
-                </button>
-              </div>
+              </>
             ) : (
               <button 
                 onClick={() => setAuthModalOpen(true)} 
@@ -227,7 +289,6 @@ function Directorio() {
         <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between pb-1 relative">
             
-            {/* BOTÓN ESTÁTICO 'TODOS' */}
             <button 
               onClick={() => setActiveCategory('Todos')} 
               className="flex flex-col items-center gap-1.5 pb-2 pr-2 sm:pr-4 border-r border-gray-200 flex-shrink-0 group relative"
@@ -237,7 +298,6 @@ function Directorio() {
               {activeCategory === 'Todos' && <div className="absolute bottom-0 left-0 right-2 sm:right-4 h-[3px] bg-[#B95221] rounded-t-md"></div>}
             </button>
 
-            {/* BOTÓN SCROLL IZQ (MÓVIL) */}
             <button 
               onClick={() => carouselRef.current?.scrollBy({ left: -150, behavior: 'smooth' })}
               disabled={!canScrollLeft}
@@ -248,7 +308,6 @@ function Directorio() {
               <ChevronLeft size={16} />
             </button>
 
-            {/* CONTENEDOR CARRUSEL */}
             <div 
               ref={carouselRef} 
               onScroll={updateScrollButtons}
@@ -266,7 +325,6 @@ function Directorio() {
               })}
             </div>
 
-            {/* BOTÓN SCROLL DER (MÓVIL) */}
             <button 
               onClick={() => carouselRef.current?.scrollBy({ left: 150, behavior: 'smooth' })}
               disabled={!canScrollRight}
@@ -277,7 +335,6 @@ function Directorio() {
               <ChevronRight size={16} />
             </button>
 
-            {/* BOTÓN ESTÁTICO 'MÁS' */}
             <button 
               onClick={() => setIsCategoryModalOpen(true)}
               className="flex flex-col items-center gap-1.5 pb-2 flex-shrink-0 group border-l border-gray-200 pl-2 sm:pl-4 relative"
@@ -289,7 +346,36 @@ function Directorio() {
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 flex flex-wrap items-center justify-end gap-3">
+        <div className="flex items-center bg-white border border-gray-200 rounded-xl px-3 py-1.5 shadow-sm focus-within:border-[#B95221] focus-within:ring-1 focus-within:ring-[#B95221] transition-all">
+          <MapPin size={16} className="text-[#32698F] mr-2" />
+          <select 
+            value={activeLocation}
+            onChange={(e) => setActiveLocation(e.target.value)}
+            className="bg-transparent text-sm text-[#1E3D51] font-medium outline-none cursor-pointer"
+          >
+            {uniqueLocations.map(loc => (
+              <option key={loc} value={loc}>{loc === 'Todas' ? 'Todas las ciudades' : loc}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex items-center bg-white border border-gray-200 rounded-xl px-3 py-1.5 shadow-sm focus-within:border-[#B95221] focus-within:ring-1 focus-within:ring-[#B95221] transition-all">
+          <Star size={16} className="text-[#F67927] mr-2" />
+          <select 
+            value={activeRating}
+            onChange={(e) => setActiveRating(e.target.value)}
+            className="bg-transparent text-sm text-[#1E3D51] font-medium outline-none cursor-pointer"
+          >
+            <option value="Todos">Cualquier calificación</option>
+            <option value="5 Estrellas">Solo 5 Estrellas</option>
+            <option value="4+ Estrellas">4 o más Estrellas</option>
+            <option value="3+ Estrellas">3 o más Estrellas</option>
+          </select>
+        </div>
+      </div>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
         {cargando ? (
           <div className="text-center py-20 flex flex-col items-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#B95221] mb-4"></div>
@@ -300,11 +386,11 @@ function Directorio() {
             {filteredProfessionals.map((prof) => (
               <Link 
                 key={prof.slug} 
-                to={isLoggedIn ? `/perfil/${prof.slug}` : "#"} // Si no está logueado, no navega
+                to={isLoggedIn ? `/perfil/${prof.slug}` : "#"}
                 onClick={(e) => {
                   if (!isLoggedIn) {
-                    e.preventDefault(); // Evita que el Link navegue
-                    handleCardClick(prof.slug); // Abre el modal
+                    e.preventDefault();
+                    handleCardClick(prof.slug);
                   }
                 }}
                 className="group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-4 transform hover:-translate-y-1 border border-gray-100 hover:border-[#B95221]/30"
@@ -312,15 +398,15 @@ function Directorio() {
                 <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-50 mb-4">
                   <img 
                     src={prof.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.name)}&background=F8F9FA&color=1E3D51&size=256`} 
-                    alt={`Foto de perfil de ${prof.name}`} // 🚀 ACCESIBILIDAD FIX
+                    alt={`Foto de perfil de ${prof.name}`}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                   />
-                  {prof.verified && (
+                  {/*prof.verified && (
                     <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-gray-100">
                       <CheckCircle2 size={16} className="text-[#B95221]" />
                       <span className="text-xs font-bold text-[#1E3D51] uppercase tracking-wider">Verificado</span>
                     </div>
-                  )}
+                */}
                   {prof.reviews_count > 0 && (
                      <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2 py-1.5 rounded-lg flex items-center gap-1 shadow-sm border border-gray-100">
                       <Star size={14} className="fill-[#B95221] text-[#B95221]" />
@@ -338,7 +424,6 @@ function Directorio() {
         )}
       </main>
 
-      {/* CATEGORÍAS MODAL */}
       {isCategoryModalOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#1E3D51]/50 backdrop-blur-sm">
           <div className="absolute inset-0" onClick={() => setIsCategoryModalOpen(false)}></div>
@@ -368,18 +453,17 @@ function Directorio() {
           </div>
         </div>
       )}
-      {/* MODAL AUTH */}
+      
       <AuthModal 
         isOpen={authModalOpen} 
         onClose={() => setAuthModalOpen(false)} 
         onSuccess={handleRegisterSuccess} 
       />
       
-      {/* PWA BANNER DE INSTALACIÓN */}
       <InstallPrompt />
     </div>
-  ); // <--- Aquí termina el return
-} // <--- Aquí termina la función Directorio
+  );
+}
 
 function App() {
   return (
@@ -395,6 +479,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Directorio />} />
         <Route path="/perfil/:slug" element={<Perfil />} />
+        <Route path="/crear-negocio" element={<CrearNegocio />} />
+        <Route path="/mis-negocios" element={<MisNegocios />} />
+        <Route path="/admin" element={<AdminPanel />} />
       </Routes>
     </Suspense>
   );

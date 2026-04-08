@@ -127,30 +127,39 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     let isVerifiedStrict = userObj?.is_verified === true || userObj?.is_verified === "true" || userObj?.is_verified === "True" || userObj?.is_verified === 1;
 
     try {
-      // 1. Si en el localStorage dice que no está verificado, le preguntamos directo al Backend 
-      // (por si el admin ya lo aprobó pero el frontend no refrescó su sesión)
       if (!isVerifiedStrict) {
-        // Asumimos un endpoint rápido de status del usuario
         const token = localStorage.getItem('spingamma_token');
+        
+        // VALIDACIÓN 1: Comprobar si realmente tenemos token para consultar
+        if (!token) {
+          console.error("Fallo de Frontend: No existe 'spingamma_token' en LocalStorage. El registro no devolvió token.");
+          goToWhatsApp();
+          return;
+        }
+
         const verifyRes = await fetch(`${API_URL}/usuarios/status`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
+
         if (verifyRes.ok) {
           const verifyData = await verifyRes.json();
+          console.log("Respuesta Exitosa de /usuarios/status:", verifyData); // 👈 Revisa la consola del navegador
+
+          // VALIDACIÓN 2: Comprobar el nombre de la propiedad
           if (verifyData.is_verified === true || verifyData.is_verified === "true" || verifyData.is_verified === 1) {
-            // ¡Se verificó por backend! Actualizar LocalStorage de forma sigilosa
             userObj.is_verified = true;
             localStorage.setItem('spingamma_user', JSON.stringify(userObj));
-            isVerifiedStrict = true; // Para pasar a la siguiente fase
+            isVerifiedStrict = true; 
           } else {
-            // Realmente NO verificado
+            console.warn("Fallo de Lógica: El endpoint respondió 200 OK, pero 'is_verified' no es true.", verifyData);
             goToWhatsApp();
             return;
           }
         } else {
-          // El endpoint falló o no dio datos, mandar a wsp por seguridad
+          const errorText = await verifyRes.text();
+          console.error(`Fallo de Backend: El endpoint respondió con error ${verifyRes.status}`, errorText);
           goToWhatsApp();
           return;
         }

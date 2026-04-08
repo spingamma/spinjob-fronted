@@ -9,7 +9,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
   
   const [showPassword, setShowPassword] = useState(false);
   
-  // Estados para el flujo de completar celular (Google Auth Híbrido)
   const [isCompletingPhone, setIsCompletingPhone] = useState(false);
   const [tempToken, setTempToken] = useState(null);
   const [tempUserData, setTempUserData] = useState(null);
@@ -35,7 +34,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
 
   if (!isOpen) return null;
 
-  // ----- INICIO SESIÓN CON GOOGLE (ID Token / credential JWT) -----
   const handleGoogleSuccess = async (credentialResponse) => {
     setIsLoading(true);
     setApiError('');
@@ -48,18 +46,17 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Error en validación con Google.');
       
-      // El servidor siempre nos da un access_token
       localStorage.setItem('spingamma_token', data.access_token);
       
-      // Regla de Negocio: Si no tiene celular, forzamos completarlo
       if (!data.celular) {
         setTempToken(data.access_token);
-        setTempUserData({ nombre: data.nombre });
+        // NUEVO: Guardamos el estado de admin
+        setTempUserData({ nombre: data.nombre, is_admin: data.is_admin || false });
         setIsCompletingPhone(true);
       } else {
-        // Ya tenía cuenta completa
-        localStorage.setItem('spingamma_user', JSON.stringify({ nombre: data.nombre, celular: data.celular }));
-        onSuccess({ nombre: data.nombre, celular: data.celular });
+        // NUEVO: Guardamos el estado de admin
+        localStorage.setItem('spingamma_user', JSON.stringify({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false }));
+        onSuccess({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false });
       }
     } catch (err) {
       setApiError(err.message);
@@ -118,12 +115,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || 'Ocurrió un error inesperado.');
 
-      // Login/Register exitoso, guardar token si lo devuelve (Login normal lo devuelve, Registro depende de tu API)
       if (data.access_token) {
         localStorage.setItem('spingamma_token', data.access_token);
       }
       
-      onSuccess({ nombre: data.nombre, celular: data.celular });
+      // NUEVO: Pasamos el estado de admin
+      onSuccess({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false });
     } catch (error) {
       setApiError(error.message);
     } finally {
@@ -149,10 +146,10 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Error al completar tu celular.');
 
-      // Exitoso. Finalizar flujo de Google.
-      const celularGuardado = formData.celular; // O si el backend lo devuelve, usarlo = data.phone
-      localStorage.setItem('spingamma_user', JSON.stringify({ nombre: tempUserData.nombre, celular: celularGuardado }));
-      onSuccess({ nombre: tempUserData.nombre, celular: celularGuardado });
+      const celularGuardado = formData.celular; 
+      // NUEVO: Pasamos el estado de admin
+      localStorage.setItem('spingamma_user', JSON.stringify({ nombre: tempUserData.nombre, celular: celularGuardado, is_admin: tempUserData.is_admin }));
+      onSuccess({ nombre: tempUserData.nombre, celular: celularGuardado, is_admin: tempUserData.is_admin });
     } catch (error) {
       setApiError(error.message);
     } finally {
@@ -160,7 +157,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
     }
   };
 
-  // Clases dinámicas basadas en el tema
   const bgOverlay = isDarkTheme ? 'bg-[#152a38]/90' : 'bg-[#1E3D51]/80';
   const bgModal = isDarkTheme ? 'bg-[#1E3D51] border-[#32698F]' : 'bg-white border-gray-200';
   const textTitle = isDarkTheme ? 'text-white' : 'text-[#1E3D51]';
@@ -203,7 +199,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
           </p>
         </div>
 
-        {/* Formulario Completa tu Celular */}
         {isCompletingPhone ? (
            <form onSubmit={handleCompletarCelular} className="space-y-4">
              <div>
@@ -239,13 +234,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
              </button>
            </form>
         ) : (
-          /* Formulario Normal (Auth) */
           <>
-
-
             <form onSubmit={handleSubmitNormal} className="space-y-4">
-              
-              {/* BOTÓN GOOGLE - Botón custom en español, usa GSI API directamente */}
               <button
                 type="button"
                 onClick={() => {
@@ -260,12 +250,10 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
                   });
                   window.google.accounts.id.prompt((notification) => {
                     if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                      // Si One Tap no se puede mostrar, usar popup como fallback
                       window.google.accounts.id.renderButton(
                         document.createElement('div'),
                         { type: 'standard' }
                       );
-                      // Fallback: abrir popup OAuth manualmente
                       const popup = window.open(
                         `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin)}&response_type=id_token&scope=openid%20email%20profile&nonce=${Date.now()}`,
                         'google-login',
@@ -374,7 +362,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
               </button>
             </form>
 
-            {/* Link para cambiar entre Login y Registro */}
             <p className={`text-center text-sm mt-5 ${textSub}`}>
               {isLoginMode ? (
                 <>
