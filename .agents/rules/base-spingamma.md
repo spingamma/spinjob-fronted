@@ -10,7 +10,6 @@ trigger: always_on
 * **Formato de Entrega:** Comienza CADA bloque de código con la ruta exacta: `// Archivo: src/ruta/Nombre.jsx`. PROHIBIDO usar placeholders como `// ... resto del código`. Entrega archivos completos.
 
 # 🚨 REGLA ESTRICTA DE SINCRONIZACIÓN BACKEND 🚨
-Dado que no tienes acceso al código del backend (FastAPI), si implementas un cambio en el frontend que requiere actualizar la API (ej. agregar un nuevo campo en un formulario, cambiar un JSON, o consumir un endpoint que no existe), DEBES hacer lo siguiente:
-1. Escribe el código del frontend asumiendo que el backend ya fue actualizado.
-2. Al final de tu respuesta, crea una sección llamada **"🚀 PROMPT PARA EL BACKEND"**.
-3. En esa sección, redacta un prompt TÉCNICO y LISTO PARA COPIAR, indicando qué endpoint, modelo de SQLAlchemy o esquema de Pydantic debe crear/modificar la IA del backend para soportar los cambios del frontend.
+Tienes acceso al código del backend (FastAPI) cruzando al directorio `spinjob-backend` (típicamente al mismo nivel, ej. `c:\Users\jhona\Desktop\spinjob-backend`). Si implementas un cambio en el frontend que requiere actualizar la API (ej. agregar un nuevo campo en un formulario, cambiar un JSON, o consumir un endpoint que no existe), DEBES ir de inmediato al backend y aplicar todos los cambios pertinentes allí también.
+Si el cambio es netamente en frontend y no requiere ajustes en la API, entonces no es necesario.
+NO me des un prompt para el backend; haz tú mismo ambas modificaciones (front y back) como parte de la misma tarea.
