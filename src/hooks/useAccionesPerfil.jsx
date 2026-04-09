@@ -73,18 +73,24 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
       const token = localStorage.getItem('spingamma_token');
 
-      await fetch(`${API_URL}/profesionales/${profesional.slug}/interaccion`, {
+      const response = await fetch(`${API_URL}/profesionales/${profesional.slug}/interaccion`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          platform: platformName
-        }),
+        body: JSON.stringify({ platform: platformName }),
         keepalive: true
-      }).catch(err => console.error("Error silencioso registrando métrica:", err));
-    } catch (error) {}
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        console.error(`Error ${response.status} registrando interacción (${platformName}):`, errorData);
+        throw new Error(`Fallo ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error en registrarInteraccionBackend:", error);
+    }
   }, [profesional]);
 
   const handleLinkClick = useCallback(async (e, platformName, url) => {
