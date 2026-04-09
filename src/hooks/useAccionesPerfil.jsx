@@ -113,7 +113,6 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     if (!profesional) return;
 
     if (!userObj) {
-      // Sin login no hacemos nada, o lo tratamos como no verificado
       const spingammaWhatsapp = "59164016676";
       const mensaje = `Hola SpinGamma, quiero habilitar la opci\u00f3n de calificar perfiles y que revisen que no soy un bot. Mi nombre es un usuario.`;
       const url = `https://wa.me/${spingammaWhatsapp}?text=${encodeURIComponent(mensaje)}`;
