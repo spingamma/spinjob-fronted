@@ -65,14 +65,15 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     }
   }, [profesional]);
 
-  const registrarInteraccionBackend = useCallback((platformName) => {
-    if (!userObj || !profesional) return;
+  const registrarInteraccionBackend = useCallback(async (platformName) => {
+    const freshUser = localStorage.getItem('spingamma_user');
+    if (!freshUser || !profesional) return;
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
       const token = localStorage.getItem('spingamma_token');
 
-      fetch(`${API_URL}/profesionales/${profesional.slug}/interaccion`, {
+      await fetch(`${API_URL}/profesionales/${profesional.slug}/interaccion`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -80,16 +81,17 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
         },
         body: JSON.stringify({
           platform: platformName
-        })
+        }),
+        keepalive: true
       }).catch(err => console.error("Error silencioso registrando métrica:", err));
     } catch (error) {}
-  }, [profesional, userObj]);
+  }, [profesional]);
 
-  const handleLinkClick = useCallback((e, platformName, url) => {
+  const handleLinkClick = useCallback(async (e, platformName, url) => {
     e.preventDefault();
 
     if (isLoggedIn) {
-      registrarInteraccionBackend(platformName);
+      await registrarInteraccionBackend(platformName);
       
       localStorage.setItem(pendingRateKey, 'true');
       setMostrarCalificacion(true);

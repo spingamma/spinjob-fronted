@@ -70,6 +70,39 @@ function Perfil() {
   }, [slug, API_URL]);
 
   // ==========================================
+  // 👁️ REGISTRO AUTOMÁTICO DE VISITA
+  // ==========================================
+  const registrarVisitaPerfil = async (slug, token) => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+      const response = await fetch(`${API_URL}/profesionales/${slug}/interaccion`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // Obligatorio para evitar error 401
+        },
+        body: JSON.stringify({ platform: "Visita Perfil" })
+      });
+      if (!response.ok) {
+        throw new Error(`Error registrando visita: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error al registrar interacción en el perfil:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (profesional && isLoggedIn) {
+      const token = localStorage.getItem('spingamma_token');
+      if (token && profesional.slug) {
+        registrarVisitaPerfil(profesional.slug, token);
+      }
+    }
+  }, [profesional, isLoggedIn]);
+
+  // ==========================================
   // 🛡️ MANEJADOR DE ENLACES PROTEGIDOS
   // ==========================================
   const handleProtectedAction = (url) => {
