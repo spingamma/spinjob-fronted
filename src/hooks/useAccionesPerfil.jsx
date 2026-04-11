@@ -215,7 +215,7 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
       
       // POST si es nueva, PUT si es edicion
       const method = esEdicion ? 'PUT' : 'POST';
-      const endpoint = `${API_URL}/profesionales/${profesional.slug}/resenas`;
+      const endpoint = `${API_URL}/businesses/${profesional.slug}/resenas`;
       
       const res = await fetch(endpoint, {
         method,

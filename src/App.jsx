@@ -20,6 +20,12 @@ const normalizeText = (text) => {
   return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 };
 
+const isValidValue = (val) => {
+  if (!val) return false;
+  const normalized = val.toString().trim().toLowerCase();
+  return !['n/a', 'na', 'null', 'undefined', 'ninguno', 'ninguna', '-', 'none'].includes(normalized);
+};
+
 const getCategoryIcon = (categoryName) => {
   const name = normalizeText(categoryName);
   if (name.includes('abogado') || name.includes('legal')) return <Scale size={24} />;
@@ -47,6 +53,8 @@ function Directorio() {
   const [activeRating, setActiveRating] = useState('Todos');
   const [activeSubcategory, setActiveSubcategory] = useState('Todas');
   const [openDropdown, setOpenDropdown] = useState(null); // 'category', 'location', 'rating'
+  const [catSearch, setCatSearch] = useState('');
+  const [locSearch, setLocSearch] = useState('');
 
   // Estados de Autenticación
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
@@ -100,20 +108,46 @@ function Directorio() {
   }, []);
 
   const groupedCategories = useMemo(() => {
-    const catsFromDB = [...new Set(profesionales.map(p => p.category).filter(Boolean))].sort();
+    const catsFromDB = [...new Set(profesionales.map(p => p.category).filter(isValidValue))].sort();
     return catsFromDB.map(c => {
-      const subs = [...new Set(profesionales.filter(p => p.category === c).map(p => p.subcategory).filter(Boolean))].sort();
+      const subs = [...new Set(profesionales.filter(p => p.category === c).map(p => p.subcategory).filter(isValidValue))].sort();
       return { category: c, subcategories: subs };
     });
   }, [profesionales]);
 
   const groupedLocations = useMemo(() => {
-    const statesFromDB = [...new Set(profesionales.map(p => p.state).filter(Boolean))].sort();
+    const statesFromDB = [...new Set(profesionales.map(p => p.state).filter(isValidValue))].sort();
     return statesFromDB.map(s => {
-      const neighs = [...new Set(profesionales.filter(p => p.state === s).map(p => p.neighborhood).filter(Boolean))].sort();
+      const neighs = [...new Set(profesionales.filter(p => p.state === s).map(p => p.neighborhood).filter(isValidValue))].sort();
       return { state: s, neighborhoods: neighs };
     });
   }, [profesionales]);
+
+  const filteredGroupedCategories = useMemo(() => {
+    const search = normalizeText(catSearch);
+    if (!search) return groupedCategories;
+    return groupedCategories.map(group => {
+      const matchCategory = normalizeText(group.category).includes(search);
+      const filteredSubs = group.subcategories.filter(sub => normalizeText(sub).includes(search));
+      if (matchCategory || filteredSubs.length > 0) {
+        return { ...group, subcategories: filteredSubs };
+      }
+      return null;
+    }).filter(Boolean);
+  }, [groupedCategories, catSearch]);
+
+  const filteredGroupedLocations = useMemo(() => {
+    const search = normalizeText(locSearch);
+    if (!search) return groupedLocations;
+    return groupedLocations.map(group => {
+      const matchState = normalizeText(group.state).includes(search);
+      const filteredNeighs = group.neighborhoods.filter(n => normalizeText(n).includes(search));
+      if (matchState || filteredNeighs.length > 0) {
+        return { ...group, neighborhoods: filteredNeighs };
+      }
+      return null;
+    }).filter(Boolean);
+  }, [groupedLocations, locSearch]);
 
   // Reset subcategory and neighborhood when their parents change (managed in click handlers now)
 
@@ -155,7 +189,12 @@ function Directorio() {
   }, [openDropdown]);
 
   const toggleDropdown = (id) => {
-    setOpenDropdown(openDropdown === id ? null : id);
+    const isNowOpen = openDropdown !== id;
+    setOpenDropdown(isNowOpen ? id : null);
+    if (!isNowOpen) {
+      setCatSearch('');
+      setLocSearch('');
+    }
   };
 
   const handleSelectOption = (type, value, subValue = null) => {
@@ -169,6 +208,8 @@ function Directorio() {
     }
     if (type === 'rating') setActiveRating(value);
     setOpenDropdown(null);
+    setCatSearch('');
+    setLocSearch('');
   };
 
 
@@ -297,26 +338,44 @@ function Directorio() {
       {/* BARRA DE FILTROS PREMIUM CUSTOM (2x2 Grid) */}
       <div className="bg-white/70 backdrop-blur-md sticky top-16 md:top-20 z-30 border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 md:py-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+          <div className="grid grid-cols-3 gap-2 md:gap-4">
             
             {/* Especialidad y Subespecialidad agrupada */}
             <div className="flex flex-col gap-1 relative custom-dropdown">
               <label className="text-[9px] md:text-[10px] font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">Servicio</label>
               <button 
                 onClick={() => toggleDropdown('category')}
-                className={`flex items-center bg-white border rounded-xl px-3 py-3 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none
+                className={`flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none
                   ${openDropdown === 'category' ? 'border-[#B95221] ring-1 ring-[#B95221]/30' : 'border-gray-200'}
                 `}
               >
-                <LayoutGrid size={18} className={`mr-2 flex-shrink-0 transition-colors ${openDropdown === 'category' ? 'text-[#B95221]' : 'text-[#32698F]'}`} />
-                <span className="w-full text-left text-sm md:text-sm text-[#1E3D51] font-extrabold truncate">
-                  {activeCategory === 'Todos' ? 'Cualquier Servicio' : (activeSubcategory !== 'Todas' ? activeSubcategory : activeCategory)}
+                <LayoutGrid size={14} className={`mr-1 md:mr-2 flex-shrink-0 transition-colors ${openDropdown === 'category' ? 'text-[#B95221]' : 'text-[#32698F]'}`} />
+                <span className="w-full text-left text-xs sm:text-sm text-[#1E3D51] font-extrabold truncate">
+                  {activeCategory === 'Todos' ? (
+                    <>
+                      <span className="hidden md:inline">Cualquier </span>Servicio
+                    </>
+                  ) : (activeSubcategory !== 'Todas' ? activeSubcategory : activeCategory)}
                 </span>
-                <ChevronDown size={14} className={`text-gray-400 ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'category' ? 'rotate-180 text-[#B95221]' : ''}`} />
+                <ChevronDown size={11} className={`text-gray-400 ml-0.5 md:ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'category' ? 'rotate-180 text-[#B95221]' : ''}`} />
               </button>
 
               {openDropdown === 'category' && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-2xl z-50 py-2 max-h-72 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute top-full left-0 mt-2 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-2xl z-50 py-2 w-[260px] md:w-full max-h-80 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+                  <div className="px-4 py-2 sticky top-0 bg-white/80 backdrop-blur-md z-10 border-b border-gray-50 mb-1">
+                    <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-[#B95221]/50">
+                      <Search size={14} className="text-gray-400 mr-2" />
+                      <input 
+                        type="text"
+                        placeholder="Buscar servicio..."
+                        value={catSearch}
+                        onChange={(e) => setCatSearch(e.target.value)}
+                        className="w-full bg-transparent text-sm outline-none placeholder-gray-400"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
                   <button
                     onClick={() => handleSelectOption('category', 'Todos')}
                     className={`w-full text-left px-5 py-3 text-sm font-extrabold transition-colors
@@ -325,7 +384,7 @@ function Directorio() {
                   >
                     Mostrar todas las especialidades
                   </button>
-                  {groupedCategories.map(group => (
+                  {filteredGroupedCategories.map(group => (
                     <div key={group.category} className="border-t border-gray-100 my-1 pt-2 pb-1">
                       <button
                         onClick={() => handleSelectOption('category', group.category)}
@@ -348,6 +407,11 @@ function Directorio() {
                       ))}
                     </div>
                   ))}
+                  {filteredGroupedCategories.length === 0 && (
+                    <div className="px-5 py-8 text-center text-gray-400 text-sm">
+                      No se encontraron servicios
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -357,19 +421,37 @@ function Directorio() {
               <label className="text-[9px] md:text-[10px] font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">Ubicación</label>
               <button 
                 onClick={() => toggleDropdown('location')}
-                className={`flex items-center bg-white border rounded-xl px-3 py-3 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none
+                className={`flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none
                   ${openDropdown === 'location' ? 'border-[#B95221] ring-1 ring-[#B95221]/30' : 'border-gray-200'}
                 `}
               >
-                <MapPin size={18} className={`mr-2 flex-shrink-0 transition-colors ${openDropdown === 'location' ? 'text-[#B95221]' : 'text-[#32698F]'}`} />
-                <span className="w-full text-left text-sm md:text-sm text-[#1E3D51] font-extrabold truncate">
-                  {activeState === 'Todas' ? 'Cualquier Ubicación' : (activeNeighborhood !== 'Todas' ? activeNeighborhood : activeState)}
+                <MapPin size={14} className={`mr-1 md:mr-2 flex-shrink-0 transition-colors ${openDropdown === 'location' ? 'text-[#B95221]' : 'text-[#32698F]'}`} />
+                <span className="w-full text-left text-xs sm:text-sm text-[#1E3D51] font-extrabold truncate">
+                  {activeState === 'Todas' ? (
+                    <>
+                      <span className="hidden md:inline">Cualquier </span>Ubicación
+                    </>
+                  ) : (activeNeighborhood !== 'Todas' ? activeNeighborhood : activeState)}
                 </span>
-                <ChevronDown size={14} className={`text-gray-400 ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'location' ? 'rotate-180 text-[#B95221]' : ''}`} />
+                <ChevronDown size={11} className={`text-gray-400 ml-0.5 md:ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'location' ? 'rotate-180 text-[#B95221]' : ''}`} />
               </button>
 
               {openDropdown === 'location' && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-2xl z-50 py-2 max-h-72 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-2xl z-50 py-2 w-[260px] md:w-full max-h-80 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+                  <div className="px-4 py-2 sticky top-0 bg-white/80 backdrop-blur-md z-10 border-b border-gray-50 mb-1">
+                    <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-[#B95221]/50">
+                      <Search size={14} className="text-gray-400 mr-2" />
+                      <input 
+                        type="text"
+                        placeholder="Buscar ubicación..."
+                        value={locSearch}
+                        onChange={(e) => setLocSearch(e.target.value)}
+                        className="w-full bg-transparent text-sm outline-none placeholder-gray-400"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
                   <button
                     onClick={() => handleSelectOption('location', 'Todas')}
                     className={`w-full text-left px-5 py-3 text-sm font-extrabold transition-colors
@@ -378,7 +460,7 @@ function Directorio() {
                   >
                     🌎 Toda Bolivia
                   </button>
-                  {groupedLocations.map(group => (
+                  {filteredGroupedLocations.map(group => (
                     <div key={group.state} className="border-t border-gray-100 my-1 pt-2 pb-1">
                       <button
                         onClick={() => handleSelectOption('location', group.state)}
@@ -401,6 +483,11 @@ function Directorio() {
                       ))}
                     </div>
                   ))}
+                  {filteredGroupedLocations.length === 0 && (
+                    <div className="px-5 py-8 text-center text-gray-400 text-sm">
+                      No se encontraron ubicaciones
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -410,19 +497,23 @@ function Directorio() {
               <label className="text-[9px] md:text-[10px] font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">Calificación</label>
               <button 
                 onClick={() => toggleDropdown('rating')}
-                className={`flex items-center bg-white border rounded-xl px-3 py-3 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none
+                className={`flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none
                   ${openDropdown === 'rating' ? 'border-[#B95221] ring-1 ring-[#B95221]/30' : 'border-gray-200'}
                 `}
               >
-                <Star size={18} className={`mr-2 flex-shrink-0 transition-colors ${openDropdown === 'rating' ? 'fill-[#B95221] text-[#B95221]' : 'text-[#F67927]'}`} />
-                <span className="w-full text-left text-sm md:text-sm text-[#1E3D51] font-extrabold truncate">
-                  {activeRating === 'Todos' ? 'Cualquier Calificación' : activeRating}
+                <Star size={14} className={`mr-1 md:mr-2 flex-shrink-0 transition-colors ${openDropdown === 'rating' ? 'fill-[#B95221] text-[#B95221]' : 'text-[#F67927]'}`} />
+                <span className="w-full text-left text-xs md:text-sm text-[#1E3D51] font-extrabold truncate">
+                  {activeRating === 'Todos' ? (
+                    <>
+                      <span className="hidden md:inline">Cualquier </span>Ranking
+                    </>
+                  ) : activeRating.replace(' Estrellas', '')}
                 </span>
-                <ChevronDown size={14} className={`text-gray-400 ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'rating' ? 'rotate-180 text-[#B95221]' : ''}`} />
+                <ChevronDown size={11} className={`text-gray-400 ml-0.5 md:ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'rating' ? 'rotate-180 text-[#B95221]' : ''}`} />
               </button>
 
               {openDropdown === 'rating' && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-2xl z-50 py-2 animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-2xl z-50 py-2 w-[220px] md:w-full animate-in fade-in zoom-in-95 duration-200">
                   {[
                     { label: 'Cualquiera', value: 'Todos' },
                     { label: 'Solo 5 Estrellas', value: '5 Estrellas' },
