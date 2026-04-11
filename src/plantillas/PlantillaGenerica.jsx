@@ -48,6 +48,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
 
   if (!profesional) return null;
 
+  const ubicacionTexto = [profesional.neighborhood, profesional.state, profesional.country].filter(Boolean).join(', ');
+
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-[#1E3D51] pb-24 font-sans antialiased selection:bg-[#B95221] selection:text-white relative">
       
@@ -144,10 +146,10 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               <span className="text-sm text-gray-500">({profesional.reviews_count} reseñas)</span>
             </div>
           )}
-          {profesional.location && (
+          {ubicacionTexto && (
             <div className="flex items-center gap-1.5 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm text-gray-600">
               <MapPin size={18} className="text-[#B95221]" />
-              <span className="text-sm font-medium">{profesional.location}</span>
+              <span className="text-sm font-medium">{ubicacionTexto}</span>
             </div>
           )}
           {profesional.category && (

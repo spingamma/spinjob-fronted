@@ -13,16 +13,16 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
   const [tempToken, setTempToken] = useState(null);
   const [tempUserData, setTempUserData] = useState(null);
 
-  const [formData, setFormData] = useState({ nombre: '', celular: '', password: '' });
-  const [errores, setErrores] = useState({ nombre: '', celular: '', password: '' });
+  const [formData, setFormData] = useState({ nombre: '', apellidos: '', celular: '', password: '' });
+  const [errores, setErrores] = useState({ nombre: '', apellidos: '', celular: '', password: '' });
 
   const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
   const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
   useEffect(() => {
     if (isOpen) {
-      setFormData({ nombre: '', celular: '', password: '' });
-      setErrores({ nombre: '', celular: '', password: '' });
+      setFormData({ nombre: '', apellidos: '', celular: '', password: '' });
+      setErrores({ nombre: '', apellidos: '', celular: '', password: '' });
       setApiError('');
       setIsLoginMode(true);
       setShowPassword(false);
@@ -77,9 +77,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
 
     if (!soloCelular) {
       if (!isLoginMode) {
-        const regexNombre = /^[A-Za-záéíóúÁÉÍÓÚñÑüÜ]+\s+[A-Za-záéíóúÁÉÍÓÚñÑüÜ\s]+$/;
-        if (!regexNombre.test(formData.nombre.trim())) {
-          nuevosErrores.nombre = 'Ingresa al menos tu nombre y un apellido (solo letras).';
+        if (formData.nombre.trim().length < 2) {
+          nuevosErrores.nombre = 'Ingresa tu nombre.';
+          valid = false;
+        }
+        if (formData.apellidos.trim().length < 2) {
+          nuevosErrores.apellidos = 'Ingresa tus apellidos.';
           valid = false;
         }
       }
@@ -103,7 +106,11 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
     const endpoint = isLoginMode ? '/auth/login' : '/auth/register';
     const payload = isLoginMode 
       ? { phone: formData.celular, password: formData.password }
-      : { name: formData.nombre, phone: formData.celular, password: formData.password };
+      : { 
+          name: `${formData.nombre.trim()} ${formData.apellidos.trim()}`, 
+          phone: formData.celular, 
+          password: formData.password 
+        };
 
     try {
       const response = await fetch(`${API_URL}${endpoint}`, {
@@ -282,21 +289,39 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
               </div>
 
               {!isLoginMode && (
-                <div>
-                  <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>Nombre Completo</label>
-                  <input 
-                    required 
-                    type="text" 
-                    placeholder="Ej. Ana Pérez" 
-                    value={formData.nombre} 
-                    onChange={(e) => {
-                      setFormData({...formData, nombre: e.target.value});
-                      if(errores.nombre) setErrores({...errores, nombre: ''});
-                    }} 
-                    className={`w-full px-4 py-3 rounded-xl outline-none focus:ring-1 transition-all ${inputBg} ${errores.nombre ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                    disabled={isLoading}
-                  />
-                  {errores.nombre && <p className="text-red-500 text-xs mt-1.5 font-medium">{errores.nombre}</p>}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>Nombre</label>
+                    <input 
+                      required 
+                      type="text" 
+                      placeholder="Ej. Ana" 
+                      value={formData.nombre} 
+                      onChange={(e) => {
+                        setFormData({...formData, nombre: e.target.value});
+                        if(errores.nombre) setErrores({...errores, nombre: ''});
+                      }} 
+                      className={`w-full px-4 py-3 rounded-xl outline-none focus:ring-1 transition-all ${inputBg} ${errores.nombre ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                      disabled={isLoading}
+                    />
+                    {errores.nombre && <p className="text-red-500 text-xs mt-1.5 font-medium">{errores.nombre}</p>}
+                  </div>
+                  <div>
+                    <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>Apellidos</label>
+                    <input 
+                      required 
+                      type="text" 
+                      placeholder="Ej. Pérez" 
+                      value={formData.apellidos} 
+                      onChange={(e) => {
+                        setFormData({...formData, apellidos: e.target.value});
+                        if(errores.apellidos) setErrores({...errores, apellidos: ''});
+                      }} 
+                      className={`w-full px-4 py-3 rounded-xl outline-none focus:ring-1 transition-all ${inputBg} ${errores.apellidos ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                      disabled={isLoading}
+                    />
+                    {errores.apellidos && <p className="text-red-500 text-xs mt-1.5 font-medium">{errores.apellidos}</p>}
+                  </div>
                 </div>
               )}
               

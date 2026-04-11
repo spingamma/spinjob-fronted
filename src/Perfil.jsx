@@ -30,7 +30,7 @@ function Perfil() {
 
     const obtenerPerfil = async (intentos = 0) => {
       try {
-        const res = await fetch(`${API_URL}/profesionales/${slug}`);
+        const res = await fetch(`${API_URL}/businesses/${slug}`);
         
         if (res.ok) {
           const data = await res.json();
@@ -75,7 +75,7 @@ function Perfil() {
   const registrarVisitaPerfil = async (slug, token) => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
-      const response = await fetch(`${API_URL}/profesionales/${slug}/interaccion`, {
+      const response = await fetch(`${API_URL}/businesses/${slug}/interaccion`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -164,16 +164,30 @@ function Perfil() {
 
   const volverAtras = () => navigate("/");
 
+  // Lógica para determinar la plantilla automáticamente
+  const normalizeText = (text) => text ? text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : '';
+  const esPremium = profesional?.premium === true;
+  
+  let tipoPlantilla = 'generica';
+  if (esPremium) {
+    const cat = normalizeText(profesional.category || '');
+    if (cat.includes('abogad') || cat.includes('legal') || cat.includes('derecho')) {
+      tipoPlantilla = 'abogado';
+    } else if (cat.includes('inmo') || cat.includes('casa') || cat.includes('propied')) {
+      tipoPlantilla = 'inmobiliaria';
+    }
+  }
+
   return (
     <>
       {/* RENDERIZADO DE PLANTILLAS */}
-      {slug === 'inmobiliaria-san-luis' ? (
+      {tipoPlantilla === 'inmobiliaria' ? (
         <PlantillaInmobiliaria 
           profesional={profesional} 
           volverAtras={volverAtras} 
           onProtectedAction={handleProtectedAction} 
         />
-      ) : slug === 'juan-pablo-jurado-morales' ? (
+      ) : tipoPlantilla === 'abogado' ? (
         <PlantillaAbogado 
           profesional={profesional} 
           volverAtras={volverAtras} 

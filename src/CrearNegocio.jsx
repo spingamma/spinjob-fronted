@@ -12,9 +12,8 @@ export default function CrearNegocio() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  // ESTADO EXPANDIDO CON TODOS LOS CAMPOS DEL BACKEND
   const [formData, setFormData] = useState({
-    name: '', title: '', category: '', location: '', description: '',
+    name: '', title: '', category: '', subcategory: '', country: 'Bolivia', state: '', neighborhood: '', description: '',
     genero: '', phone: '', whatsapp: '', facebook: '', instagram: '',
     linkedin: '', website: '', tiktok: '', github: '', ubicacion_url: ''
   });
@@ -43,7 +42,7 @@ export default function CrearNegocio() {
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      const response = await fetch(`${API_URL}/profesionales/`, {
+      const response = await fetch(`${API_URL}/businesses/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -141,10 +140,45 @@ export default function CrearNegocio() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>Ciudad *</label>
+                  <label className={labelClass}>Sub-especialidad (Opcional)</label>
+                  <div className={wrapperClass}>
+                    <div className="pl-4 flex items-center text-gray-400"><AlignLeft size={18} /></div>
+                    <input name="subcategory" value={formData.subcategory || ""} onChange={handleChange} placeholder="Ej. Ortodoncia, Frontend..." className={inputClass} />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>País *</label>
+                  <div className={`${wrapperClass} opacity-70`}>
+                    <div className="pl-4 flex items-center text-gray-400"><MapPin size={18} /></div>
+                    <input name="country" value={formData.country} readOnly disabled className={inputClass} />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Ciudad / Departamento *</label>
                   <div className={wrapperClass}>
                     <div className="pl-4 flex items-center text-gray-400"><MapPin size={18} /></div>
-                    <input required name="location" value={formData.location} onChange={handleChange} placeholder="Ej. La Paz, Bolivia" className={inputClass} />
+                    <select required name="state" value={formData.state} onChange={handleChange} className={`${inputClass} bg-transparent cursor-pointer`}>
+                      <option value="">Seleccionar...</option>
+                      <option value="La Paz">La Paz</option>
+                      <option value="Santa Cruz">Santa Cruz</option>
+                      <option value="Cochabamba">Cochabamba</option>
+                      <option value="Oruro">Oruro</option>
+                      <option value="Potosí">Potosí</option>
+                      <option value="Chuquisaca">Chuquisaca</option>
+                      <option value="Tarija">Tarija</option>
+                      <option value="Beni">Beni</option>
+                      <option value="Pando">Pando</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Zona / Barrio *</label>
+                  <div className={wrapperClass}>
+                    <div className="pl-4 flex items-center text-gray-400"><Map size={18} /></div>
+                    <input required name="neighborhood" value={formData.neighborhood} onChange={handleChange} placeholder="Ej. Zona Sur" className={inputClass} />
                   </div>
                 </div>
 

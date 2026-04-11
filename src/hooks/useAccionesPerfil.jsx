@@ -73,7 +73,7 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
       const token = localStorage.getItem('spingamma_token');
 
-      const response = await fetch(`${API_URL}/profesionales/${profesional.slug}/interaccion`, {
+      const response = await fetch(`${API_URL}/businesses/${profesional.slug}/interaccion`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
 
       // 2. Si pasamos hasta aquí, el usuario ESTÁ VERIFICADO (ya sea en localStorage o porque el endpoint lo confirmó)
       const token = localStorage.getItem('spingamma_token');
-      const res = await fetch(`${API_URL}/profesionales/${profesional.slug}/resenas/me`, {
+      const res = await fetch(`${API_URL}/businesses/${profesional.slug}/resenas/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

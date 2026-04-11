@@ -171,7 +171,9 @@ export default function MisNegocios() {
                     <CampoLectura label="Nombre / Marca" valor={negocioSeleccionado.name} />
                     <CampoLectura label="Especialidad" valor={negocioSeleccionado.title} />
                     <CampoLectura label="Categoría" valor={negocioSeleccionado.category} />
-                    <CampoLectura label="Ciudad" valor={negocioSeleccionado.location} />
+                    <CampoLectura label="País" valor={negocioSeleccionado.country} />
+                    <CampoLectura label="Ciudad / Departamento" valor={negocioSeleccionado.state} />
+                    <CampoLectura label="Zona / Barrio" valor={negocioSeleccionado.neighborhood} />
                     <CampoLectura label="Género" valor={negocioSeleccionado.genero} />
                   </div>
                   <div className="mt-3">

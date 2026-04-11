@@ -41,11 +41,12 @@ function Directorio() {
   
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
-  // Filtros Avanzados
-  const [activeLocation, setActiveLocation] = useState('Todas');
+  const [activeState, setActiveState] = useState('Todas');
+  const [activeNeighborhood, setActiveNeighborhood] = useState('Todas');
   const [activeRating, setActiveRating] = useState('Todos');
+  const [activeSubcategory, setActiveSubcategory] = useState('Todas');
+  const [openDropdown, setOpenDropdown] = useState(null); // 'category', 'location', 'rating'
 
   // Estados de Autenticación
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
@@ -76,7 +77,7 @@ function Directorio() {
 
     const cargarDirectorio = async (intentos = 0) => {
       try {
-        const res = await fetch(`${API_URL}/profesionales/`);
+        const res = await fetch(`${API_URL}/businesses/`);
         if (!res.ok) throw new Error("Error en red");
         
         const data = await res.json();
@@ -98,41 +99,23 @@ function Directorio() {
     return () => { isMounted = false; };
   }, []);
 
-  const dynamicCategories = useMemo(() => {
-    const categoriesFromDB = profesionales.map(p => p.category).filter(Boolean);
-    const uniqueCategories = [...new Set(categoriesFromDB)].sort();
-    return uniqueCategories;
+  const groupedCategories = useMemo(() => {
+    const catsFromDB = [...new Set(profesionales.map(p => p.category).filter(Boolean))].sort();
+    return catsFromDB.map(c => {
+      const subs = [...new Set(profesionales.filter(p => p.category === c).map(p => p.subcategory).filter(Boolean))].sort();
+      return { category: c, subcategories: subs };
+    });
   }, [profesionales]);
 
-  const topBarCategories = ['Todos', ...dynamicCategories];
-
-  const uniqueLocations = useMemo(() => {
-    const locationsFromDB = profesionales.map(p => p.location).filter(Boolean);
-    const unique = [...new Set(locationsFromDB)].sort();
-    return ['Todas', ...unique];
+  const groupedLocations = useMemo(() => {
+    const statesFromDB = [...new Set(profesionales.map(p => p.state).filter(Boolean))].sort();
+    return statesFromDB.map(s => {
+      const neighs = [...new Set(profesionales.filter(p => p.state === s).map(p => p.neighborhood).filter(Boolean))].sort();
+      return { state: s, neighborhoods: neighs };
+    });
   }, [profesionales]);
 
-  const carouselRef = useRef(null);
-
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-
-  const updateScrollButtons = useCallback(() => {
-    if (carouselRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
-    }
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(updateScrollButtons, 100);
-    window.addEventListener('resize', updateScrollButtons);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', updateScrollButtons);
-    };
-  }, [updateScrollButtons, dynamicCategories]);
+  // Reset subcategory and neighborhood when their parents change (managed in click handlers now)
 
   const filteredProfessionals = profesionales
     .filter(p => {
@@ -140,14 +123,16 @@ function Directorio() {
       const searchNormalized = normalizeText(searchTerm);
       const matchSearch = normalizeText(p.name).includes(searchNormalized) || 
                           normalizeText(p.title).includes(searchNormalized);
-      const matchLocation = activeLocation === 'Todas' || p.location === activeLocation;
+      const matchState = activeState === 'Todas' || p.state === activeState;
+      const matchNeighborhood = activeNeighborhood === 'Todas' || p.neighborhood === activeNeighborhood;
+      const matchSubcategory = activeSubcategory === 'Todas' || p.subcategory === activeSubcategory;
       
       let matchRating = true;
       if (activeRating === '5 Estrellas') matchRating = (p.rating || 0) >= 5;
       else if (activeRating === '4+ Estrellas') matchRating = (p.rating || 0) >= 4;
       else if (activeRating === '3+ Estrellas') matchRating = (p.rating || 0) >= 3;
 
-      return matchCategory && matchSearch && matchLocation && matchRating;
+      return matchCategory && matchSearch && matchState && matchNeighborhood && matchRating && matchSubcategory;
     })
     .sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
@@ -158,10 +143,35 @@ function Directorio() {
     setIsAdmin(false);
   };
 
-  const seleccionarCategoriaDesdeModal = (cat) => {
-    setActiveCategory(cat);
-    setIsCategoryModalOpen(false);
+  // Manejo de Dropdowns Custom
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (openDropdown && !event.target.closest('.custom-dropdown')) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [openDropdown]);
+
+  const toggleDropdown = (id) => {
+    setOpenDropdown(openDropdown === id ? null : id);
   };
+
+  const handleSelectOption = (type, value, subValue = null) => {
+    if (type === 'category') {
+      setActiveCategory(value);
+      setActiveSubcategory(subValue || 'Todas');
+    }
+    if (type === 'location') {
+      setActiveState(value);
+      setActiveNeighborhood(subValue || 'Todas');
+    }
+    if (type === 'rating') setActiveRating(value);
+    setOpenDropdown(null);
+  };
+
+
 
   const handleRegisterSuccess = (formData) => {
     localStorage.setItem('spingamma_user', JSON.stringify(formData));
@@ -284,94 +294,156 @@ function Directorio() {
         </div>
       </header>
 
-      {/* BARRA DE CATEGORÍAS */}
-      <div className="bg-white shadow-sm sticky top-16 md:top-20 z-30 pt-4 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between pb-1 relative">
+      {/* BARRA DE FILTROS PREMIUM CUSTOM (2x2 Grid) */}
+      <div className="bg-white/70 backdrop-blur-md sticky top-16 md:top-20 z-30 border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 md:py-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
             
-            <button 
-              onClick={() => setActiveCategory('Todos')} 
-              className="flex flex-col items-center gap-1.5 pb-2 pr-2 sm:pr-4 border-r border-gray-200 flex-shrink-0 group relative"
-            >
-              <div className={`transition-colors duration-300 ${activeCategory === 'Todos' ? 'text-[#B95221]' : 'text-[#32698F] group-hover:text-[#1E3D51]'}`}>{getCategoryIcon('Todos')}</div>
-              <span className={`text-[0.8rem] font-medium transition-colors duration-300 ${activeCategory === 'Todos' ? 'text-[#1E3D51] font-bold' : 'text-gray-500 group-hover:text-[#1E3D51]'}`}>Todos</span>
-              {activeCategory === 'Todos' && <div className="absolute bottom-0 left-0 right-2 sm:right-4 h-[3px] bg-[#B95221] rounded-t-md"></div>}
-            </button>
+            {/* Especialidad y Subespecialidad agrupada */}
+            <div className="flex flex-col gap-1 relative custom-dropdown">
+              <label className="text-[9px] md:text-[10px] font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">Servicio</label>
+              <button 
+                onClick={() => toggleDropdown('category')}
+                className={`flex items-center bg-white border rounded-xl px-3 py-3 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none
+                  ${openDropdown === 'category' ? 'border-[#B95221] ring-1 ring-[#B95221]/30' : 'border-gray-200'}
+                `}
+              >
+                <LayoutGrid size={18} className={`mr-2 flex-shrink-0 transition-colors ${openDropdown === 'category' ? 'text-[#B95221]' : 'text-[#32698F]'}`} />
+                <span className="w-full text-left text-sm md:text-sm text-[#1E3D51] font-extrabold truncate">
+                  {activeCategory === 'Todos' ? 'Cualquier Servicio' : (activeSubcategory !== 'Todas' ? activeSubcategory : activeCategory)}
+                </span>
+                <ChevronDown size={14} className={`text-gray-400 ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'category' ? 'rotate-180 text-[#B95221]' : ''}`} />
+              </button>
 
-            <button 
-              onClick={() => carouselRef.current?.scrollBy({ left: -150, behavior: 'smooth' })}
-              disabled={!canScrollLeft}
-              className={`md:hidden flex items-center justify-center p-1 rounded-full z-10 bg-white border border-gray-100 mx-1 flex-shrink-0 transition-all duration-300
-                ${canScrollLeft ? 'text-[#B95221] hover:bg-gray-50 shadow-[0_0_8px_rgba(0,0,0,0.1)] cursor-pointer hover:scale-105' : 'text-gray-300 opacity-40 cursor-not-allowed shadow-none'}
-              `}
-            >
-              <ChevronLeft size={16} />
-            </button>
-
-            <div 
-              ref={carouselRef} 
-              onScroll={updateScrollButtons}
-              className="flex space-x-5 overflow-x-auto scrollbar-hide flex-1 px-2 sm:px-4 scroll-smooth"
-            >
-              {dynamicCategories.map((cat) => {
-                const isActive = activeCategory === cat;
-                return (
-                  <button key={cat} onClick={() => setActiveCategory(cat)} className="flex flex-col items-center min-w-max gap-1.5 pb-2 relative group">
-                    <div className={`transition-colors duration-300 ${isActive ? 'text-[#B95221]' : 'text-[#32698F] group-hover:text-[#1E3D51]'}`}>{getCategoryIcon(cat)}</div>
-                    <span className={`text-[0.8rem] font-medium transition-colors duration-300 ${isActive ? 'text-[#1E3D51] font-bold' : 'text-gray-500 group-hover:text-[#1E3D51]'}`}>{cat}</span>
-                    {isActive && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#B95221] rounded-t-md"></div>}
+              {openDropdown === 'category' && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-2xl z-50 py-2 max-h-72 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+                  <button
+                    onClick={() => handleSelectOption('category', 'Todos')}
+                    className={`w-full text-left px-5 py-3 text-sm font-extrabold transition-colors
+                      ${activeCategory === 'Todos' ? 'bg-[#B95221]/10 text-[#B95221]' : 'text-[#B95221] hover:bg-gray-50'}
+                    `}
+                  >
+                    Mostrar todas las especialidades
                   </button>
-                );
-              })}
+                  {groupedCategories.map(group => (
+                    <div key={group.category} className="border-t border-gray-100 my-1 pt-2 pb-1">
+                      <button
+                        onClick={() => handleSelectOption('category', group.category)}
+                        className={`w-full text-left px-5 py-2 text-sm font-bold transition-colors
+                          ${activeCategory === group.category && activeSubcategory === 'Todas' ? 'text-[#B95221] bg-orange-50/50' : 'text-[#1E3D51] hover:bg-gray-50'}
+                        `}
+                      >
+                        {group.category}
+                      </button>
+                      {group.subcategories.map(sub => (
+                        <button
+                          key={sub}
+                          onClick={() => handleSelectOption('category', group.category, sub)}
+                          className={`w-full text-left pl-9 pr-5 py-2 text-[13px] font-medium transition-colors
+                            ${activeSubcategory === sub ? 'text-[#B95221] font-bold bg-[#B95221]/5' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}
+                          `}
+                        >
+                          • {sub}
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <button 
-              onClick={() => carouselRef.current?.scrollBy({ left: 150, behavior: 'smooth' })}
-              disabled={!canScrollRight}
-              className={`md:hidden flex items-center justify-center p-1 rounded-full z-10 bg-white border border-gray-100 mx-1 flex-shrink-0 transition-all duration-300
-                ${canScrollRight ? 'text-[#B95221] hover:bg-gray-50 shadow-[0_0_8px_rgba(0,0,0,0.1)] cursor-pointer hover:scale-105' : 'text-gray-300 opacity-40 cursor-not-allowed shadow-none'}
-              `}
-            >
-              <ChevronRight size={16} />
-            </button>
+            {/* Ubicación Agrupada */}
+            <div className="flex flex-col gap-1 relative custom-dropdown">
+              <label className="text-[9px] md:text-[10px] font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">Ubicación</label>
+              <button 
+                onClick={() => toggleDropdown('location')}
+                className={`flex items-center bg-white border rounded-xl px-3 py-3 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none
+                  ${openDropdown === 'location' ? 'border-[#B95221] ring-1 ring-[#B95221]/30' : 'border-gray-200'}
+                `}
+              >
+                <MapPin size={18} className={`mr-2 flex-shrink-0 transition-colors ${openDropdown === 'location' ? 'text-[#B95221]' : 'text-[#32698F]'}`} />
+                <span className="w-full text-left text-sm md:text-sm text-[#1E3D51] font-extrabold truncate">
+                  {activeState === 'Todas' ? 'Cualquier Ubicación' : (activeNeighborhood !== 'Todas' ? activeNeighborhood : activeState)}
+                </span>
+                <ChevronDown size={14} className={`text-gray-400 ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'location' ? 'rotate-180 text-[#B95221]' : ''}`} />
+              </button>
 
-            <button 
-              onClick={() => setIsCategoryModalOpen(true)}
-              className="flex flex-col items-center gap-1.5 pb-2 flex-shrink-0 group border-l border-gray-200 pl-2 sm:pl-4 relative"
-            >
-              <div className="text-[#B95221] group-hover:scale-110 transition-transform bg-[#B95221]/10 p-1.5 rounded-lg"><LayoutList size={20} /></div>
-              <span className="text-[0.75rem] font-bold text-[#B95221]">Menu</span>
-            </button>
+              {openDropdown === 'location' && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-2xl z-50 py-2 max-h-72 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+                  <button
+                    onClick={() => handleSelectOption('location', 'Todas')}
+                    className={`w-full text-left px-5 py-3 text-sm font-extrabold transition-colors
+                      ${activeState === 'Todas' ? 'bg-[#B95221]/10 text-[#B95221]' : 'text-[#B95221] hover:bg-gray-50'}
+                    `}
+                  >
+                    🌎 Toda Bolivia
+                  </button>
+                  {groupedLocations.map(group => (
+                    <div key={group.state} className="border-t border-gray-100 my-1 pt-2 pb-1">
+                      <button
+                        onClick={() => handleSelectOption('location', group.state)}
+                        className={`w-full text-left px-5 py-2 text-sm font-bold transition-colors
+                          ${activeState === group.state && activeNeighborhood === 'Todas' ? 'text-[#B95221] bg-orange-50/50' : 'text-[#1E3D51] hover:bg-gray-50'}
+                        `}
+                      >
+                        📍 {group.state}
+                      </button>
+                      {group.neighborhoods.map(neigh => (
+                        <button
+                          key={neigh}
+                          onClick={() => handleSelectOption('location', group.state, neigh)}
+                          className={`w-full text-left pl-9 pr-5 py-2 text-[13px] font-medium transition-colors
+                            ${activeNeighborhood === neigh ? 'text-[#B95221] font-bold bg-[#B95221]/5' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}
+                          `}
+                        >
+                          • {neigh}
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Calificación */}
+            <div className="flex flex-col gap-1 relative custom-dropdown">
+              <label className="text-[9px] md:text-[10px] font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">Calificación</label>
+              <button 
+                onClick={() => toggleDropdown('rating')}
+                className={`flex items-center bg-white border rounded-xl px-3 py-3 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none
+                  ${openDropdown === 'rating' ? 'border-[#B95221] ring-1 ring-[#B95221]/30' : 'border-gray-200'}
+                `}
+              >
+                <Star size={18} className={`mr-2 flex-shrink-0 transition-colors ${openDropdown === 'rating' ? 'fill-[#B95221] text-[#B95221]' : 'text-[#F67927]'}`} />
+                <span className="w-full text-left text-sm md:text-sm text-[#1E3D51] font-extrabold truncate">
+                  {activeRating === 'Todos' ? 'Cualquier Calificación' : activeRating}
+                </span>
+                <ChevronDown size={14} className={`text-gray-400 ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'rating' ? 'rotate-180 text-[#B95221]' : ''}`} />
+              </button>
+
+              {openDropdown === 'rating' && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-2xl z-50 py-2 animate-in fade-in zoom-in-95 duration-200">
+                  {[
+                    { label: 'Cualquiera', value: 'Todos' },
+                    { label: 'Solo 5 Estrellas', value: '5 Estrellas' },
+                    { label: '4+ Estrellas', value: '4+ Estrellas' },
+                    { label: '3+ Estrellas', value: '3+ Estrellas' }
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => handleSelectOption('rating', opt.value)}
+                      className={`w-full text-left px-5 py-3 text-sm font-bold transition-colors
+                        ${activeRating === opt.value ? 'bg-[#B95221]/10 text-[#B95221]' : 'text-gray-600 hover:bg-gray-50'}
+                      `}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
           </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 flex flex-wrap items-center justify-end gap-3">
-        <div className="flex items-center bg-white border border-gray-200 rounded-xl px-3 py-1.5 shadow-sm focus-within:border-[#B95221] focus-within:ring-1 focus-within:ring-[#B95221] transition-all">
-          <MapPin size={16} className="text-[#32698F] mr-2" />
-          <select 
-            value={activeLocation}
-            onChange={(e) => setActiveLocation(e.target.value)}
-            className="bg-transparent text-sm text-[#1E3D51] font-medium outline-none cursor-pointer"
-          >
-            {uniqueLocations.map(loc => (
-              <option key={loc} value={loc}>{loc === 'Todas' ? 'Todas las ciudades' : loc}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex items-center bg-white border border-gray-200 rounded-xl px-3 py-1.5 shadow-sm focus-within:border-[#B95221] focus-within:ring-1 focus-within:ring-[#B95221] transition-all">
-          <Star size={16} className="text-[#F67927] mr-2" />
-          <select 
-            value={activeRating}
-            onChange={(e) => setActiveRating(e.target.value)}
-            className="bg-transparent text-sm text-[#1E3D51] font-medium outline-none cursor-pointer"
-          >
-            <option value="Todos">Cualquier calificación</option>
-            <option value="5 Estrellas">Solo 5 Estrellas</option>
-            <option value="4+ Estrellas">4 o más Estrellas</option>
-            <option value="3+ Estrellas">3 o más Estrellas</option>
-          </select>
         </div>
       </div>
 
@@ -424,35 +496,7 @@ function Directorio() {
         )}
       </main>
 
-      {isCategoryModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#1E3D51]/50 backdrop-blur-sm">
-          <div className="absolute inset-0" onClick={() => setIsCategoryModalOpen(false)}></div>
-          <div className="bg-white w-full sm:w-[450px] sm:rounded-3xl rounded-t-3xl max-h-[85vh] flex flex-col shadow-2xl relative">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100">
-              <h2 className="text-xl font-extrabold text-[#1E3D51] flex items-center gap-2">Explorar Categorías</h2>
-              <button 
-                onClick={() => setIsCategoryModalOpen(false)} 
-                aria-label="Cerrar"
-                className="text-gray-400 bg-gray-100 p-1.5 rounded-full"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="p-4 overflow-y-auto flex-1 space-y-3">
-              {topBarCategories.map((cat, idx) => (
-                <button 
-                  key={idx}
-                  onClick={() => seleccionarCategoriaDesdeModal(cat)}
-                  className="w-full flex items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:bg-gray-50"
-                >
-                  <div className="text-[#32698F]">{getCategoryIcon(cat)}</div>
-                  <span className="text-lg font-bold text-[#1E3D51]">{cat}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+
       
       <AuthModal 
         isOpen={authModalOpen} 

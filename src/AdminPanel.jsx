@@ -47,8 +47,8 @@ export default function AdminPanel() {
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
     
     try {
-      // Asumiendo endpoint: @app.put("/admin/profesionales/{slug}/status")
-      const res = await fetch(`${API_URL}/admin/profesionales/${slug}/status`, {
+      // Asumiendo endpoint: @app.put("/admin/businesses/{slug}/status")
+      const res = await fetch(`${API_URL}/admin/businesses/${slug}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ export default function AdminPanel() {
                     <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded font-bold uppercase">{neg.status}</span>
                   </div>
                   <p className="text-sm font-medium text-gray-700 mb-1">Especialidad: {neg.title} | {neg.category}</p>
-                  <p className="text-sm text-gray-500 mb-3">Sede: {neg.location} | Cel: {neg.whatsapp || 'N/A'}</p>
+                  <p className="text-sm text-gray-500 mb-3">Sede: {[neg.neighborhood, neg.state, neg.country].filter(Boolean).join(', ')} | Cel: {neg.whatsapp || 'N/A'}</p>
                   <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-100">{neg.description}</p>
                 </div>
                 
