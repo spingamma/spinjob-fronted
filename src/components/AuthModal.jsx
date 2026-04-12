@@ -1,31 +1,44 @@
 // Archivo: src/components/AuthModal.jsx
-import { useState, useEffect, useCallback } from 'react';
-import { UserPlus, LogIn, X, Loader2, Eye, EyeOff, Phone } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { UserPlus, LogIn, X, Loader2, Eye, EyeOff, Phone, KeyRound, Mail, ShieldCheck } from 'lucide-react';
 
 export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = false }) {
+  // ── Estados de vista ──
   const [isLoginMode, setIsLoginMode] = useState(true);
+  const [isForgotMode, setIsForgotMode] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isCompletingPhone, setIsCompletingPhone] = useState(false);
+
+  // ── Estados auxiliares ──
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
-  
+  const [apiSuccess, setApiSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  
-  const [isCompletingPhone, setIsCompletingPhone] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
+  // ── Datos temporales (Google flow / change-password flow) ──
   const [tempToken, setTempToken] = useState(null);
   const [tempUserData, setTempUserData] = useState(null);
 
-  const [formData, setFormData] = useState({ nombre: '', apellidos: '', celular: '', password: '' });
-  const [errores, setErrores] = useState({ nombre: '', apellidos: '', celular: '', password: '' });
+  // ── Formulario ──
+  const [formData, setFormData] = useState({ nombre: '', apellidos: '', celular: '', email: '', password: '', newPassword: '', confirmPassword: '' });
+  const [errores, setErrores] = useState({});
 
   const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
   const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
+  // ── Reset al abrir ──
   useEffect(() => {
     if (isOpen) {
-      setFormData({ nombre: '', apellidos: '', celular: '', password: '' });
-      setErrores({ nombre: '', apellidos: '', celular: '', password: '' });
+      setFormData({ nombre: '', apellidos: '', celular: '', email: '', password: '', newPassword: '', confirmPassword: '' });
+      setErrores({});
       setApiError('');
+      setApiSuccess('');
       setIsLoginMode(true);
+      setIsForgotMode(false);
+      setIsChangingPassword(false);
       setShowPassword(false);
+      setShowNewPassword(false);
       setIsCompletingPhone(false);
       setTempToken(null);
       setTempUserData(null);
@@ -34,6 +47,9 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
 
   if (!isOpen) return null;
 
+  // ══════════════════════════════════════════
+  // Google Auth Handler
+  // ══════════════════════════════════════════
   const handleGoogleSuccess = async (credentialResponse) => {
     setIsLoading(true);
     setApiError('');
@@ -50,11 +66,9 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
       
       if (!data.celular) {
         setTempToken(data.access_token);
-        // NUEVO: Guardamos el estado de admin
         setTempUserData({ nombre: data.nombre, is_admin: data.is_admin || false });
         setIsCompletingPhone(true);
       } else {
-        // NUEVO: Guardamos el estado de admin
         localStorage.setItem('spingamma_user', JSON.stringify({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false }));
         onSuccess({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false });
       }
@@ -65,17 +79,40 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
     }
   };
 
+  // ══════════════════════════════════════════
+  // Validación
+  // ══════════════════════════════════════════
   const validar = (soloCelular = false) => {
     let valid = true;
-    const nuevosErrores = { nombre: '', celular: '', password: '' };
-
-    const regexCelular = /^[0-9]{8}$/;
-    if (!regexCelular.test(formData.celular.trim())) {
-      nuevosErrores.celular = 'El celular debe tener exactamente 8 dígitos numéricos.';
-      valid = false;
-    }
+    const nuevosErrores = {};
 
     if (!soloCelular) {
+      // ── Forgot mode: solo email ──
+      if (isForgotMode) {
+        const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!regexEmail.test(formData.email.trim())) {
+          nuevosErrores.email = 'Ingresa un correo electrónico válido.';
+          valid = false;
+        }
+        setErrores(nuevosErrores);
+        return valid;
+      }
+
+      // ── Change-password mode ──
+      if (isChangingPassword) {
+        if (formData.newPassword.trim().length < 4) {
+          nuevosErrores.newPassword = 'La contraseña debe tener al menos 4 caracteres.';
+          valid = false;
+        }
+        if (formData.newPassword !== formData.confirmPassword) {
+          nuevosErrores.confirmPassword = 'Las contraseñas no coinciden.';
+          valid = false;
+        }
+        setErrores(nuevosErrores);
+        return valid;
+      }
+
+      // ── Register fields ──
       if (!isLoginMode) {
         if (formData.nombre.trim().length < 2) {
           nuevosErrores.nombre = 'Ingresa tu nombre.';
@@ -85,8 +122,25 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
           nuevosErrores.apellidos = 'Ingresa tus apellidos.';
           valid = false;
         }
+        const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!regexEmail.test(formData.email.trim())) {
+          nuevosErrores.email = 'Ingresa un correo electrónico válido.';
+          valid = false;
+        }
       }
-  
+    }
+
+    // ── Celular (register + login + completar phone) ──
+    if (!isForgotMode && !isChangingPassword) {
+      const regexCelular = /^[0-9]{8}$/;
+      if (!regexCelular.test(formData.celular.trim())) {
+        nuevosErrores.celular = 'El celular debe tener exactamente 8 dígitos numéricos.';
+        valid = false;
+      }
+    }
+
+    // ── Password (register + login) ──
+    if (!soloCelular && !isForgotMode && !isChangingPassword) {
       if (formData.password.trim().length < 4) {
         nuevosErrores.password = 'La contraseña debe tener al menos 4 caracteres.';
         valid = false;
@@ -97,9 +151,13 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
     return valid;
   };
 
+  // ══════════════════════════════════════════
+  // Login / Register
+  // ══════════════════════════════════════════
   const handleSubmitNormal = async (e) => {
     e.preventDefault();
     setApiError('');
+    setApiSuccess('');
     if (!validar(false)) return;
     setIsLoading(true);
     
@@ -109,6 +167,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
       : { 
           name: `${formData.nombre.trim()} ${formData.apellidos.trim()}`, 
           phone: formData.celular, 
+          email: formData.email.trim(),
           password: formData.password 
         };
 
@@ -126,7 +185,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
         localStorage.setItem('spingamma_token', data.access_token);
       }
       
-      // NUEVO: Pasamos el estado de admin
+      // Si must_change_password es true, forzar cambio de contraseña
+      if (data.must_change_password) {
+        setTempToken(data.access_token);
+        setTempUserData({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false });
+        setIsChangingPassword(true);
+        setIsLoading(false);
+        return;
+      }
+      
       onSuccess({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false });
     } catch (error) {
       setApiError(error.message);
@@ -135,6 +202,74 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
     }
   };
 
+  // ══════════════════════════════════════════
+  // Forgot Password
+  // ══════════════════════════════════════════
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setApiError('');
+    setApiSuccess('');
+    if (!validar(false)) return;
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email.trim() })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || 'Error al procesar la solicitud.');
+
+      setApiSuccess(data.message || 'Si el correo está registrado, recibirás una contraseña temporal.');
+    } catch (error) {
+      setApiError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ══════════════════════════════════════════
+  // Change Password (forced after temp login)
+  // ══════════════════════════════════════════
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setApiError('');
+    setApiSuccess('');
+    if (!validar(false)) return;
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/auth/change-password`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tempToken}`
+        },
+        body: JSON.stringify({ new_password: formData.newPassword })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || 'Error al cambiar la contraseña.');
+
+      // Contraseña cambiada exitosamente, completar el login
+      localStorage.setItem('spingamma_user', JSON.stringify({ 
+        nombre: tempUserData.nombre, 
+        celular: tempUserData.celular, 
+        is_admin: tempUserData.is_admin 
+      }));
+      onSuccess({ nombre: tempUserData.nombre, celular: tempUserData.celular, is_admin: tempUserData.is_admin });
+    } catch (error) {
+      setApiError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ══════════════════════════════════════════
+  // Completar Celular (Google flow)
+  // ══════════════════════════════════════════
   const handleCompletarCelular = async (e) => {
     e.preventDefault();
     setApiError('');
@@ -154,7 +289,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
       if (!res.ok) throw new Error(data.detail || 'Error al completar tu celular.');
 
       const celularGuardado = formData.celular; 
-      // NUEVO: Pasamos el estado de admin
       localStorage.setItem('spingamma_user', JSON.stringify({ nombre: tempUserData.nombre, celular: celularGuardado, is_admin: tempUserData.is_admin }));
       onSuccess({ nombre: tempUserData.nombre, celular: celularGuardado, is_admin: tempUserData.is_admin });
     } catch (error) {
@@ -164,6 +298,9 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
     }
   };
 
+  // ══════════════════════════════════════════
+  // Theme tokens
+  // ══════════════════════════════════════════
   const bgOverlay = isDarkTheme ? 'bg-[#152a38]/90' : 'bg-[#1E3D51]/80';
   const bgModal = isDarkTheme ? 'bg-[#1E3D51] border-[#32698F]' : 'bg-white border-gray-200';
   const textTitle = isDarkTheme ? 'text-white' : 'text-[#1E3D51]';
@@ -175,7 +312,72 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
   const inputBg = isDarkTheme ? 'bg-[#32698F] border-[#32698F] text-white placeholder-[#E6E2DF]/50 focus:border-[#F67927] focus:ring-[#F67927]' : 'bg-gray-50 border-gray-200 text-[#1E3D51] placeholder-gray-400 focus:border-[#B95221] focus:ring-[#B95221]';
   const btnSubmitBg = isDarkTheme ? 'bg-[#F67927] hover:bg-[#e06516] text-white' : 'bg-[#B95221] hover:bg-[#9A4219] text-white';
   const eyeIconColor = isDarkTheme ? 'text-[#E6E2DF]/60 hover:text-[#F67927]' : 'text-gray-400 hover:text-[#B95221]';
+  const requiredStar = isDarkTheme ? 'text-[#F67927]' : 'text-red-500';
 
+  // ══════════════════════════════════════════
+  // Helper: qué icono y título mostrar
+  // ══════════════════════════════════════════
+  const getHeaderInfo = () => {
+    if (isCompletingPhone) return { icon: <Phone size={32} className={iconColor} />, title: 'Falta un paso más', subtitle: 'Hola, vincula tu número de WhatsApp para activar la opción de calificación en SpinJob.' };
+    if (isChangingPassword) return { icon: <ShieldCheck size={32} className={iconColor} />, title: 'Crea tu Nueva Contraseña', subtitle: 'Tu contraseña temporal fue verificada. Por seguridad, elige una nueva contraseña permanente.' };
+    if (isForgotMode) return { icon: <KeyRound size={32} className={iconColor} />, title: 'Recuperar Contraseña', subtitle: 'Ingresa el correo electrónico con el que te registraste y te enviaremos una contraseña temporal.' };
+    if (isLoginMode) return { icon: <LogIn size={32} className={iconColor} />, title: 'Inicia Sesión', subtitle: 'Ingresa para guardar tus perfiles y dejar reseñas.' };
+    return { icon: <UserPlus size={32} className={iconColor} />, title: 'Crea tu Cuenta', subtitle: 'Únete gratis y de forma segura a SpinJob en segundos.' };
+  };
+
+  const { icon, title, subtitle } = getHeaderInfo();
+
+  // ══════════════════════════════════════════
+  // Input helper
+  // ══════════════════════════════════════════
+  const renderInput = (field, label, type, placeholder, options = {}) => {
+    const { required = true, inputMode, isPassword = false } = options;
+    const showEye = isPassword;
+    const currentShowState = field === 'newPassword' || field === 'confirmPassword' ? showNewPassword : showPassword;
+    const toggleShow = () => {
+      if (field === 'newPassword' || field === 'confirmPassword') setShowNewPassword(!showNewPassword);
+      else setShowPassword(!showPassword);
+    };
+
+    return (
+      <div>
+        <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>
+          {label} {required && <span className={requiredStar}>*</span>}
+        </label>
+        <div className={showEye ? 'relative' : ''}>
+          <input
+            required={required}
+            type={showEye ? (currentShowState ? 'text' : 'password') : type}
+            inputMode={inputMode}
+            placeholder={placeholder}
+            value={formData[field]}
+            onChange={(e) => {
+              setFormData({...formData, [field]: e.target.value});
+              if (errores[field]) setErrores({...errores, [field]: ''});
+            }}
+            className={`w-full ${showEye ? 'pl-4 pr-12' : 'px-4'} py-3 rounded-xl outline-none focus:ring-1 transition-all ${showEye ? 'tracking-wider' : ''} ${inputBg} ${errores[field] ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+            disabled={isLoading}
+          />
+          {showEye && (
+            <button
+              type="button"
+              onClick={toggleShow}
+              className={`absolute inset-y-0 right-0 pr-3.5 flex items-center active:scale-95 transition-all ${eyeIconColor}`}
+              aria-label={currentShowState ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              disabled={isLoading}
+            >
+              {currentShowState ? <EyeOff size={20} strokeWidth={2} /> : <Eye size={20} strokeWidth={2} />}
+            </button>
+          )}
+        </div>
+        {errores[field] && <p className="text-red-500 text-xs mt-1.5 font-medium">{errores[field]}</p>}
+      </div>
+    );
+  };
+
+  // ══════════════════════════════════════════
+  // RENDER
+  // ══════════════════════════════════════════
   return (
     <div className={`fixed inset-0 z-[200] flex items-center justify-center p-4 ${bgOverlay} backdrop-blur-sm transition-opacity`}>
       <div className={`${bgModal} border rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 relative animate-in fade-in zoom-in duration-300`}>
@@ -184,47 +386,21 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
           <X size={20} />
         </button>
 
+        {/* ── Header ── */}
         <div className="text-center mb-6 mt-2">
           <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 shadow-inner ${iconWrapBg}`}>
-            {isCompletingPhone ? (
-               <Phone size={32} className={iconColor} />
-            ) : isLoginMode ? (
-               <LogIn size={32} className={iconColor} /> 
-            ) : (
-               <UserPlus size={32} className={iconColor} />
-            )}
+            {icon}
           </div>
-          <h2 className={`text-2xl font-extrabold mb-2 ${textTitle}`}>
-            {isCompletingPhone 
-              ? 'Falta un paso más' 
-              : isLoginMode ? 'Inicia Sesión' : 'Crea tu Cuenta'}
-          </h2>
-          <p className={`text-sm px-2 ${textSub}`}>
-            {isCompletingPhone 
-              ? `Hola, vincula tu número de WhatsApp para activar la opción de calificación en SpinJob.`
-              : isLoginMode ? 'Ingresa para guardar tus perfiles y dejar reseñas.' : 'Únete gratis y de forma segura a SpinJob en segundos.'}
-          </p>
+          <h2 className={`text-2xl font-extrabold mb-2 ${textTitle}`}>{title}</h2>
+          <p className={`text-sm px-2 ${textSub}`}>{subtitle}</p>
         </div>
 
+        {/* ══════════════════════════════════════ */}
+        {/* VISTA: Completar Celular (Google)     */}
+        {/* ══════════════════════════════════════ */}
         {isCompletingPhone ? (
            <form onSubmit={handleCompletarCelular} className="space-y-4">
-             <div>
-               <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>Celular / WhatsApp (OBLIGATORIO)</label>
-               <input 
-                 required 
-                 type="tel" 
-                 inputMode="numeric"
-                 placeholder="Ej. 71234567" 
-                 value={formData.celular} 
-                 onChange={(e) => {
-                   setFormData({...formData, celular: e.target.value});
-                   if(errores.celular) setErrores({...errores, celular: ''});
-                 }} 
-                 className={`w-full px-4 py-3 rounded-xl outline-none focus:ring-1 transition-all ${inputBg} ${errores.celular ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                 disabled={isLoading}
-               />
-               {errores.celular && <p className="text-red-500 text-xs mt-1.5 font-medium">{errores.celular}</p>}
-             </div>
+             {renderInput('celular', 'Celular / WhatsApp (OBLIGATORIO)', 'tel', 'Ej. 71234567', { inputMode: 'numeric' })}
              
              {apiError && (
                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in">
@@ -240,6 +416,74 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
                {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Completar Registro'}
              </button>
            </form>
+
+        /* ══════════════════════════════════════ */
+        /* VISTA: Cambiar Contraseña (forzado)   */
+        /* ══════════════════════════════════════ */
+        ) : isChangingPassword ? (
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            {renderInput('newPassword', 'Nueva Contraseña', 'password', 'Mínimo 4 caracteres', { isPassword: true })}
+            {renderInput('confirmPassword', 'Confirmar Contraseña', 'password', 'Repite tu nueva contraseña', { isPassword: true })}
+            
+            {apiError && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in">
+                {apiError}
+              </div>
+            )}
+
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className={`w-full font-bold py-4 px-4 rounded-xl transition-all shadow-md mt-4 flex justify-center items-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-0.5 active:scale-[0.98]'} ${btnSubmitBg}`}
+            >
+              {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Guardar Nueva Contraseña'}
+            </button>
+          </form>
+
+        /* ══════════════════════════════════════ */
+        /* VISTA: Forgot Password                 */
+        /* ══════════════════════════════════════ */
+        ) : isForgotMode ? (
+          <form onSubmit={handleForgotPassword} className="space-y-4">
+            {renderInput('email', 'Correo Electrónico', 'email', 'tucorreo@ejemplo.com')}
+
+            {apiError && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in">
+                {apiError}
+              </div>
+            )}
+
+            {apiSuccess && (
+              <div className={`${isDarkTheme ? 'bg-[#32698F]/50 border-[#F67927]/40 text-[#E6E2DF]' : 'bg-green-50 border-green-200 text-green-700'} border px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in`}>
+                <div className="flex items-start gap-2">
+                  <Mail size={16} className="mt-0.5 flex-shrink-0" />
+                  <span>{apiSuccess}</span>
+                </div>
+              </div>
+            )}
+
+            <button 
+              type="submit" 
+              disabled={isLoading || !!apiSuccess}
+              className={`w-full font-bold py-4 px-4 rounded-xl transition-all shadow-md mt-4 flex justify-center items-center gap-2 ${(isLoading || apiSuccess) ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-0.5 active:scale-[0.98]'} ${btnSubmitBg}`}
+            >
+              {isLoading ? <Loader2 size={18} className="animate-spin" /> : (apiSuccess ? 'Correo Enviado ✓' : 'Enviar Contraseña Temporal')}
+            </button>
+
+            <p className={`text-center text-sm mt-5 ${textSub}`}>
+              <button
+                type="button"
+                onClick={() => { setIsForgotMode(false); setApiError(''); setApiSuccess(''); setErrores({}); }}
+                className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#B95221] hover:text-[#e06516]'}`}
+              >
+                ← Volver al inicio de sesión
+              </button>
+            </p>
+          </form>
+
+        /* ══════════════════════════════════════ */
+        /* VISTA: Login / Register                */
+        /* ══════════════════════════════════════ */
         ) : (
           <>
             <form onSubmit={handleSubmitNormal} className="space-y-4">
@@ -288,88 +532,39 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
                 <div className="flex-grow border-t border-gray-300/50"></div>
               </div>
 
+              {/* ── Campos de registro ── */}
               {!isLoginMode && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>Nombre</label>
-                    <input 
-                      required 
-                      type="text" 
-                      placeholder="Ej. Ana" 
-                      value={formData.nombre} 
-                      onChange={(e) => {
-                        setFormData({...formData, nombre: e.target.value});
-                        if(errores.nombre) setErrores({...errores, nombre: ''});
-                      }} 
-                      className={`w-full px-4 py-3 rounded-xl outline-none focus:ring-1 transition-all ${inputBg} ${errores.nombre ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                      disabled={isLoading}
-                    />
-                    {errores.nombre && <p className="text-red-500 text-xs mt-1.5 font-medium">{errores.nombre}</p>}
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {renderInput('nombre', 'Nombre', 'text', 'Ej. Ana')}
+                    {renderInput('apellidos', 'Apellidos', 'text', 'Ej. Pérez')}
                   </div>
-                  <div>
-                    <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>Apellidos</label>
-                    <input 
-                      required 
-                      type="text" 
-                      placeholder="Ej. Pérez" 
-                      value={formData.apellidos} 
-                      onChange={(e) => {
-                        setFormData({...formData, apellidos: e.target.value});
-                        if(errores.apellidos) setErrores({...errores, apellidos: ''});
-                      }} 
-                      className={`w-full px-4 py-3 rounded-xl outline-none focus:ring-1 transition-all ${inputBg} ${errores.apellidos ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                      disabled={isLoading}
-                    />
-                    {errores.apellidos && <p className="text-red-500 text-xs mt-1.5 font-medium">{errores.apellidos}</p>}
-                  </div>
-                </div>
+                  {renderInput('email', 'Correo Electrónico', 'email', 'tucorreo@ejemplo.com')}
+                </>
               )}
-              
-              <div>
-                <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>Celular / WhatsApp</label>
-                <input 
-                  required 
-                  type="tel" 
-                  inputMode="numeric"
-                  placeholder="Ej. 71234567" 
-                  value={formData.celular} 
-                  onChange={(e) => {
-                    setFormData({...formData, celular: e.target.value});
-                    if(errores.celular) setErrores({...errores, celular: ''});
-                  }} 
-                  className={`w-full px-4 py-3 rounded-xl outline-none focus:ring-1 transition-all ${inputBg} ${errores.celular ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                  disabled={isLoading}
-                />
-                {errores.celular && <p className="text-red-500 text-xs mt-1.5 font-medium">{errores.celular}</p>}
-              </div>
 
-              <div>
-                <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>Contraseña</label>
-                <div className="relative">
-                  <input 
-                    required 
-                    type={showPassword ? 'text' : 'password'} 
-                    placeholder="Mínimo 4 caracteres" 
-                    value={formData.password} 
-                    onChange={(e) => {
-                      setFormData({...formData, password: e.target.value});
-                      if(errores.password) setErrores({...errores, password: ''});
-                    }} 
-                    className={`w-full pl-4 pr-12 py-3 rounded-xl outline-none focus:ring-1 transition-all tracking-wider ${inputBg} ${errores.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                    disabled={isLoading}
-                  />
+              {/* ── Celular (login + register) ── */}
+              {renderInput('celular', 'Celular / WhatsApp', 'tel', 'Ej. 71234567', { inputMode: 'numeric' })}
+
+              {/* ── Password ── */}
+              {renderInput('password', 'Contraseña', 'password', 'Mínimo 4 caracteres', { isPassword: true })}
+
+              {/* ── ¿Olvidaste tu contraseña? (solo en login) ── */}
+              {isLoginMode && (
+              <div className="text-center -mt-1">
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className={`absolute inset-y-0 right-0 pr-3.5 flex items-center active:scale-95 transition-all ${eyeIconColor}`}
-                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                    disabled={isLoading}
+                    onClick={() => { setIsForgotMode(true); setApiError(''); setErrores({}); }}
+                    className={`text-xs font-semibold transition-colors ${
+                      isDarkTheme
+                        ? 'text-[#E6E2DF]/70 hover:text-[#F67927]'
+                        : 'text-gray-400 hover:text-[#B95221]'
+                    }`}
                   >
-                    {showPassword ? <EyeOff size={20} strokeWidth={2} /> : <Eye size={20} strokeWidth={2} />}
+                    ¿Olvidaste tu contraseña?
                   </button>
                 </div>
-                {errores.password && <p className="text-red-500 text-xs mt-1.5 font-medium">{errores.password}</p>}
-              </div>
+              )}
 
               {apiError && (
                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in">
@@ -382,7 +577,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
                 disabled={isLoading}
                 className={`w-full font-bold py-4 px-4 rounded-xl transition-all shadow-md mt-4 flex justify-center items-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-0.5 active:scale-[0.98]'} ${btnSubmitBg}`}
               >
-                {isLoading && !isCompletingPhone && <Loader2 size={18} className="animate-spin" />}
+                {isLoading && <Loader2 size={18} className="animate-spin" />}
                 {isLoading ? 'Procesando...' : (isLoginMode ? 'Ingresar a mi cuenta' : 'Crear mi cuenta gratis')}
               </button>
             </form>
@@ -393,7 +588,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
                   ¿No tienes cuenta?{' '}
                   <button
                     type="button"
-                    onClick={() => { setIsLoginMode(false); setApiError(''); }}
+                    onClick={() => { setIsLoginMode(false); setApiError(''); setErrores({}); }}
                     className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#B95221] hover:text-[#e06516]'}`}
                   >
                     Crear tu cuenta
@@ -404,7 +599,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
                   ¿Ya tienes cuenta?{' '}
                   <button
                     type="button"
-                    onClick={() => { setIsLoginMode(true); setApiError(''); }}
+                    onClick={() => { setIsLoginMode(true); setApiError(''); setErrores({}); }}
                     className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#B95221] hover:text-[#e06516]'}`}
                   >
                     Iniciar sesión
