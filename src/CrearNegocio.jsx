@@ -9,6 +9,7 @@ import {
 export default function CrearNegocio() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDetecting, setIsDetecting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
@@ -20,6 +21,43 @@ export default function CrearNegocio() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleDetectLocation = () => {
+    setIsDetecting(true);
+    setError('');
+
+    if (!navigator.geolocation) {
+      setError("Tu navegador no soporta geolocalización.");
+      setIsDetecting(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const url = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        setFormData(prev => ({ ...prev, ubicacion_url: url }));
+        setIsDetecting(false);
+        // Feedback visual rápido
+        const input = document.getElementsByName('ubicacion_url')[0];
+        if (input) {
+          input.classList.add('ring-2', 'ring-green-400');
+          setTimeout(() => input.classList.remove('ring-2', 'ring-green-400'), 2000);
+        }
+      },
+      (err) => {
+        console.error(err);
+        let msg = "No se pudo obtener tu ubicación.";
+        if (err.code === 1) msg = "Permiso de ubicación denegado. Por favor, actívalo en tu navegador.";
+        else if (err.code === 2) msg = "Posición no disponible.";
+        else if (err.code === 3) msg = "Tiempo de espera agotado.";
+        
+        setError(msg);
+        setIsDetecting(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -225,10 +263,37 @@ export default function CrearNegocio() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className={labelClass}>Link de Google Maps (Ubicación)</label>
+                  <div className="flex justify-between items-end mb-1">
+                    <label className={labelClass}>Link de Google Maps (Ubicación)</label>
+                    <button
+                      type="button"
+                      onClick={handleDetectLocation}
+                      disabled={isDetecting}
+                      className="text-xs font-bold text-[#B95221] hover:text-[#1E3D51] flex items-center gap-1 mb-1 transition-colors px-2 py-1 rounded-lg hover:bg-orange-50"
+                    >
+                      {isDetecting ? (
+                        <>
+                          <Loader2 size={14} className="animate-spin" />
+                          Detectando...
+                        </>
+                      ) : (
+                        <>
+                          <MapPin size={14} />
+                          Detectar mi ubicación actual
+                        </>
+                      )}
+                    </button>
+                  </div>
                   <div className={wrapperClass}>
                     <div className="pl-4 flex items-center text-gray-400"><Map size={18} /></div>
-                    <input type="url" name="ubicacion_url" value={formData.ubicacion_url} onChange={handleChange} placeholder="https://maps.app.goo.gl/..." className={inputClass} />
+                    <input 
+                      type="url" 
+                      name="ubicacion_url" 
+                      value={formData.ubicacion_url} 
+                      onChange={handleChange} 
+                      placeholder="https://maps.app.goo.gl/..." 
+                      className={inputClass} 
+                    />
                   </div>
                 </div>
 
