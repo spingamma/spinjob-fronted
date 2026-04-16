@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, BookmarkMinus, Eye, Bookmark as BookmarkIcon, Search } from 'lucide-react';
-import BottomNavbar from './components/BottomNavbar';
-import Header from './components/Header';
+import BottomNavbar from '../../components/BottomNavbar';
+import Header from '../../components/Header';
 
 export default function Tarjetero() {
   const [tarjetas, setTarjetas] = useState([]);

@@ -1,13 +1,13 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import AuthModal from './components/AuthModal';
+import AuthModal from '../../components/AuthModal';
 
 // ==========================================
 // 📥 IMPORTACIÓN DE PLANTILLAS
 // ==========================================
-import PlantillaGenerica from './plantillas/PlantillaGenerica';
-import PlantillaInmobiliaria from './plantillas/PlantillaInmobiliaria';
-import PlantillaAbogado from './plantillas/PlantillaAbogado';
+import PlantillaGenerica from '../../plantillas/PlantillaGenerica';
+import PlantillaInmobiliaria from '../../plantillas/PlantillaInmobiliaria';
+import PlantillaAbogado from '../../plantillas/PlantillaAbogado';
 
 function Perfil() {
   const { slug } = useParams();

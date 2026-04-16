@@ -2,7 +2,7 @@
 trigger: always_on
 ---
 
-# Estándares UI/UX (Diseñador)
+# Estándares de Diseño UI/UX y Estética Premium (Diseñador)
 1. **UI Reutilizable:** Extrae elementos visuales compartidos a `src/components/`.
 2. **Renderizado Seguro:** Protege el DOM. Si `profesional.dato` es `null`, NO lo renderices.
 3. **Validación Frontend:** Usa Regex en formularios (ej. nombres sin números, celulares de 8 dígitos).

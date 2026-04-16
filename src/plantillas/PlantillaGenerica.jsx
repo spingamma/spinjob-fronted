@@ -6,6 +6,7 @@ import {
 
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
 import ReviewModal from '../components/ReviewModal';
+import ModalVerificacion from '../components/ModalVerificacion';
 
 export default function PlantillaGenerica({ profesional, volverAtras, onProtectedAction }) {
   
@@ -14,6 +15,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
     mostrarQR, toggleQR, mostrarCalificacion, isLoggedIn, userName, handleLogout,
     handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion,
     mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview,
+    mostrarModalVerificacion, setMostrarModalVerificacion,
     isSaved, isSaving, toggleSaveCard
   } = useAccionesPerfil(profesional, onProtectedAction);
 
@@ -292,6 +294,19 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         isSubmitting={isSubmittingReview}
         calificacionPrevia={calificacionPrevia}
         profesionalName={profesional.name}
+      />
+
+      {/* ==========================================
+          MODAL DE VERIFICACIÓN (NUEVO)
+          ========================================== */}
+      <ModalVerificacion 
+        isOpen={mostrarModalVerificacion}
+        onClose={() => setMostrarModalVerificacion(false)}
+        onSuccess={() => {
+          setMostrarModalVerificacion(false);
+          setMostrarModalCalificando(true);
+        }}
+        userName={userName}
       />
     </div>
   );

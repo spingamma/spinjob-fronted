@@ -3,7 +3,7 @@ trigger: always_on
 ---
 
 # Contexto Técnico CRÍTICO: ProRed/SpinGamma
-* **Misión:** Directorio de Tarjetas Digitales. Código robusto, principios DRY.
+* **Misión:** Directorio de Tarjetas Digitales. Código Robusto, Arquitectura Experta, Clean Code y principios DRY.
 * **Frontend:** React + Vite. Router: `react-router-dom`.
 * **Backend:** FastAPI en Python (Repositorio y contexto separado).
 * **Integración Base:** Respeta la estructura, enrutamiento y el ecosistema actual; no reinventes lo que ya funciona.

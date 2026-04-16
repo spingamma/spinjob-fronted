@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Clock, CheckCircle2, XCircle, PlusCircle, Building, Eye, FileText, X } from 'lucide-react';
-import BottomNavbar from './components/BottomNavbar';
-import Header from './components/Header';
+import BottomNavbar from '../../components/BottomNavbar';
+import Header from '../../components/Header';
 
 // Mini-componente para mostrar los campos en solo lectura
 const CampoLectura = ({ label, valor }) => (

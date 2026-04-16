@@ -12,8 +12,9 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     return localStorage.getItem(pendingRateKey) === 'true';
   });
 
-  // Nuevo estado para el modal de calificacion
+  // Nuevo estado para el modal de calificacion y verificacion
   const [mostrarModalCalificando, setMostrarModalCalificando] = useState(false);
+  const [mostrarModalVerificacion, setMostrarModalVerificacion] = useState(false);
   const [calificacionPrevia, setCalificacionPrevia] = useState(null);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
@@ -172,11 +173,8 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     setIsSubmittingReview(true); // Re-usamos esto para que el usuario note que algo está cargando
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
-    const goToWhatsApp = () => {
-      const spingammaWhatsapp = "59164016676";
-      const mensaje = `Hola SpinGamma, quiero habilitar la opci\u00f3n de calificar perfiles y que revisen que no soy un bot. Mi nombre es ${userName || 'un usuario'}.`;
-      const url = `https://wa.me/${spingammaWhatsapp}?text=${encodeURIComponent(mensaje)}`;
-      window.open(url, '_blank', 'noopener,noreferrer');
+    const showVerificationPrompt = () => {
+      setMostrarModalVerificacion(true);
       setIsSubmittingReview(false);
     };
 
@@ -189,7 +187,7 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
         // VALIDACIÓN 1: Comprobar si realmente tenemos token para consultar
         if (!token) {
           console.error("Fallo de Frontend: No existe 'spingamma_token' en LocalStorage. El registro no devolvió token.");
-          goToWhatsApp();
+          showVerificationPrompt();
           return;
         }
 
@@ -210,13 +208,13 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
             isVerifiedStrict = true; 
           } else {
             console.warn("Fallo de Lógica: El endpoint respondió 200 OK, pero 'is_verified' no es true.", verifyData);
-            goToWhatsApp();
+            showVerificationPrompt();
             return;
           }
         } else {
           const errorText = await verifyRes.text();
           console.error(`Fallo de Backend: El endpoint respondió con error ${verifyRes.status}`, errorText);
-          goToWhatsApp();
+          showVerificationPrompt();
           return;
         }
       }
@@ -242,8 +240,7 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
       
     } catch (err) {
       console.error("Error validando perfiles o reseña", err);
-      // Fallback a whatsApp por seguridad si todo crashea
-      goToWhatsApp();
+      showVerificationPrompt();
     } finally {
       setIsSubmittingReview(false);
     }
@@ -313,6 +310,8 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     // Propiedades nuevas para Modal:
     mostrarModalCalificando,
     setMostrarModalCalificando,
+    mostrarModalVerificacion,
+    setMostrarModalVerificacion,
     calificacionPrevia,
     isSubmittingReview,
     handleSubmitReview,

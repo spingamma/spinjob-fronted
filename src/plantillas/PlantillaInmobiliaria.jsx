@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { LogOut, UserPlus, X, Share2, QrCode, Star, Bookmark } from 'lucide-react';
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
 import ReviewModal from '../components/ReviewModal';
+import ModalVerificacion from '../components/ModalVerificacion';
 
 export default function PlantillaInmobiliaria({ profesional, volverAtras, onProtectedAction }) {
   const [loaded, setLoaded] = useState(false);
@@ -12,6 +13,7 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
     mostrarQR, toggleQR, mostrarCalificacion, isLoggedIn, userName,
     handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion, handleLogout,
     mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview,
+    mostrarModalVerificacion, setMostrarModalVerificacion,
     isSaved, isSaving, toggleSaveCard
   } = useAccionesPerfil(profesional, onProtectedAction);
 
@@ -289,6 +291,16 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
         isSubmitting={isSubmittingReview}
         calificacionPrevia={calificacionPrevia}
         profesionalName={profesional.name}
+      />
+
+      <ModalVerificacion 
+        isOpen={mostrarModalVerificacion}
+        onClose={() => setMostrarModalVerificacion(false)}
+        onSuccess={() => {
+          setMostrarModalVerificacion(false);
+          setMostrarModalCalificando(true);
+        }}
+        userName={userName}
       />
     </div>
   );
