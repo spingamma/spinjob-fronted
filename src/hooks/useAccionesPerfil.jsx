@@ -17,6 +17,10 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
   const [calificacionPrevia, setCalificacionPrevia] = useState(null);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
+  // Estados para Mi Tarjetero
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
   // Leer user obj completo
   const userObj = (() => {
     const stored = localStorage.getItem('spingamma_user');
@@ -43,6 +47,24 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     }
   });
 
+  // Verificar estado de Mi Tarjetero al montar
+  useEffect(() => {
+    const token = localStorage.getItem('spingamma_token');
+    if (isLoggedIn && token && profesional) {
+      const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+      fetch(`${API_URL}/tarjetero/${profesional.slug}/status`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.is_saved !== undefined) {
+          setIsSaved(data.is_saved);
+        }
+      })
+      .catch(err => console.error("Error consultando estado del tarjetero", err));
+    }
+  }, [isLoggedIn, profesional]);
+
   const toggleQR = useCallback(() => setMostrarQR(prev => !prev), []);
 
   const handleShare = useCallback(async () => {
@@ -64,6 +86,33 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
       alert("Enlace copiado al portapapeles");
     }
   }, [profesional]);
+
+  const toggleSaveCard = useCallback(async () => {
+    if (!profesional) return;
+    if (!isLoggedIn) {
+      onProtectedAction(null);
+      return;
+    }
+
+    setIsSaving(true);
+    const token = localStorage.getItem('spingamma_token');
+    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+    const method = isSaved ? 'DELETE' : 'POST';
+
+    try {
+      const res = await fetch(`${API_URL}/tarjetero/${profesional.slug}`, {
+        method,
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setIsSaved(!isSaved);
+      }
+    } catch (err) {
+      console.error("Error guardando tarjeta:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [isLoggedIn, profesional, isSaved, onProtectedAction]);
 
   const registrarInteraccionBackend = useCallback(async (platformName) => {
     const freshUser = localStorage.getItem('spingamma_user');
@@ -266,6 +315,11 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     setMostrarModalCalificando,
     calificacionPrevia,
     isSubmittingReview,
-    handleSubmitReview
+    handleSubmitReview,
+    // Propiedades para Mi Tarjetero:
+    isSaved,
+    isSaving,
+    toggleSaveCard
   };
+
 }

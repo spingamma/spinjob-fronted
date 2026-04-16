@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Clock, CheckCircle2, XCircle, PlusCircle, Building, Eye, FileText, X } from 'lucide-react';
+import BottomNavbar from './components/BottomNavbar';
+import Header from './components/Header';
 
 // Mini-componente para mostrar los campos en solo lectura
 const CampoLectura = ({ label, valor }) => (
@@ -21,6 +23,18 @@ export default function MisNegocios() {
 
   // Estado para controlar qué negocio se está viendo en el modal
   const [negocioSeleccionado, setNegocioSeleccionado] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  // Estados de Auth para la navegación
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
+  const [isAdmin, setIsAdmin] = useState(() => {
+    const stored = localStorage.getItem('spingamma_user');
+    if (stored) {
+      try { return JSON.parse(stored).is_admin === true; } catch(e) { return false; }
+    }
+    return false;
+  });
 
   useEffect(() => {
     const fetchMisNegocios = async () => {
@@ -50,12 +64,37 @@ export default function MisNegocios() {
     fetchMisNegocios();
   }, [navigate]);
 
+  const handleLogout = () => {
+    localStorage.removeItem('spingamma_user');
+    localStorage.removeItem('spingamma_token');
+    setIsLoggedIn(false);
+    navigate('/');
+  };
+
+  const handleCleanFilters = () => {
+    navigate('/');
+  };
+
   if (cargando) return <div className="text-center py-20 text-[#1E3D51] font-bold">Cargando tus negocios...</div>;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] py-10 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-4xl mx-auto relative">
-        <button onClick={() => navigate(-1)} className="flex items-center text-[#32698F] hover:text-[#B95221] font-medium mb-6 transition-colors">
+    <div className="min-h-screen bg-[#F8F9FA] font-sans pb-20">
+      <Header 
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        isLoggedIn={isLoggedIn}
+        isAdmin={isAdmin}
+        userName={JSON.parse(localStorage.getItem('spingamma_user') || '{}').nombre || ''}
+        isUserMenuOpen={isUserMenuOpen}
+        setIsUserMenuOpen={setIsUserMenuOpen}
+        handleLogout={handleLogout}
+        setAuthModalOpen={() => navigate('/')}
+        onHomeClick={handleCleanFilters}
+        isMobile={window.innerWidth < 768}
+      />
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative">
+        <button onClick={() => navigate(-1)} className="flex items-center text-[#32698F] hover:text-[#1D565D] font-medium mb-6 transition-colors">
           <ArrowLeft size={20} className="mr-2" /> Volver
         </button>
 
@@ -210,6 +249,12 @@ export default function MisNegocios() {
         )}
 
       </div>
+      
+      <BottomNavbar 
+        isLoggedIn={isLoggedIn} 
+        isAdmin={isAdmin} 
+        onHomeClick={() => navigate('/')} 
+      />
     </div>
   );
 }

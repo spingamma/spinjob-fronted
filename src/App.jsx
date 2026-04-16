@@ -8,12 +8,16 @@ import {
 } from 'lucide-react';
 import AuthModal from './components/AuthModal';
 import InstallPrompt from './components/InstallPrompt';
+import Header from './components/Header';
+import NavMenu from './components/NavMenu';
+import BottomNavbar from './components/BottomNavbar';
 
 // Lazy load de Vistas
 const Perfil = lazy(() => import('./Perfil'));  
 const CrearNegocio = lazy(() => import('./CrearNegocio'));
 const MisNegocios = lazy(() => import('./MisNegocios'));
 const AdminPanel = lazy(() => import('./AdminPanel'));
+const Tarjetero = lazy(() => import('./Tarjetero'));
 
 const normalizeText = (text) => {
   if (!text) return '';
@@ -274,129 +278,20 @@ function Directorio() {
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-[#1E3D51] font-sans pb-12 antialiased selection:bg-[#B95221] selection:text-white relative">
       
-      {/* HEADER */}
-      <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm h-16 md:h-20 flex items-center">
-        <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
-          
-          <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-10 h-10 bg-[#B95221] rounded-xl flex items-center justify-center shadow-md">
-              <Briefcase className="text-white w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
-            <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-[#1E3D51] uppercase hidden md:block ml-3">SPINJOB</span>
-          </div>
-          
-          <div className="flex-1 max-w-2xl px-1 sm:px-0">
-            <div className="flex items-center bg-gray-50 border border-gray-200 rounded-full shadow-inner py-1.5 px-3 focus-within:ring-2 focus-within:ring-[#B95221] transition-all gap-1 sm:gap-2">
-              <Search size={16} className="text-[#32698F] flex-shrink-0" />
-              <input 
-                type="text" 
-                aria-label="Buscar profesional" 
-                placeholder="Buscar profesional..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)} 
-                className="w-full bg-transparent text-[#1E3D51] placeholder-gray-400 outline-none text-[13px] sm:text-base" 
-              />
-              
-              {/* Iconos de Filtro en Mobile */}
-              {isMobile && (
-                <div className="flex items-center gap-1.5 py-0.5 ml-1 border-l border-gray-200 pl-2">
-                  <button 
-                    onClick={() => toggleDropdown('location')}
-                    className={`relative p-1.5 rounded-full transition-colors ${openDropdown === 'location' ? 'bg-[#B95221]/10' : ''}`}
-                  >
-                    <MapPin size={18} className={isLocationFiltered ? 'text-[#B95221]' : 'text-gray-400'} />
-                    {isLocationFiltered && (
-                      <span className="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full border border-white"></span>
-                    )}
-                  </button>
-                  <button 
-                    onClick={() => toggleDropdown('rating')}
-                    className={`relative p-1.5 rounded-full transition-colors ${openDropdown === 'rating' ? 'bg-[#B95221]/10' : ''}`}
-                  >
-                    <Star size={18} className={isRatingFiltered ? 'text-[#B95221] fill-[#B95221]' : 'text-gray-400'} />
-                    {isRatingFiltered && (
-                      <span className="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full border border-white"></span>
-                    )}
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* ZONA DE USUARIO / MENÚ DESPLEGABLE */}
-          <div className="flex items-center flex-shrink-0 relative">
-            {isLoggedIn ? (
-              <>
-                {isUserMenuOpen && (
-                  <div className="fixed inset-0 z-40" onClick={() => setIsUserMenuOpen(false)}></div>
-                )}
-
-                <div className="relative z-50">
-                  <button 
-                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center gap-1.5 sm:gap-2 bg-white hover:bg-gray-50 border border-gray-200 py-1 sm:py-1.5 px-1.5 sm:px-3 rounded-full shadow-sm transition-all"
-                  >
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#B95221] flex items-center justify-center shadow-inner flex-shrink-0">
-                      <span className="text-white font-bold text-xs sm:text-sm">
-                        {userName ? userName.charAt(0).toUpperCase() : 'U'}
-                      </span>
-                    </div>
-                    <span className="text-sm text-gray-600 hidden lg:block mr-1 truncate max-w-[100px]">
-                      Hola, <strong className="text-[#1E3D51] font-semibold">{userName.split(' ')[0]}</strong>
-                    </span>
-                    <ChevronDown size={16} className={`text-gray-400 transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {/* MENÚ FLOTANTE */}
-                  {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="p-2 space-y-1">
-                        
-                        <Link 
-                          to="/mis-negocios" 
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-[#1E3D51] hover:bg-orange-50 hover:text-[#B95221] rounded-xl transition-colors"
-                        >
-                          <Building size={18} /> Mis Negocios
-                        </Link>
-                        
-                        {/* NUEVO: ESTE BOTÓN AHORA SOLO SE RENDERIZA SI ES ADMIN */}
-                        {isAdmin && (
-                          <Link 
-                            to="/admin" 
-                            onClick={() => setIsUserMenuOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                          >
-                            <Shield size={18} /> Panel Admin
-                          </Link>
-                        )}
-
-                        <div className="h-[1px] bg-gray-100 my-1"></div>
-
-                        <button 
-                          onClick={() => { handleLogout(); setIsUserMenuOpen(false); }} 
-                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-50 hover:text-gray-700 rounded-xl transition-colors"
-                        >
-                          <LogOut size={18} /> Cerrar sesión
-                        </button>
-
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </>
-            ) : (
-              <button 
-                onClick={() => setAuthModalOpen(true)} 
-                className="flex items-center justify-center bg-[#32698F] hover:bg-[#1E3D51] text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-full transition-colors shadow-sm"
-              >
-                <UserPlus size={16} className="md:hidden" />
-                <span className="text-sm font-semibold hidden md:block">Ingresar</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
+      {/* HEADER GLOBAL */}
+      <Header 
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        isLoggedIn={isLoggedIn}
+        isAdmin={isAdmin}
+        userName={userName}
+        isUserMenuOpen={isUserMenuOpen}
+        setIsUserMenuOpen={setIsUserMenuOpen}
+        handleLogout={handleLogout}
+        setAuthModalOpen={setAuthModalOpen}
+        onHomeClick={handleCleanFilters}
+        isMobile={isMobile}
+      />
 
       {/* BARRA DE FILTROS PREMIUM CUSTOM */}
       <div className="bg-white/70 backdrop-blur-md sticky top-16 md:top-20 z-30 border-b border-gray-200 shadow-sm">
@@ -412,9 +307,9 @@ function Directorio() {
               {/* Categoría Principal */}
               <div className="flex flex-col gap-1 relative custom-dropdown">
                 <label className="text-[9px] md:text-[10px] font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">Categoría</label>
-                <button 
+                <div 
                   onClick={() => toggleDropdown('category')}
-                  className={`flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none
+                  className={`flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none cursor-pointer
                     ${openDropdown === 'category' ? 'border-[#B95221] ring-1 ring-[#B95221]/30' : 'border-gray-200'}
                   `}
                 >
@@ -435,7 +330,7 @@ function Directorio() {
                     </button>
                   )}
                   <ChevronDown size={11} className={`text-gray-400 ml-0.5 md:ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'category' ? 'rotate-180 text-[#B95221]' : ''}`} />
-                </button>
+                </div>
 
                 {openDropdown === 'category' && (
                   <div className="absolute top-full left-0 mt-2 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-2xl z-50 py-2 w-[260px] md:w-full max-h-80 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
@@ -480,9 +375,9 @@ function Directorio() {
               {activeCategory !== 'Todos' && (
                 <div className="flex flex-col gap-1 relative custom-dropdown animate-in fade-in zoom-in-95 duration-300">
                   <label className="text-[9px] md:text-[10px] font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">Subcategoría</label>
-                  <button 
+                  <div 
                     onClick={() => toggleDropdown('subcategory')}
-                    className={`flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none
+                    className={`flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none cursor-pointer
                       ${openDropdown === 'subcategory' ? 'border-[#B95221] ring-1 ring-[#B95221]/30' : 'border-gray-200'}
                     `}
                   >
@@ -502,7 +397,7 @@ function Directorio() {
                       </button>
                     )}
                     <ChevronDown size={11} className={`text-gray-400 ml-0.5 md:ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'subcategory' ? 'rotate-180 text-[#B95221]' : ''}`} />
-                  </button>
+                  </div>
 
                   {openDropdown === 'subcategory' && (
                     <div className="absolute top-full left-0 mt-2 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-2xl z-50 py-2 w-[260px] md:w-full max-h-80 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
@@ -549,9 +444,9 @@ function Directorio() {
                 {!isMobile && (
                   <>
                     <label className="text-[9px] md:text-[10px] font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">Ubicación</label>
-                    <button 
+                    <div 
                       onClick={() => toggleDropdown('location')}
-                      className={`flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none
+                      className={`flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none cursor-pointer
                         ${openDropdown === 'location' ? 'border-[#B95221] ring-1 ring-[#B95221]/30' : 'border-gray-200'}
                       `}
                     >
@@ -571,7 +466,7 @@ function Directorio() {
                         </button>
                       )}
                       <ChevronDown size={11} className={`text-gray-400 ml-0.5 md:ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'location' ? 'rotate-180 text-[#B95221]' : ''}`} />
-                    </button>
+                    </div>
                   </>
                 )}
 
@@ -633,9 +528,9 @@ function Directorio() {
                 {!isMobile && (
                   <>
                     <label className="text-[9px] md:text-[10px] font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">Ranking</label>
-                    <button 
+                    <div 
                       onClick={() => toggleDropdown('rating')}
-                      className={`flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none
+                      className={`flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none cursor-pointer
                         ${openDropdown === 'rating' ? 'border-[#B95221] ring-1 ring-[#B95221]/30' : 'border-gray-200'}
                       `}
                     >
@@ -655,7 +550,7 @@ function Directorio() {
                         </button>
                       )}
                       <ChevronDown size={11} className={`text-gray-400 ml-0.5 md:ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'rating' ? 'rotate-180 text-[#B95221]' : ''}`} />
-                    </button>
+                    </div>
                   </>
                 )}
 
@@ -696,7 +591,7 @@ function Directorio() {
             <p className="text-[#1E3D51] font-bold text-lg mb-2">{mensajeCarga}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-5">
             {filteredProfessionals.map((prof) => (
               <Link 
                 key={prof.slug} 
@@ -707,30 +602,36 @@ function Directorio() {
                     handleCardClick(prof.slug);
                   }
                 }}
-                className="group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-4 transform hover:-translate-y-1 border border-gray-100 hover:border-[#B95221]/30"
+                className="group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-3 sm:p-4 transform hover:-translate-y-1 border border-gray-100 hover:border-[#B95221]/30"
               >
-                <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-50 mb-4">
+                <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-50 mb-3 sm:mb-4">
                   <img 
                     src={prof.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.name)}&background=F8F9FA&color=1E3D51&size=256`} 
                     alt={`Foto de perfil de ${prof.name}`}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                   />
                   {/*prof.verified && (
-                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-gray-100">
-                      <CheckCircle2 size={16} className="text-[#B95221]" />
-                      <span className="text-xs font-bold text-[#1E3D51] uppercase tracking-wider">Verificado</span>
+                    <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-white/90 backdrop-blur-sm px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-gray-100">
+                      <CheckCircle2 size={12} className="text-[#B95221] sm:w-[16px] sm:h-[16px]" />
+                      <span className="text-[10px] sm:text-xs font-bold text-[#1E3D51] uppercase tracking-wider">Verificado</span>
                     </div>
                 */}
                   {prof.reviews_count > 0 && (
-                     <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2 py-1.5 rounded-lg flex items-center gap-1 shadow-sm border border-gray-100">
-                      <Star size={14} className="fill-[#B95221] text-[#B95221]" />
-                      <span className="text-sm font-bold text-gray-900">{prof.rating}</span>
+                     <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/95 backdrop-blur-sm px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-lg flex items-center gap-1 shadow-sm border border-gray-100">
+                      <Star size={12} className="fill-[#B95221] text-[#B95221] sm:w-[14px] sm:h-[14px]" />
+                      <span className="text-xs sm:text-sm font-bold text-gray-900">{prof.rating}</span>
                     </div>
                   )}
                 </div>
                 <div className="flex flex-col flex-1">
-                  <h3 className="font-bold text-[#1E3D51] text-xl leading-tight line-clamp-1 pr-2">{prof.name}</h3>
-                  <p className="text-[#B95221] font-semibold text-sm mb-3 line-clamp-2 leading-snug">{prof.title}</p>
+                  <h3 className="font-bold text-[#1E3D51] text-base sm:text-xl leading-tight line-clamp-1 pr-1 sm:pr-2">{prof.name}</h3>
+                  <p className="text-[#B95221] font-semibold text-xs sm:text-sm mb-3 line-clamp-2 leading-snug">{prof.title}</p>
+                </div>
+                
+                <div className="mt-auto pt-2 w-full">
+                  <div className="w-full flex items-center justify-center border-2 border-[#32698F] text-[#32698F] group-hover:bg-[#32698F] group-hover:text-white font-bold py-1.5 sm:py-2 px-3 rounded-full transition-colors text-xs sm:text-sm">
+                    Contactar
+                  </div>
                 </div>
               </Link>
             ))}
@@ -747,6 +648,13 @@ function Directorio() {
       />
       
       <InstallPrompt />
+      
+      {/* BARRA DE NAVEGACIÓN MOBILE */}
+      <BottomNavbar 
+        isLoggedIn={isLoggedIn} 
+        isAdmin={isAdmin} 
+        onHomeClick={handleCleanFilters} 
+      />
     </div>
   );
 }
@@ -768,6 +676,7 @@ function App() {
         <Route path="/crear-negocio" element={<CrearNegocio />} />
         <Route path="/mis-negocios" element={<MisNegocios />} />
         <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/tarjetero" element={<Tarjetero />} />
       </Routes>
     </Suspense>
   );

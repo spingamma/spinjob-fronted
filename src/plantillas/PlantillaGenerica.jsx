@@ -1,8 +1,9 @@
 // Archivo: src/plantillas/PlantillaGenerica.jsx
 import { 
   ArrowLeft, Share2, QrCode, MapPin, Phone, MessageCircle, 
-  Facebook, Instagram, Linkedin, Globe, Github, X, CheckCircle2, Star, LogOut, UserPlus
+  Facebook, Instagram, Linkedin, Globe, Github, X, CheckCircle2, Star, LogOut, UserPlus, Bookmark
 } from 'lucide-react';
+
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
 import ReviewModal from '../components/ReviewModal';
 
@@ -12,8 +13,10 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
   const {
     mostrarQR, toggleQR, mostrarCalificacion, isLoggedIn, userName, handleLogout,
     handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion,
-    mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview
+    mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview,
+    isSaved, isSaving, toggleSaveCard
   } = useAccionesPerfil(profesional, onProtectedAction);
+
 
   // 🧹 LIMPIEZA Y FORMATEO DE ENLACES
   const cleanPhone = profesional?.phone?.replace(/[^0-9]/g, '');
@@ -91,8 +94,16 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
                </button>
             )}
 
-            {/* 🚀 BOTONES QR Y COMPARTIR ABAJO DEL LOGOUT */}
+            {/* 🚀 BOTONES DE ACCIÓN: GUARDAR, QR Y COMPARTIR */}
             <div className="flex gap-2 sm:gap-3">
+              <button 
+                onClick={toggleSaveCard}
+                disabled={isSaving}
+                aria-label={isSaved ? "Quitar tarjeta del tarjetero" : "Guardar tarjeta en el tarjetero"}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md ${isSaved ? 'bg-[#1D565D] text-white border-transparent hover:bg-[#154045]' : 'bg-white/80 hover:bg-white text-[#1E3D51] border border-gray-200'} ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
+              >
+                <Bookmark size={18} className={isSaved ? 'fill-white' : ''} />
+              </button>
               <button 
                 onClick={toggleQR}
                 aria-label="Mostrar código QR de este perfil"
@@ -100,6 +111,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               >
                 <QrCode size={18} />
               </button>
+
               <button 
                 onClick={handleShare}
                 aria-label="Compartir este perfil"

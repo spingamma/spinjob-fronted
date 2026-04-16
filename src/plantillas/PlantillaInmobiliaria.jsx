@@ -1,6 +1,6 @@
 // Archivo: src/plantillas/PlantillaInmobiliaria.jsx
 import React, { useEffect, useState } from 'react';
-import { LogOut, UserPlus, X, Share2, QrCode, Star } from 'lucide-react';
+import { LogOut, UserPlus, X, Share2, QrCode, Star, Bookmark } from 'lucide-react';
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
 import ReviewModal from '../components/ReviewModal';
 
@@ -11,7 +11,8 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
   const {
     mostrarQR, toggleQR, mostrarCalificacion, isLoggedIn, userName,
     handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion, handleLogout,
-    mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview
+    mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview,
+    isSaved, isSaving, toggleSaveCard
   } = useAccionesPerfil(profesional, onProtectedAction);
 
   // Simulador del Loader
@@ -102,8 +103,16 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
               </button>
             )}
 
-            {/* 🚀 BOTONES QR Y COMPARTIR ABAJO DEL LOGOUT */}
+            {/* 🚀 BOTONES DE ACCIÓN: GUARDAR, QR Y COMPARTIR */}
             <div className="flex gap-2.5">
+              <button 
+                onClick={toggleSaveCard}
+                disabled={isSaving}
+                className={`w-10 h-10 flex items-center justify-center rounded-full transition-all backdrop-blur-sm shadow-md ${isSaved ? 'bg-[#C8A721] text-[#11181A] border-transparent' : 'bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-[#425C63]'} ${isSaving ? 'opacity-70' : ''}`}
+                title={isSaved ? "Quitar del tarjetero" : "Guardar en mi tarjetero"}
+              >
+                <Bookmark size={18} className={isSaved ? 'fill-[#11181A]' : ''} />
+              </button>
               <button onClick={toggleQR} className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-[#425C63] rounded-full transition-all text-gray-300 hover:text-white backdrop-blur-sm shadow-md" title="Mostrar QR">
                 <QrCode size={18} />
               </button>

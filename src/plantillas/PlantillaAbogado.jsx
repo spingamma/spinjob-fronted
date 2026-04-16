@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { 
   LogOut, UserPlus, X, Share2, QrCode, Star, ArrowLeft, 
-  Phone, MessageCircle, MapPin, Globe, Facebook, Instagram, Linkedin 
+  Phone, MessageCircle, MapPin, Globe, Facebook, Instagram, Linkedin, Bookmark
 } from 'lucide-react';
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
 import ReviewModal from '../components/ReviewModal';
@@ -14,7 +14,8 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
   const {
     mostrarQR, toggleQR, mostrarCalificacion, isLoggedIn, userName,
     handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion, handleLogout,
-    mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview
+    mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview,
+    isSaved, isSaving, toggleSaveCard
   } = useAccionesPerfil(profesional, onProtectedAction);
 
   useEffect(() => {
@@ -87,6 +88,14 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
             )}
             
             <div className="flex gap-3">
+              <button 
+                onClick={toggleSaveCard}
+                disabled={isSaving}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-sm ${isSaved ? 'bg-[#E9CE3F] text-[#121212] border-transparent' : 'bg-[#1a1a1a] text-gray-300 border border-[#E9CE3F]/20 hover:text-[#E9CE3F]'} ${isSaving ? 'opacity-70' : ''}`}
+                title={isSaved ? "Quitar del tarjetero" : "Guardar en mi tarjetero"}
+              >
+                <Bookmark size={16} className={isSaved ? 'fill-[#121212]' : ''} />
+              </button>
               <button onClick={toggleQR} className="w-10 h-10 rounded-full bg-[#1a1a1a] border border-[#E9CE3F]/20 flex items-center justify-center text-gray-300 hover:text-[#E9CE3F] shadow-md">
                 <QrCode size={16} />
               </button>

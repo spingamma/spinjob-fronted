@@ -2,12 +2,23 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle, ShieldAlert } from 'lucide-react';
+import BottomNavbar from './components/BottomNavbar';
 
 export default function AdminPanel() {
   const [pendientes, setPendientes] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  // Estados de Auth para la navegación
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
+  const [isAdmin, setIsAdmin] = useState(() => {
+    const stored = localStorage.getItem('spingamma_user');
+    if (stored) {
+      try { return JSON.parse(stored).is_admin === true; } catch(e) { return false; }
+    }
+    return false;
+  });
 
   const cargarPendientes = async () => {
     const token = localStorage.getItem('spingamma_token');
@@ -128,6 +139,12 @@ export default function AdminPanel() {
           </div>
         )}
       </div>
+      
+      <BottomNavbar 
+        isLoggedIn={isLoggedIn} 
+        isAdmin={isAdmin} 
+        onHomeClick={() => navigate('/')} 
+      />
     </div>
   );
 }
