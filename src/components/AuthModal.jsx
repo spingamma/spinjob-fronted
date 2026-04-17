@@ -56,6 +56,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
         window.google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
           callback: (response) => handleGoogleSuccess({ credential: response.credential }),
+          ux_mode: 'popup',
         });
         
         btnContainer.innerHTML = '';
