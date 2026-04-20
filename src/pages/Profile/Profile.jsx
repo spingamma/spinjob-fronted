@@ -32,7 +32,7 @@ function Perfil() {
     const obtenerPerfil = async (intentos = 0) => {
       try {
         const res = await fetch(`${API_URL}/businesses/${slug}`);
-        
+
         if (res.ok) {
           const data = await res.json();
           if (isMounted) {
@@ -49,12 +49,12 @@ function Perfil() {
         }
       } catch (err) {
         console.warn(`Intento ${intentos + 1} fallido. El servidor backend podría estar despertando...`, err);
-        
+
         if (intentos < 10 && isMounted) {
           if (intentos === 1) setMensajeCarga("Conectando al servidor seguro, por favor espera...");
           if (intentos === 3) setMensajeCarga("Preparando la tarjeta digital...");
           if (intentos === 6) setMensajeCarga("Casi listo, el servidor está iniciando...");
-          
+
           setTimeout(() => obtenerPerfil(intentos + 1), 3500);
         } else if (isMounted) {
           console.error("Error definitivo cargando perfil:", err);
@@ -166,7 +166,7 @@ function Perfil() {
     localStorage.setItem('spingamma_user', JSON.stringify(formData));
     setIsLoggedIn(true);
     setAuthModalOpen(false);
-    
+
     if (pendingUrl) {
       if (pendingUrl.startsWith('tel:') || pendingUrl.startsWith('mailto:')) {
         window.location.href = pendingUrl;
@@ -195,8 +195,8 @@ function Perfil() {
         </div>
         <h2 className="text-2xl font-bold text-white mb-3">Perfil no encontrado o inactivo</h2>
         <p className="text-[#E6E2DF] mb-8 max-w-md">El profesional que buscas no existe en nuestra base de datos o su plan de suscripción ha expirado.</p>
-        <button 
-          onClick={() => navigate("/")} 
+        <button
+          onClick={() => navigate("/")}
           className="bg-[#F67927] hover:bg-[#e06516] text-white font-bold px-8 py-3 rounded-xl transition-all shadow-lg hover:-translate-y-1"
         >
           Explorar Directorio
@@ -210,13 +210,13 @@ function Perfil() {
   // Lógica para determinar la plantilla automáticamente
   const normalizeText = (text) => text ? text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : '';
   const esPremium = profesional?.premium === true;
-  
+
   let tipoPlantilla = 'generica';
   if (esPremium) {
-    const cat = normalizeText(profesional.category || '');
-    if (cat.includes('abogad') || cat.includes('legal') || cat.includes('derecho')) {
+    const subcategory = normalizeText(profesional.subcategory || '');
+    if (subcategory.includes('abogad') || subcategory.includes('legal') || subcategory.includes('derecho')) {
       tipoPlantilla = 'abogado';
-    } else if (cat.includes('inmo') || cat.includes('casa') || cat.includes('propied')) {
+    } else if (subcategory.includes('inmo') || subcategory.includes('casa') || subcategory.includes('propied')) {
       tipoPlantilla = 'inmobiliaria';
     }
   }
@@ -225,33 +225,33 @@ function Perfil() {
     <>
       {/* RENDERIZADO DE PLANTILLAS */}
       {tipoPlantilla === 'inmobiliaria' ? (
-        <PlantillaInmobiliaria 
-          profesional={profesional} 
-          volverAtras={volverAtras} 
-          onProtectedAction={handleProtectedAction} 
+        <PlantillaInmobiliaria
+          profesional={profesional}
+          volverAtras={volverAtras}
+          onProtectedAction={handleProtectedAction}
         />
       ) : tipoPlantilla === 'abogado' ? (
-        <PlantillaAbogado 
-          profesional={profesional} 
-          volverAtras={volverAtras} 
-          onProtectedAction={handleProtectedAction} 
+        <PlantillaAbogado
+          profesional={profesional}
+          volverAtras={volverAtras}
+          onProtectedAction={handleProtectedAction}
         />
       ) : (
-        <PlantillaGenerica 
-          profesional={profesional} 
-          volverAtras={volverAtras} 
-          onProtectedAction={handleProtectedAction} 
+        <PlantillaGenerica
+          profesional={profesional}
+          volverAtras={volverAtras}
+          onProtectedAction={handleProtectedAction}
         />
       )}
 
       {/* ==========================================
           MODAL DE REGISTRO REUTILIZABLE (TEMA OSCURO)
           ========================================== */}
-      <AuthModal 
-        isOpen={authModalOpen} 
-        onClose={() => setAuthModalOpen(false)} 
-        onSuccess={handleRegisterSuccess} 
-        isDarkTheme={true} 
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onSuccess={handleRegisterSuccess}
+        isDarkTheme={true}
       />
     </>
   );
