@@ -2,38 +2,30 @@
 trigger: always_on
 ---
 
-# Estándares de Arquitectura Experta y Clean Code (Arquitecto)
+# Estándares de Arquitectura y Clean Code
 
-1. **Arquitectura DRY y SRP (Single Responsibility Principle):**
-   - Si detectas lógica compleja o repetida (métricas, estados, llamadas a API), extráela a un Custom Hook. 
-   - NUNCA permitas "God Components" (archivos de más de 300-400 líneas). Divide los componentes grandes en sub-componentes funcionales.
-   - Cada componente o hook debe tener una UNICA responsabilidad.
+## Código
+1. **DRY + SRP:** Lógica repetida → Custom Hook. Máx 300-400 líneas por archivo. 1 responsabilidad por componente/hook.
+2. **Idioma:** Variables, funciones, archivos → inglés. Textos al usuario → español.
+3. **Estructura:** `pages/` vistas, `components/` reutilizables, `hooks/` lógica, `plantillas/` templates de perfil, `utils/` utilidades puras.
 
-2. **Terminología en Inglés (Strict):**
-   - Usa SIEMPRE inglés para nombres de archivos, carpetas, variables, constantes, funciones y estados internos (ej. `useDirectoryFilters`, `ProductCard`, `isSubmitting`). 
-   - El contenido visual/textos para el usuario final (labels, placeholders, mensajes) debe permanecer en **español**.
+## API y Estado
+4. **Base URL:** `import.meta.env.VITE_API_URL` (nunca hardcodeado).
+5. **Sesión:** `localStorage.getItem('spingamma_user')` → objeto usuario.
+6. **JWT:** `localStorage.getItem('spingamma_token')` → token Bearer.
+7. **Errores:** SIEMPRE `try/catch` o `.catch()` en fetches. Manejar 4xx/5xx explícitamente.
 
-3. **Estructura de Directorios:**
-   - Mantén un orden estricto: `src/pages/` para vistas de ruta, `src/components/` para piezas reutilizables, `src/hooks/` para lógica.
-   - Cada página debe estar en su propia carpeta (ej. `src/pages/Home/Home.jsx`).
+## Reglas React
+8. **Hooks en orden:** Nunca leas variables de `useMemo`/`useCallback` dentro de un `useEffect` declarado ANTES. Orden semántico descendente.
+9. **Early returns:** NUNCA antes de que TODOS los hooks hayan sido invocados.
+10. **Acciones protegidas:** Clic en redes/WhatsApp sin sesión → forzar `AuthModal`.
 
-4. **API y Estado:**
-   - Usa SIEMPRE `import.meta.env.VITE_API_URL`.
-   - Estado de sesión: `localStorage.getItem('spingamma_user')`.
-   - JWT: `localStorage.getItem('spingamma_token')`.
+## Terceros y APIs Nativas
+11. **Scripts:** NUNCA cargar `<script>` manual si ya lo gestiona una librería React (ej. GSI).
+12. **Compartir:** Usar `navigator.share` cuando esté disponible.
+13. **WhatsApp:** Limpiar números con `.replace(/[^0-9]/g, '')`.
 
-5. **Manejo de Errores y Resiliencia:**
-   - Incluye SIEMPRE bloques `.catch()` o `try/catch` para manejar fallos del servidor o códigos `4xx/5xx`.
-   - Los clics en redes o WhatsApp DEBEN interceptarse: si no hay sesión, fuerza el `AuthModal`.
-
-6. **Orden Estricto de Hooks (TDZ):**
-   - NUNCA leas constantes o variables extraídas de un `useMemo` / `useCallback` dentro de un `useEffect` que haya sido declarado ANTES en el código. Mantén siempre las dependencias y sus Hooks consumidores en estricto orden semántico descendente.
-
-7. **Early Returns DESPUÉS de Hooks:**
-   - NUNCA coloques un `return null` o cualquier early return ANTES de que todos los Hooks (`useState`, `useEffect`, `useContext`, etc.) hayan sido invocados.
-
-8. **Scripts de Terceros:**
-   - NUNCA cargues manualmente un `<script>` en `index.html` si una librería de React ya lo gestiona. Evita duplicados (ej. Google Login).
-
-9. **APIs Nativas:**
-   - Usa `navigator.share` y limpia números para WhatsApp (`.replace(/[^0-9]/g, '')`).
+## Eficiencia del Agente
+14. **Ediciones en lote:** Si una tarea toca N archivos independientes → editar TODOS en paralelo. Nunca secuencialmente.
+15. **No leer para editar si ya conoces el contenido.** Un `grep_search` con `MatchPerLine=true` da línea exacta + contenido suficiente para `replace_file_content` directo.
+16. **Multi-chunk para mismo archivo.** Si un archivo necesita 2+ ediciones no contiguas → usar `multi_replace_file_content` en 1 sola llamada.

@@ -12,7 +12,7 @@ import { useDirectoryFilters } from '../../hooks/useDirectoryFilters';
 export default function Directory() {
   const [profesionales, setProfesionales] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [mensajeCarga, setMensajeCarga] = useState("Cargando directorio SPINJOB...");
+  const [mensajeCarga, setMensajeCarga] = useState("Cargando directorio Tarjetoso...");
   const navigate = useNavigate();
 
   // Estados de Autenticación

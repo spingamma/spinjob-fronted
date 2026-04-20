@@ -1,45 +1,38 @@
 ---
-description: Cómo implementar Google Sign-In correctamente en SpinJob (evitar bugs conocidos)
+description: Cómo implementar Google Sign-In correctamente en Tarjetoso (evitar bugs conocidos)
 ---
 
-# Google Auth — Patrón Correcto para SpinJob
+# Google Auth — Patrón Correcto para Tarjetoso
+
+// turbo-all
+
+## 🏎️ REGLAS DE VELOCIDAD
+1. **Direct Edit:** Si necesitas corregir un error de Auth, no pidas confirmación, aplica el parche directamente usando `multi_replace_file_content`.
+2. **Checklist Paralelo:** Verifica `.env`, `App.jsx` y el componente de Auth en una sola ráfaga de `view_file` paralelo.
 
 ## Arquitectura Actual
-SpinJob usa **Google Identity Services (GSI)** para autenticación con Google.
-- El backend (`POST /auth/google`) espera un **ID Token JWT** (campo `credential`), **NO** un `access_token` (ya29...).
-- El script GSI se carga vía `@react-oauth/google` (`GoogleOAuthProvider` en `main.jsx`).
-- El botón es custom (HTML/CSS propios en español), NO usa el componente `<GoogleLogin>`.
+- **Librería:** `@react-oauth/google` (`GoogleOAuthProvider` en `main.jsx`).
+- **Endpoint backend:** `POST /auth/google` espera `{ google_token: "<JWT credential>" }`.
+- **Botón:** Custom HTML/CSS en español (NO usa el componente `<GoogleLogin>`).
+- **API usada:** `window.google.accounts.id.initialize()` + `.prompt()`.
 
-## ⚠️ Bugs Conocidos y Cómo Evitarlos
+## ⚠️ Bugs Conocidos
 
-### 1. `useGoogleLogin` devuelve `access_token`, NO `credential`
-- **NO usar** `useGoogleLogin()` de `@react-oauth/google` para este flujo.
-- Ese hook devuelve un `access_token` (ya29...) que el backend rechaza.
-- **Usar** la API nativa: `window.google.accounts.id.initialize()` + `.prompt()`, que devuelve `credential` (JWT).
+| Bug | Causa | Solución |
+|-----|-------|----------|
+| Backend rechaza token `ya29...` | `useGoogleLogin()` devuelve `access_token`, no `credential` | Usar API nativa GSI, NO `useGoogleLogin()` |
+| `initialize() called multiple times` | `<GoogleLogin>` + StrictMode | Usar botón custom + API nativa |
+| `contentType undefined` crash | Script GSI duplicado | NO agregar `<script>` manual en `index.html` |
+| Popup de Google no aparece | Origen no autorizado | Agregar origin en Google Cloud Console → Credentials |
+| `width` crash en `<GoogleLogin>` | Espera número, no string | Pasar `width={400}`, no `width="100%"` |
 
-### 2. `<GoogleLogin>` causa `initialize() called multiple times`
-- En `React.StrictMode` (dev), los efectos se ejecutan dos veces, y el componente `<GoogleLogin>` llama `initialize()` en cada montaje.
-- **Solución actual:** No usar el componente `<GoogleLogin>`. Usar un botón custom + API nativa.
-
-### 3. No duplicar el script de GSI
-- `@react-oauth/google` ya carga `https://accounts.google.com/gsi/client` automáticamente.
-- **NUNCA** agregar un `<script src="...gsi/client">` manual en `index.html`. Duplicar causa crashes (`contentType undefined`).
-
-### 4. Props del componente `<GoogleLogin>` (si alguna vez se usa)
-- `width` espera un **número en píxeles** (ej. `width={400}`), NO un string (`width="100%"` crashea).
-- `locale` no siempre funciona — el idioma depende del script GSI y del navegador del usuario.
-
-### 5. Origen no permitido en Google Cloud Console
-- Error: `The given origin is not allowed for the given client ID`
-- **Solución:** Ir a Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID → Agregar `http://localhost:5173` (o el puerto que use Vite) en **Authorized JavaScript Origins**.
-
-## Flujo Correcto (Implementación Actual)
+## Implementación Correcta
 
 ```jsx
-// 1. Botón custom en español (sin dependencia de <GoogleLogin>)
+// Botón custom que usa API nativa GSI
 <button onClick={() => {
   window.google.accounts.id.initialize({
-    client_id: GOOGLE_CLIENT_ID,
+    client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
     callback: (response) => handleGoogleSuccess({ credential: response.credential }),
   });
   window.google.accounts.id.prompt();
@@ -47,20 +40,19 @@ SpinJob usa **Google Identity Services (GSI)** para autenticación con Google.
   Iniciar sesión con Google
 </button>
 
-// 2. El handler envía el credential (JWT) al backend
+// Handler envía credential (JWT) al backend
 const handleGoogleSuccess = async (credentialResponse) => {
-  const res = await fetch(`${API_URL}/auth/google`, {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/google`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ google_token: credentialResponse.credential }) // ← JWT, NO access_token
+    body: JSON.stringify({ google_token: credentialResponse.credential })
   });
-  // ...
 };
 ```
 
 ## Checklist Pre-Deploy
-- [ ] `VITE_GOOGLE_CLIENT_ID` está en `.env`
-- [ ] El origen de producción está en Authorized JavaScript Origins de Google Cloud Console
+- [ ] `VITE_GOOGLE_CLIENT_ID` en `.env` y `.env.production`
+- [ ] Origen de producción en Google Cloud Console
 - [ ] NO hay `<script>` manual de GSI en `index.html`
-- [ ] El botón de Google usa API nativa, no el componente `<GoogleLogin>`
-- [ ] Se envía `credential` (JWT), no `access_token`
+- [ ] Botón usa API nativa, NO `<GoogleLogin>` ni `useGoogleLogin()`
+- [ ] Se envía `credential` (JWT), NO `access_token` (ya29...)

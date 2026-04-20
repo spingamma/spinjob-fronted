@@ -1,6 +1,6 @@
-# 🌟 Spinjob - Frontend
+# 🌟 Tarjetoso - Frontend
 
-¡Hola! Bienvenido al proyecto **Spinjob**. Este es el código de la parte visual de la aplicación (lo que ves en la pantalla). 
+¡Hola! Bienvenido al proyecto **Tarjetoso**. Este es el código de la parte visual de la aplicación (lo que ves en la pantalla). 
 
 Esta guía está diseñada para que puedas instalar y ejecutar el proyecto en tu computadora de la forma más sencilla posible, ¡incluso si no tienes mucha o ninguna experiencia programando! 😊
 
@@ -21,7 +21,7 @@ Para que el proyecto funcione en tu computadora, solo necesitas instalar un prog
 Una vez que tengas Node.js instalado, sigue estos breves pasos:
 
 ### Paso 1: Abrir la carpeta del proyecto
-Abre la carpeta `spinjob-fronted` en la que te encuentras ahora mismo. 
+Abre la carpeta del proyecto en la que te encuentras ahora mismo. 
 Dentro de ella, necesitas abrir una **"Terminal"** o Línea de Comandos:
 - **En Windows:** Abre la carpeta donde están estos archivos. Haz clic en la barra de direcciones que está arriba en esa misma ventana, borra lo que está escrito, escribe `cmd` y presiona la tecla **Enter**.
 - **En Mac:** Abre la carpeta, haz clic derecho y selecciona "Abrir nueva terminal en la carpeta".
@@ -51,4 +51,4 @@ Si todo salió bien, en la terminal verás un enlace que generalmente se ve así
 ## 🛑 ¿Quieres apagarlo?
 Si ya terminaste de ver o usar la aplicación y quieres apagarla, vuelve a la ventana negra (terminal) donde escribiste el último comando y presiona las teclas **`Ctrl`** y **`C`** al mismo tiempo. A veces te preguntará si estás seguro, en ese caso presiona la tecla `S` o `Y` y luego Enter.
 
-¡Disfruta Spinjob! ✨
+¡Disfruta Tarjetoso! ✨

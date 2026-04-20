@@ -223,7 +223,7 @@ export default function CrearNegocio() {
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
           <div className="bg-gradient-to-r from-[#1E3D51] to-[#32698F] p-8 text-white text-center">
             <h1 className="text-3xl font-extrabold mb-2">Registra tu Negocio</h1>
-            <p className="text-[#E6E2DF]">Completa tu perfil para destacar en SpinJob.</p>
+            <p className="text-[#E6E2DF]">Completa tu perfil para destacar en Tarjetoso.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-8">

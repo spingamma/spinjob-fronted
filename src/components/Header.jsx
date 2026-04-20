@@ -26,9 +26,9 @@ const Header = ({
         {/* LOGO */}
         <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => navigate('/')}>
           <div className="w-10 h-10 bg-[#1D565D] rounded-xl flex items-center justify-center shadow-md overflow-hidden p-1.5 border border-[#1D565D]">
-            <img src="/icon-192.png" alt="SpinJob Logo" className="w-full h-full object-contain" />
+            <img src="/icon-192.png" alt="Tarjetoso Logo" className="w-full h-full object-contain" />
           </div>
-          <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-[#1E3D51] uppercase hidden md:block ml-3">SPINJOB</span>
+          <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-[#1E3D51] uppercase hidden md:block ml-3">TARJETOSO</span>
         </div>
         
         {/* BUSCADOR Y NAV */}

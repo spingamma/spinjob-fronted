@@ -346,11 +346,11 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
   // Helper: qué icono y título mostrar
   // ══════════════════════════════════════════
   const getHeaderInfo = () => {
-    if (isCompletingPhone) return { icon: <Phone size={32} className={iconColor} />, title: 'Falta un paso más', subtitle: 'Hola, vincula tu número de WhatsApp para activar la opción de calificación en SpinJob.' };
+    if (isCompletingPhone) return { icon: <Phone size={32} className={iconColor} />, title: 'Falta un paso más', subtitle: 'Hola, vincula tu número de WhatsApp para activar la opción de calificación en Tarjetoso.' };
     if (isChangingPassword) return { icon: <ShieldCheck size={32} className={iconColor} />, title: 'Crea tu Nueva Contraseña', subtitle: 'Tu contraseña temporal fue verificada. Por seguridad, elige una nueva contraseña permanente.' };
     if (isForgotMode) return { icon: <KeyRound size={32} className={iconColor} />, title: 'Recuperar Contraseña', subtitle: 'Ingresa el correo electrónico con el que te registraste y te enviaremos una contraseña temporal.' };
     if (isLoginMode) return { icon: <LogIn size={32} className={iconColor} />, title: 'Inicia Sesión', subtitle: 'Ingresa para guardar tus perfiles y dejar reseñas.' };
-    return { icon: <UserPlus size={32} className={iconColor} />, title: 'Crea tu Cuenta', subtitle: 'Únete gratis y de forma segura a SpinJob en segundos.' };
+    return { icon: <UserPlus size={32} className={iconColor} />, title: 'Crea tu Cuenta', subtitle: 'Únete gratis y de forma segura a Tarjetoso en segundos.' };
   };
 
   const { icon, title, subtitle } = getHeaderInfo();

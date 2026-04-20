@@ -161,7 +161,7 @@ export default function AdminPanel() {
               <h1 className="text-3xl font-extrabold flex items-center gap-3">
                 <ShieldCheck size={32} /> Panel de Control
               </h1>
-              <p className="text-[#E6E2DF] mt-1">Administración central de SpinJob</p>
+              <p className="text-[#E6E2DF] mt-1">Administración central de Tarjetoso</p>
             </div>
             <button 
               onClick={() => navigate('/')} 

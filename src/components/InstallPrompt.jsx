@@ -113,7 +113,7 @@ export default function InstallPrompt() {
           
           <div className="flex-1 pr-4">
             <h3 className="text-white font-bold text-[15px] leading-tight mb-1">
-  Instala SpinJob
+  Instala Tarjetoso
 </h3>
             
             {isIOS ? (

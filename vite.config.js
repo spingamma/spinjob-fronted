@@ -39,13 +39,13 @@ export default defineConfig({
         ]
       },
       manifest: {
-        name: "SpinJob Directorio", // 🚀 CAMBIADO AQUÍ
-        short_name: "SpinJob",      // 🚀 CAMBIADO AQUÍ (Nombre en el ícono del celular)
+        name: "Tarjetoso Directorio", // 🚀 CAMBIADO AQUÍ
+        short_name: "Tarjetoso",      // 🚀 CAMBIADO AQUÍ (Nombre en el ícono del celular)
         start_url: "/",
         display: "standalone",
         background_color: "#FFFFFF",
         theme_color: "#1E3D51",
-        description: "Directorio de Tarjetas Digitales SpinJob", // 🚀 CAMBIADO AQUÍ
+        description: "Directorio de Tarjetas Digitales Tarjetoso", // 🚀 CAMBIADO AQUÍ
         icons: [
           {
             src: "/icon-192.png",
