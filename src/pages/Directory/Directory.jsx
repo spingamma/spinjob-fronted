@@ -8,6 +8,7 @@ import BottomNavbar from '../../components/BottomNavbar';
 import DirectoryFilterBar from '../../components/DirectoryFilterBar';
 import ProfessionalCard from '../../components/ProfessionalCard';
 import { useDirectoryFilters } from '../../hooks/useDirectoryFilters';
+import useSEO from '../../hooks/useSEO';
 
 export default function Directory() {
   const [profesionales, setProfesionales] = useState([]);
@@ -75,6 +76,13 @@ export default function Directory() {
 
   const filterHook = useDirectoryFilters(profesionales);
 
+  useSEO({
+    title: 'Tarjetoso | Directorio de Profesionales y Negocios en Bolivia',
+    description: 'Encuentra, contacta y califica a los mejores profesionales independientes y negocios locales de Bolivia. Tu directorio de tarjetas digitales profesionales.',
+    url: 'https://tarjetoso.com/',
+    type: 'website'
+  });
+
   const handleLogout = () => {
     localStorage.removeItem('spingamma_user');
     setIsLoggedIn(false);
@@ -127,6 +135,7 @@ export default function Directory() {
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <h1 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">Directorio de Profesionales</h1>
         {cargando ? (
           <div className="text-center py-20 flex flex-col items-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#B95221] mb-4"></div>

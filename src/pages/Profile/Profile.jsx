@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import useSEO from '../../hooks/useSEO';
 import AuthModal from '../../components/AuthModal';
 
 // ==========================================
@@ -101,6 +102,48 @@ function Perfil() {
       }
     }
   }, [profesional, isLoggedIn]);
+
+  // ==========================================
+  // 🔍 SEO DINÁMICO Y STRUCTURED DATA (JSON-LD)
+  // ==========================================
+  const jsonLdData = useMemo(() => {
+    if (!profesional) return null;
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "name": profesional.name,
+      "description": profesional.description || `${profesional.name}, ${profesional.title}`,
+      "url": `https://tarjetoso.com/perfil/${profesional.slug}`,
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": profesional.neighborhood,
+        "addressRegion": profesional.state,
+        "addressCountry": profesional.country || "Bolivia"
+      },
+      "sameAs": [profesional.facebook, profesional.instagram, profesional.linkedin, profesional.website, profesional.tiktok, profesional.github].filter(Boolean)
+    };
+    if (profesional.image) schema.image = profesional.image;
+    if (profesional.phone) schema.telephone = profesional.phone;
+    if (profesional.reviews_count > 0) {
+      schema.aggregateRating = {
+        "@type": "AggregateRating",
+        "ratingValue": profesional.rating,
+        "reviewCount": profesional.reviews_count,
+        "bestRating": 5,
+        "worstRating": 1
+      };
+    }
+    return schema;
+  }, [profesional]);
+
+  useSEO({
+    title: profesional ? `${profesional.name} - ${profesional.title} | Tarjetoso` : 'Tarjetoso | Directorio Profesional',
+    description: profesional ? (profesional.description || `${profesional.name}, ${profesional.title} en ${profesional.category}`).slice(0, 160) : 'Directorio de tarjetas digitales profesionales de Bolivia.',
+    url: profesional ? `https://tarjetoso.com/perfil/${profesional.slug}` : null,
+    image: profesional?.image || null,
+    type: 'profile',
+    jsonLd: jsonLdData
+  });
 
   // ==========================================
   // 🛡️ MANEJADOR DE ENLACES PROTEGIDOS

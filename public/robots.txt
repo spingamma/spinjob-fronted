@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /mis-negocios
+Disallow: /crear-negocio
+Disallow: /tarjetero
+
+Sitemap: https://tarjetoso.com/sitemap.xml
