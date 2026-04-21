@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, CheckCircle, XCircle, ShieldAlert, 
-  Users, Building, Search, Clock, ShieldCheck, Loader2 
+  Users, Building, Search, Clock, ShieldCheck, Loader2,
+  FileText, X, Eye
 } from 'lucide-react';
 import BottomNavbar from '../../components/BottomNavbar';
+import BusinessDetailsModal from '../../components/BusinessDetailsModal';
 
 export default function AdminPanel() {
   const [pendientes, setPendientes] = useState([]);
@@ -18,6 +20,9 @@ export default function AdminPanel() {
   const [userSearchTerm, setUserSearchTerm] = useState('');
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isVerifyingUser, setIsVerifyingUser] = useState(null);
+
+  // Estado para ver detalles de un negocio
+  const [negocioSeleccionado, setNegocioSeleccionado] = useState(null);
 
   // Estados de Auth para la navegación
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
@@ -259,6 +264,12 @@ export default function AdminPanel() {
                         <CheckCircle size={20} /> Aprobar
                       </button>
                       <button 
+                        onClick={() => setNegocioSeleccionado(neg)}
+                        className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-600 py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all"
+                      >
+                        <FileText size={20} /> Ver Datos
+                      </button>
+                      <button 
                         onClick={() => handleAccion(neg.slug, 'rechazar')}
                         className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all"
                       >
@@ -352,6 +363,38 @@ export default function AdminPanel() {
         isLoggedIn={isLoggedIn} 
         isAdmin={isAdmin} 
         onHomeClick={() => navigate('/')} 
+      />
+
+      {/* MODAL DE DETALLES DEL NEGOCIO REFACTORIZADO */}
+      <BusinessDetailsModal 
+        business={negocioSeleccionado}
+        onClose={() => setNegocioSeleccionado(null)}
+        banner={{
+          type: 'info',
+          content: 'Modo Revisión: Estos son los datos enviados por el usuario. Revisa cuidadosamente antes de aprobar o rechazar.'
+        }}
+        actions={
+          <>
+            <button 
+              onClick={() => {
+                handleAccion(negocioSeleccionado.slug, 'aprobar');
+                setNegocioSeleccionado(null);
+              }}
+              className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
+            >
+              <CheckCircle size={18} /> Aprobar Ahora
+            </button>
+            <button 
+              onClick={() => {
+                handleAccion(negocioSeleccionado.slug, 'rechazar');
+                setNegocioSeleccionado(null);
+              }}
+              className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
+            >
+              <XCircle size={18} /> Rechazar
+            </button>
+          </>
+        }
       />
     </div>
   );

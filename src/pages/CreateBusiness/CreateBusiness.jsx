@@ -271,7 +271,7 @@ export default function CrearNegocio() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
                 <div>
-                  <label className={labelClass}>Nombre / Marca *</label>
+                  <label className={labelClass}>Nombre / Marca <span className="text-red-500">*</span></label>
                   <div className={wrapperClass}>
                     <div className="pl-4 flex items-center text-gray-400"><Briefcase size={18} /></div>
                     <input required name="name" value={formData.name} onChange={handleChange} placeholder="Ej. Dra. Ana López" className={inputClass} />
@@ -279,7 +279,7 @@ export default function CrearNegocio() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>Especialidad / Título *</label>
+                  <label className={labelClass}>Especialidad / Título <span className="text-red-500">*</span></label>
                   <div className={wrapperClass}>
                     <div className="pl-4 flex items-center text-gray-400"><AlignLeft size={18} /></div>
                     <input required name="title" value={formData.title} onChange={handleChange} placeholder="Ej. Odontóloga Especialista" className={inputClass} />
@@ -287,7 +287,7 @@ export default function CrearNegocio() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>Categoría *</label>
+                  <label className={labelClass}>Categoría <span className="text-red-500">*</span></label>
                   <div className={wrapperClass}>
                     <div className="pl-4 flex items-center text-gray-400"><Building size={18} /></div>
                     <input required name="category" value={formData.category} onChange={handleChange} placeholder="Ej. Salud, Tecnología..." className={inputClass} />
@@ -303,7 +303,7 @@ export default function CrearNegocio() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>País *</label>
+                  <label className={labelClass}>País <span className="text-red-500">*</span></label>
                   <div className={`${wrapperClass} opacity-70`}>
                     <div className="pl-4 flex items-center text-gray-400"><MapPin size={18} /></div>
                     <input name="country" value={formData.country} readOnly disabled className={inputClass} />
@@ -311,7 +311,7 @@ export default function CrearNegocio() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>Ciudad / Departamento *</label>
+                  <label className={labelClass}>Ciudad / Departamento <span className="text-red-500">*</span></label>
                   <div className={wrapperClass}>
                     <div className="pl-4 flex items-center text-gray-400"><MapPin size={18} /></div>
                     <select required name="state" value={formData.state} onChange={handleChange} className={`${inputClass} bg-transparent cursor-pointer`}>
@@ -330,7 +330,7 @@ export default function CrearNegocio() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>Zona / Barrio *</label>
+                  <label className={labelClass}>Zona / Barrio <span className="text-red-500">*</span></label>
                   <div className={wrapperClass}>
                     <div className="pl-4 flex items-center text-gray-400"><Map size={18} /></div>
                     <input required name="neighborhood" value={formData.neighborhood} onChange={handleChange} placeholder="Ej. Zona Sur" className={inputClass} />
@@ -353,7 +353,7 @@ export default function CrearNegocio() {
               </div>
 
               <div className="mt-5">
-                <label className={labelClass}>Descripción de Servicios *</label>
+                <label className={labelClass}>Descripción de Servicios <span className="text-red-500">*</span></label>
                 <textarea required name="description" value={formData.description} onChange={handleChange} rows="4" placeholder="¿Qué servicios ofreces? Destaca tu experiencia..." className="w-full bg-gray-50 rounded-xl border border-gray-200 focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] transition-all px-4 py-3 outline-none text-[#1E3D51] resize-none"></textarea>
               </div>
             </div>

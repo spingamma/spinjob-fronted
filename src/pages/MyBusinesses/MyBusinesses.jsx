@@ -1,19 +1,10 @@
 // Archivo: src/MisNegocios.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Clock, CheckCircle2, XCircle, PlusCircle, Building, Eye, FileText, X } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle2, XCircle, PlusCircle, Building, Eye, FileText, X, Trash2, Loader2 } from 'lucide-react';
 import BottomNavbar from '../../components/BottomNavbar';
 import Header from '../../components/Header';
-
-// Mini-componente para mostrar los campos en solo lectura
-const CampoLectura = ({ label, valor }) => (
-  <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
-    <span className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">{label}</span>
-    <span className="block text-sm font-medium text-[#1E3D51] break-words whitespace-pre-wrap">
-      {valor ? valor : <span className="text-gray-300 italic">No especificado</span>}
-    </span>
-  </div>
-);
+import BusinessDetailsModal from '../../components/BusinessDetailsModal';
 
 export default function MisNegocios() {
   const [negocios, setNegocios] = useState([]);
@@ -35,6 +26,7 @@ export default function MisNegocios() {
     }
     return false;
   });
+  const [isDeleting, setIsDeleting] = useState(null); // Slug del negocio que se está eliminando
 
   useEffect(() => {
     const fetchMisNegocios = async () => {
@@ -73,6 +65,33 @@ export default function MisNegocios() {
 
   const handleCleanFilters = () => {
     navigate('/');
+  };
+
+  const handleEliminarNegocio = async (slug) => {
+    if (!window.confirm("¿Estás seguro de que deseas eliminar esta solicitud? Esta acción es permanente.")) {
+      return;
+    }
+
+    setIsDeleting(slug);
+    try {
+      const token = localStorage.getItem('spingamma_token');
+      const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+      const res = await fetch(`${API_URL}/businesses/${slug}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Error al eliminar el negocio");
+      }
+
+      setNegocios(prev => prev.filter(n => n.slug !== slug));
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      setIsDeleting(null);
+    }
   };
 
   if (cargando) return <div className="text-center py-20 text-[#1E3D51] font-bold">Cargando tus negocios...</div>;
@@ -169,6 +188,22 @@ export default function MisNegocios() {
                       <Eye size={18} /> Ver Tarjeta Pública
                     </Link>
                   )}
+
+                  {/* Botón de eliminar (solo para pendientes o admin) */}
+                  {(neg.status === 'pendiente' || isAdmin) && (
+                    <button 
+                      onClick={() => handleEliminarNegocio(neg.slug)}
+                      disabled={isDeleting === neg.slug}
+                      className="flex items-center gap-2 text-sm font-bold text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
+                    >
+                      {isDeleting === neg.slug ? (
+                        <Loader2 size={18} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={18} />
+                      )}
+                      Eliminar Solicitud
+                    </button>
+                  )}
                 </div>
 
               </div>
@@ -176,80 +211,22 @@ export default function MisNegocios() {
           </div>
         )}
 
-        {/* MODAL DE VISTA PREVIA DEL FORMULARIO */}
-        {negocioSeleccionado && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1E3D51]/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-[#F8F9FA] rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
-              
-              <div className="bg-gradient-to-r from-[#1E3D51] to-[#32698F] p-5 flex justify-between items-center text-white shrink-0">
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                  <Building size={20} /> Datos del Formulario
-                </h2>
-                <button onClick={() => setNegocioSeleccionado(null)} className="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors">
-                  <X size={20} />
-                </button>
-              </div>
-              
-              <div className="p-6 overflow-y-auto flex-1 space-y-6">
-                
-                {negocioSeleccionado.status === 'pendiente' && (
-                  <div className="bg-orange-50 text-orange-800 p-4 rounded-xl border border-orange-200 text-sm">
-                    <strong>Información en revisión:</strong> Estos datos fueron enviados a los administradores. Una vez aprobados, se generará tu tarjeta digital pública.
-                  </div>
-                )}
-                
-                {negocioSeleccionado.status === 'rechazado' && (
-                  <div className="bg-red-50 text-red-800 p-4 rounded-xl border border-red-200 text-sm">
-                    <strong>Solicitud rechazada:</strong> {negocioSeleccionado.rejection_reason}
-                  </div>
-                )}
-
-                <div>
-                  <h3 className="font-bold text-[#B95221] border-b border-gray-200 pb-2 mb-3">Información Principal</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <CampoLectura label="Nombre / Marca" valor={negocioSeleccionado.name} />
-                    <CampoLectura label="Especialidad" valor={negocioSeleccionado.title} />
-                    <CampoLectura label="Categoría" valor={negocioSeleccionado.category} />
-                    <CampoLectura label="País" valor={negocioSeleccionado.country} />
-                    <CampoLectura label="Ciudad / Departamento" valor={negocioSeleccionado.state} />
-                    <CampoLectura label="Zona / Barrio" valor={negocioSeleccionado.neighborhood} />
-                    <CampoLectura label="Género" valor={negocioSeleccionado.genero} />
-                  </div>
-                  <div className="mt-3">
-                    <CampoLectura label="Descripción de Servicios" valor={negocioSeleccionado.description} />
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-bold text-[#B95221] border-b border-gray-200 pb-2 mb-3">Contacto</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <CampoLectura label="WhatsApp" valor={negocioSeleccionado.whatsapp} />
-                    <CampoLectura label="Teléfono Fijo" valor={negocioSeleccionado.phone} />
-                  </div>
-                  <div className="mt-3">
-                    <CampoLectura label="Link de Ubicación (Maps)" valor={negocioSeleccionado.ubicacion_url} />
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-bold text-[#B95221] border-b border-gray-200 pb-2 mb-3">Redes Sociales</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <CampoLectura label="Página Web" valor={negocioSeleccionado.website} />
-                    <CampoLectura label="Facebook" valor={negocioSeleccionado.facebook} />
-                    <CampoLectura label="Instagram" valor={negocioSeleccionado.instagram} />
-                    <CampoLectura label="LinkedIn" valor={negocioSeleccionado.linkedin} />
-                    <CampoLectura label="TikTok" valor={negocioSeleccionado.tiktok} />
-                    <CampoLectura label="GitHub" valor={negocioSeleccionado.github} />
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        )}
-
+        {/* MODAL DE DETALLES REFACTORIZADO */}
+        <BusinessDetailsModal 
+          business={negocioSeleccionado}
+          onClose={() => setNegocioSeleccionado(null)}
+          banner={
+            negocioSeleccionado?.status === 'pendiente' ? {
+              type: 'warning',
+              content: 'Información en revisión: Estos datos fueron enviados a los administradores. Una vez aprobados, se generará tu tarjeta digital pública.'
+            } : negocioSeleccionado?.status === 'rechazado' ? {
+              type: 'error',
+              content: `Solicitud rechazada: ${negocioSeleccionado.rejection_reason}`
+            } : null
+          }
+        />
       </div>
-      
+
       <BottomNavbar 
         isLoggedIn={isLoggedIn} 
         isAdmin={isAdmin} 
