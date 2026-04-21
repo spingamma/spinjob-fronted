@@ -189,8 +189,8 @@ export default function MisNegocios() {
                     </Link>
                   )}
 
-                  {/* Botón de eliminar (solo para pendientes o admin) */}
-                  {(neg.status === 'pendiente' || isAdmin) && (
+                  {/* Botón de eliminar (para pendientes, rechazados o admin) */}
+                  {(neg.status === 'pendiente' || neg.status === 'rechazado' || isAdmin) && (
                     <button 
                       onClick={() => handleEliminarNegocio(neg.slug)}
                       disabled={isDeleting === neg.slug}
