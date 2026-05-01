@@ -1,5 +1,6 @@
 // Archivo: src/hooks/useAccionesPerfil.js
 import { useState, useEffect, useCallback } from 'react';
+import fetchAuth from '../utils/fetchAuth';
 
 export default function useAccionesPerfil(profesional, onProtectedAction) {
   const [mostrarQR, setMostrarQR] = useState(false);
@@ -96,14 +97,11 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     }
 
     setIsSaving(true);
-    const token = localStorage.getItem('spingamma_token');
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-    const method = isSaved ? 'DELETE' : 'POST';
 
     try {
-      const res = await fetch(`${API_URL}/tarjetero/${profesional.slug}`, {
-        method,
-        headers: { 'Authorization': `Bearer ${token}` }
+      const res = await fetchAuth(`${API_URL}/tarjetero/${profesional.slug}`, {
+        method: isSaved ? 'DELETE' : 'POST'
       });
       if (res.ok) {
         setIsSaved(!isSaved);
@@ -121,16 +119,11 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      const token = localStorage.getItem('spingamma_token');
 
-      const response = await fetch(`${API_URL}/businesses/${profesional.slug}/interaccion`, {
+      const response = await fetchAuth(`${API_URL}/businesses/${profesional.slug}/interaccion`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ platform: platformName }),
-        keepalive: true
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform: platformName })
       });
       
       if (!response.ok) {
@@ -170,7 +163,7 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
       return;
     }
 
-    setIsSubmittingReview(true); // Re-usamos esto para que el usuario note que algo está cargando
+    setIsSubmittingReview(true);
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
     const showVerificationPrompt = () => {
@@ -182,50 +175,25 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
 
     try {
       if (!isVerifiedStrict) {
-        const token = localStorage.getItem('spingamma_token');
-        
-        // VALIDACIÓN 1: Comprobar si realmente tenemos token para consultar
-        if (!token) {
-          console.error("Fallo de Frontend: No existe 'spingamma_token' en LocalStorage. El registro no devolvió token.");
-          showVerificationPrompt();
-          return;
-        }
-
-        const verifyRes = await fetch(`${API_URL}/usuarios/status`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const verifyRes = await fetchAuth(`${API_URL}/usuarios/status`);
 
         if (verifyRes.ok) {
           const verifyData = await verifyRes.json();
-          console.log("Respuesta Exitosa de /usuarios/status:", verifyData); // 👈 Revisa la consola del navegador
-
-          // VALIDACIÓN 2: Comprobar el nombre de la propiedad
           if (verifyData.is_verified === true || verifyData.is_verified === "true" || verifyData.is_verified === 1) {
             userObj.is_verified = true;
             localStorage.setItem('spingamma_user', JSON.stringify(userObj));
             isVerifiedStrict = true; 
           } else {
-            console.warn("Fallo de Lógica: El endpoint respondió 200 OK, pero 'is_verified' no es true.", verifyData);
             showVerificationPrompt();
             return;
           }
         } else {
-          const errorText = await verifyRes.text();
-          console.error(`Fallo de Backend: El endpoint respondió con error ${verifyRes.status}`, errorText);
           showVerificationPrompt();
           return;
         }
       }
 
-      // 2. Si pasamos hasta aquí, el usuario ESTÁ VERIFICADO (ya sea en localStorage o porque el endpoint lo confirmó)
-      const token = localStorage.getItem('spingamma_token');
-      const res = await fetch(`${API_URL}/businesses/${profesional.slug}/resenas/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const res = await fetchAuth(`${API_URL}/businesses/${profesional.slug}/resenas/me`);
       if (res.ok) {
         const data = await res.json();
         setCalificacionPrevia(data.rating ? data : null);
@@ -233,7 +201,6 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
         setCalificacionPrevia(null);
       }
       
-      // Abrimos modal de exito final
       setMostrarModalCalificando(true);
       localStorage.removeItem(pendingRateKey);
       setMostrarCalificacion(false);
@@ -246,34 +213,27 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     }
   }, [profesional, userName, userObj, pendingRateKey]);
 
-  const handleSubmitReview = useCallback(async ({ rating, description, imageFile, esEdicion }) => {
+  const handleSubmitReview = useCallback(async ({ rating, description, esEdicion }) => {
     if (!profesional || !userObj) return;
     setIsSubmittingReview(true);
     
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      const token = localStorage.getItem('spingamma_token');
       
       const formData = new FormData();
       formData.append('rating', rating);
       if (description) formData.append('descripcion', description);
-      if (imageFile) formData.append('image', imageFile);
       
-      // POST si es nueva, PUT si es edicion
       const method = esEdicion ? 'PUT' : 'POST';
       const endpoint = `${API_URL}/businesses/${profesional.slug}/resenas`;
       
-      const res = await fetch(endpoint, {
+      const res = await fetchAuth(endpoint, {
         method,
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
         body: formData,
       });
       
       if (!res.ok) throw new Error("Error saving review");
       
-      // Si fue exitoso
       setMostrarModalCalificando(false);
       // Limpiar datos
       setCalificacionPrevia(null);

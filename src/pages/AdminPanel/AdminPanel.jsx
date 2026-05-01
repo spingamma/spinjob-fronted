@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import BottomNavbar from '../../components/BottomNavbar';
 import BusinessDetailsModal from '../../components/BusinessDetailsModal';
+import fetchAuth from '../../utils/fetchAuth';
 
 export default function AdminPanel() {
   const [pendientes, setPendientes] = useState([]);
@@ -42,10 +43,7 @@ export default function AdminPanel() {
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      // Asumiendo endpoint: @app.get("/admin/pendientes")
-      const res = await fetch(`${API_URL}/admin/pendientes`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await fetchAuth(`${API_URL}/admin/pendientes`);
       
       if (res.status === 403) throw new Error("No tienes permisos de administrador.");
       if (!res.ok) throw new Error("Error al cargar solicitudes.");
@@ -78,9 +76,7 @@ export default function AdminPanel() {
         ? `${API_URL}/admin/users?search=${encodeURIComponent(userSearchTerm)}` 
         : `${API_URL}/admin/users`;
         
-      const res = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await fetchAuth(url);
       
       if (!res.ok) throw new Error("Error obteniendo usuarios");
       const data = await res.json();
@@ -97,9 +93,8 @@ export default function AdminPanel() {
     setIsVerifyingUser(phone);
     try {
       const token = localStorage.getItem('spingamma_token');
-      const res = await fetch(`${API_URL}/users/${phone}/verificar`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const res = await fetchAuth(`${API_URL}/users/${phone}/verificar`, {
+        method: 'PUT'
       });
       if (!res.ok) throw new Error("Error al verificar al usuario.");
       setUsers(users.map(u => u.phone === phone ? { ...u, is_verified: true } : u));
@@ -122,11 +117,10 @@ export default function AdminPanel() {
     
     try {
       // Asumiendo endpoint: @app.put("/admin/businesses/{slug}/status")
-      const res = await fetch(`${API_URL}/admin/businesses/${slug}/status`, {
+      const res = await fetchAuth(`${API_URL}/admin/businesses/${slug}/status`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           status: accion === 'aprobar' ? 'aprobado' : 'rechazado',
@@ -256,7 +250,7 @@ export default function AdminPanel() {
                       </p>
                     </div>
                     
-                    <div className="flex lg:flex-col gap-3 min-w-[160px] justify-center">
+                    <div className="flex flex-col sm:flex-row lg:flex-col gap-3 w-full sm:w-auto lg:min-w-[160px] justify-center">
                       <button 
                         onClick={() => handleAccion(neg.slug, 'aprobar')}
                         className="flex-1 bg-green-500 hover:bg-green-600 text-white py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm hover:-translate-y-0.5"

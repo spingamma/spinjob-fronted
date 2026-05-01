@@ -1,20 +1,18 @@
 // Archivo: src/components/ReviewModal.jsx
 import React, { useState, useEffect } from 'react';
-import { Star, X, ImagePlus, UploadCloud, Loader2 } from 'lucide-react';
+import { Star, X, Loader2 } from 'lucide-react';
 
 export default function ReviewModal({
   isOpen,
   onClose,
   onSubmit,
   isSubmitting,
-  calificacionPrevia = null, // Si tiene algo, significa que está editando
+  calificacionPrevia = null,
   profesionalName = ""
 }) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [description, setDescription] = useState("");
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
 
   // Al abrir el modal, poblamos con la calificación previa si la hubiera
   useEffect(() => {
@@ -22,44 +20,22 @@ export default function ReviewModal({
       if (calificacionPrevia) {
         setRating(calificacionPrevia.rating || 0);
         setDescription(calificacionPrevia.descripcion || "");
-        setImagePreview(calificacionPrevia.image_url || null);
-        setImageFile(null); // No hay archivo porque ya está subida
       } else {
         setRating(0);
         setDescription("");
-        setImageFile(null);
-        setImagePreview(null);
       }
     }
   }, [isOpen, calificacionPrevia]);
 
   if (!isOpen) return null;
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleRemoveImage = () => {
-    setImageFile(null);
-    setImagePreview(calificacionPrevia?.image_url || null);
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (rating === 0) {
-      // Opcionalmente podrías poner un error state aquí
       alert("Por favor selecciona una calificación de estrellas.");
       return;
     }
-    onSubmit({ rating, description, imageFile, esEdicion: !!calificacionPrevia });
+    onSubmit({ rating, description, esEdicion: !!calificacionPrevia });
   };
 
   const isEditing = !!calificacionPrevia;
@@ -143,44 +119,6 @@ export default function ReviewModal({
                 className="w-full bg-gray-50 border border-gray-200 text-[#1E3D51] rounded-2xl p-4 focus:ring-2 focus:ring-[#B95221]/30 focus:border-[#B95221] focus:bg-white outline-none transition-all resize-none disabled:opacity-60"
                 rows="4"
               />
-            </div>
-
-            {/* SUBIDA DE IMAGEN */}
-            <div>
-              <label className="block text-sm font-bold text-[#1E3D51] mb-2">
-                Adjuntar evidencia o foto de su trabajo (Opcional)
-              </label>
-              
-              {!imagePreview ? (
-                <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer bg-gray-50 hover:bg-orange-50 hover:border-[#B95221]/50 transition-all ${isSubmitting ? 'pointer-events-none opacity-60' : ''}`}>
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6 text-gray-400">
-                    <UploadCloud size={32} className="mb-2" />
-                    <p className="mb-1 text-sm font-semibold text-gray-600">Haz clic para subir imagen</p>
-                    <p className="text-xs">PNG, JPG o WEBP (MAX. 5MB)</p>
-                  </div>
-                  <input 
-                    type="file" 
-                    className="hidden" 
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    disabled={isSubmitting}
-                  />
-                </label>
-              ) : (
-                <div className="relative group rounded-2xl overflow-hidden border border-gray-200">
-                  <img src={imagePreview} alt="Vista previa" className="w-full h-40 object-cover" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button
-                      type="button"
-                      disabled={isSubmitting}
-                      onClick={handleRemoveImage}
-                      className="bg-red-500 text-white font-bold py-2 px-4 rounded-xl flex items-center gap-2 hover:bg-red-600 transition-colors shadow-lg"
-                    >
-                      <X size={16} /> Quitar imagen
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* BOTÓN ENVIAR */}

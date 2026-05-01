@@ -6,6 +6,7 @@ import BottomNavbar from '../../components/BottomNavbar';
 import Header from '../../components/Header';
 import DirectoryFilterBar from '../../components/DirectoryFilterBar';
 import { useDirectoryFilters } from '../../hooks/useDirectoryFilters';
+import fetchAuth from '../../utils/fetchAuth';
 
 export default function Tarjetero() {
   const [tarjetas, setTarjetas] = useState([]);
@@ -41,9 +42,7 @@ export default function Tarjetero() {
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      const res = await fetch(`${API_URL}/tarjetero`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await fetchAuth(`${API_URL}/tarjetero`);
       
       if (!res.ok) throw new Error("Error al cargar tu tarjetero");
       
@@ -75,9 +74,8 @@ export default function Tarjetero() {
     
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      const res = await fetch(`${API_URL}/tarjetero/${slug}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const res = await fetchAuth(`${API_URL}/tarjetero/${slug}`, {
+        method: 'DELETE'
       });
       if (res.ok) {
         setTarjetas(prev => prev.filter(t => t.slug !== slug));

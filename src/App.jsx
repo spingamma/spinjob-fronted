@@ -25,6 +25,7 @@ function App() {
         <Route path="/" element={<Directory />} />
         <Route path="/perfil/:slug" element={<Profile />} />
         <Route path="/crear-negocio" element={<CreateBusiness />} />
+        <Route path="/editar-negocio/:slug" element={<CreateBusiness />} />
         <Route path="/mis-negocios" element={<MyBusinesses />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/tarjetero" element={<BusinessCardHolder />} />

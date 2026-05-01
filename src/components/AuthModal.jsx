@@ -1,55 +1,25 @@
 // Archivo: src/components/AuthModal.jsx
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { UserPlus, LogIn, X, Loader2, Eye, EyeOff, Phone, KeyRound, Mail, ShieldCheck } from 'lucide-react';
+import useAuthLogic from '../hooks/useAuthLogic';
 
 export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = false }) {
-  // ── Estados de vista ──
-  const [isLoginMode, setIsLoginMode] = useState(true);
-  const [isForgotMode, setIsForgotMode] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [isCompletingPhone, setIsCompletingPhone] = useState(false);
+  const {
+    isLoginMode, isForgotMode, isChangingPassword, isCompletingPhone,
+    isLoading, apiError, apiSuccess, showPassword, showNewPassword,
+    setShowPassword, setShowNewPassword,
+    formData, setFormData, errores, setErrores,
+    handleGoogleSuccess, handleSubmitNormal, handleForgotPassword,
+    handleChangePassword, handleCompletarCelular,
+    switchToForgot, switchFromForgot, switchMode,
+  } = useAuthLogic({ isOpen, onSuccess });
 
-  // ── Estados auxiliares ──
-  const [isLoading, setIsLoading] = useState(false);
-  const [apiError, setApiError] = useState('');
-  const [apiSuccess, setApiSuccess] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-
-  // ── Datos temporales (Google flow / change-password flow) ──
-  const [tempToken, setTempToken] = useState(null);
-  const [tempUserData, setTempUserData] = useState(null);
-
-  // ── Formulario ──
-  const [formData, setFormData] = useState({ nombre: '', apellidos: '', celular: '', email: '', password: '', newPassword: '', confirmPassword: '' });
-  const [errores, setErrores] = useState({});
-
-  const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
   const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
-  // ── Reset al abrir ──
-  useEffect(() => {
-    if (isOpen) {
-      setFormData({ nombre: '', apellidos: '', celular: '', email: '', password: '', newPassword: '', confirmPassword: '' });
-      setErrores({});
-      setApiError('');
-      setApiSuccess('');
-      setIsLoginMode(true);
-      setIsForgotMode(false);
-      setIsChangingPassword(false);
-      setShowPassword(false);
-      setShowNewPassword(false);
-      setIsCompletingPhone(false);
-      setTempToken(null);
-      setTempUserData(null);
-    }
-  }, [isOpen]);
-
-  // ── Render Google Button (Avoid FedCM AbortError) ──
+  // ── Render Google Button ──
   useEffect(() => {
     if (!isOpen || isForgotMode || isChangingPassword || isCompletingPhone) return;
 
-    // Pequeño timeout para asegurar que el DOM y el SDK de Google están listos
     const timeoutId = setTimeout(() => {
       const btnContainer = document.getElementById('googleSignInContainer');
       if (btnContainer && window.google?.accounts?.id) {
@@ -76,257 +46,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
   if (!isOpen) return null;
 
   // ══════════════════════════════════════════
-  // Google Auth Handler
-  // ══════════════════════════════════════════
-  const handleGoogleSuccess = async (credentialResponse) => {
-    setIsLoading(true);
-    setApiError('');
-    try {
-      const res = await fetch(`${API_URL}/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ google_token: credentialResponse.credential })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Error en validación con Google.');
-      
-      localStorage.setItem('spingamma_token', data.access_token);
-      
-      if (!data.celular) {
-        setTempToken(data.access_token);
-        setTempUserData({ nombre: data.nombre, is_admin: data.is_admin || false });
-        setIsCompletingPhone(true);
-      } else {
-        localStorage.setItem('spingamma_user', JSON.stringify({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false }));
-        onSuccess({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false });
-      }
-    } catch (err) {
-      setApiError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // ══════════════════════════════════════════
-  // Validación
-  // ══════════════════════════════════════════
-  const validar = (soloCelular = false) => {
-    let valid = true;
-    const nuevosErrores = {};
-
-    if (!soloCelular) {
-      // ── Forgot mode: solo email ──
-      if (isForgotMode) {
-        const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!regexEmail.test(formData.email.trim())) {
-          nuevosErrores.email = 'Ingresa un correo electrónico válido.';
-          valid = false;
-        }
-        setErrores(nuevosErrores);
-        return valid;
-      }
-
-      // ── Change-password mode ──
-      if (isChangingPassword) {
-        if (formData.newPassword.trim().length < 4) {
-          nuevosErrores.newPassword = 'La contraseña debe tener al menos 4 caracteres.';
-          valid = false;
-        }
-        if (formData.newPassword !== formData.confirmPassword) {
-          nuevosErrores.confirmPassword = 'Las contraseñas no coinciden.';
-          valid = false;
-        }
-        setErrores(nuevosErrores);
-        return valid;
-      }
-
-      // ── Register fields ──
-      if (!isLoginMode) {
-        if (formData.nombre.trim().length < 2) {
-          nuevosErrores.nombre = 'Ingresa tu nombre.';
-          valid = false;
-        }
-        if (formData.apellidos.trim().length < 2) {
-          nuevosErrores.apellidos = 'Ingresa tus apellidos.';
-          valid = false;
-        }
-        const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!regexEmail.test(formData.email.trim())) {
-          nuevosErrores.email = 'Ingresa un correo electrónico válido.';
-          valid = false;
-        }
-      }
-    }
-
-    // ── Celular (register + login + completar phone) ──
-    if (!isForgotMode && !isChangingPassword) {
-      const regexCelular = /^[0-9]{8}$/;
-      if (!regexCelular.test(formData.celular.trim())) {
-        nuevosErrores.celular = 'El celular debe tener exactamente 8 dígitos numéricos.';
-        valid = false;
-      }
-    }
-
-    // ── Password (register + login) ──
-    if (!soloCelular && !isForgotMode && !isChangingPassword) {
-      if (formData.password.trim().length < 4) {
-        nuevosErrores.password = 'La contraseña debe tener al menos 4 caracteres.';
-        valid = false;
-      }
-    }
-
-    setErrores(nuevosErrores);
-    return valid;
-  };
-
-  // ══════════════════════════════════════════
-  // Login / Register
-  // ══════════════════════════════════════════
-  const handleSubmitNormal = async (e) => {
-    e.preventDefault();
-    setApiError('');
-    setApiSuccess('');
-    if (!validar(false)) return;
-    setIsLoading(true);
-    
-    const endpoint = isLoginMode ? '/auth/login' : '/auth/register';
-    const payload = isLoginMode 
-      ? { phone: formData.celular, password: formData.password }
-      : { 
-          name: `${formData.nombre.trim()} ${formData.apellidos.trim()}`, 
-          phone: formData.celular, 
-          email: formData.email.trim(),
-          password: formData.password 
-        };
-
-    try {
-      const response = await fetch(`${API_URL}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || 'Ocurrió un error inesperado.');
-
-      if (data.access_token) {
-        localStorage.setItem('spingamma_token', data.access_token);
-      }
-      
-      // Si must_change_password es true, forzar cambio de contraseña
-      if (data.must_change_password) {
-        setTempToken(data.access_token);
-        setTempUserData({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false });
-        setIsChangingPassword(true);
-        setIsLoading(false);
-        return;
-      }
-      
-      onSuccess({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false });
-    } catch (error) {
-      setApiError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // ══════════════════════════════════════════
-  // Forgot Password
-  // ══════════════════════════════════════════
-  const handleForgotPassword = async (e) => {
-    e.preventDefault();
-    setApiError('');
-    setApiSuccess('');
-    if (!validar(false)) return;
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(`${API_URL}/auth/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email.trim() })
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || 'Error al procesar la solicitud.');
-
-      setApiSuccess(data.message || 'Si el correo está registrado, recibirás una contraseña temporal.');
-    } catch (error) {
-      setApiError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // ══════════════════════════════════════════
-  // Change Password (forced after temp login)
-  // ══════════════════════════════════════════
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
-    setApiError('');
-    setApiSuccess('');
-    if (!validar(false)) return;
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(`${API_URL}/auth/change-password`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${tempToken}`
-        },
-        body: JSON.stringify({ new_password: formData.newPassword })
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || 'Error al cambiar la contraseña.');
-
-      // Contraseña cambiada exitosamente, completar el login
-      localStorage.setItem('spingamma_user', JSON.stringify({ 
-        nombre: tempUserData.nombre, 
-        celular: tempUserData.celular, 
-        is_admin: tempUserData.is_admin 
-      }));
-      onSuccess({ nombre: tempUserData.nombre, celular: tempUserData.celular, is_admin: tempUserData.is_admin });
-    } catch (error) {
-      setApiError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // ══════════════════════════════════════════
-  // Completar Celular (Google flow)
-  // ══════════════════════════════════════════
-  const handleCompletarCelular = async (e) => {
-    e.preventDefault();
-    setApiError('');
-    if (!validar(true)) return;
-    setIsLoading(true);
-
-    try {
-      const res = await fetch(`${API_URL}/usuarios/completar-celular`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${tempToken}`
-        },
-        body: JSON.stringify({ phone: formData.celular })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Error al completar tu celular.');
-
-      const celularGuardado = formData.celular; 
-      localStorage.setItem('spingamma_user', JSON.stringify({ nombre: tempUserData.nombre, celular: celularGuardado, is_admin: tempUserData.is_admin }));
-      onSuccess({ nombre: tempUserData.nombre, celular: celularGuardado, is_admin: tempUserData.is_admin });
-    } catch (error) {
-      setApiError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // ══════════════════════════════════════════
   // Theme tokens
   // ══════════════════════════════════════════
   const bgOverlay = isDarkTheme ? 'bg-[#152a38]/90' : 'bg-[#1E3D51]/80';
@@ -342,9 +61,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
   const eyeIconColor = isDarkTheme ? 'text-[#E6E2DF]/60 hover:text-[#F67927]' : 'text-gray-400 hover:text-[#B95221]';
   const requiredStar = isDarkTheme ? 'text-[#F67927]' : 'text-red-500';
 
-  // ══════════════════════════════════════════
-  // Helper: qué icono y título mostrar
-  // ══════════════════════════════════════════
+  // ── Header info ──
   const getHeaderInfo = () => {
     if (isCompletingPhone) return { icon: <Phone size={32} className={iconColor} />, title: 'Falta un paso más', subtitle: 'Hola, vincula tu número de WhatsApp para activar la opción de calificación en Tarjetoso.' };
     if (isChangingPassword) return { icon: <ShieldCheck size={32} className={iconColor} />, title: 'Crea tu Nueva Contraseña', subtitle: 'Tu contraseña temporal fue verificada. Por seguridad, elige una nueva contraseña permanente.' };
@@ -355,9 +72,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
 
   const { icon, title, subtitle } = getHeaderInfo();
 
-  // ══════════════════════════════════════════
-  // Input helper
-  // ══════════════════════════════════════════
+  // ── Input helper ──
   const renderInput = (field, label, type, placeholder, options = {}) => {
     const { required = true, inputMode, isPassword = false } = options;
     const showEye = isPassword;
@@ -403,6 +118,24 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
     );
   };
 
+  // ── Error / Success alerts ──
+  const renderError = () => apiError && (
+    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in">
+      {apiError}
+    </div>
+  );
+
+  const renderSuccess = () => apiSuccess && (
+    <div className={`${isDarkTheme ? 'bg-[#32698F]/50 border-[#F67927]/40 text-[#E6E2DF]' : 'bg-green-50 border-green-200 text-green-700'} border px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in`}>
+      <div className="flex items-start gap-2">
+        <Mail size={16} className="mt-0.5 flex-shrink-0" />
+        <span>{apiSuccess}</span>
+      </div>
+    </div>
+  );
+
+  const submitBtnClass = `w-full font-bold py-4 px-4 rounded-xl transition-all shadow-md mt-4 flex justify-center items-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-0.5 active:scale-[0.98]'} ${btnSubmitBg}`;
+
   // ══════════════════════════════════════════
   // RENDER
   // ══════════════════════════════════════════
@@ -423,85 +156,42 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
           <p className={`text-sm px-2 ${textSub}`}>{subtitle}</p>
         </div>
 
-        {/* ══════════════════════════════════════ */}
-        {/* VISTA: Completar Celular (Google)     */}
-        {/* ══════════════════════════════════════ */}
+        {/* VISTA: Completar Celular (Google) */}
         {isCompletingPhone ? (
            <form onSubmit={handleCompletarCelular} className="space-y-4">
              {renderInput('celular', 'Celular / WhatsApp (OBLIGATORIO)', 'tel', 'Ej. 71234567', { inputMode: 'numeric' })}
-             
-             {apiError && (
-               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in">
-                 {apiError}
-               </div>
-             )}
-
-             <button 
-               type="submit" 
-               disabled={isLoading}
-               className={`w-full font-bold py-4 px-4 rounded-xl transition-all shadow-md mt-4 flex justify-center items-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-0.5 active:scale-[0.98]'} ${btnSubmitBg}`}
-             >
+             {renderError()}
+             <button type="submit" disabled={isLoading} className={submitBtnClass}>
                {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Completar Registro'}
              </button>
            </form>
 
-        /* ══════════════════════════════════════ */
-        /* VISTA: Cambiar Contraseña (forzado)   */
-        /* ══════════════════════════════════════ */
+        /* VISTA: Cambiar Contraseña (forzado) */
         ) : isChangingPassword ? (
           <form onSubmit={handleChangePassword} className="space-y-4">
             {renderInput('newPassword', 'Nueva Contraseña', 'password', 'Mínimo 4 caracteres', { isPassword: true })}
             {renderInput('confirmPassword', 'Confirmar Contraseña', 'password', 'Repite tu nueva contraseña', { isPassword: true })}
-            
-            {apiError && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in">
-                {apiError}
-              </div>
-            )}
-
-            <button 
-              type="submit" 
-              disabled={isLoading}
-              className={`w-full font-bold py-4 px-4 rounded-xl transition-all shadow-md mt-4 flex justify-center items-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-0.5 active:scale-[0.98]'} ${btnSubmitBg}`}
-            >
+            {renderError()}
+            <button type="submit" disabled={isLoading} className={submitBtnClass}>
               {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Guardar Nueva Contraseña'}
             </button>
           </form>
 
-        /* ══════════════════════════════════════ */
-        /* VISTA: Forgot Password                 */
-        /* ══════════════════════════════════════ */
+        /* VISTA: Forgot Password */
         ) : isForgotMode ? (
           <form onSubmit={handleForgotPassword} className="space-y-4">
             {renderInput('email', 'Correo Electrónico', 'email', 'tucorreo@ejemplo.com')}
+            {renderError()}
+            {renderSuccess()}
 
-            {apiError && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in">
-                {apiError}
-              </div>
-            )}
-
-            {apiSuccess && (
-              <div className={`${isDarkTheme ? 'bg-[#32698F]/50 border-[#F67927]/40 text-[#E6E2DF]' : 'bg-green-50 border-green-200 text-green-700'} border px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in`}>
-                <div className="flex items-start gap-2">
-                  <Mail size={16} className="mt-0.5 flex-shrink-0" />
-                  <span>{apiSuccess}</span>
-                </div>
-              </div>
-            )}
-
-            <button 
-              type="submit" 
-              disabled={isLoading || !!apiSuccess}
-              className={`w-full font-bold py-4 px-4 rounded-xl transition-all shadow-md mt-4 flex justify-center items-center gap-2 ${(isLoading || apiSuccess) ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-0.5 active:scale-[0.98]'} ${btnSubmitBg}`}
-            >
+            <button type="submit" disabled={isLoading || !!apiSuccess} className={`${submitBtnClass} ${apiSuccess ? 'opacity-70 cursor-not-allowed' : ''}`}>
               {isLoading ? <Loader2 size={18} className="animate-spin" /> : (apiSuccess ? 'Correo Enviado ✓' : 'Enviar Contraseña Temporal')}
             </button>
 
             <p className={`text-center text-sm mt-5 ${textSub}`}>
               <button
                 type="button"
-                onClick={() => { setIsForgotMode(false); setApiError(''); setApiSuccess(''); setErrores({}); }}
+                onClick={switchFromForgot}
                 className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#B95221] hover:text-[#e06516]'}`}
               >
                 ← Volver al inicio de sesión
@@ -509,13 +199,11 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
             </p>
           </form>
 
-        /* ══════════════════════════════════════ */
-        /* VISTA: Login / Register                */
-        /* ══════════════════════════════════════ */
+        /* VISTA: Login / Register */
         ) : (
           <>
             <form onSubmit={handleSubmitNormal} className="space-y-4">
-              <div className="flex justify-center w-full w-full min-h-[44px]">
+              <div className="flex justify-center w-full min-h-[44px]">
                 <div id="googleSignInContainer" className={isLoading ? 'opacity-50 pointer-events-none' : ''}></div>
               </div>
 
@@ -525,7 +213,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
                 <div className="flex-grow border-t border-gray-300/50"></div>
               </div>
 
-              {/* ── Campos de registro ── */}
               {!isLoginMode && (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -536,40 +223,24 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
                 </>
               )}
 
-              {/* ── Celular (login + register) ── */}
               {renderInput('celular', 'Celular / WhatsApp', 'tel', 'Ej. 71234567', { inputMode: 'numeric' })}
-
-              {/* ── Password ── */}
               {renderInput('password', 'Contraseña', 'password', 'Mínimo 4 caracteres', { isPassword: true })}
 
-              {/* ── ¿Olvidaste tu contraseña? (solo en login) ── */}
               {isLoginMode && (
-              <div className="text-center -mt-1">
+                <div className="text-center -mt-1">
                   <button
                     type="button"
-                    onClick={() => { setIsForgotMode(true); setApiError(''); setErrores({}); }}
-                    className={`text-xs font-semibold transition-colors ${
-                      isDarkTheme
-                        ? 'text-[#E6E2DF]/70 hover:text-[#F67927]'
-                        : 'text-gray-400 hover:text-[#B95221]'
-                    }`}
+                    onClick={switchToForgot}
+                    className={`text-xs font-semibold transition-colors ${isDarkTheme ? 'text-[#E6E2DF]/70 hover:text-[#F67927]' : 'text-gray-400 hover:text-[#B95221]'}`}
                   >
                     ¿Olvidaste tu contraseña?
                   </button>
                 </div>
               )}
 
-              {apiError && (
-                 <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in">
-                   {apiError}
-                 </div>
-              )}
+              {renderError()}
 
-              <button 
-                type="submit" 
-                disabled={isLoading}
-                className={`w-full font-bold py-4 px-4 rounded-xl transition-all shadow-md mt-4 flex justify-center items-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-0.5 active:scale-[0.98]'} ${btnSubmitBg}`}
-              >
+              <button type="submit" disabled={isLoading} className={submitBtnClass}>
                 {isLoading && <Loader2 size={18} className="animate-spin" />}
                 {isLoading ? 'Procesando...' : (isLoginMode ? 'Ingresar a mi cuenta' : 'Crear mi cuenta gratis')}
               </button>
@@ -579,22 +250,14 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
               {isLoginMode ? (
                 <>
                   ¿No tienes cuenta?{' '}
-                  <button
-                    type="button"
-                    onClick={() => { setIsLoginMode(false); setApiError(''); setErrores({}); }}
-                    className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#B95221] hover:text-[#e06516]'}`}
-                  >
+                  <button type="button" onClick={switchMode} className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#B95221] hover:text-[#e06516]'}`}>
                     Crear tu cuenta
                   </button>
                 </>
               ) : (
                 <>
                   ¿Ya tienes cuenta?{' '}
-                  <button
-                    type="button"
-                    onClick={() => { setIsLoginMode(true); setApiError(''); setErrores({}); }}
-                    className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#B95221] hover:text-[#e06516]'}`}
-                  >
+                  <button type="button" onClick={switchMode} className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#B95221] hover:text-[#e06516]'}`}>
                     Iniciar sesión
                   </button>
                 </>

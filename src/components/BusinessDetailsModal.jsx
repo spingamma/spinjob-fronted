@@ -95,7 +95,7 @@ export default function BusinessDetailsModal({ business, onClose, actions, banne
 
         {/* Acciones Opcionales (Pie de Modal) */}
         {actions && (
-          <div className="p-5 bg-gray-50 border-t border-gray-100 flex gap-3">
+          <div className="p-5 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row gap-3">
             {actions}
           </div>
         )}

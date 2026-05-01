@@ -1,10 +1,12 @@
 // Archivo: src/MisNegocios.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Clock, CheckCircle2, XCircle, PlusCircle, Building, Eye, FileText, X, Trash2, Loader2 } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle2, XCircle, PlusCircle, Building, Eye, FileText, X, Trash2, Loader2, ShoppingBag, Edit3 } from 'lucide-react';
 import BottomNavbar from '../../components/BottomNavbar';
 import Header from '../../components/Header';
 import BusinessDetailsModal from '../../components/BusinessDetailsModal';
+import CatalogManager from '../../components/CatalogManager';
+import fetchAuth from '../../utils/fetchAuth';
 
 export default function MisNegocios() {
   const [negocios, setNegocios] = useState([]);
@@ -14,6 +16,7 @@ export default function MisNegocios() {
 
   // Estado para controlar qué negocio se está viendo en el modal
   const [negocioSeleccionado, setNegocioSeleccionado] = useState(null);
+  const [catalogBusiness, setCatalogBusiness] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
@@ -38,9 +41,7 @@ export default function MisNegocios() {
 
       try {
         const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-        const res = await fetch(`${API_URL}/usuarios/mis-negocios`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const res = await fetchAuth(`${API_URL}/usuarios/mis-negocios`);
         
         if (!res.ok) throw new Error("Error al cargar tus negocios");
         
@@ -179,13 +180,32 @@ export default function MisNegocios() {
                     <FileText size={18} /> Ver Datos Enviados
                   </button>
 
-                  {/* Este enlace va a la tarjeta pública, SOLO visible si está aprobado */}
                   {neg.status === 'aprobado' && (
                     <Link 
                       to={`/perfil/${neg.slug}`} 
                       className="flex items-center gap-2 text-sm font-bold text-[#32698F] hover:text-[#B95221] transition-colors"
                     >
                       <Eye size={18} /> Ver Tarjeta Pública
+                    </Link>
+                  )}
+
+                  {/* Botón Gestionar Catálogo - Solo para negocios aprobados */}
+                  {neg.status === 'aprobado' && (
+                    <button 
+                      onClick={() => setCatalogBusiness(neg)}
+                      className="flex items-center gap-2 text-sm font-bold text-teal-600 hover:text-teal-800 transition-colors"
+                    >
+                      <ShoppingBag size={18} /> Gestionar Catálogo
+                    </button>
+                  )}
+
+                  {/* Botón Editar Información - Solo para negocios aprobados */}
+                  {neg.status === 'aprobado' && (
+                    <Link
+                      to={`/editar-negocio/${neg.slug}`}
+                      className="flex items-center gap-2 text-sm font-bold text-amber-600 hover:text-amber-800 transition-colors"
+                    >
+                      <Edit3 size={18} /> Editar Información
                     </Link>
                   )}
 
@@ -224,6 +244,13 @@ export default function MisNegocios() {
               content: `Solicitud rechazada: ${negocioSeleccionado.rejection_reason}`
             } : null
           }
+        />
+
+        {/* MODAL DE GESTIÓN DE CATÁLOGO */}
+        <CatalogManager
+          isOpen={!!catalogBusiness}
+          onClose={() => setCatalogBusiness(null)}
+          business={catalogBusiness}
         />
       </div>
 

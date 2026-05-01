@@ -1,38 +1,64 @@
 // Archivo: src/CrearNegocio.jsx
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Briefcase, Building, MapPin, AlignLeft, Phone, ArrowLeft,
-  Loader2, Clock, Globe, Link as LinkIcon, User, Map, Image as ImageIcon, X, Check
+  Loader2, Clock, Globe, Link as LinkIcon, User, Map, Image as ImageIcon, Check, ShoppingBag
 } from 'lucide-react';
-import Cropper from 'react-easy-crop';
-import { getCroppedImgFile } from '../../utils/cropImage';
+import CropModal from '../../components/CropModal';
 import ModalVerificacion from '../../components/ModalVerificacion';
 
 export default function CrearNegocio() {
   const navigate = useNavigate();
+  const { slug: editSlug } = useParams();
+  const isEditMode = !!editSlug;
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(isEditMode);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState(null);
 
   const [formData, setFormData] = useState({
     name: '', title: '', category: '', subcategory: '', country: 'Bolivia', state: '', neighborhood: '', description: '',
     genero: '', phone: '', whatsapp: '', facebook: '', instagram: '',
-    linkedin: '', website: '', tiktok: '', github: '', ubicacion_url: ''
+    linkedin: '', website: '', tiktok: '', github: '', ubicacion_url: '', catalog_url: ''
   });
 
   const [imageSrc, setImageSrc] = useState(null);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [croppedImageFile, setCroppedImageFile] = useState(null);
   const [showCropModal, setShowCropModal] = useState(false);
-
-  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
+  // 📦 Cargar datos del negocio en modo edición
+  useEffect(() => {
+    if (!isEditMode) return;
+    const fetchBusiness = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+        const res = await fetch(`${API_URL}/businesses/${editSlug}`);
+        if (!res.ok) throw new Error('No se encontró el negocio');
+        const data = await res.json();
+        setFormData({
+          name: data.name || '', title: data.title || '', category: data.category || '',
+          subcategory: data.subcategory || '', country: data.country || 'Bolivia',
+          state: data.state || '', neighborhood: data.neighborhood || '',
+          description: data.description || '', genero: data.genero || '',
+          phone: data.phone || '', whatsapp: data.whatsapp || '',
+          facebook: data.facebook || '', instagram: data.instagram || '',
+          linkedin: data.linkedin || '', website: data.website || '',
+          tiktok: data.tiktok || '', github: data.github || '',
+          ubicacion_url: data.ubicacion_url || '', catalog_url: data.catalog_url || ''
+        });
+        if (data.image) setCurrentAvatarUrl(data.image);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+    fetchBusiness();
+  }, [editSlug, isEditMode]);
 
   const onFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -46,16 +72,6 @@ export default function CrearNegocio() {
     }
   };
 
-  const handleCropImage = async () => {
-    try {
-      const file = await getCroppedImgFile(imageSrc, croppedAreaPixels);
-      setCroppedImageFile(file);
-      setShowCropModal(false);
-    } catch (e) {
-      console.error(e);
-      setError("Error al recortar la imagen");
-    }
-  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -167,8 +183,13 @@ export default function CrearNegocio() {
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      const response = await fetch(`${API_URL}/businesses/`, {
-        method: 'POST',
+      const endpoint = isEditMode 
+        ? `${API_URL}/businesses/${editSlug}/editar`
+        : `${API_URL}/businesses/`;
+      const method = isEditMode ? 'PUT' : 'POST';
+
+      const response = await fetch(endpoint, {
+        method,
         headers: {
           'Authorization': `Bearer ${token}`
         },
@@ -177,7 +198,7 @@ export default function CrearNegocio() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Error al crear el negocio.');
+        throw new Error(errorData.detail || (isEditMode ? 'Error al actualizar.' : 'Error al crear el negocio.'));
       }
 
       setSuccess(true);
@@ -193,12 +214,24 @@ export default function CrearNegocio() {
   if (success) {
     return (
       <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center p-4 text-center">
-        <Clock size={64} className="text-[#F67927] mb-4" />
-        <h2 className="text-2xl font-bold text-[#1E3D51]">¡Solicitud enviada con éxito!</h2>
-        <p className="text-gray-500 mt-2 max-w-md">
-          Tu negocio ha sido registrado y está en estado <strong>Pendiente de Revisión</strong>.
-          Te estamos redirigiendo a tu panel...
-        </p>
+        {isEditMode ? (
+          <>
+            <Check size={64} className="text-green-500 mb-4" />
+            <h2 className="text-2xl font-bold text-[#1E3D51]">¡Información actualizada!</h2>
+            <p className="text-gray-500 mt-2 max-w-md">
+              Los cambios se han guardado correctamente. Te estamos redirigiendo...
+            </p>
+          </>
+        ) : (
+          <>
+            <Clock size={64} className="text-[#F67927] mb-4" />
+            <h2 className="text-2xl font-bold text-[#1E3D51]">¡Solicitud enviada con éxito!</h2>
+            <p className="text-gray-500 mt-2 max-w-md">
+              Tu negocio ha sido registrado y está en estado <strong>Pendiente de Revisión</strong>.
+              Te estamos redirigiendo a tu panel...
+            </p>
+          </>
+        )}
       </div>
     );
   }
@@ -220,10 +253,16 @@ export default function CrearNegocio() {
           Volver atrás
         </button>
 
+        {isLoadingData ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 size={40} className="animate-spin text-[#B95221] mb-3" />
+            <p className="text-gray-500 font-bold">Cargando datos del negocio...</p>
+          </div>
+        ) : (
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
           <div className="bg-gradient-to-r from-[#1E3D51] to-[#32698F] p-8 text-white text-center">
-            <h1 className="text-3xl font-extrabold mb-2">Registra tu Negocio</h1>
-            <p className="text-[#E6E2DF]">Completa tu perfil para destacar en Tarjetoso.</p>
+            <h1 className="text-3xl font-extrabold mb-2">{isEditMode ? 'Editar Información' : 'Registra tu Negocio'}</h1>
+            <p className="text-[#E6E2DF]">{isEditMode ? 'Modifica los datos de tu perfil profesional.' : 'Completa tu perfil para destacar en Tarjetoso.'}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-8">
@@ -244,6 +283,8 @@ export default function CrearNegocio() {
                   <div className="flex items-center gap-4 mb-4 sm:mb-0">
                     {croppedImageFile ? (
                       <img src={URL.createObjectURL(croppedImageFile)} alt="Preview" className="w-20 h-20 rounded-full object-cover border-2 border-[#1E3D51]" />
+                    ) : currentAvatarUrl ? (
+                      <img src={currentAvatarUrl} alt="Avatar actual" className="w-20 h-20 rounded-full object-cover border-2 border-[#32698F]" />
                     ) : (
                       <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center border-2 border-gray-300">
                         <ImageIcon size={30} className="text-gray-400" />
@@ -471,6 +512,16 @@ export default function CrearNegocio() {
                 </div>
 
               </div>
+
+              {/* SECCIÓN: CATÁLOGO EXTERNO */}
+              <div className="md:col-span-2">
+                <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Enlace a Catálogo Externo (Opcional)</label>
+                <div className={wrapperClass}>
+                  <div className="pl-4 flex items-center text-teal-600"><ShoppingBag size={16} /></div>
+                  <input type="url" name="catalog_url" value={formData.catalog_url} onChange={handleChange} placeholder="https://mitienda.com/catalogo" className={inputClass} />
+                </div>
+                <p className="text-xs text-gray-400 mt-1 ml-1">Si tienes un catálogo en otra plataforma, pega el enlace aquí.</p>
+              </div>
             </div>
 
             <button
@@ -480,75 +531,26 @@ export default function CrearNegocio() {
                 ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#F67927] hover:bg-[#e06516] hover:-translate-y-1'}`}
             >
               {isSubmitting && <Loader2 size={20} className="animate-spin" />}
-              {isSubmitting ? 'Guardando Perfil...' : 'Enviar para Revisión'}
+              {isSubmitting 
+                ? (isEditMode ? 'Guardando Cambios...' : 'Guardando Perfil...') 
+                : (isEditMode ? 'Guardar Cambios' : 'Enviar para Revisión')
+              }
             </button>
 
           </form>
         </div>
+        )}
       </div>
 
-      {/* Modal de Easy Crop */}
-      {showCropModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col h-[80vh] max-h-[600px]">
-            <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50">
-              <h3 className="font-bold text-[#1E3D51] text-lg">Recortar Imagen</h3>
-              <button onClick={() => setShowCropModal(false)} className="text-gray-400 hover:text-red-500 transition-colors p-1">
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className="relative flex-1 bg-gray-900 w-full">
-              {imageSrc && (
-                <Cropper
-                  image={imageSrc}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={1}
-                  cropShape="round"
-                  showGrid={false}
-                  onCropChange={setCrop}
-                  onCropComplete={onCropComplete}
-                  onZoomChange={setZoom}
-                />
-              )}
-            </div>
-
-            <div className="p-5 bg-white space-y-4">
-              <div>
-                <label className="text-xs font-bold text-gray-500 uppercase block mb-2">Zoom</label>
-                <input
-                  type="range"
-                  value={zoom}
-                  min={1}
-                  max={3}
-                  step={0.1}
-                  aria-labelledby="Zoom"
-                  onChange={(e) => setZoom(e.target.value)}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#F67927]"
-                />
-              </div>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowCropModal(false)}
-                  className="flex-1 py-3 px-4 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCropImage}
-                  className="flex-1 py-3 px-4 rounded-xl font-bold text-white bg-[#F67927] hover:bg-[#e06516] transition-colors flex items-center justify-center gap-2"
-                >
-                  <Check size={20} />
-                  Aplicar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <CropModal
+        isOpen={showCropModal}
+        imageSrc={imageSrc}
+        onClose={() => setShowCropModal(false)}
+        onCropDone={(file) => {
+          setCroppedImageFile(file);
+          setShowCropModal(false);
+        }}
+      />
 
       {/* Modal de Verificación por Email */}
       <ModalVerificacion 
