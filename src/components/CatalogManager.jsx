@@ -1,7 +1,8 @@
 // Archivo: src/components/CatalogManager.jsx
-import { useState, useEffect } from 'react';
-import { X, Plus, Loader2, Package, Trash2, Image as ImageIcon, Save } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Plus, Loader2, Package, Trash2, Image as ImageIcon, Save, Pencil } from 'lucide-react';
 import fetchAuth from '../utils/fetchAuth';
+import CropModal from './CropModal';
 
 export default function CatalogManager({ isOpen, onClose, business }) {
   const [products, setProducts] = useState([]);
@@ -9,6 +10,8 @@ export default function CatalogManager({ isOpen, onClose, business }) {
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState(null);
 
   // Form state
   const [formName, setFormName] = useState('');
@@ -17,6 +20,14 @@ export default function CatalogManager({ isOpen, onClose, business }) {
   const [formImage, setFormImage] = useState(null);
   const [formPreview, setFormPreview] = useState(null);
   const [editingId, setEditingId] = useState(null);
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 250)}px`;
+    }
+  }, [formDesc, showForm]);
 
   const isPremium = business?.premium === true;
   const limit = isPremium ? 10 : 5;
@@ -56,11 +67,22 @@ export default function CatalogManager({ isOpen, onClose, business }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormImage(file);
       const reader = new FileReader();
-      reader.onloadend = () => setFormPreview(reader.result);
+      reader.onloadend = () => {
+        setCropImageSrc(reader.result);
+        setShowCropModal(true);
+      };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCropDone = (croppedFile) => {
+    setFormImage(croppedFile);
+    const reader = new FileReader();
+    reader.onloadend = () => setFormPreview(reader.result);
+    reader.readAsDataURL(croppedFile);
+    setShowCropModal(false);
+    setCropImageSrc(null);
   };
 
   const openEditForm = (product) => {
@@ -129,154 +151,209 @@ export default function CatalogManager({ isOpen, onClose, business }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-[#1E3D51]/60 backdrop-blur-md" onClick={onClose}>
-      <div
-        className="bg-white w-full sm:max-w-2xl sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh] animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="bg-gradient-to-br from-[#1E3D51] to-[#32698F] p-5 relative shrink-0">
-          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay"></div>
-          <button onClick={onClose} aria-label="Cerrar gestor de catálogo" className="absolute top-4 right-4 z-20 text-white/80 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm">
-            <X size={20} />
-          </button>
-          <div className="relative z-10 flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                <Package size={20} className="text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-extrabold text-white">Gestionar Catálogo</h3>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <p className="text-white/70 text-xs">{business?.name}</p>
-                  <span className="bg-white/15 backdrop-blur-sm px-2 py-0.5 rounded-full text-white text-[10px] font-bold">{products.length}/{limit}</span>
+    <>
+      <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-[#1E3D51]/60 backdrop-blur-md" onClick={onClose}>
+        <div
+          className="bg-white w-full sm:max-w-2xl sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh] animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="bg-gradient-to-br from-[#1E3D51] to-[#32698F] p-5 relative shrink-0">
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay"></div>
+            <button onClick={onClose} aria-label="Cerrar gestor de catálogo" className="absolute top-4 right-4 z-20 text-white/80 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm">
+              <X size={20} />
+            </button>
+            <div className="relative z-10 flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                  <Package size={20} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-extrabold text-white">Gestionar Catálogo</h3>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-white/70 text-xs">{business?.name}</p>
+                    <span className="bg-white/15 backdrop-blur-sm px-2 py-0.5 rounded-full text-white text-[10px] font-bold">{products.length}/{limit}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-        </div>
+          </div>
 
-        {/* Content */}
-        <div className="p-4 sm:p-6 overflow-y-auto flex-1">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-              <Loader2 size={32} className="animate-spin mb-3" />
-              <p className="text-sm font-medium">Cargando catálogo...</p>
-            </div>
-          ) : (
-            <>
-              {/* Form */}
-              {showForm && (
-                <form onSubmit={handleSubmit} className="mb-6 bg-gray-50 rounded-2xl p-4 border border-gray-200 space-y-3">
-                  <h4 className="font-bold text-[#1E3D51] text-sm">{editingId ? 'Editar Producto' : 'Nuevo Producto'}</h4>
+          {/* Content */}
+          <div className="p-4 sm:p-6 overflow-y-auto flex-1">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                <Loader2 size={32} className="animate-spin mb-3" />
+                <p className="text-sm font-medium">Cargando catálogo...</p>
+              </div>
+            ) : (
+              <>
+                {/* Form */}
+                {showForm && (
+                  <form onSubmit={handleSubmit} className="mb-6 bg-gray-50 rounded-2xl p-4 border border-gray-200 space-y-3">
+                    <h4 className="font-bold text-[#1E3D51] text-sm">{editingId ? 'Editar Producto' : 'Nuevo Producto'}</h4>
 
-                  {/* Image upload */}
-                  <div className="flex items-center gap-3">
-                    <label className="cursor-pointer shrink-0">
-                      {formPreview ? (
-                        <img src={formPreview} alt="Preview" className="w-16 h-16 rounded-xl object-cover border-2 border-[#B95221]" />
-                      ) : (
-                        <div className="w-16 h-16 rounded-xl bg-gray-200 flex items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#B95221] transition-colors">
-                          <ImageIcon size={24} className="text-gray-400" />
-                        </div>
-                      )}
-                      <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                    </label>
-                    <div className="flex-1 space-y-2">
-                      <input
-                        type="text" value={formName} onChange={(e) => setFormName(e.target.value)}
-                        placeholder="Nombre del producto *"
-                        required
-                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1E3D51] outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] transition-all"
-                      />
-                      <input
-                        type="text" value={formPrice} onChange={(e) => setFormPrice(e.target.value)}
-                        placeholder="Precio (ej. Bs. 120)"
-                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1E3D51] outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  <textarea
-                    value={formDesc} onChange={(e) => setFormDesc(e.target.value)}
-                    placeholder="Descripción breve (opcional)"
-                    rows="2"
-                    className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1E3D51] outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] transition-all resize-none"
-                  />
-
-                  <div className="flex gap-2">
-                    <button type="button" onClick={resetForm} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors">
-                      Cancelar
-                    </button>
-                    <button type="submit" disabled={isSubmitting || !formName.trim()} className={`flex-1 py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all ${isSubmitting || !formName.trim() ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#B95221] hover:bg-[#9A4219]'}`}>
-                      {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                      {editingId ? 'Actualizar' : 'Guardar'}
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              {/* Grid */}
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-                {/* Add button */}
-                {!showForm && products.length < limit && (
-                  <button
-                    onClick={() => { resetForm(); setShowForm(true); }}
-                    className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center aspect-square hover:border-[#B95221] hover:bg-orange-50 transition-all group"
-                  >
-                    <Plus size={36} className="text-gray-300 group-hover:text-[#B95221] transition-colors mb-1" />
-                    <span className="text-xs font-bold text-gray-400 group-hover:text-[#B95221] transition-colors">Agregar</span>
-                  </button>
-                )}
-
-                {products.map(product => (
-                  <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 relative group">
-                    <div className="relative overflow-hidden bg-gray-50">
-                      {product.image_url ? (
-                        <img src={product.image_url} alt={product.name} className="w-full aspect-square object-cover"
-                          onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(product.name)}&background=F0FDFA&color=0D9488&size=400&font-size=0.33`; }}
+                    {/* Image upload */}
+                    <div className="flex items-center gap-3">
+                      <label className="cursor-pointer shrink-0">
+                        {formPreview ? (
+                          <img src={formPreview} alt="Preview" className="w-16 h-16 rounded-xl object-cover border-2 border-[#B95221]" />
+                        ) : (
+                          <div className="w-16 h-16 rounded-xl bg-gray-200 flex items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#B95221] transition-colors">
+                            <ImageIcon size={24} className="text-gray-400" />
+                          </div>
+                        )}
+                        <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                      </label>
+                      <div className="flex-1 space-y-2">
+                        <input
+                          type="text" value={formName} onChange={(e) => setFormName(e.target.value)}
+                          placeholder="Nombre del producto *"
+                          required
+                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1E3D51] outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] transition-all"
                         />
-                      ) : (
-                        <div className="w-full aspect-square flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-                          <Package size={36} className="text-gray-300" />
-                        </div>
-                      )}
-                      {/* Overlay acciones */}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <button onClick={() => openEditForm(product)} className="bg-white text-[#1E3D51] font-bold py-1.5 px-3 rounded-lg text-xs hover:bg-gray-100 transition-colors shadow">
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => handleDelete(product.id)}
-                          disabled={deletingId === product.id}
-                          className="bg-red-500 text-white font-bold py-1.5 px-3 rounded-lg text-xs hover:bg-red-600 transition-colors shadow disabled:opacity-50"
-                        >
-                          {deletingId === product.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                        </button>
+                        <input
+                          type="text" value={formPrice} onChange={(e) => setFormPrice(e.target.value)}
+                          placeholder="Precio (ej. Bs. 120)"
+                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1E3D51] outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] transition-all"
+                        />
                       </div>
                     </div>
-                    <div className="p-3">
-                      <h4 className="font-semibold text-gray-800 text-sm truncate">{product.name}</h4>
-                      {product.price && <p className="text-teal-600 font-bold text-sm mt-0.5">{product.price}</p>}
-                    </div>
-                  </div>
-                ))}
-              </div>
 
-              {/* Limit indicator */}
-              <div className="mt-4 text-center">
-                <div className="inline-flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: limit }).map((_, i) => (
-                      <div key={i} className={`w-2 h-2 rounded-full ${i < products.length ? 'bg-[#B95221]' : 'bg-gray-200'}`} />
-                    ))}
-                  </div>
-                  <span className="text-xs font-bold text-gray-500">{products.length}/{limit} fotos usadas</span>
-                  {!isPremium && <span className="text-xs text-[#B95221] font-medium">(Premium: 10)</span>}
+                    <div className="relative">
+                      <textarea
+                        ref={textareaRef}
+                        value={formDesc} onChange={(e) => setFormDesc(e.target.value)}
+                        placeholder="Descripción breve (opcional)"
+                        rows="2"
+                        maxLength={400}
+                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 pb-7 text-sm text-[#1E3D51] outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] transition-all resize-none overflow-y-auto"
+                      />
+                      <div className="absolute bottom-2 right-3 text-[10px] font-medium text-gray-400 bg-white/80 px-1 backdrop-blur-sm rounded">
+                        {formDesc.length}/400
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button type="button" onClick={resetForm} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors">
+                        Cancelar
+                      </button>
+                      <button type="submit" disabled={isSubmitting || !formName.trim()} className={`flex-1 py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all ${isSubmitting || !formName.trim() ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#B95221] hover:bg-[#9A4219]'}`}>
+                        {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                        {editingId ? 'Actualizar' : 'Guardar'}
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {/* Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-3">
+                  {/* Add button */}
+                  {!showForm && products.length < limit && (
+                    <button
+                      onClick={() => { resetForm(); setShowForm(true); }}
+                      className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center aspect-square hover:border-[#B95221] hover:bg-orange-50 transition-all group"
+                    >
+                      <Plus size={36} className="text-gray-300 group-hover:text-[#B95221] transition-colors mb-1" />
+                      <span className="text-xs font-bold text-gray-400 group-hover:text-[#B95221] transition-colors">Agregar</span>
+                    </button>
+                  )}
+
+                  {products.map(product => (
+                    <ManagerProductCard 
+                      key={product.id} 
+                      product={product} 
+                      openEditForm={openEditForm} 
+                      handleDelete={handleDelete} 
+                      deletingId={deletingId} 
+                    />
+                  ))}
                 </div>
-              </div>
-            </>
-          )}
+
+                {/* Limit indicator */}
+                <div className="mt-4 text-center">
+                  <div className="inline-flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: limit }).map((_, i) => (
+                        <div key={i} className={`w-2 h-2 rounded-full ${i < products.length ? 'bg-[#B95221]' : 'bg-gray-200'}`} />
+                      ))}
+                    </div>
+                    <span className="text-xs font-bold text-gray-500">{products.length}/{limit} fotos usadas</span>
+                    {!isPremium && <span className="text-xs text-[#B95221] font-medium">(Premium: 10)</span>}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      <CropModal 
+        isOpen={showCropModal} 
+        imageSrc={cropImageSrc} 
+        onClose={() => { setShowCropModal(false); setCropImageSrc(null); }} 
+        onCropDone={handleCropDone}
+        cropShape="rect"
+      />
+    </>
+  );
+}
+
+const ManagerProductCard = ({ product, openEditForm, handleDelete, deletingId }) => {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = product.description && product.description.length > 70;
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 relative group flex flex-col">
+      <div className="relative overflow-hidden bg-gray-50">
+        {product.image_url ? (
+          <img src={product.image_url} alt={product.name} className="w-full aspect-square object-cover"
+            onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(product.name)}&background=F0FDFA&color=0D9488&size=400&font-size=0.33`; }}
+          />
+        ) : (
+          <div className="w-full aspect-square flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+            <Package size={36} className="text-gray-300" />
+          </div>
+        )}
+      </div>
+      <div className="p-3 flex-1 flex flex-col">
+        <h4 className="font-semibold text-gray-800 text-sm truncate">{product.name}</h4>
+        
+        {product.description && (
+          <div className="mt-0.5">
+            <p className={`text-xs text-gray-500 whitespace-pre-wrap ${!expanded ? 'line-clamp-2' : ''}`}>
+              {product.description}
+            </p>
+            {isLong && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
+                className="text-[#B95221] font-bold text-[10px] mt-1 hover:underline uppercase"
+              >
+                {expanded ? 'Ver menos' : 'Ver más'}
+              </button>
+            )}
+          </div>
+        )}
+        
+        <div className="mt-auto pt-3 flex items-center justify-between">
+          <p className="text-teal-600 font-bold text-sm">{product.price || ''}</p>
+          <div className="flex gap-1.5">
+            <button 
+              onClick={(e) => { e.stopPropagation(); openEditForm(product); }} 
+              className="p-1.5 text-gray-400 hover:text-[#32698F] bg-gray-50 hover:bg-[#32698F]/10 rounded-lg transition-colors border border-gray-100 hover:border-[#32698F]/20 shadow-sm"
+              title="Editar producto"
+            >
+              <Pencil size={14} />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }}
+              disabled={deletingId === product.id}
+              className="p-1.5 text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-lg transition-colors border border-gray-100 hover:border-red-200 shadow-sm disabled:opacity-50"
+              title="Eliminar producto"
+            >
+              {deletingId === product.id ? <Loader2 size={14} className="animate-spin text-red-500" /> : <Trash2 size={14} />}
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};

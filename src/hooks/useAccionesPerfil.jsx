@@ -35,17 +35,21 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
   const isLoggedIn = userObj !== null;
   const userName = userObj?.nombre || '';
   const isVerified = userObj?.is_verified === true;
+  const isAdmin = userObj?.is_admin === true;
 
   useEffect(() => {
     const userStr = localStorage.getItem('spingamma_user');
     const pendingPlatform = localStorage.getItem(pendingInteractionKey);
 
     if (userStr && pendingPlatform) {
-      registrarInteraccionBackend(pendingPlatform);
+      // Si es admin, limpiar pero no registrar
+      const parsed = JSON.parse(userStr);
+      if (!parsed.is_admin) {
+        registrarInteraccionBackend(pendingPlatform);
+        localStorage.setItem(pendingRateKey, 'true');
+        setMostrarCalificacion(true);
+      }
       localStorage.removeItem(pendingInteractionKey);
-
-      localStorage.setItem(pendingRateKey, 'true');
-      setMostrarCalificacion(true);
     }
   });
 
@@ -114,10 +118,13 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
   }, [isLoggedIn, profesional, isSaved, onProtectedAction]);
 
   const registrarInteraccionBackend = useCallback(async (platformName) => {
-    const freshUser = localStorage.getItem('spingamma_user');
-    if (!freshUser || !profesional) return;
+    const freshUserStr = localStorage.getItem('spingamma_user');
+    if (!freshUserStr || !profesional) return;
 
     try {
+      const freshUser = JSON.parse(freshUserStr);
+      if (freshUser.is_admin) return;
+
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
       const response = await fetchAuth(`${API_URL}/businesses/${profesional.slug}/interaccion`, {
@@ -140,17 +147,17 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     e.preventDefault();
 
     if (isLoggedIn) {
-      await registrarInteraccionBackend(platformName);
-      
-      localStorage.setItem(pendingRateKey, 'true');
-      setMostrarCalificacion(true);
-      
+      if (!isAdmin) {
+        await registrarInteraccionBackend(platformName);
+        localStorage.setItem(pendingRateKey, 'true');
+        setMostrarCalificacion(true);
+      }
       onProtectedAction(url);
     } else {
       localStorage.setItem(pendingInteractionKey, platformName);
       onProtectedAction(url);
     }
-  }, [onProtectedAction, registrarInteraccionBackend, pendingRateKey, pendingInteractionKey, isLoggedIn]);
+  }, [onProtectedAction, registrarInteraccionBackend, pendingRateKey, pendingInteractionKey, isLoggedIn, isAdmin]);
 
   const handleCalificarClick = useCallback(async () => {
     if (!profesional) return;

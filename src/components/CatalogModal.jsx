@@ -63,26 +63,9 @@ export default function CatalogModal({ isOpen, onClose, slug, catalogUrl }) {
               <p className="text-xs text-gray-400 mt-1">Este negocio todavía no ha publicado productos.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-3">
               {products.map(product => (
-                <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-200 group">
-                  <div className="relative overflow-hidden bg-gray-50">
-                    {product.image_url ? (
-                      <img src={product.image_url} alt={product.name} className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(product.name)}&background=F0FDFA&color=0D9488&size=400&font-size=0.33`; }}
-                      />
-                    ) : (
-                      <div className="w-full aspect-square flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-                        <Package size={36} className="text-gray-300" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <h4 className="font-semibold text-gray-800 text-sm truncate">{product.name}</h4>
-                    {product.description && <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">{product.description}</p>}
-                    {product.price && <p className="text-teal-600 font-bold text-sm mt-1">{product.price}</p>}
-                  </div>
-                </div>
+                <ProductCard key={product.id} product={product} />
               ))}
             </div>
           )}
@@ -98,3 +81,47 @@ export default function CatalogModal({ isOpen, onClose, slug, catalogUrl }) {
     </div>
   );
 }
+
+const ProductCard = ({ product }) => {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = product.description && product.description.length > 70;
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-200 group flex flex-col">
+      <div className="relative overflow-hidden bg-gray-50">
+        {product.image_url ? (
+          <img src={product.image_url} alt={product.name} className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(product.name)}&background=F0FDFA&color=0D9488&size=400&font-size=0.33`; }}
+          />
+        ) : (
+          <div className="w-full aspect-square flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+            <Package size={36} className="text-gray-300" />
+          </div>
+        )}
+      </div>
+      <div className="p-3 flex-1 flex flex-col">
+        <h4 className="font-semibold text-gray-800 text-sm truncate">{product.name}</h4>
+        
+        {product.description && (
+          <div className="mt-0.5">
+            <p className={`text-xs text-gray-500 whitespace-pre-wrap ${!expanded ? 'line-clamp-2' : ''}`}>
+              {product.description}
+            </p>
+            {isLong && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
+                className="text-[#B95221] font-bold text-[10px] mt-1 hover:underline uppercase"
+              >
+                {expanded ? 'Ver menos' : 'Ver más'}
+              </button>
+            )}
+          </div>
+        )}
+        
+        <div className="mt-auto pt-2">
+          {product.price && <p className="text-teal-600 font-bold text-sm">{product.price}</p>}
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -4,7 +4,7 @@ import { X, Check } from 'lucide-react';
 import Cropper from 'react-easy-crop';
 import { getCroppedImgFile } from '../utils/cropImage';
 
-export default function CropModal({ isOpen, imageSrc, onClose, onCropDone }) {
+export default function CropModal({ isOpen, imageSrc, onClose, onCropDone, cropShape = "round" }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
@@ -25,7 +25,7 @@ export default function CropModal({ isOpen, imageSrc, onClose, onCropDone }) {
   if (!isOpen || !imageSrc) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 p-4">
       <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col h-[80vh] max-h-[600px]">
         <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50">
           <h3 className="font-bold text-[#1E3D51] text-lg">Recortar Imagen</h3>
@@ -40,7 +40,7 @@ export default function CropModal({ isOpen, imageSrc, onClose, onCropDone }) {
             crop={crop}
             zoom={zoom}
             aspect={1}
-            cropShape="round"
+            cropShape={cropShape}
             showGrid={false}
             onCropChange={setCrop}
             onCropComplete={onCropComplete}
