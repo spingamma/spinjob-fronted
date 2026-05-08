@@ -30,7 +30,7 @@ export default function CatalogManager({ isOpen, onClose, business }) {
   }, [formDesc, showForm]);
 
   const isPremium = business?.premium === true;
-  const limit = isPremium ? 10 : 5;
+  const limit = isPremium ? 20 : 10;
   const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
   const token = localStorage.getItem('spingamma_token');
 
@@ -277,7 +277,7 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                       ))}
                     </div>
                     <span className="text-xs font-bold text-gray-500">{products.length}/{limit} fotos usadas</span>
-                    {!isPremium && <span className="text-xs text-[#B95221] font-medium">(Premium: 10)</span>}
+                    {!isPremium && <span className="text-xs text-[#B95221] font-medium">(Premium: 20)</span>}
                   </div>
                 </div>
               </>
