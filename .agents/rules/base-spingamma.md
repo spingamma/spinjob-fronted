@@ -68,6 +68,9 @@ trigger: always_on
 | `ReviewModal.jsx` | Modal de reseñas/calificaciones |
 | `ModalVerificacion.jsx` | Modal de verificación de cuenta |
 | `InstallPrompt.jsx` | Prompt de instalación PWA |
+| `CatalogManager.jsx` | Gestor CRUD de productos del catálogo (subir, editar, eliminar). Límites: 10 general / 20 premium |
+| `CatalogModal.jsx` | Vista pública del catálogo de un negocio (solo lectura, con "Ver más") |
+| `CropModal.jsx` | Modal de recorte de imagen con `react-easy-crop`. Acepta `cropShape` prop: `"round"` (avatar) o `"rect"` (producto) |
 
 ## `src/hooks/` (Lógica extraída)
 | Archivo | Propósito |

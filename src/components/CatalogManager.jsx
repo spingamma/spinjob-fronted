@@ -164,17 +164,17 @@ export default function CatalogManager({ isOpen, onClose, business }) {
               <X size={20} />
             </button>
             <div className="relative z-10 flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                  <Package size={20} className="text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-extrabold text-white">Gestionar Catálogo</h3>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <p className="text-white/70 text-xs">{business?.name}</p>
-                    <span className="bg-white/15 backdrop-blur-sm px-2 py-0.5 rounded-full text-white text-[10px] font-bold">{products.length}/{limit}</span>
-                  </div>
+              <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                <Package size={20} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-extrabold text-white">Gestionar Catálogo</h3>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="text-white/70 text-xs">{business?.name}</p>
+                  <span className="bg-white/15 backdrop-blur-sm px-2 py-0.5 rounded-full text-white text-[10px] font-bold">{products.length}/{limit}</span>
                 </div>
               </div>
+            </div>
           </div>
 
           {/* Content */}
@@ -258,12 +258,12 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                   )}
 
                   {products.map(product => (
-                    <ManagerProductCard 
-                      key={product.id} 
-                      product={product} 
-                      openEditForm={openEditForm} 
-                      handleDelete={handleDelete} 
-                      deletingId={deletingId} 
+                    <ManagerProductCard
+                      key={product.id}
+                      product={product}
+                      openEditForm={openEditForm}
+                      handleDelete={handleDelete}
+                      deletingId={deletingId}
                     />
                   ))}
                 </div>
@@ -285,11 +285,11 @@ export default function CatalogManager({ isOpen, onClose, business }) {
           </div>
         </div>
       </div>
-      
-      <CropModal 
-        isOpen={showCropModal} 
-        imageSrc={cropImageSrc} 
-        onClose={() => { setShowCropModal(false); setCropImageSrc(null); }} 
+
+      <CropModal
+        isOpen={showCropModal}
+        imageSrc={cropImageSrc}
+        onClose={() => { setShowCropModal(false); setCropImageSrc(null); }}
         onCropDone={handleCropDone}
         cropShape="rect"
       />
@@ -316,14 +316,14 @@ const ManagerProductCard = ({ product, openEditForm, handleDelete, deletingId })
       </div>
       <div className="p-3 flex-1 flex flex-col">
         <h4 className="font-semibold text-gray-800 text-sm truncate">{product.name}</h4>
-        
+
         {product.description && (
           <div className="mt-0.5">
             <p className={`text-xs text-gray-500 whitespace-pre-wrap ${!expanded ? 'line-clamp-2' : ''}`}>
               {product.description}
             </p>
             {isLong && (
-              <button 
+              <button
                 onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
                 className="text-[#B95221] font-bold text-[10px] mt-1 hover:underline uppercase"
               >
@@ -332,12 +332,12 @@ const ManagerProductCard = ({ product, openEditForm, handleDelete, deletingId })
             )}
           </div>
         )}
-        
+
         <div className="mt-auto pt-3 flex items-center justify-between">
           <p className="text-teal-600 font-bold text-sm">{product.price || ''}</p>
           <div className="flex gap-1.5">
-            <button 
-              onClick={(e) => { e.stopPropagation(); openEditForm(product); }} 
+            <button
+              onClick={(e) => { e.stopPropagation(); openEditForm(product); }}
               className="p-1.5 text-gray-400 hover:text-[#32698F] bg-gray-50 hover:bg-[#32698F]/10 rounded-lg transition-colors border border-gray-100 hover:border-[#32698F]/20 shadow-sm"
               title="Editar producto"
             >
