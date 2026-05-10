@@ -9,13 +9,14 @@ const CreateBusiness = lazy(() => import('./pages/CreateBusiness/CreateBusiness'
 const MyBusinesses = lazy(() => import('./pages/MyBusinesses/MyBusinesses'));
 const AdminPanel = lazy(() => import('./pages/AdminPanel/AdminPanel'));
 const BusinessCardHolder = lazy(() => import('./pages/BusinessCardHolder/BusinessCardHolder'));
+const MetricsDashboard = lazy(() => import('./pages/MetricsDashboard/MetricsDashboard'));
 
 function App() {
   return (
     <Suspense fallback={
-      <div 
+      <div
         className="min-h-screen flex items-center justify-center bg-[#F8F9FA]"
-        role="status" 
+        role="status"
         aria-label="Cargando aplicación..."
       >
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B95221]"></div>
@@ -29,6 +30,7 @@ function App() {
         <Route path="/mis-negocios" element={<MyBusinesses />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/tarjetero" element={<BusinessCardHolder />} />
+        <Route path="/metricas/:slug" element={<MetricsDashboard />} />
       </Routes>
     </Suspense>
   );

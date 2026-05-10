@@ -1,7 +1,7 @@
 // Archivo: src/MisNegocios.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Clock, CheckCircle2, XCircle, PlusCircle, Building, Eye, FileText, X, Trash2, Loader2, ShoppingBag, Edit3 } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle2, XCircle, PlusCircle, Building, Eye, FileText, X, Trash2, Loader2, ShoppingBag, Edit3, BarChart2 } from 'lucide-react';
 import BottomNavbar from '../../components/BottomNavbar';
 import Header from '../../components/Header';
 import BusinessDetailsModal from '../../components/BusinessDetailsModal';
@@ -25,7 +25,7 @@ export default function MisNegocios() {
   const [isAdmin, setIsAdmin] = useState(() => {
     const stored = localStorage.getItem('spingamma_user');
     if (stored) {
-      try { return JSON.parse(stored).is_admin === true; } catch(e) { return false; }
+      try { return JSON.parse(stored).is_admin === true; } catch (e) { return false; }
     }
     return false;
   });
@@ -42,9 +42,9 @@ export default function MisNegocios() {
       try {
         const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
         const res = await fetchAuth(`${API_URL}/usuarios/mis-negocios`);
-        
+
         if (!res.ok) throw new Error("Error al cargar tus negocios");
-        
+
         const data = await res.json();
         setNegocios(data);
       } catch (err) {
@@ -99,7 +99,7 @@ export default function MisNegocios() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] font-sans pb-20">
-      <Header 
+      <Header
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         isLoggedIn={isLoggedIn}
@@ -138,13 +138,13 @@ export default function MisNegocios() {
           <div className="grid gap-6">
             {negocios.map(neg => (
               <div key={neg.slug} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4 transition-all hover:shadow-md">
-                
+
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
                     <h3 className="font-bold text-xl text-[#1E3D51]">{neg.name}</h3>
                     <p className="text-gray-500 text-sm">{neg.title} • {neg.category}</p>
                   </div>
-                  
+
                   <div className="flex flex-col items-end">
                     {neg.status === 'aprobado' && (
                       <div className="flex items-center gap-1.5 text-green-600 bg-green-50 px-3 py-1 rounded-full font-bold text-sm">
@@ -171,9 +171,9 @@ export default function MisNegocios() {
 
                 {/* BOTONES DE ACCIÓN */}
                 <div className="pt-4 border-t border-gray-100 flex flex-wrap justify-end gap-4">
-                  
+
                   {/* Este botón abre el modal de solo lectura, SIEMPRE visible */}
-                  <button 
+                  <button
                     onClick={() => setNegocioSeleccionado(neg)}
                     className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[#1E3D51] transition-colors"
                   >
@@ -181,8 +181,8 @@ export default function MisNegocios() {
                   </button>
 
                   {neg.status === 'aprobado' && (
-                    <Link 
-                      to={`/perfil/${neg.slug}`} 
+                    <Link
+                      to={`/perfil/${neg.slug}`}
                       className="flex items-center gap-2 text-sm font-bold text-[#32698F] hover:text-[#B95221] transition-colors"
                     >
                       <Eye size={18} /> Ver Tarjeta Pública
@@ -191,7 +191,7 @@ export default function MisNegocios() {
 
                   {/* Botón Gestionar Catálogo - Solo para negocios aprobados */}
                   {neg.status === 'aprobado' && (
-                    <button 
+                    <button
                       onClick={() => setCatalogBusiness(neg)}
                       className="flex items-center gap-2 text-sm font-bold text-teal-600 hover:text-teal-800 transition-colors"
                     >
@@ -209,9 +209,19 @@ export default function MisNegocios() {
                     </Link>
                   )}
 
+                  {/* Botón Ver Métricas - Solo para negocios aprobados */}
+                  {neg.status === 'aprobado' && (
+                    <Link
+                      to={`/metricas/${neg.slug}`}
+                      className="flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                    >
+                      <BarChart2 size={18} /> Ver Métricas
+                    </Link>
+                  )}
+
                   {/* Botón de eliminar (para pendientes, rechazados o admin) */}
                   {(neg.status === 'pendiente' || neg.status === 'rechazado' || isAdmin) && (
-                    <button 
+                    <button
                       onClick={() => handleEliminarNegocio(neg.slug)}
                       disabled={isDeleting === neg.slug}
                       className="flex items-center gap-2 text-sm font-bold text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
@@ -232,7 +242,7 @@ export default function MisNegocios() {
         )}
 
         {/* MODAL DE DETALLES REFACTORIZADO */}
-        <BusinessDetailsModal 
+        <BusinessDetailsModal
           business={negocioSeleccionado}
           onClose={() => setNegocioSeleccionado(null)}
           banner={
@@ -254,10 +264,10 @@ export default function MisNegocios() {
         />
       </div>
 
-      <BottomNavbar 
-        isLoggedIn={isLoggedIn} 
-        isAdmin={isAdmin} 
-        onHomeClick={() => navigate('/')} 
+      <BottomNavbar
+        isLoggedIn={isLoggedIn}
+        isAdmin={isAdmin}
+        onHomeClick={() => navigate('/')}
       />
     </div>
   );
