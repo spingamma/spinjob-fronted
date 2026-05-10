@@ -76,10 +76,21 @@ export default function Directory() {
 
   const filterHook = useDirectoryFilters(profesionales);
 
+  const categoryStr = filterHook.states.activeCategory !== 'Todos' ? filterHook.states.activeCategory : '';
+  const stateStr = filterHook.states.activeState !== 'Todas' ? `en ${filterHook.states.activeState}` : '';
+  
+  let seoTitle = 'Tarjetoso | Directorio de Profesionales y Negocios en Bolivia';
+  let seoDesc = 'Encuentra, contacta y califica a los mejores profesionales independientes y negocios locales de Bolivia. Tu directorio de tarjetas digitales profesionales.';
+  
+  if (categoryStr || stateStr) {
+    seoTitle = `${categoryStr || 'Profesionales'} ${stateStr} | Tarjetoso`.trim();
+    seoDesc = `Encuentra los mejores ${categoryStr ? categoryStr.toLowerCase() : 'profesionales'} ${stateStr} en Tarjetoso. Tu directorio de confianza.`.trim();
+  }
+
   useSEO({
-    title: 'Tarjetoso | Directorio de Profesionales y Negocios en Bolivia',
-    description: 'Encuentra, contacta y califica a los mejores profesionales independientes y negocios locales de Bolivia. Tu directorio de tarjetas digitales profesionales.',
-    url: 'https://tarjetoso.com/',
+    title: seoTitle,
+    description: seoDesc,
+    url: window.location.href,
     type: 'website'
   });
 

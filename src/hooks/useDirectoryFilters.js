@@ -1,5 +1,7 @@
 // Archivo: src/hooks/useDirectoryFilters.js
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { slugify, matchSlugToName } from '../utils/slugs';
 
 const normalizeText = (text) => {
   if (!text) return '';
@@ -13,26 +15,16 @@ const isValidValue = (val) => {
 };
 
 export function useDirectoryFilters(professionals = []) {
-  const [activeCategory, setActiveCategory] = useState('Todos');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeState, setActiveState] = useState('Todas');
-  const [activeNeighborhood, setActiveNeighborhood] = useState('Todas');
-  const [activeRating, setActiveRating] = useState('Todos');
-  const [activeSubcategory, setActiveSubcategory] = useState('Todas');
+  const { categoria, estado } = useParams();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [openDropdown, setOpenDropdown] = useState(null); // 'category', 'location', 'rating', 'subcategory'
   const [catSearch, setCatSearch] = useState('');
   const [locSearch, setLocSearch] = useState('');
   const [subSearch, setSubSearch] = useState('');
 
-  const handleCleanFilters = useCallback(() => {
-    setActiveCategory('Todos');
-    setActiveSubcategory('Todas');
-    setActiveState('Todas');
-    setActiveNeighborhood('Todas');
-    setActiveRating('Todos');
-    setSearchTerm('');
-  }, []);
-
+  // Extract base lists
   const groupedCategories = useMemo(() => {
     const catsFromDB = [...new Set(professionals.map(p => p.category).filter(isValidValue))].sort();
     return catsFromDB.map(c => {
@@ -49,6 +41,46 @@ export function useDirectoryFilters(professionals = []) {
     });
   }, [professionals]);
 
+  // Compute active values from URL
+  const activeCategory = useMemo(() => {
+    const cats = groupedCategories.map(g => g.category);
+    return matchSlugToName(categoria, cats, 'Todos');
+  }, [categoria, groupedCategories]);
+
+  const activeState = useMemo(() => {
+    const states = groupedLocations.map(g => g.state);
+    return matchSlugToName(estado, states, 'Todas');
+  }, [estado, groupedLocations]);
+
+  // Read other filters from search parameters
+  const searchTerm = searchParams.get('buscar') || '';
+  const activeNeighborhood = searchParams.get('barrio') || 'Todas';
+  const activeRating = searchParams.get('rating') || 'Todos';
+  const activeSubcategory = searchParams.get('subcategoria') || 'Todas';
+
+  // State update helpers
+  const updateSearchParams = useCallback((newParams) => {
+    const currentParams = Object.fromEntries([...searchParams]);
+    const merged = { ...currentParams, ...newParams };
+    
+    if (!merged.buscar) delete merged.buscar;
+    if (!merged.barrio || merged.barrio === 'Todas') delete merged.barrio;
+    if (!merged.rating || merged.rating === 'Todos') delete merged.rating;
+    if (!merged.subcategoria || merged.subcategoria === 'Todas') delete merged.subcategoria;
+
+    setSearchParams(merged);
+  }, [searchParams, setSearchParams]);
+
+  const setSearchTerm = useCallback((val) => {
+    updateSearchParams({ buscar: val });
+  }, [updateSearchParams]);
+
+  const handleCleanFilters = useCallback(() => {
+    setSearchParams({});
+    navigate('/');
+  }, [navigate, setSearchParams]);
+
+  // Dropdown Filtering Logic
   const filteredGroupedCategories = useMemo(() => {
     const search = normalizeText(catSearch);
     if (!search) return groupedCategories;
@@ -75,6 +107,7 @@ export function useDirectoryFilters(professionals = []) {
     }).filter(Boolean);
   }, [groupedLocations, locSearch]);
 
+  // Final Directory Filtering
   const filteredProfessionals = useMemo(() => {
     return professionals
       .filter(p => {
@@ -96,6 +129,7 @@ export function useDirectoryFilters(professionals = []) {
       .sort((a, b) => (b.rating || 0) - (a.rating || 0));
   }, [professionals, activeCategory, searchTerm, activeState, activeNeighborhood, activeSubcategory, activeRating]);
 
+  // Interactions
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (openDropdown && !event.target.closest('.custom-dropdown')) {
@@ -117,23 +151,65 @@ export function useDirectoryFilters(professionals = []) {
   }, [openDropdown]);
 
   const handleSelectOption = useCallback((type, value, subValue = null) => {
+    const currentParams = Object.fromEntries([...searchParams]);
+
     if (type === 'category') {
-      setActiveCategory(value);
-      setActiveSubcategory(subValue || 'Todas');
+      const slugCat = value === 'Todos' ? '' : slugify(value);
+      const currentLocSlug = estado || '';
+      
+      let url = '/';
+      if (slugCat) {
+        url = `/directorio/${slugCat}`;
+        if (currentLocSlug) url += `/${currentLocSlug}`;
+      } else if (currentLocSlug) {
+        url = `/directorio/todos/${currentLocSlug}`;
+      }
+
+      if (subValue && subValue !== 'Todas') {
+        currentParams.subcategoria = subValue;
+      } else {
+        delete currentParams.subcategoria;
+      }
+      
+      const newSearch = new URLSearchParams(currentParams).toString();
+      navigate({ pathname: url, search: newSearch ? `?${newSearch}` : '' });
     }
-    if (type === 'subcategory') {
-      setActiveSubcategory(value);
+    else if (type === 'subcategory') {
+      currentParams.subcategoria = value;
+      const newSearch = new URLSearchParams(currentParams).toString();
+      setSearchParams(newSearch);
     }
-    if (type === 'location') {
-      setActiveState(value);
-      setActiveNeighborhood(subValue || 'Todas');
+    else if (type === 'location') {
+      const currentCatSlug = categoria || 'todos';
+      const slugLoc = value === 'Todas' ? '' : slugify(value);
+      
+      let url = '/';
+      if (slugLoc) {
+        url = `/directorio/${currentCatSlug}/${slugLoc}`;
+      } else if (currentCatSlug !== 'todos') {
+        url = `/directorio/${currentCatSlug}`;
+      }
+
+      if (subValue && subValue !== 'Todas') {
+        currentParams.barrio = subValue;
+      } else {
+        delete currentParams.barrio;
+      }
+      
+      const newSearch = new URLSearchParams(currentParams).toString();
+      navigate({ pathname: url, search: newSearch ? `?${newSearch}` : '' });
     }
-    if (type === 'rating') setActiveRating(value);
+    else if (type === 'rating') {
+      currentParams.rating = value;
+      const newSearch = new URLSearchParams(currentParams).toString();
+      setSearchParams(newSearch);
+    }
+    
     setOpenDropdown(null);
     setCatSearch('');
     setLocSearch('');
     setSubSearch('');
-  }, []);
+  }, [categoria, estado, navigate, searchParams, setSearchParams]);
 
   const activeCategoryData = useMemo(() => {
     return groupedCategories.find(g => g.category === activeCategory);
