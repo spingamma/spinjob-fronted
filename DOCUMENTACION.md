@@ -28,11 +28,12 @@ El sistema relacional se basa en 6 tablas principales (`models.py`):
 - **Moderación de Negocios:** Los usuarios crean negocios que nacen con estado `pendiente`. Un administrador debe usar el endpoint `/admin/businesses/{slug}/status` para pasarlos a `aprobado` (haciéndolos públicos) o `rechazado` (con un motivo `rejection_reason`).
 - **Gestión de Catálogos (`products.py`):** Rutas CRUD completas para que el dueño suba fotos a Cloudinary, defina precios y descripciones de sus productos. Incorpora lógica de cuotas: límite de 5 productos para negocios estándar y 10 productos para negocios premium.
 - **Métricas e Interacciones (`businesses.py`):** Endpoint nativo `/businesses/{slug}/metrics` para recuperar el historial de interacciones y alimentar gráficas de alto rendimiento en el cliente.
+- **SEO y Sitemaps Dinámicos (`seo.py`):** Endpoint `/sitemap.xml` que genera un mapa del sitio en tiempo real cruzando todas las categorías y departamentos con negocios activos en la base de datos (e.g. `/directorio/abogados/la-paz`). Incluye también el generador de Open Graph en `/og/{slug}`.
 - **Middlewares:** Configuración CORS amplia para permitir conexiones desde Vercel, localhost y el dominio oficial (tarjetoso.com).
 
 ## 5. Arquitectura del Frontend (React)
 ### 5.1. Componentes Principales
-- **Directory.jsx:** Landing page. Obtiene todos los negocios aprobados y los renderiza usando `ProfessionalCard`.
+- **Directory.jsx:** Landing page y vista principal del directorio. Integrado profundamente con React Router para soportar URLs amigables (ej. `/directorio/:categoria/:estado`). Inyecta etiquetas SEO dinámicas según los parámetros de la URL y renderiza tarjetas usando `ProfessionalCard`.
 - **Profile.jsx:** Renderizado dinámico (`/perfil/:slug`). Inyecta SEO dinámico (JSON-LD) para Google. Decide qué plantilla renderizar (PlantillaGenerica, PlantillaInmobiliaria, PlantillaAbogado) basándose en si el negocio es `premium` y analizando su `subcategory`. Registra automáticamente interacciones de "Visita Perfil" en base de datos.
 - **CreateBusiness.jsx:** Formulario de registro. Integra `navigator.geolocation` para generar enlaces de Google Maps. Solo permite el envío si el usuario es `is_verified` (comprobado en LocalStorage y validado contra el backend).
 - **AdminPanel.jsx:** Dashboard para usuarios `is_admin`. Permite revisar formularios crudos (mediante `BusinessDetailsModal`), aprobar/rechazar negocios y verificar usuarios manualmente.
@@ -47,10 +48,11 @@ El sistema relacional se basa en 6 tablas principales (`models.py`):
 - **CropModal.jsx:** Extraído para aislar y reutilizar la lógica de recorte fotográfico (`react-easy-crop`) tanto en la imagen de avatar del profesional como en las fotos de los productos del catálogo.
 
 ### 5.3. Custom Hooks
-- **useDirectoryFilters.js:** Motor de búsqueda del directorio. Filtra por categoría, subcategoría (anidada), ubicación (departamento y zona anidada), texto libre y calificación mínima.
+- **useDirectoryFilters.js:** Motor de búsqueda del directorio. Lee la categoría y el departamento directamente de la URL (`useParams`) para potenciar el SEO, mientras que administra la subcategoría, barrio, texto libre y calificación mínima mediante Query Params en la URL (`useSearchParams`). Mantiene la navegación sincronizada en todo momento.
 - **useAccionesPerfil.jsx:** Centraliza la lógica de los perfiles: compartir, guardar en tarjetero, calificar (verificando si el usuario es apto/verificado) y registrar clics en enlaces (Interacciones).
 - **useSEO.js:** Inyecta etiquetas Meta (Open Graph, Twitter Cards) y Schema.org JSON-LD en el `<head>` para posicionamiento orgánico.
 
 ## 6. Características Especiales
 - **PWA (Progressive Web App):** Lógica en `InstallPrompt.jsx` para detectar dispositivos (iOS/Android/Desktop) y mostrar un banner personalizado invitando a "Instalar la App", interceptando el evento `beforeinstallprompt`.
+- **SEO Dinámico y Enrutamiento Inteligente:** Aunque es una SPA construida con Vite, usa parámetros de ruta estrictos en frontend (`/directorio/plomeros/santa-cruz`) respaldados por un `sitemap.xml` dinámico servido directamente desde FastAPI vía un proxy reescrito en `vercel.json`. Esto permite indexación profunda y etiquetas `<title>` y `<meta>` vivas.
 - **Deferred Actions (Acciones Diferidas):** Si un usuario no logueado intenta calificar o dar clic a WhatsApp, el sistema guarda su intención en `localStorage`, levanta el `AuthModal`, y ejecuta la acción automáticamente una vez que el login es exitoso.

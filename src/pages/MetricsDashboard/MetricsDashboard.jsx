@@ -70,7 +70,7 @@ export default function MetricsDashboard() {
       } else {
         const earliest = metrics.reduce((min, m) => {
           if (!m.date) return min;
-          const d = new Date(m.date.split('T')[0] + "T00:00:00");
+          const d = new Date(m.date.substring(0, 10) + "T00:00:00");
           return d < min ? d : min;
         }, new Date());
         start = new Date(earliest);
@@ -112,11 +112,11 @@ export default function MetricsDashboard() {
     
     // Poblar con métricas reales
     metrics.forEach(interaction => {
-      const iDate = interaction.date ? interaction.date.split('T')[0] : null;
+      const iDate = interaction.date ? interaction.date.substring(0, 10) : null;
       if (iDate) {
         const dayEntry = result.find(r => r.date === iDate);
         if (dayEntry) {
-          if (interaction.platform === 'perfil_view') {
+          if (interaction.platform === 'perfil_view' || interaction.platform === 'Visita Perfil') {
             dayEntry.vistas += 1;
           } else {
             dayEntry.clics += 1;
