@@ -170,10 +170,10 @@ export default function Tarjetero() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filterHook.computed.filteredProfessionals.map(neg => (
-              <div key={neg.slug} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col gap-4 transition-all hover:shadow-xl hover:border-[#B95221]/20 relative group">
+              <div key={neg.slug} className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex flex-col gap-4 transition-all hover:shadow-xl hover:border-[#B95221]/20 relative group w-full overflow-hidden">
                 
-                <div className="flex items-start gap-4">
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden bg-gray-50 shrink-0 border border-gray-100">
+                <div className="flex items-start gap-3 sm:gap-4 w-full">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-gray-50 shrink-0 border border-gray-100">
                     <img 
                       src={neg.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(neg.name)}&background=F8F9FA&color=1E3D51&size=256`} 
                       alt={neg.name}
@@ -185,10 +185,10 @@ export default function Tarjetero() {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-lg text-[#1E3D51] leading-tight truncate">{neg.name}</h3>
-                    <p className="text-[#B95221] text-sm font-bold truncate mt-0.5">{neg.title}</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-50 text-gray-500 border border-gray-100 uppercase tracking-tighter">
+                    <h3 className="font-bold text-base sm:text-lg text-[#1E3D51] leading-tight line-clamp-1">{neg.name}</h3>
+                    <p className="text-[#B95221] text-xs sm:text-sm font-bold line-clamp-1 mt-0.5">{neg.title}</p>
+                    <div className="flex items-center flex-wrap gap-2 mt-2">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-50 text-gray-500 border border-gray-100 uppercase tracking-tighter truncate max-w-full">
                         {neg.category}
                       </span>
                     </div>
@@ -196,20 +196,20 @@ export default function Tarjetero() {
                 </div>
 
                 {/* BOTONES DE ACCIÓN */}
-                <div className="pt-4 border-t border-gray-50 flex justify-between items-center gap-3 mt-auto">
+                <div className="pt-4 border-t border-gray-50 flex justify-between items-center gap-2 sm:gap-3 mt-auto">
                   <button 
                     onClick={() => handleQuitarTarjeta(neg.slug)}
-                    className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-red-500 transition-colors py-2 px-3 rounded-xl hover:bg-red-50"
+                    className="flex items-center justify-center gap-1 sm:gap-2 text-xs font-bold text-gray-400 hover:text-red-500 transition-colors py-2 px-2 sm:px-3 rounded-xl hover:bg-red-50"
                   >
-                    <BookmarkMinus size={18} />
+                    <BookmarkMinus size={16} className="sm:w-[18px] sm:h-[18px]" />
                     <span>Quitar</span>
                   </button>
 
                   <Link 
                     to={`/perfil/${neg.slug}`} 
-                    className="flex-1 flex items-center justify-center gap-2 text-sm font-bold text-white bg-[#1E3D51] hover:bg-[#32698F] py-2.5 rounded-xl transition-all shadow-sm active:scale-95"
+                    className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold text-white bg-[#1E3D51] hover:bg-[#32698F] py-2 sm:py-2.5 px-2 rounded-xl transition-all shadow-sm active:scale-95 whitespace-nowrap overflow-hidden text-ellipsis"
                   >
-                    <Eye size={18} /> Ver Perfil
+                    <Eye size={16} className="shrink-0 sm:w-[18px] sm:h-[18px]" /> <span className="truncate">Ver Perfil</span>
                   </Link>
                 </div>
               </div>
