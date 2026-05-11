@@ -8,7 +8,7 @@ import BottomNavbar from '../../components/BottomNavbar';
 import DirectoryFilterBar from '../../components/DirectoryFilterBar';
 import ProfessionalCard from '../../components/ProfessionalCard';
 import { useDirectoryFilters } from '../../hooks/useDirectoryFilters';
-import useSEO from '../../hooks/useSEO';
+import SeoMeta from '../../components/SeoMeta';
 
 export default function Directory() {
   const [profesionales, setProfesionales] = useState([]);
@@ -87,13 +87,6 @@ export default function Directory() {
     seoDesc = `Encuentra los mejores ${categoryStr ? categoryStr.toLowerCase() : 'profesionales'} ${stateStr} en Tarjetoso. Tu directorio de confianza.`.trim();
   }
 
-  useSEO({
-    title: seoTitle,
-    description: seoDesc,
-    url: window.location.href,
-    type: 'website'
-  });
-
   const handleLogout = () => {
     localStorage.removeItem('spingamma_user');
     setIsLoggedIn(false);
@@ -120,6 +113,11 @@ export default function Directory() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-[#1E3D51] font-sans pb-12 antialiased selection:bg-[#B95221] selection:text-white relative">
+      <SeoMeta 
+        title={categoryStr || stateStr ? `${categoryStr || 'Profesionales'} ${stateStr}` : null} 
+        description={seoDesc} 
+        url={window.location.href} 
+      />
       
       {/* HEADER GLOBAL */}
       <Header 

@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
-import useSEO from '../../hooks/useSEO';
+import SeoMeta from '../../components/SeoMeta';
 import AuthModal from '../../components/AuthModal';
 
 // ==========================================
@@ -136,15 +136,6 @@ function Perfil() {
     return schema;
   }, [profesional]);
 
-  useSEO({
-    title: profesional ? `${profesional.name} - ${profesional.title} | Tarjetoso` : 'Tarjetoso | Directorio Profesional',
-    description: profesional ? (profesional.description || `${profesional.name}, ${profesional.title} en ${profesional.category}`).slice(0, 160) : 'Directorio de tarjetas digitales profesionales de Bolivia.',
-    url: profesional ? `https://tarjetoso.com/perfil/${profesional.slug}` : null,
-    image: profesional?.image || null,
-    type: 'profile',
-    jsonLd: jsonLdData
-  });
-
   // ==========================================
   // 🛡️ MANEJADOR DE ENLACES PROTEGIDOS
   // ==========================================
@@ -223,6 +214,17 @@ function Perfil() {
 
   return (
     <>
+      {profesional && (
+        <SeoMeta 
+          title={`${profesional.name} - ${profesional.title}`}
+          description={(profesional.description || `${profesional.name}, ${profesional.title} en ${profesional.category}`).slice(0, 160)}
+          url={`https://tarjetoso.com/perfil/${profesional.slug}`}
+          image={profesional.image}
+          type="profile"
+          jsonLd={jsonLdData}
+        />
+      )}
+      
       {/* RENDERIZADO DE PLANTILLAS */}
       {tipoPlantilla === 'inmobiliaria' ? (
         <PlantillaInmobiliaria

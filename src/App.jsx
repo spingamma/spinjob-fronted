@@ -1,6 +1,7 @@
 // Archivo: src/App.jsx
 import { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import ReloadPrompt from './components/ReloadPrompt';
 
 // Lazy load de Vistas
 const Directory = lazy(() => import('./pages/Directory/Directory'));
@@ -13,6 +14,7 @@ const MetricsDashboard = lazy(() => import('./pages/MetricsDashboard/MetricsDash
 
 function App() {
   return (
+    <>
     <Suspense fallback={
       <div
         className="min-h-screen flex items-center justify-center bg-[#F8F9FA]"
@@ -35,6 +37,8 @@ function App() {
         <Route path="/metricas/:slug" element={<MetricsDashboard />} />
       </Routes>
     </Suspense>
+      <ReloadPrompt />
+    </>
   );
 }
 
