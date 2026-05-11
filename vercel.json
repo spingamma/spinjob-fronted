@@ -2,7 +2,11 @@
   "rewrites": [
     {
       "source": "/sitemap.xml",
-      "destination": "https://api.spingamma.com/sitemap.xml"
+      "destination": "http://129.80.108.184:8000/sitemap.xml"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "http://129.80.108.184:8000/$1"
     },
     {
       "source": "/(.*)",
