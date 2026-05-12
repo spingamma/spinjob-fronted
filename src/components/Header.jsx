@@ -1,6 +1,6 @@
 // Archivo: src/components/Header.jsx
 import React from 'react';
-import { Search, LogOut, UserPlus, ChevronDown } from 'lucide-react';
+import { Search, LogOut, DoorOpen, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NavMenu from './NavMenu';
 
@@ -41,7 +41,7 @@ const Header = ({
               placeholder="Buscar profesional..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)} 
-              className="w-full bg-transparent text-[#1E3D51] placeholder-gray-400 outline-none text-[13px] sm:text-base" 
+              className="w-full bg-transparent text-[#1E3D51] placeholder-gray-400 outline-none text-sm sm:text-base" 
             />
           </div>
 
@@ -99,7 +99,7 @@ const Header = ({
               onClick={() => setAuthModalOpen(true)} 
               className="flex items-center justify-center bg-[#1D565D] hover:bg-[#154045] text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-full transition-colors shadow-sm"
             >
-              <UserPlus size={16} className="md:hidden" />
+              <DoorOpen size={16} className="md:hidden" />
               <span className="text-sm font-semibold hidden md:block">Ingresar</span>
             </button>
           )}

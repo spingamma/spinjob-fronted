@@ -112,7 +112,7 @@ export default function InstallPrompt() {
           </div>
           
           <div className="flex-1 pr-4">
-            <h3 className="text-white font-bold text-[15px] leading-tight mb-1">
+            <h3 className="text-white font-bold text-base leading-tight mb-1">
   Instala Tarjetoso
 </h3>
             

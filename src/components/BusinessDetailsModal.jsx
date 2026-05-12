@@ -3,7 +3,7 @@ import { Building, X, Globe, Link as LinkIcon, Phone, MapPin, User, AlignLeft, B
 // Mini-componente para mostrar los campos en solo lectura
 export const CampoLectura = ({ label, valor }) => (
   <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
-    <span className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">{label}</span>
+    <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{label}</span>
     <span className="block text-sm font-medium text-[#1E3D51] break-words whitespace-pre-wrap">
       {valor ? valor : <span className="text-gray-300 italic">No especificado</span>}
     </span>

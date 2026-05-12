@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Share2, QrCode, MapPin, Phone, MessageCircle, 
-  Facebook, Instagram, Linkedin, Globe, Github, X, CheckCircle2, Star, LogOut, UserPlus, Bookmark, ShoppingBag
+  Facebook, Instagram, Linkedin, Globe, Github, X, CheckCircle2, Star, LogOut, DoorOpen, Bookmark, ShoppingBag
 } from 'lucide-react';
 
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
@@ -76,13 +76,15 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
 
   if (!profesional) return null;
 
-  const ubicacionTexto = [profesional.neighborhood, profesional.state, profesional.country].filter(Boolean).join(', ');
+  const ubicacionTexto = [profesional.neighborhood, profesional.state, profesional.country]
+    .filter(val => Boolean(val) && val.toUpperCase() !== 'NA' && val.toUpperCase() !== 'N/A')
+    .join(', ');
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-[#1E3D51] pb-24 font-sans antialiased selection:bg-[#B95221] selection:text-white relative">
       
       {/* 🖼️ HEADER Y FOTO DE PORTADA */}
-      <div className="relative h-48 sm:h-64 bg-gradient-to-br from-[#1E3D51] to-[#32698F] overflow-hidden">
+      <div className="relative h-36 sm:h-48 bg-gradient-to-br from-[#1E3D51] to-[#32698F] overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay"></div>
         
         {/* Barra de Navegación Superior */}
@@ -115,45 +117,52 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
                  aria-label="Ingresar para ver más detalles"
                  className="h-10 px-4 bg-white/90 backdrop-blur-md border border-gray-200 rounded-full flex items-center justify-center hover:bg-white transition-all text-xs font-bold uppercase text-[#1E3D51] tracking-widest gap-2 shadow-md"
                >
-                 <UserPlus size={16} className="text-[#B95221]"/> Ingresar
+                 <DoorOpen size={16} className="text-[#B95221]"/> Ingresar
                </button>
             )}
-
-            {/* 🚀 BOTONES DE ACCIÓN: GUARDAR, QR Y COMPARTIR */}
-            <div className="flex gap-2 sm:gap-3">
-              <button 
-                onClick={toggleSaveCard}
-                disabled={isSaving}
-                aria-label={isSaved ? "Quitar tarjeta del tarjetero" : "Guardar tarjeta en el tarjetero"}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md ${isSaved ? 'bg-[#1D565D] text-white border-transparent hover:bg-[#154045]' : 'bg-white/80 hover:bg-white text-[#1E3D51] border border-gray-200'} ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
-              >
-                <Bookmark size={18} className={isSaved ? 'fill-white' : ''} />
-              </button>
-              <button 
-                onClick={toggleQR}
-                aria-label="Mostrar código QR de este perfil"
-                className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white text-[#1E3D51] border border-gray-200 transition-all shadow-md"
-              >
-                <QrCode size={18} />
-              </button>
-
-              <button 
-                onClick={handleShare}
-                aria-label="Compartir este perfil"
-                className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white text-[#1E3D51] border border-gray-200 transition-all shadow-md"
-              >
-                <Share2 size={18} />
-              </button>
-            </div>
           </div>
         </div>
       </div>
 
       {/* 🧑‍💼 INFO PRINCIPAL DEL PERFIL */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 relative z-20">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6">
-          <div className="relative -mt-16 sm:-mt-20 shrink-0">
-            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white overflow-hidden bg-white shadow-xl">
+        
+        {/* BOTONES FLOTANTES LATERALES (QR, Share, Bookmark) */}
+        <div className="absolute -top-14 right-4 sm:right-6 flex flex-col items-end gap-3 z-30">
+           {/* Fila superior: QR y Compartir */}
+           <div className="flex gap-2 sm:gap-3">
+              <button 
+                onClick={toggleQR}
+                aria-label="Mostrar código QR de este perfil"
+                className="w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white text-[#1E3D51] border border-gray-200 transition-all shadow-md"
+              >
+                <QrCode size={18} />
+              </button>
+              <button 
+                onClick={handleShare}
+                aria-label="Compartir este perfil"
+                className="w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white text-[#1E3D51] border border-gray-200 transition-all shadow-md"
+              >
+                <Share2 size={18} />
+              </button>
+           </div>
+           {/* Fila inferior: Guardar (Bookmark) */}
+           <button 
+             onClick={toggleSaveCard}
+             disabled={isSaving}
+             aria-label={isSaved ? "Quitar tarjeta del tarjetero" : "Guardar tarjeta en el tarjetero"}
+             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md ${isSaved ? 'bg-[#1D565D] text-white border-transparent hover:bg-[#154045]' : 'bg-white/90 hover:bg-white text-[#1E3D51] border border-gray-200'} ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
+           >
+             <Bookmark size={18} className={isSaved ? 'fill-white' : ''} />
+           </button>
+        </div>
+        
+        {/* ENCABEZADO: FOTO CENTRADA + BADGES A LA DERECHA */}
+        <div className="relative flex flex-col items-center mb-6">
+          
+          {/* FOTO SIEMPRE AL CENTRO */}
+          <div className="relative -mt-16 sm:-mt-20 shrink-0 z-10">
+            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white overflow-hidden bg-white shadow-xl relative">
               <img 
                 src={profesional.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name)}&background=F8F9FA&color=1E3D51&size=256`} 
                 onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name)}&background=F8F9FA&color=1E3D51&size=256`; }}
@@ -162,39 +171,28 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               />
             </div>
             {profesional.verified && (
-              <div className="absolute bottom-2 right-2 bg-white rounded-full p-0.5 shadow-md border border-gray-100">
+              <div className="absolute bottom-2 right-2 bg-white rounded-full p-0.5 shadow-md border border-gray-100 z-20">
                 <CheckCircle2 size={24} className="text-[#B95221] fill-white" />
+              </div>
+            )}
+            
+            {/* BADGE DE CALIFICACIÓN: Flotante inferior derecha de la foto */}
+            {profesional.reviews_count > 0 && (
+              <div className="absolute bottom-4 sm:bottom-6 -right-10 sm:-right-12 bg-white px-2 py-1 rounded-md border border-gray-100 shadow-md flex items-center gap-1 z-30 animate-in zoom-in duration-300">
+                <Star size={12} className="text-[#B95221] fill-[#B95221]" />
+                <span className="font-bold text-[#1E3D51] text-xs">{profesional.rating}</span>
               </div>
             )}
           </div>
           
-          <div className="text-center sm:text-left flex-1 pb-2 mt-4 sm:mt-20">
+          {/* TÍTULO Y PROFESIÓN (Siempre centrados debajo de la foto) */}
+          <div className="text-center w-full pb-2 mt-4">
             <h1 className="text-3xl font-extrabold text-[#1E3D51] leading-tight mb-1">{profesional.name}</h1>
             <h2 className="text-gray-500 text-lg font-medium">{profesional.title}</h2>
           </div>
         </div>
 
-        {/* 🌟 ESTADÍSTICAS Y UBICACIÓN */}
-        <div className="flex flex-wrap justify-center sm:justify-start gap-3 mb-8">
-          {profesional.reviews_count > 0 && (
-            <div className="flex items-center gap-1.5 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
-              <Star size={18} className="text-[#B95221] fill-[#B95221]" />
-              <span className="font-bold text-[#1E3D51]">{profesional.rating}</span>
-              <span className="text-sm text-gray-500">({profesional.reviews_count} reseñas)</span>
-            </div>
-          )}
-          {ubicacionTexto && (
-            <div className="flex items-center gap-1.5 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm text-gray-600">
-              <MapPin size={18} className="text-[#B95221]" />
-              <span className="text-sm font-medium">{ubicacionTexto}</span>
-            </div>
-          )}
-          {profesional.category && (
-            <div className="flex items-center gap-1.5 bg-orange-50 px-4 py-2 rounded-xl border border-[#B95221]/20 shadow-sm text-[#B95221]">
-               <span className="text-sm font-bold">{profesional.category}</span>
-            </div>
-          )}
-        </div>
+        {/* INFO PRINCIPAL REMOVED OLD LOCATION */}
 
         {/* 📝 ACERCA DE */}
         {profesional.description && (
@@ -211,7 +209,15 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
 
         {/* 📱 REDES DE CONTACTO */}
         <div className="mb-8">
-          <h3 className="text-lg font-bold text-[#1E3D51] mb-4 ml-2">Contactar y Redes Sociales</h3>
+          <div className="flex justify-between items-center mb-4 ml-2 mr-2 gap-4">
+            <h3 className="text-lg font-bold text-[#1E3D51]">Contactar y Redes Sociales</h3>
+            {ubicacionTexto && (
+              <div className="flex items-center justify-end gap-1.5 text-gray-700 bg-white shadow-sm border border-gray-200 px-3 py-1.5 rounded-xl shrink-0 max-w-[50%]">
+                <MapPin size={14} className="text-[#B95221] shrink-0" />
+                <span className="text-xs sm:text-sm font-medium leading-tight text-right">{ubicacionTexto}</span>
+              </div>
+            )}
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             <SocialButton icon={MessageCircle} label="WhatsApp" url={links.whatsapp} colorClass="text-green-500 hover:bg-green-50" />
             <SocialButton icon={Phone} label="Llamar" url={links.phone} colorClass="text-blue-500 hover:bg-blue-50" />
@@ -354,6 +360,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         onClose={() => setShowCatalog(false)}
         slug={profesional?.slug}
         catalogUrl={profesional?.catalog_url}
+        whatsappNumber={profesional?.whatsapp}
+        businessName={profesional?.name}
       />
     </div>
   );

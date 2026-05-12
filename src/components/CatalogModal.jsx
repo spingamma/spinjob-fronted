@@ -1,8 +1,8 @@
 // Archivo: src/components/CatalogModal.jsx
 import { useState, useEffect } from 'react';
-import { X, ShoppingBag, ExternalLink, Loader2, Package } from 'lucide-react';
+import { X, ShoppingBag, ExternalLink, Loader2, Package, MessageCircle } from 'lucide-react';
 
-export default function CatalogModal({ isOpen, onClose, slug, catalogUrl }) {
+export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsappNumber, businessName }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -65,7 +65,7 @@ export default function CatalogModal({ isOpen, onClose, slug, catalogUrl }) {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-3">
               {products.map(product => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.id} product={product} whatsappNumber={whatsappNumber} businessName={businessName} />
               ))}
             </div>
           )}
@@ -82,9 +82,14 @@ export default function CatalogModal({ isOpen, onClose, slug, catalogUrl }) {
   );
 }
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, whatsappNumber, businessName }) => {
   const [expanded, setExpanded] = useState(false);
   const isLong = product.description && product.description.length > 70;
+
+  // Limpiar número WhatsApp y construir URL con mensaje prellenado
+  const cleanWa = whatsappNumber ? whatsappNumber.replace(/[^0-9]/g, '') : '';
+  const waMessage = encodeURIComponent(`Hola ${businessName || ''}, me interesa ${product.name}`);
+  const waUrl = cleanWa ? `https://wa.me/${cleanWa}?text=${waMessage}` : null;
 
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-200 group flex flex-col">
@@ -121,6 +126,20 @@ const ProductCard = ({ product }) => {
         <div className="mt-auto pt-2">
           {product.price && <p className="text-teal-600 font-bold text-sm">{product.price}</p>}
         </div>
+
+        {/* Botón "Me interesa" → redirige a WhatsApp */}
+        {waUrl && (
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 flex items-center justify-center gap-1.5 bg-[#25D366] hover:bg-[#1fb855] text-white text-xs font-bold py-2 px-3 rounded-lg transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.97]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MessageCircle size={14} className="fill-white" />
+            Me interesa
+          </a>
+        )}
       </div>
     </div>
   );

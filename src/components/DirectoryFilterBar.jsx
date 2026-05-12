@@ -38,7 +38,7 @@ export default function DirectoryFilterBar({
             
             {/* Categoría Principal */}
             <div className="flex flex-col gap-1 relative custom-dropdown">
-              <label className="text-[9px] md:text-[10px] font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">
+              <label className="text-[10px] md:text-xs font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">
                 Categoría
               </label>
               <div 
@@ -108,7 +108,7 @@ export default function DirectoryFilterBar({
             {/* Subcategoría (Condicional) */}
             {activeCategory !== 'Todos' && (
               <div className="flex flex-col gap-1 relative custom-dropdown animate-in fade-in zoom-in-95 duration-300">
-                <label className="text-[9px] md:text-[10px] font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">
+                <label className="text-[10px] md:text-xs font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">
                   Subcategoría
                 </label>
                 <div 
@@ -163,7 +163,7 @@ export default function DirectoryFilterBar({
                       <button
                         key={sub}
                         onClick={() => handleSelectOption('subcategory', sub)}
-                        className={`w-full text-left px-5 py-2.5 text-[13px] font-medium transition-colors border-t border-gray-50/50
+                        className={`w-full text-left px-5 py-2.5 text-sm font-medium transition-colors border-t border-gray-50/50
                           ${activeSubcategory === sub ? 'text-[#B95221] bg-orange-50/20 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'}
                         `}
                       >
@@ -179,7 +179,7 @@ export default function DirectoryFilterBar({
             <div className={`flex flex-col gap-1 relative custom-dropdown ${isMobile && openDropdown !== 'location' ? 'hidden' : ''}`}>
               {!isMobile && (
                 <>
-                  <label className="text-[9px] md:text-[10px] font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">
+                  <label className="text-[10px] md:text-xs font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">
                     Ubicación
                   </label>
                   <div 
@@ -248,7 +248,7 @@ export default function DirectoryFilterBar({
                         <button
                           key={neigh}
                           onClick={() => handleSelectOption('location', group.state, neigh)}
-                          className={`w-full text-left pl-9 pr-5 py-2 text-[13px] font-medium transition-colors
+                          className={`w-full text-left pl-9 pr-5 py-2 text-sm font-medium transition-colors
                             ${activeNeighborhood === neigh ? 'text-[#B95221] font-bold bg-[#B95221]/5' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}
                           `}
                         >
@@ -265,7 +265,7 @@ export default function DirectoryFilterBar({
             <div className={`flex flex-col gap-1 relative custom-dropdown ${isMobile && openDropdown !== 'rating' ? 'hidden' : ''}`}>
               {!isMobile && (
                 <>
-                  <label className="text-[9px] md:text-[10px] font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">
+                  <label className="text-[10px] md:text-xs font-bold text-[#B95221] uppercase tracking-widest ml-1 hidden sm:block">
                     Ranking
                   </label>
                   <div 

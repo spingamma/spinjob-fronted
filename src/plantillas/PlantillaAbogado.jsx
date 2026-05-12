@@ -1,7 +1,7 @@
 // Archivo: src/plantillas/PlantillaAbogado.jsx
 import React, { useEffect, useState } from 'react';
 import { 
-  LogOut, UserPlus, X, Share2, QrCode, Star, ArrowLeft, 
+  LogOut, DoorOpen, X, Share2, QrCode, Star, ArrowLeft, 
   Phone, MessageCircle, MapPin, Globe, Facebook, Instagram, Linkedin, Bookmark, ShoppingBag
 } from 'lucide-react';
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
@@ -108,7 +108,7 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
                 onClick={() => onProtectedAction(null)} 
                 className="h-10 px-4 rounded-full bg-[#1a1a1a] border border-[#E9CE3F]/20 flex items-center justify-center text-[#E9CE3F] text-xs font-bold uppercase tracking-widest gap-2 shadow-md"
               >
-                <UserPlus size={16} /> Ingresar
+                <DoorOpen size={16} /> Ingresar
               </button>
             )}
             
@@ -260,7 +260,7 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
       )}
 
       <footer className="w-full text-center pb-6 mt-4">
-          <a href="https://spingamma.github.io/spingamma-landing/" target="_blank" rel="noopener noreferrer" className="text-[0.55rem] tracking-[0.25em] font-medium uppercase text-gray-600 hover:text-[#E9CE3F] transition-colors">
+          <a href="https://spingamma.github.io/spingamma-landing/" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.25em] font-medium uppercase text-gray-600 hover:text-[#E9CE3F] transition-colors">
               Tecnología desarrollada por SPINGAMMA
           </a>
       </footer>
@@ -290,6 +290,8 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
         onClose={() => setShowCatalog(false)}
         slug={profesional?.slug}
         catalogUrl={profesional?.catalog_url}
+        whatsappNumber={profesional?.whatsapp}
+        businessName={profesional?.name}
       />
     </div>
   );

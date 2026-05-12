@@ -90,7 +90,7 @@ const NavMenu = ({ isLoggedIn, isAdmin, onHomeClick, isMobile = false }) => {
           </div>
           <span className={`
             font-bold uppercase tracking-tighter text-center
-            ${isMobile ? 'text-[9px]' : 'text-[10px]'}
+            ${isMobile ? 'text-[10px]' : 'text-[10px]'}
             ${item.active ? 'text-[#B95221]' : 'text-gray-400 group-hover:text-[#B95221]'}
           `}>
             {item.label}
