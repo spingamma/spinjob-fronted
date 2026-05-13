@@ -49,10 +49,17 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
     </svg>
   );
 
+  // Parsear whatsapp_numbers (JSON array)
+  let waNumbers = [];
+  try { waNumbers = JSON.parse(profesional?.whatsapp_numbers || '[]'); } catch { waNumbers = []; }
+
   // 📱 Mapeo de redes sociales incluyendo el teléfono como un icono estándar
   const enlacesSociales = [
     { id: 'phone', icon: Phone, url: profesional.phone ? `tel:${profesional.phone.replace(/[^0-9]/g, '')}` : null, label: 'Llamar' },
-    { id: 'whatsapp', icon: MessageCircle, url: profesional.whatsapp ? `https://wa.me/${profesional.whatsapp.replace(/[^0-9]/g, '')}` : null, label: 'WhatsApp' },
+    ...waNumbers.map((num, idx) => {
+      const clean = num.replace(/[^0-9]/g, '');
+      return { id: `whatsapp-${idx}`, icon: MessageCircle, url: clean ? `https://wa.me/${clean}` : null, label: waNumbers.length > 1 ? `WhatsApp ${idx + 1}` : 'WhatsApp' };
+    }),
     { id: 'ubicacion', icon: MapPin, url: profesional.ubicacion_url, label: 'Ubicación' },
     { id: 'website', icon: Globe, url: profesional.website, label: 'Sitio Web' },
     { id: 'facebook', icon: Facebook, url: profesional.facebook, label: 'Facebook' },
@@ -290,7 +297,7 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
         onClose={() => setShowCatalog(false)}
         slug={profesional?.slug}
         catalogUrl={profesional?.catalog_url}
-        whatsappNumber={profesional?.whatsapp}
+        whatsappNumber={waNumbers[0] || null}
         businessName={profesional?.name}
       />
     </div>

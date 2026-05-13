@@ -176,14 +176,22 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
               </a>
             )}
 
-            {profesional.whatsapp && (
-              <a href={`https://wa.me/${profesional.whatsapp.replace(/[^0-9]/g, '')}`} onClick={(e) => handleLinkClick(e, 'WhatsApp', `https://wa.me/${profesional.whatsapp.replace(/[^0-9]/g, '')}`)} className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#25D366] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
-                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#25D366]/20 group-hover:bg-[#25D366] text-[#25D366] group-hover:text-white transition-all mb-2">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 0C5.39 0 .004 5.385.004 12.025c0 2.126.552 4.195 1.6 6.01L.067 23.99l6.103-1.601c1.748.951 3.733 1.453 5.86 1.453 6.638 0 12.025-5.385 12.025-12.025S18.669 0 12.031 0zm0 19.957c-1.793 0-3.548-.482-5.088-1.395l-.364-.216-3.778.991.999-3.684-.236-.376c-1.002-1.597-1.531-3.444-1.531-5.341 0-5.548 4.515-10.063 10.063-10.063 5.547 0 10.062 4.515 10.062 10.063 0 5.548-4.515 10.063-10.062 10.063z"/></svg>
-                  </div>
-                  <span className="font-semibold text-[10px] text-gray-300 group-hover:text-white uppercase tracking-wider">WhatsApp</span>
-              </a>
-            )}
+            {(() => {
+              let waNumbers = [];
+              try { waNumbers = JSON.parse(profesional?.whatsapp_numbers || '[]'); } catch { waNumbers = []; }
+              return waNumbers.map((num, idx) => {
+                const clean = num.replace(/[^0-9]/g, '');
+                if (!clean) return null;
+                return (
+                  <a key={`wa-${idx}`} href={`https://wa.me/${clean}`} onClick={(e) => handleLinkClick(e, 'WhatsApp', `https://wa.me/${clean}`)} className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#25D366] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+                    <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#25D366]/20 group-hover:bg-[#25D366] text-[#25D366] group-hover:text-white transition-all mb-2">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 0C5.39 0 .004 5.385.004 12.025c0 2.126.552 4.195 1.6 6.01L.067 23.99l6.103-1.601c1.748.951 3.733 1.453 5.86 1.453 6.638 0 12.025-5.385 12.025-12.025S18.669 0 12.031 0zm0 19.957c-1.793 0-3.548-.482-5.088-1.395l-.364-.216-3.778.991.999-3.684-.236-.376c-1.002-1.597-1.531-3.444-1.531-5.341 0-5.548 4.515-10.063 10.063-10.063 5.547 0 10.062 4.515 10.062 10.063 0 5.548-4.515 10.063-10.062 10.063z"/></svg>
+                    </div>
+                    <span className="font-semibold text-[10px] text-gray-300 group-hover:text-white uppercase tracking-wider">{waNumbers.length > 1 ? `WhatsApp ${idx+1}` : 'WhatsApp'}</span>
+                  </a>
+                );
+              });
+            })()}
 
             {profesional.website && (
               <a href={profesional.website} onClick={(e) => handleLinkClick(e, 'Website', profesional.website)} className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#425C63] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
@@ -338,7 +346,7 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
         onClose={() => setShowCatalog(false)}
         slug={profesional?.slug}
         catalogUrl={profesional?.catalog_url}
-        whatsappNumber={profesional?.whatsapp}
+        whatsappNumber={(() => { try { return JSON.parse(profesional?.whatsapp_numbers || '[]')[0] || null; } catch { return null; } })()}
         businessName={profesional?.name}
       />
     </div>

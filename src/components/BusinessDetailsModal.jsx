@@ -71,7 +71,7 @@ export default function BusinessDetailsModal({ business, onClose, actions, banne
           <div>
             <h3 className="font-bold text-[#B95221] border-b border-gray-200 pb-2 mb-3">Contacto</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <CampoLectura label="WhatsApp" valor={business.whatsapp} />
+              <CampoLectura label="WhatsApp" valor={(() => { try { const nums = JSON.parse(business.whatsapp_numbers || '[]'); return nums.join(', '); } catch { return business.whatsapp_numbers; } })()} />
               <CampoLectura label="Teléfono Fijo" valor={business.phone} />
             </div>
             <div className="mt-3">

@@ -38,12 +38,13 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
 
 
   // 🧹 LIMPIEZA Y FORMATEO DE ENLACES
+  // Parsear whatsapp_numbers (JSON array)
+  let waNumbers = [];
+  try { waNumbers = JSON.parse(profesional?.whatsapp_numbers || '[]'); } catch { waNumbers = []; }
   const cleanPhone = profesional?.phone?.replace(/[^0-9]/g, '');
-  const cleanWa = profesional?.whatsapp?.replace(/[^0-9]/g, '');
   
   const links = {
     phone: cleanPhone ? `tel:${cleanPhone}` : null,
-    whatsapp: cleanWa ? `https://wa.me/${cleanWa}` : null,
     facebook: profesional?.facebook,
     instagram: profesional?.instagram,
     linkedin: profesional?.linkedin,
@@ -219,7 +220,11 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             )}
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            <SocialButton icon={MessageCircle} label="WhatsApp" url={links.whatsapp} colorClass="text-green-500 hover:bg-green-50" />
+            {waNumbers.map((num, idx) => {
+              const clean = num.replace(/[^0-9]/g, '');
+              if (!clean) return null;
+              return <SocialButton key={`wa-${idx}`} icon={MessageCircle} label={waNumbers.length > 1 ? `WhatsApp ${idx + 1}` : 'WhatsApp'} url={`https://wa.me/${clean}`} colorClass="text-green-500 hover:bg-green-50" />;
+            })}
             <SocialButton icon={Phone} label="Llamar" url={links.phone} colorClass="text-blue-500 hover:bg-blue-50" />
             <SocialButton icon={MapPin} label="Ubicación" url={links.ubicacion} colorClass="text-red-500 hover:bg-red-50" />
             <SocialButton icon={Globe} label="Sitio Web" url={links.website} colorClass="text-purple-500 hover:bg-purple-50" />
@@ -360,7 +365,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         onClose={() => setShowCatalog(false)}
         slug={profesional?.slug}
         catalogUrl={profesional?.catalog_url}
-        whatsappNumber={profesional?.whatsapp}
+        whatsappNumber={waNumbers[0] || null}
         businessName={profesional?.name}
       />
     </div>

@@ -1,9 +1,9 @@
-// Archivo: src/CrearNegocio.jsx
+// Archivo: src/pages/CreateBusiness/CreateBusiness.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Briefcase, Building, MapPin, AlignLeft, Phone, ArrowLeft,
-  Loader2, Clock, Globe, Link as LinkIcon, User, Map, Image as ImageIcon, Check, ShoppingBag
+  Loader2, Clock, Globe, Link as LinkIcon, User, Map, Image as ImageIcon, Check, ShoppingBag, Plus, X as XIcon
 } from 'lucide-react';
 import CropModal from '../../components/CropModal';
 import ModalVerificacion from '../../components/ModalVerificacion';
@@ -22,14 +22,33 @@ export default function CrearNegocio() {
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState(null);
 
   const [formData, setFormData] = useState({
-    name: '', title: '', category: '', subcategory: '', country: 'Bolivia', state: '', neighborhood: '', description: '',
-    genero: '', phone: '', whatsapp: '', facebook: '', instagram: '',
+    name: '', title: '', category: '', country: 'Bolivia', state: '', neighborhood: '', description: '',
+    genero: '', phone: '', facebook: '', instagram: '',
     linkedin: '', website: '', tiktok: '', github: '', ubicacion_url: '', catalog_url: ''
   });
+
+  // WhatsApp: lista de números (máx 2)
+  const [whatsappList, setWhatsappList] = useState(['']);
+  // Subcategorías: array de seleccionados
+  const [selectedSubcategories, setSelectedSubcategories] = useState([]);
+  // Campo "Otro" para subcategoría personalizada
+  const [otherSubcategory, setOtherSubcategory] = useState('');
+  const [showOtherInput, setShowOtherInput] = useState(false);
+  // Especialidades desde la API
+  const [specialtiesData, setSpecialtiesData] = useState([]);
 
   const [imageSrc, setImageSrc] = useState(null);
   const [croppedImageFile, setCroppedImageFile] = useState(null);
   const [showCropModal, setShowCropModal] = useState(false);
+  // 📦 Cargar especialidades desde la API
+  useEffect(() => {
+    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+    fetch(`${API_URL}/specialties/grouped`)
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setSpecialtiesData(data))
+      .catch(() => setSpecialtiesData([]));
+  }, []);
+
   // 📦 Cargar datos del negocio en modo edición
   useEffect(() => {
     if (!isEditMode) return;
@@ -41,15 +60,25 @@ export default function CrearNegocio() {
         const data = await res.json();
         setFormData({
           name: data.name || '', title: data.title || '', category: data.category || '',
-          subcategory: data.subcategory || '', country: data.country || 'Bolivia',
+          country: data.country || 'Bolivia',
           state: data.state || '', neighborhood: data.neighborhood || '',
           description: data.description || '', genero: data.genero || '',
-          phone: data.phone || '', whatsapp: data.whatsapp || '',
+          phone: data.phone || '',
           facebook: data.facebook || '', instagram: data.instagram || '',
           linkedin: data.linkedin || '', website: data.website || '',
           tiktok: data.tiktok || '', github: data.github || '',
           ubicacion_url: data.ubicacion_url || '', catalog_url: data.catalog_url || ''
         });
+        // Parsear whatsapp_numbers JSON
+        try {
+          const nums = JSON.parse(data.whatsapp_numbers || '[]');
+          setWhatsappList(nums.length > 0 ? nums : ['']);
+        } catch { setWhatsappList(['']); }
+        // Parsear subcategories JSON
+        try {
+          const subs = JSON.parse(data.subcategories || '[]');
+          setSelectedSubcategories(subs);
+        } catch { setSelectedSubcategories([]); }
         if (data.image) setCurrentAvatarUrl(data.image);
       } catch (err) {
         setError(err.message);
@@ -162,14 +191,27 @@ export default function CrearNegocio() {
       if (payload[key] === '') payload[key] = null;
     });
 
-    // La imagen ya no es obligatoria
-    /*
-    if (!croppedImageFile) {
-      setError("Es obligatorio subir y recortar una imagen de perfil.");
-      setIsSubmitting(false);
-      return;
+    // Serializar whatsapp_numbers como JSON array
+    const cleanedWhatsapps = whatsappList.filter(n => n.trim() !== '');
+    payload.whatsapp_numbers = cleanedWhatsapps.length > 0 ? JSON.stringify(cleanedWhatsapps) : null;
+
+    // Serializar subcategories como JSON array
+    const allSubs = [...selectedSubcategories];
+    if (showOtherInput && otherSubcategory.trim()) {
+      allSubs.push(otherSubcategory.trim());
+      // Insertar "Otro" en la tabla de especialidades
+      if (payload.category) {
+        try {
+          const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+          await fetch(`${API_URL}/specialties/other`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ category: payload.category, subcategory: otherSubcategory.trim() })
+          });
+        } catch (err) { console.error('Error insertando sub-especialidad:', err); }
+      }
     }
-    */
+    payload.subcategories = allSubs.length > 0 ? JSON.stringify(allSubs) : null;
 
     const formDataObj = new FormData();
     Object.keys(payload).forEach(key => {
@@ -331,17 +373,76 @@ export default function CrearNegocio() {
                   <label className={labelClass}>Categoría <span className="text-red-500">*</span></label>
                   <div className={wrapperClass}>
                     <div className="pl-4 flex items-center text-gray-400"><Building size={18} /></div>
-                    <input required name="category" value={formData.category} onChange={handleChange} placeholder="Ej. Salud, Tecnología..." className={inputClass} />
+                    <select required name="category" value={formData.category} onChange={(e) => { handleChange(e); setSelectedSubcategories([]); setOtherSubcategory(''); setShowOtherInput(false); }} className={`${inputClass} bg-transparent cursor-pointer`}>
+                      <option value="">Seleccionar categoría...</option>
+                      {specialtiesData.map(g => (
+                        <option key={g.category} value={g.category}>{g.category}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
-                <div>
-                  <label className={labelClass}>Sub-especialidad (Opcional)</label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-gray-400"><AlignLeft size={18} /></div>
-                    <input name="subcategory" value={formData.subcategory || ""} onChange={handleChange} placeholder="Ej. Ortodoncia, Frontend..." className={inputClass} />
-                  </div>
-                </div>
+                {/* Sub-especialidades: checkboxes múltiples */}
+                {formData.category && (() => {
+                  const group = specialtiesData.find(g => g.category === formData.category);
+                  const subs = group ? group.subcategories : [];
+                  return (
+                    <div className="md:col-span-2">
+                      <label className={labelClass}>Sub-especialidades (puedes elegir varias)</label>
+                      <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 space-y-2">
+                        <div className="flex flex-wrap gap-2">
+                          {subs.map(s => {
+                            const checked = selectedSubcategories.includes(s.subcategory);
+                            return (
+                              <button
+                                type="button"
+                                key={s.subcategory}
+                                onClick={() => {
+                                  setSelectedSubcategories(prev =>
+                                    checked ? prev.filter(x => x !== s.subcategory) : [...prev, s.subcategory]
+                                  );
+                                }}
+                                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                                  checked
+                                    ? 'bg-[#B95221] text-white border-[#B95221] shadow-sm'
+                                    : 'bg-white text-gray-600 border-gray-200 hover:border-[#B95221]/50 hover:text-[#B95221]'
+                                }`}
+                              >
+                                {checked && <Check size={14} className="inline mr-1 -mt-0.5" />}
+                                {s.subcategory}
+                                {s.source === 'user_other' && <span className="ml-1 text-[10px] opacity-60">(otro)</span>}
+                              </button>
+                            );
+                          })}
+                          {/* Botón "Otro" */}
+                          <button
+                            type="button"
+                            onClick={() => setShowOtherInput(!showOtherInput)}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                              showOtherInput
+                                ? 'bg-[#1E3D51] text-white border-[#1E3D51]'
+                                : 'bg-white text-[#1E3D51] border-dashed border-gray-300 hover:border-[#1E3D51]'
+                            }`}
+                          >
+                            <Plus size={14} className="inline mr-1 -mt-0.5" /> Otro
+                          </button>
+                        </div>
+                        {showOtherInput && (
+                          <div className="mt-3">
+                            <input
+                              type="text"
+                              value={otherSubcategory}
+                              onChange={(e) => setOtherSubcategory(e.target.value)}
+                              placeholder="Escribe tu sub-especialidad..."
+                              className="w-full bg-white px-3 py-2 rounded-lg border border-gray-200 focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] outline-none text-sm text-[#1E3D51]"
+                            />
+                            <p className="text-[10px] text-gray-400 mt-1">Se agregará a la lista de sub-especialidades</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 <div>
                   <label className={labelClass}>País <span className="text-red-500">*</span></label>
@@ -404,11 +505,45 @@ export default function CrearNegocio() {
               <h3 className="text-lg font-extrabold text-[#B95221] border-b border-gray-200 pb-2 mb-4">Contacto</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                <div>
-                  <label className={labelClass}>WhatsApp (Principal)</label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-gray-400"><Phone size={18} /></div>
-                    <input type="tel" name="whatsapp" value={formData.whatsapp} onChange={handleChange} placeholder="Ej. +59170000000" className={inputClass} />
+                <div className="md:col-span-2">
+                  <label className={labelClass}>WhatsApp (máximo 2 números)</label>
+                  <div className="space-y-3">
+                    {whatsappList.map((num, idx) => (
+                      <div key={idx} className="flex gap-2 items-center">
+                        <div className={`${wrapperClass} flex-1`}>
+                          <div className="pl-4 flex items-center text-gray-400"><Phone size={18} /></div>
+                          <input
+                            type="tel"
+                            value={num}
+                            onChange={(e) => {
+                              const updated = [...whatsappList];
+                              updated[idx] = e.target.value;
+                              setWhatsappList(updated);
+                            }}
+                            placeholder={idx === 0 ? 'WhatsApp principal' : 'WhatsApp secundario'}
+                            className={inputClass}
+                          />
+                        </div>
+                        {idx > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setWhatsappList(whatsappList.filter((_, i) => i !== idx))}
+                            className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                          >
+                            <XIcon size={18} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    {whatsappList.length < 2 && (
+                      <button
+                        type="button"
+                        onClick={() => setWhatsappList([...whatsappList, ''])}
+                        className="flex items-center gap-2 text-sm font-bold text-[#B95221] hover:text-[#1E3D51] transition-colors px-2 py-1 rounded-lg hover:bg-orange-50"
+                      >
+                        <Plus size={16} /> Agregar segundo WhatsApp
+                      </button>
+                    )}
                   </div>
                 </div>
 

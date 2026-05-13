@@ -28,7 +28,13 @@ export function useDirectoryFilters(professionals = []) {
   const groupedCategories = useMemo(() => {
     const catsFromDB = [...new Set(professionals.map(p => p.category).filter(isValidValue))].sort();
     return catsFromDB.map(c => {
-      const subs = [...new Set(professionals.filter(p => p.category === c).map(p => p.subcategory).filter(isValidValue))].sort();
+      const allSubs = professionals
+        .filter(p => p.category === c)
+        .flatMap(p => {
+          try { return JSON.parse(p.subcategories || '[]'); } catch { return p.subcategories ? [p.subcategories] : []; }
+        })
+        .filter(isValidValue);
+      const subs = [...new Set(allSubs)].sort();
       return { category: c, subcategories: subs };
     });
   }, [professionals]);
@@ -117,7 +123,9 @@ export function useDirectoryFilters(professionals = []) {
                             normalizeText(p.title).includes(searchNormalized);
         const matchState = activeState === 'Todas' || p.state === activeState;
         const matchNeighborhood = activeNeighborhood === 'Todas' || p.neighborhood === activeNeighborhood;
-        const matchSubcategory = activeSubcategory === 'Todas' || p.subcategory === activeSubcategory;
+        const matchSubcategory = activeSubcategory === 'Todas' || (() => {
+          try { const subs = JSON.parse(p.subcategories || '[]'); return subs.includes(activeSubcategory); } catch { return p.subcategories === activeSubcategory; }
+        })();
         
         let matchRating = true;
         if (activeRating === '5 Estrellas') matchRating = (p.rating || 0) >= 5;
