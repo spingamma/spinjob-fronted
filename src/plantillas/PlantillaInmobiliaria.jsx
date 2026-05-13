@@ -179,6 +179,7 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
             {(() => {
               let waNumbers = [];
               try { waNumbers = JSON.parse(profesional?.whatsapp_numbers || '[]'); } catch { waNumbers = []; }
+              if (waNumbers.length === 0 && profesional?.whatsapp) waNumbers = [profesional.whatsapp];
               return waNumbers.map((num, idx) => {
                 const clean = num.replace(/[^0-9]/g, '');
                 if (!clean) return null;

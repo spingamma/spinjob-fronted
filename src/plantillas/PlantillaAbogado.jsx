@@ -49,9 +49,10 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
     </svg>
   );
 
-  // Parsear whatsapp_numbers (JSON array)
+  // Parsear whatsapp_numbers (JSON array) con fallback al campo viejo
   let waNumbers = [];
   try { waNumbers = JSON.parse(profesional?.whatsapp_numbers || '[]'); } catch { waNumbers = []; }
+  if (waNumbers.length === 0 && profesional?.whatsapp) waNumbers = [profesional.whatsapp];
 
   // 📱 Mapeo de redes sociales incluyendo el teléfono como un icono estándar
   const enlacesSociales = [

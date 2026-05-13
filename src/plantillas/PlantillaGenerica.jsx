@@ -38,9 +38,10 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
 
 
   // 🧹 LIMPIEZA Y FORMATEO DE ENLACES
-  // Parsear whatsapp_numbers (JSON array)
+  // Parsear whatsapp_numbers (JSON array) con fallback al campo viejo
   let waNumbers = [];
   try { waNumbers = JSON.parse(profesional?.whatsapp_numbers || '[]'); } catch { waNumbers = []; }
+  if (waNumbers.length === 0 && profesional?.whatsapp) waNumbers = [profesional.whatsapp];
   const cleanPhone = profesional?.phone?.replace(/[^0-9]/g, '');
   
   const links = {
