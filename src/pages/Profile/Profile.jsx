@@ -204,10 +204,12 @@ function Perfil() {
 
   let tipoPlantilla = 'generica';
   if (esPremium) {
-    const subcategory = normalizeText(profesional.subcategory || '');
-    if (subcategory.includes('abogad') || subcategory.includes('legal') || subcategory.includes('derecho')) {
+    // Buscamos en subcategoría (singular y plural) y en el título como respaldo
+    const searchArea = normalizeText(`${profesional.subcategory || ''} ${profesional.subcategories || ''} ${profesional.title || ''}`);
+    
+    if (searchArea.includes('abogad') || searchArea.includes('legal') || searchArea.includes('derecho')) {
       tipoPlantilla = 'abogado';
-    } else if (subcategory.includes('inmo') || subcategory.includes('casa') || subcategory.includes('propied')) {
+    } else if (searchArea.includes('inmo') || searchArea.includes('casa') || searchArea.includes('propied')) {
       tipoPlantilla = 'inmobiliaria';
     }
   }
