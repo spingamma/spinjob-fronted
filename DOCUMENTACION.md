@@ -56,3 +56,28 @@ El sistema relacional se basa en 6 tablas principales (`models.py`):
 - **PWA (Progressive Web App):** Lógica en `InstallPrompt.jsx` para detectar dispositivos (iOS/Android/Desktop) y mostrar un banner personalizado invitando a "Instalar la App", interceptando el evento `beforeinstallprompt`.
 - **SEO Dinámico y Enrutamiento Inteligente:** Aunque es una SPA construida con Vite, usa parámetros de ruta estrictos en frontend (`/directorio/plomeros/santa-cruz`) respaldados por un `sitemap.xml` dinámico servido directamente desde FastAPI vía un proxy reescrito en `vercel.json`. Esto permite indexación profunda y etiquetas `<title>` y `<meta>` vivas.
 - **Deferred Actions (Acciones Diferidas):** Si un usuario no logueado intenta calificar o dar clic a WhatsApp, el sistema guarda su intención en `localStorage`, levanta el `AuthModal`, y ejecuta la acción automáticamente una vez que el login es exitoso.
+
+---
+
+## 7. Guía de Inicio Rápido
+
+¡Hola! Bienvenido al proyecto **Tarjetoso**. Esta guía te ayudará a instalar y ejecutar el proyecto en tu computadora de la forma más sencilla posible.
+
+### 🛠️ Requisitos Previos
+Para que el proyecto funcione, necesitas instalar **Node.js**:
+1. Descarga la versión **LTS** de [nodejs.org](https://nodejs.org/es).
+2. Instálalo siguiendo los pasos predeterminados.
+
+### 🚀 Pasos para Ejecutar
+1. **Instalar dependencias:** Abre una terminal en la carpeta del proyecto y ejecuta:
+   ```bash
+   npm install
+   ```
+2. **Arrancar la aplicación:** Una vez instaladas las dependencias, ejecuta:
+   ```bash
+   npm run dev
+   ```
+3. **Ver en el navegador:** Abre [http://localhost:5173/](http://localhost:5173/) en tu navegador.
+
+### 🛑 Detener la Aplicación
+Presiona `Ctrl + C` en la terminal para detener el servidor de desarrollo.
