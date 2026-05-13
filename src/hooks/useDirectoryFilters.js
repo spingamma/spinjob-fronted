@@ -31,7 +31,10 @@ export function useDirectoryFilters(professionals = []) {
       const allSubs = professionals
         .filter(p => p.category === c)
         .flatMap(p => {
-          try { return JSON.parse(p.subcategories || '[]'); } catch { return p.subcategories ? [p.subcategories] : []; }
+          try {
+            const parsed = JSON.parse(p.subcategories || '[]');
+            return parsed.length > 0 ? parsed : (p.subcategory ? [p.subcategory] : []);
+          } catch { return p.subcategory ? [p.subcategory] : (p.subcategories ? [p.subcategories] : []); }
         })
         .filter(isValidValue);
       const subs = [...new Set(allSubs)].sort();
@@ -124,7 +127,11 @@ export function useDirectoryFilters(professionals = []) {
         const matchState = activeState === 'Todas' || p.state === activeState;
         const matchNeighborhood = activeNeighborhood === 'Todas' || p.neighborhood === activeNeighborhood;
         const matchSubcategory = activeSubcategory === 'Todas' || (() => {
-          try { const subs = JSON.parse(p.subcategories || '[]'); return subs.includes(activeSubcategory); } catch { return p.subcategories === activeSubcategory; }
+          try {
+            const subs = JSON.parse(p.subcategories || '[]');
+            if (subs.length > 0) return subs.includes(activeSubcategory);
+            return p.subcategory === activeSubcategory;
+          } catch { return p.subcategory === activeSubcategory || p.subcategories === activeSubcategory; }
         })();
         
         let matchRating = true;
