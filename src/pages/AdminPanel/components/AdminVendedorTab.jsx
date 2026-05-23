@@ -10,6 +10,19 @@ export default function AdminVendedorTab({ API_URL }) {
   const [filter, setFilter] = useState('todos'); // todos, assigned, possible, none
   const [transfering, setTransfering] = useState(null); // { slug, userId }
 
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [internalTab, setInternalTab] = useState('mis_ventas'); // mis_ventas, general
+
+  useEffect(() => {
+    const stored = localStorage.getItem('spingamma_user');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setIsAdmin(parsed.is_admin === true);
+      } catch (e) {}
+    }
+  }, []);
+
   // Estados para búsqueda manual
   const [manualModalOpen, setManualModalOpen] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState(null);
@@ -130,9 +143,12 @@ export default function AdminVendedorTab({ API_URL }) {
     
     if (!matchesSearch) return false;
     
-    if (filter === 'assigned') return b.owner_id !== null;
-    if (filter === 'possible') return b.owner_id === null && b.possible_owners && b.possible_owners.length > 0;
-    if (filter === 'none') return b.owner_id === null && (!b.possible_owners || b.possible_owners.length === 0);
+    // Filtro por pestañas internas para admin
+    if (isAdmin && internalTab === 'mis_ventas' && !b.is_mine) return false;
+    
+    if (filter === 'assigned') return b.owner_id && !b.is_held_by_seller;
+    if (filter === 'possible') return b.is_held_by_seller && b.possible_owners && b.possible_owners.length > 0;
+    if (filter === 'none') return b.is_held_by_seller && (!b.possible_owners || b.possible_owners.length === 0);
     
     return true; // todos
   });
@@ -140,33 +156,53 @@ export default function AdminVendedorTab({ API_URL }) {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
       {/* HEADER DE CONTROLES */}
-      <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-20">
-        <h2 className="text-xl font-extrabold text-[#1E3D51] flex items-center gap-2">
-          <Store size={24} className="text-[#B95221]" />
-          Gestión de Dueños (Vendedores)
-        </h2>
+      <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4 relative z-20">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h2 className="text-xl font-extrabold text-[#1E3D51] flex items-center gap-2">
+              <Store size={24} className="text-[#B95221]" />
+              Gestión de Ventas
+            </h2>
+            {isAdmin && (
+              <div className="flex bg-gray-100 rounded-xl p-1 mt-3 w-fit">
+                <button
+                  onClick={() => setInternalTab('mis_ventas')}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${internalTab === 'mis_ventas' ? 'bg-white text-[#B95221] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  Mis Ventas (Pendientes)
+                </button>
+                <button
+                  onClick={() => setInternalTab('general')}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${internalTab === 'general' ? 'bg-white text-[#B95221] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  General (Todos los Vendedores)
+                </button>
+              </div>
+            )}
+          </div>
 
-        <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3 items-start sm:items-center flex-wrap">
-          <select 
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="w-full sm:w-auto bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221]/30 text-sm font-bold text-[#1E3D51] appearance-none"
-          >
-            <option value="todos">Todos los Negocios</option>
-            <option value="possible">Con Posible Dueño</option>
-            <option value="none">Sin Usuario Registrado</option>
-            <option value="assigned">Dueño Asignado</option>
-          </select>
+          <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3 items-start sm:items-center flex-wrap">
+            <select 
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="w-full sm:w-auto bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221]/30 text-sm font-bold text-[#1E3D51] appearance-none"
+            >
+              <option value="todos">Todos los Negocios</option>
+              <option value="possible">Con Posible Dueño</option>
+              <option value="none">Sin Usuario Registrado</option>
+              <option value="assigned">Dueño Asignado</option>
+            </select>
 
-          <div className="relative w-full sm:w-64">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="Buscar negocio..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-gray-200 py-2.5 pl-11 pr-4 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221]/10 transition-all font-medium text-[#1E3D51]"
-            />
+            <div className="relative w-full sm:w-64">
+              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input 
+                type="text" 
+                placeholder="Buscar negocio..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-white border border-gray-200 py-2.5 pl-11 pr-4 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221]/10 transition-all font-medium text-[#1E3D51]"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -201,15 +237,23 @@ export default function AdminVendedorTab({ API_URL }) {
               
               <div className="mt-auto pt-4 border-t border-gray-50">
                 <div className="p-4 bg-gray-50 flex flex-col gap-3">
-                  {b.owner_id ? (
+                  {b.owner_id && !b.is_held_by_seller ? (
                     <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-xl border border-green-100">
                       <CheckCircle size={18} className="shrink-0" />
                       <div>
                         <p className="text-xs font-bold">Dueño Asignado</p>
-                        <p className="text-[10px] text-green-600/80">Este negocio ya tiene un propietario.</p>
+                        <p className="text-[10px] text-green-600/80">Transferido exitosamente.</p>
                       </div>
                     </div>
-                  ) : b.possible_owners && b.possible_owners.length > 0 ? null : (
+                  ) : b.is_held_by_seller ? (
+                    <div className="flex items-center gap-2 text-orange-600 bg-orange-50 p-3 rounded-xl border border-orange-100">
+                      <Store size={18} className="shrink-0" />
+                      <div>
+                        <p className="text-xs font-bold">Pendiente de Vender</p>
+                        <p className="text-[10px] text-orange-600/80">Vendedor actual: {b.owner_name}</p>
+                      </div>
+                    </div>
+                  ) : (
                     <div className="flex items-center gap-2 text-gray-500 bg-gray-50 p-3 rounded-xl border border-gray-100">
                       <XCircle size={18} className="shrink-0" />
                       <div>
@@ -219,7 +263,7 @@ export default function AdminVendedorTab({ API_URL }) {
                     </div>
                   )}
 
-                  {b.possible_owners && b.possible_owners.length > 0 && (
+                  {b.is_held_by_seller && b.possible_owners && b.possible_owners.length > 0 && (
                     <div className="flex flex-col gap-3 mt-1">
                       {b.possible_owners.map((po, idx) => (
                         <div key={idx} className="flex flex-col gap-2 p-3 rounded-xl border border-[#B95221]/20 bg-[#B95221]/5 relative">
@@ -243,13 +287,13 @@ export default function AdminVendedorTab({ API_URL }) {
                     </div>
                   )}
                 </div>                
-                {/* Botón de asignación manual siempre disponible si no tiene dueño */}
-                {!b.owner_id && (
+                {/* Botón de asignación manual siempre disponible si está retenido por un vendedor o no tiene dueño */}
+                {(!b.owner_id || b.is_held_by_seller) && (
                   <button
                     onClick={() => { setSelectedBusiness(b); setManualModalOpen(true); }}
                     className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors"
                   >
-                    <Search size={14} /> Asignar Manualmente
+                    <Search size={14} /> Transferir Manualmente
                   </button>
                 )}
               </div>

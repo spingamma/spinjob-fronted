@@ -8,7 +8,7 @@ import {
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
 import ReviewModal from '../components/ReviewModal';
 import ModalVerificacion from '../components/ModalVerificacion';
-import CatalogModal from '../components/CatalogModal';
+import InlineCatalogCarousel from '../components/InlineCatalogCarousel';
 import { cleanWhatsappNumber } from '../utils/phone';
 
 export default function PlantillaGenerica({ profesional, volverAtras, onProtectedAction }) {
@@ -21,22 +21,6 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
     mostrarModalVerificacion, setMostrarModalVerificacion,
     isSaved, isSaving, toggleSaveCard
   } = useAccionesPerfil(profesional, onProtectedAction);
-
-  // 📦 Estado del catálogo
-  const [showCatalog, setShowCatalog] = useState(false);
-  const [hasProducts, setHasProducts] = useState(false);
-
-  useEffect(() => {
-    if (!profesional?.slug) return;
-    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-    fetch(`${API_URL}/businesses/${profesional.slug}/products`)
-      .then(res => res.ok ? res.json() : [])
-      .then(data => setHasProducts(data.length > 0))
-      .catch(() => setHasProducts(false));
-  }, [profesional?.slug]);
-
-  const showCatalogButton = hasProducts || profesional?.catalog_url;
-
 
   // 🧹 LIMPIEZA Y FORMATEO DE ENLACES
   // Parsear whatsapp_numbers (JSON array) con fallback al campo viejo
@@ -238,18 +222,15 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           </div>
         </div>
 
-        {/* 📦 BOTÓN VER CATÁLOGO */}
-        {showCatalogButton && (
-          <div className="mb-8">
-            <button
-              onClick={() => setShowCatalog(true)}
-              className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
-            >
-              <ShoppingBag size={20} />
-              Ver Catálogo
-            </button>
-          </div>
-        )}
+        {/* 📦 CATÁLOGO INLINE (CARRUSEL) */}
+        <InlineCatalogCarousel 
+          slug={profesional.slug} 
+          catalogUrl={profesional.catalog_url}
+          whatsappNumber={waNumbers[0] || null}
+          businessName={profesional.name}
+          country={profesional.country || 'Bolivia'}
+          theme="light"
+        />
 
         {/* 🚀 FOOTER SPINGAMMA */}
         <div className="mt-12 mb-8 text-center flex flex-col items-center justify-center">
@@ -357,19 +338,6 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           setMostrarModalCalificando(true);
         }}
         userName={userName}
-      />
-
-      {/* ==========================================
-          MODAL DE CATÁLOGO
-          ========================================== */}
-      <CatalogModal
-        isOpen={showCatalog}
-        onClose={() => setShowCatalog(false)}
-        slug={profesional?.slug}
-        catalogUrl={profesional?.catalog_url}
-        whatsappNumber={waNumbers[0] || null}
-        businessName={profesional?.name}
-        country={profesional?.country || 'Bolivia'}
       />
     </div>
   );

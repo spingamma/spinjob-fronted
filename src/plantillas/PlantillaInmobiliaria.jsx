@@ -4,7 +4,7 @@ import { LogOut, DoorOpen, X, Share2, QrCode, Star, Bookmark, ShoppingBag } from
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
 import ReviewModal from '../components/ReviewModal';
 import ModalVerificacion from '../components/ModalVerificacion';
-import CatalogModal from '../components/CatalogModal';
+import InlineCatalogCarousel from '../components/InlineCatalogCarousel';
 import { cleanWhatsappNumber } from '../utils/phone';
 
 export default function PlantillaInmobiliaria({ profesional, volverAtras, onProtectedAction }) {
@@ -24,21 +24,6 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
     const timer = setTimeout(() => setLoaded(true), 800);
     return () => clearTimeout(timer);
   }, []);
-
-  // 📦 Estado del catálogo
-  const [showCatalog, setShowCatalog] = useState(false);
-  const [hasProducts, setHasProducts] = useState(false);
-
-  useEffect(() => {
-    if (!profesional?.slug) return;
-    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-    fetch(`${API_URL}/businesses/${profesional.slug}/products`)
-      .then(res => res.ok ? res.json() : [])
-      .then(data => setHasProducts(data.length > 0))
-      .catch(() => setHasProducts(false));
-  }, [profesional?.slug]);
-
-  const showCatalogButton = hasProducts || profesional?.catalog_url;
 
   if (!profesional) return null;
 
@@ -259,18 +244,17 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
             )}
         </div>
 
-        {/* 📦 BOTÓN VER CATÁLOGO */}
-        {showCatalogButton && (
-          <div className="w-full mt-8 mb-4">
-            <button
-              onClick={() => setShowCatalog(true)}
-              className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-[#425C63] to-[#C8A721] text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg transition-all hover:shadow-xl hover:scale-[1.02] font-montserrat text-sm uppercase tracking-wider"
-            >
-              <ShoppingBag size={18} />
-              Ver Catálogo
-            </button>
-          </div>
-        )}
+        {/* 📦 CATÁLOGO INLINE (CARRUSEL) */}
+        <div className="w-full mt-8 mb-4">
+          <InlineCatalogCarousel 
+            slug={profesional.slug} 
+            catalogUrl={profesional.catalog_url}
+            whatsappNumber={(() => { try { return JSON.parse(profesional?.whatsapp_numbers || '[]')[0] || null; } catch { return null; } })()}
+            businessName={profesional.name}
+            country={profesional.country || 'Bolivia'}
+            theme="dark"
+          />
+        </div>
         
         
         {/* FOOTER */}
@@ -341,16 +325,6 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
           setMostrarModalCalificando(true);
         }}
         userName={userName}
-      />
-
-      <CatalogModal
-        isOpen={showCatalog}
-        onClose={() => setShowCatalog(false)}
-        slug={profesional?.slug}
-        catalogUrl={profesional?.catalog_url}
-        whatsappNumber={(() => { try { return JSON.parse(profesional?.whatsapp_numbers || '[]')[0] || null; } catch { return null; } })()}
-        businessName={profesional?.name}
-        country={profesional?.country || 'Bolivia'}
       />
     </div>
   );

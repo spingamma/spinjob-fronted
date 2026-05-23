@@ -7,7 +7,7 @@ import {
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
 import ReviewModal from '../components/ReviewModal';
 import ModalVerificacion from '../components/ModalVerificacion';
-import CatalogModal from '../components/CatalogModal';
+import InlineCatalogCarousel from '../components/InlineCatalogCarousel';
 import { cleanWhatsappNumber } from '../utils/phone';
 
 export default function PlantillaAbogado({ profesional, volverAtras, onProtectedAction }) {
@@ -26,21 +26,6 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
     const timer = setTimeout(() => setLoaded(true), 100);
     return () => clearTimeout(timer);
   }, []);
-
-  // 📦 Estado del catálogo
-  const [showCatalog, setShowCatalog] = useState(false);
-  const [hasProducts, setHasProducts] = useState(false);
-
-  useEffect(() => {
-    if (!profesional?.slug) return;
-    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-    fetch(`${API_URL}/businesses/${profesional.slug}/products`)
-      .then(res => res.ok ? res.json() : [])
-      .then(data => setHasProducts(data.length > 0))
-      .catch(() => setHasProducts(false));
-  }, [profesional?.slug]);
-
-  const showCatalogButton = hasProducts || profesional?.catalog_url;
 
   if (!profesional) return null;
 
@@ -212,18 +197,15 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
           </div>
         </div>
 
-        {/* 📦 BOTÓN VER CATÁLOGO */}
-        {showCatalogButton && (
-          <div className="w-full max-w-sm mt-10">
-            <button
-              onClick={() => setShowCatalog(true)}
-              className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-[#C2A562] to-[#E9CE3F] text-[#121212] font-bold py-3.5 px-6 rounded-2xl shadow-lg transition-all hover:shadow-xl hover:scale-[1.02] font-seasons tracking-wide"
-            >
-              <ShoppingBag size={18} />
-              Ver Catálogo
-            </button>
-          </div>
-        )}
+        {/* 📦 CATÁLOGO INLINE (CARRUSEL) */}
+        <InlineCatalogCarousel 
+          slug={profesional.slug} 
+          catalogUrl={profesional.catalog_url}
+          whatsappNumber={waNumbers[0] || null}
+          businessName={profesional.name}
+          country={profesional.country || 'Bolivia'}
+          theme="dark"
+        />
       </div>
 
       {/* Modal QR */}
@@ -292,16 +274,6 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
           setMostrarModalCalificando(true);
         }}
         userName={userName}
-      />
-
-      <CatalogModal
-        isOpen={showCatalog}
-        onClose={() => setShowCatalog(false)}
-        slug={profesional?.slug}
-        catalogUrl={profesional?.catalog_url}
-        whatsappNumber={waNumbers[0] || null}
-        businessName={profesional?.name}
-        country={profesional?.country || 'Bolivia'}
       />
     </div>
   );

@@ -143,10 +143,10 @@ export default function useAuthLogic({ isOpen, onSuccess }) {
 
       if (!data.celular) {
         setTempToken(data.access_token);
-        setTempUserData({ nombre: data.nombre, is_admin: data.is_admin || false });
+        setTempUserData({ nombre: data.nombre, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false });
         setIsCompletingPhone(true);
       } else {
-        _completeSession({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false });
+        _completeSession({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false });
       }
     } catch (err) {
       setApiError(err.message);
@@ -191,13 +191,13 @@ export default function useAuthLogic({ isOpen, onSuccess }) {
 
       if (data.must_change_password) {
         setTempToken(data.access_token);
-        setTempUserData({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false });
+        setTempUserData({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false });
         setIsChangingPassword(true);
         setIsLoading(false);
         return;
       }
 
-      _completeSession({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false });
+      _completeSession({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false });
     } catch (error) {
       setApiError(error.message);
     } finally {
@@ -256,7 +256,7 @@ export default function useAuthLogic({ isOpen, onSuccess }) {
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || 'Error al cambiar la contraseña.');
 
-      _completeSession({ nombre: tempUserData.nombre, celular: tempUserData.celular, is_admin: tempUserData.is_admin });
+      _completeSession({ nombre: tempUserData.nombre, celular: tempUserData.celular, is_admin: tempUserData.is_admin, is_vendedor: tempUserData.is_vendedor });
     } catch (error) {
       setApiError(error.message);
     } finally {
@@ -285,7 +285,7 @@ export default function useAuthLogic({ isOpen, onSuccess }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Error al completar tu celular.');
 
-      _completeSession({ nombre: tempUserData.nombre, celular: formData.celular, is_admin: tempUserData.is_admin });
+      _completeSession({ nombre: tempUserData.nombre, celular: formData.celular, is_admin: tempUserData.is_admin, is_vendedor: tempUserData.is_vendedor });
     } catch (error) {
       setApiError(error.message);
     } finally {
