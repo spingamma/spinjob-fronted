@@ -3,22 +3,36 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, CheckCircle, XCircle, ShieldAlert, 
   Users, Building, Search, Clock, ShieldCheck, Loader2,
-  FileText, X, Eye
+  FileText, X, Eye, BarChart2, Bookmark, Store
 } from 'lucide-react';
 import BottomNavbar from '../../components/BottomNavbar';
 import BusinessDetailsModal from '../../components/BusinessDetailsModal';
 import fetchAuth from '../../utils/fetchAuth';
+import AdminAnalyticsTab from './components/AdminAnalyticsTab';
+import AdminSpecialtiesTab from './components/AdminSpecialtiesTab';
+import AdminVendedorTab from './components/AdminVendedorTab';
 
 export default function AdminPanel() {
   const [pendientes, setPendientes] = useState([]);
+  const [searchPendientes, setSearchPendientes] = useState('');
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   // Estados para la pestaña de Usuarios
-  const [activeTab, setActiveTab] = useState('negocios'); // 'negocios' o 'usuarios'
+  const [activeTab, setActiveTab] = useState(() => {
+    const stored = localStorage.getItem('spingamma_user');
+    if (stored) {
+      try { 
+        const parsed = JSON.parse(stored);
+        if (!parsed.is_admin && parsed.is_vendedor) return 'vendedor';
+      } catch(e) {}
+    }
+    return 'negocios';
+  });
   const [users, setUsers] = useState([]);
   const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [userStatusFilter, setUserStatusFilter] = useState('pendientes');
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isVerifyingUser, setIsVerifyingUser] = useState(null);
 
@@ -34,6 +48,13 @@ export default function AdminPanel() {
     }
     return false;
   });
+  const [isVendedor, setIsVendedor] = useState(() => {
+    const stored = localStorage.getItem('spingamma_user');
+    if (stored) {
+      try { return JSON.parse(stored).is_vendedor === true; } catch(e) { return false; }
+    }
+    return false;
+  });
 
   const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
@@ -43,9 +64,10 @@ export default function AdminPanel() {
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      const res = await fetchAuth(`${API_URL}/admin/pendientes`);
+      const queryParams = searchPendientes ? `?search=${encodeURIComponent(searchPendientes)}` : '';
+      const res = await fetchAuth(`${API_URL}/admin/pendientes${queryParams}`);
       
-      if (res.status === 403) throw new Error("No tienes permisos de administrador.");
+      if (res.status === 403) throw new Error("No tienes permisos suficientes.");
       if (!res.ok) throw new Error("Error al cargar solicitudes.");
       
       const data = await res.json();
@@ -58,8 +80,12 @@ export default function AdminPanel() {
   };
 
   useEffect(() => {
-    cargarPendientes();
-  }, [navigate]);
+    if (activeTab === 'negocios' && isAdmin) {
+      cargarPendientes();
+    } else {
+      setCargando(false);
+    }
+  }, [navigate, searchPendientes, activeTab, isAdmin]);
 
   // Efecto para cargar usuarios cuando la pestaña cambia o se busca
   useEffect(() => {
@@ -171,43 +197,89 @@ export default function AdminPanel() {
           </div>
 
           {/* Selector de TABS con diseño Premium */}
-          <div className="flex border-b border-gray-100 p-2 bg-gray-50/50">
-            <button
-              onClick={() => setActiveTab('negocios')}
-              className={`flex-1 flex items-center justify-center gap-2 py-4 px-4 rounded-2xl font-bold transition-all
-                ${activeTab === 'negocios' 
-                  ? 'bg-white shadow-sm text-[#B95221] ring-1 ring-gray-200/50' 
-                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
-              `}
-            >
-              <Building size={20} />
-              Solicitudes de Negocios
-              {pendientes.length > 0 && (
-                <span className="ml-1 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-pulse">
-                  {pendientes.length}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('usuarios')}
-              className={`flex-1 flex items-center justify-center gap-2 py-4 px-4 rounded-2xl font-bold transition-all
-                ${activeTab === 'usuarios' 
-                  ? 'bg-white shadow-sm text-[#B95221] ring-1 ring-gray-200/50' 
-                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
-              `}
-            >
-              <Users size={20} />
-              Usuarios Pendientes
-            </button>
-          </div>
+          {isAdmin && (
+            <div className="flex border-b border-gray-100 p-2 bg-gray-50/50 overflow-x-auto hide-scrollbar">
+              <button
+                onClick={() => setActiveTab('negocios')}
+                className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
+                  ${activeTab === 'negocios' 
+                    ? 'bg-white shadow-sm text-[#B95221] ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
+                `}
+              >
+                <Building size={18} />
+                Solicitudes
+                {pendientes.length > 0 && (
+                  <span className="ml-1 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-pulse">
+                    {pendientes.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setActiveTab('analytics')}
+                className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
+                  ${activeTab === 'analytics' 
+                    ? 'bg-white shadow-sm text-[#B95221] ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
+                `}
+              >
+                <BarChart2 size={18} />
+                Analíticas
+              </button>
+              <button
+                onClick={() => setActiveTab('especialidades')}
+                className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
+                  ${activeTab === 'especialidades' 
+                    ? 'bg-white shadow-sm text-[#B95221] ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
+                `}
+              >
+                <Bookmark size={18} />
+                Especialidades
+              </button>
+              <button
+                onClick={() => setActiveTab('vendedor')}
+                className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
+                  ${activeTab === 'vendedor' 
+                    ? 'bg-white shadow-sm text-[#B95221] ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
+                `}
+              >
+                <Store size={18} />
+                Vendedores
+              </button>
+              <button
+                onClick={() => setActiveTab('usuarios')}
+                className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
+                  ${activeTab === 'usuarios' 
+                    ? 'bg-white shadow-sm text-[#B95221] ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
+                `}
+              >
+                <Users size={18} />
+                Usuarios
+              </button>
+            </div>
+          )}
         </div>
 
         {/* CONTENIDO DE PESTAÑA: NEGOCIOS */}
         {activeTab === 'negocios' && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center justify-between px-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
               <h2 className="text-xl font-extrabold text-[#1E3D51]">Revisiones Pendientes</h2>
-              <span className="text-sm text-gray-500 font-medium">{pendientes.length} por aprobar</span>
+              
+              <div className="relative w-full sm:w-72">
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input 
+                  type="text" 
+                  placeholder="Buscar por nombre o categoría..." 
+                  value={searchPendientes}
+                  onChange={(e) => setSearchPendientes(e.target.value)}
+                  className="w-full bg-white border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221]/30 transition-all text-sm font-medium"
+                />
+              </div>
             </div>
 
             {pendientes.length === 0 ? (
@@ -281,17 +353,32 @@ export default function AdminPanel() {
         {activeTab === 'usuarios' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-6 border-b border-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="p-6 border-b border-gray-50 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                 <h2 className="text-xl font-extrabold text-[#1E3D51]">Gestión de Verificaciones</h2>
-                <div className="relative w-full sm:w-72">
-                  <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Buscar usuario..." 
-                    value={userSearchTerm}
-                    onChange={(e) => setUserSearchTerm(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221]/30 transition-all text-sm font-medium"
-                  />
+                
+                <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3">
+                  {/* Select Filtro */}
+                  <select 
+                    value={userStatusFilter}
+                    onChange={(e) => setUserStatusFilter(e.target.value)}
+                    className="bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221]/30 text-sm font-bold text-[#1E3D51]"
+                  >
+                    <option value="todos">Todos los Estados</option>
+                    <option value="pendientes">Pendientes</option>
+                    <option value="verificados">Verificados</option>
+                  </select>
+
+                  {/* Input Búsqueda */}
+                  <div className="relative w-full sm:w-64">
+                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input 
+                      type="text" 
+                      placeholder="Buscar usuario..." 
+                      value={userSearchTerm}
+                      onChange={(e) => setUserSearchTerm(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221]/30 transition-all text-sm font-medium"
+                    />
+                  </div>
                 </div>
               </div>
               
@@ -301,14 +388,14 @@ export default function AdminPanel() {
                     <Loader2 size={40} className="animate-spin text-[#B95221] mb-2" />
                     <p className="text-gray-400 font-bold">Buscando...</p>
                   </div>
-                ) : users.length === 0 ? (
+                ) : users.filter(u => userStatusFilter === 'todos' ? true : (userStatusFilter === 'verificados' ? u.is_verified : !u.is_verified)).length === 0 ? (
                   <div className="py-20 text-center">
                     <Users size={48} className="mx-auto mb-4 text-gray-200" />
                     <p className="text-gray-400 font-bold">No se encontraron usuarios.</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {users.map(user => (
+                    {users.filter(u => userStatusFilter === 'todos' ? true : (userStatusFilter === 'verificados' ? u.is_verified : !u.is_verified)).map(user => (
                       <div key={user.id} className="group bg-gray-50/50 rounded-2xl border border-gray-100 p-5 hover:border-[#F67927]/30 transition-all hover:bg-white hover:shadow-md flex flex-col h-full">
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex-1 min-w-0">
@@ -351,11 +438,20 @@ export default function AdminPanel() {
             </div>
           </div>
         )}
+
+        {/* CONTENIDO DE PESTAÑA: ANALÍTICAS */}
+        {activeTab === 'analytics' && <AdminAnalyticsTab API_URL={API_URL} />}
+
+        {/* CONTENIDO DE PESTAÑA: ESPECIALIDADES */}
+        {activeTab === 'especialidades' && <AdminSpecialtiesTab API_URL={API_URL} />}
+
+        {/* CONTENIDO DE PESTAÑA: VENDEDORES */}
+        {activeTab === 'vendedor' && <AdminVendedorTab API_URL={API_URL} />}
       </div>
       
       <BottomNavbar 
         isLoggedIn={isLoggedIn} 
-        isAdmin={isAdmin} 
+        isAdmin={isAdmin || isVendedor} 
         onHomeClick={() => navigate('/')} 
       />
 

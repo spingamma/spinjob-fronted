@@ -1,8 +1,9 @@
 // Archivo: src/components/CatalogModal.jsx
 import { useState, useEffect } from 'react';
 import { X, ShoppingBag, ExternalLink, Loader2, Package, MessageCircle } from 'lucide-react';
+import { cleanWhatsappNumber } from '../utils/phone';
 
-export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsappNumber, businessName }) {
+export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia' }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -65,7 +66,7 @@ export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsa
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-3">
               {products.map(product => (
-                <ProductCard key={product.id} product={product} whatsappNumber={whatsappNumber} businessName={businessName} />
+                <ProductCard key={product.id} product={product} whatsappNumber={whatsappNumber} businessName={businessName} country={country} />
               ))}
             </div>
           )}
@@ -82,12 +83,12 @@ export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsa
   );
 }
 
-const ProductCard = ({ product, whatsappNumber, businessName }) => {
+const ProductCard = ({ product, whatsappNumber, businessName, country }) => {
   const [expanded, setExpanded] = useState(false);
   const isLong = product.description && product.description.length > 70;
 
   // Limpiar número WhatsApp y construir URL con mensaje prellenado
-  const cleanWa = whatsappNumber ? whatsappNumber.replace(/[^0-9]/g, '') : '';
+  const cleanWa = cleanWhatsappNumber(whatsappNumber, country);
   const waMessage = encodeURIComponent(`Hola ${businessName || ''}, me interesa ${product.name}`);
   const waUrl = cleanWa ? `https://wa.me/${cleanWa}?text=${waMessage}` : null;
 

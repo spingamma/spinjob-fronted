@@ -61,3 +61,15 @@ cd c:\Users\jhona\Desktop\spinjob-fronted && npm run dev
 ```
 
 Si el servidor arranca sin warnings críticos, la verificación pasó.
+
+## 8. Preservación e Integridad de Módulos (Ediciones de Múltiples Líneas)
+
+Al realizar reemplazos en lote o editar cabeceras de archivos para añadir imports (`import ...`), confirma siempre:
+- **No eliminar imports colaterales necesarios** (e.g., `useState`, `useEffect` o hooks del sistema).
+- **No duplicar imports** del mismo módulo.
+- **Mantener el formato internacional dinámico**: NUNCA hardcodear prefijos de países (`591`) o nombres de países (`Bolivia`) como fallbacks estáticos en código utilitario. Utiliza siempre la resolución dinámica basada en la lista de configuración centralizada (`COUNTRIES`).
+
+## 9. Compatibilidad de Terminal Windows (Scripts de Saneamiento/Migración)
+
+Si creas scripts en Python, Node o Bash de utilidad rápida que se ejecuten en la terminal de Windows:
+- **NO utilices emojis ni caracteres Unicode complejos** en los prints o salidas estándar. La terminal de Windows con codificación nativa `cp1252` fallará arrojando `UnicodeEncodeError`. Utiliza texto plano seguro como `[INFO]`, `[SUCCESS]`, `[WARN]` o `[ERROR]`.

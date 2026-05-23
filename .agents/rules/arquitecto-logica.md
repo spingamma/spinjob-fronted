@@ -38,6 +38,13 @@ trigger: always_on
     - NUNCA igualar z-index entre BottomNavbar y modales. Los modales SIEMPRE deben estar por encima.
 
 ## Eficiencia del Agente
-28. **Ediciones en lote:** Si una tarea toca N archivos independientes → editar TODOS en paralelo. Nunca secuencialmente.
-29. **No leer para editar si ya conoces el contenido.** Un `grep_search` con `MatchPerLine=true` da línea exacta + contenido suficiente para `replace_file_content` directo.
-30. **Multi-chunk para mismo archivo.** Si un archivo necesita 2+ ediciones no contiguas → usar `multi_replace_file_content` en 1 sola llamada.
+41. **Ediciones en lote:** Si una tarea toca N archivos independientes → editar TODOS en paralelo. Nunca secuencialmente.
+42. **No leer para editar si ya conoces el contenido.** Un `grep_search` con `MatchPerLine=true` da línea exacta + contenido suficiente para `replace_file_content` directo.
+43. **Multi-chunk para mismo archivo.** Si un archivo necesita 2+ ediciones no contiguas → usar `multi_replace_file_content` en 1 sola llamada.
+
+## Backend (FastAPI / SQLAlchemy)
+44. **Filtros en Properties:** NUNCA usar filtros `.ilike()` u otros operadores directos de búsqueda sobre campos calculados o propiedades (properties) de SQLAlchemy. Causan errores 500 a nivel de BD que el frontend interpreta como problemas de CORS. Si la propiedad deriva de una relación, usa la sintaxis de relación (ej. `modelo.relacion.any(...)`).
+45. **Límites de Búsqueda UI:** En rutas de búsqueda que alimentan gráficas o selectores masivos en la UI, asegura usar límites razonables para la vista de usuario (`limit(50)`) y no límites muy restrictivos (`limit(20)`) que corten el flujo esperado.
+
+## Librerías y Reportes
+46. **Exportación PDF (jsPDF):** La librería `jspdf-autotable` debe importarse explícitamente y ejecutarse pasando el documento por parámetro: `import autoTable from 'jspdf-autotable'` y luego `autoTable(doc, {...})`. NO usar `doc.autoTable(...)` ya que genera el error `doc.autoTable is not a function` en ES6 Modules.

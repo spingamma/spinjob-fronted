@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import CropModal from '../../components/CropModal';
 import ModalVerificacion from '../../components/ModalVerificacion';
+import PhoneInputWithCountry from '../../components/PhoneInputWithCountry';
 
 export default function CrearNegocio() {
   const navigate = useNavigate();
@@ -510,18 +511,16 @@ export default function CrearNegocio() {
                   <div className="space-y-3">
                     {whatsappList.map((num, idx) => (
                       <div key={idx} className="flex gap-2 items-center">
-                        <div className={`${wrapperClass} flex-1`}>
-                          <div className="pl-4 flex items-center text-gray-400"><Phone size={18} /></div>
-                          <input
-                            type="tel"
+                        <div className="flex-1">
+                          <PhoneInputWithCountry
                             value={num}
-                            onChange={(e) => {
+                            countryName={formData.country || 'Bolivia'}
+                            onChange={(val) => {
                               const updated = [...whatsappList];
-                              updated[idx] = e.target.value;
+                              updated[idx] = val;
                               setWhatsappList(updated);
                             }}
                             placeholder={idx === 0 ? 'WhatsApp principal' : 'WhatsApp secundario'}
-                            className={inputClass}
                           />
                         </div>
                         {idx > 0 && (

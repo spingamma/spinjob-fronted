@@ -1,6 +1,7 @@
 // Archivo: src/components/AuthModal.jsx
 import { useEffect } from 'react';
 import { UserPlus, LogIn, X, Loader2, Eye, EyeOff, Phone, KeyRound, Mail, ShieldCheck } from 'lucide-react';
+import PhoneInputWithCountry from './PhoneInputWithCountry';
 import useAuthLogic from '../hooks/useAuthLogic';
 
 export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = false }) {
@@ -82,37 +83,53 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
       else setShowPassword(!showPassword);
     };
 
+    const isCelular = field === 'celular';
+
     return (
       <div>
         <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>
           {label} {required && <span className={requiredStar}>*</span>}
         </label>
-        <div className={showEye ? 'relative' : ''}>
-          <input
-            required={required}
-            type={showEye ? (currentShowState ? 'text' : 'password') : type}
-            inputMode={inputMode}
-            placeholder={placeholder}
+        {isCelular ? (
+          <PhoneInputWithCountry
+            id={field}
             value={formData[field]}
-            onChange={(e) => {
-              setFormData({...formData, [field]: e.target.value});
+            onChange={(val) => {
+              setFormData({...formData, [field]: val});
               if (errores[field]) setErrores({...errores, [field]: ''});
             }}
-            className={`w-full ${showEye ? 'pl-4 pr-12' : 'px-4'} py-3 rounded-xl outline-none focus:ring-1 transition-all ${showEye ? 'tracking-wider' : ''} ${inputBg} ${errores[field] ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
             disabled={isLoading}
+            isDarkTheme={isDarkTheme}
+            className={errores[field] ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-500' : ''}
           />
-          {showEye && (
-            <button
-              type="button"
-              onClick={toggleShow}
-              className={`absolute inset-y-0 right-0 pr-3.5 flex items-center active:scale-95 transition-all ${eyeIconColor}`}
-              aria-label={currentShowState ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+        ) : (
+          <div className={showEye ? 'relative' : ''}>
+            <input
+              required={required}
+              type={showEye ? (currentShowState ? 'text' : 'password') : type}
+              inputMode={inputMode}
+              placeholder={placeholder}
+              value={formData[field]}
+              onChange={(e) => {
+                setFormData({...formData, [field]: e.target.value});
+                if (errores[field]) setErrores({...errores, [field]: ''});
+              }}
+              className={`w-full ${showEye ? 'pl-4 pr-12' : 'px-4'} py-3 rounded-xl outline-none focus:ring-1 transition-all ${showEye ? 'tracking-wider' : ''} ${inputBg} ${errores[field] ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
               disabled={isLoading}
-            >
-              {currentShowState ? <EyeOff size={20} strokeWidth={2} /> : <Eye size={20} strokeWidth={2} />}
-            </button>
-          )}
-        </div>
+            />
+            {showEye && (
+              <button
+                type="button"
+                onClick={toggleShow}
+                className={`absolute inset-y-0 right-0 pr-3.5 flex items-center active:scale-95 transition-all ${eyeIconColor}`}
+                aria-label={currentShowState ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                disabled={isLoading}
+              >
+                {currentShowState ? <EyeOff size={20} strokeWidth={2} /> : <Eye size={20} strokeWidth={2} />}
+              </button>
+            )}
+          </div>
+        )}
         {errores[field] && <p className="text-red-500 text-xs mt-1.5 font-medium">{errores[field]}</p>}
       </div>
     );

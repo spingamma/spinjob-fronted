@@ -29,7 +29,10 @@ export default function Directory() {
   const [isAdmin, setIsAdmin] = useState(() => {
     const stored = localStorage.getItem('spingamma_user');
     if (stored) {
-      try { return JSON.parse(stored).is_admin === true; } catch(e) { return false; }
+      try { 
+        const parsed = JSON.parse(stored);
+        return parsed.is_admin === true || parsed.is_vendedor === true; 
+      } catch(e) { return false; }
     }
     return false;
   });
@@ -98,7 +101,7 @@ export default function Directory() {
     localStorage.setItem('spingamma_user', JSON.stringify(formData));
     setIsLoggedIn(true);
     setUserName(formData.nombre);
-    setIsAdmin(formData.is_admin === true);
+    setIsAdmin(formData.is_admin === true || formData.is_vendedor === true);
     setAuthModalOpen(false);
     if (pendingSlug) {
       navigate(`/perfil/${pendingSlug}`);

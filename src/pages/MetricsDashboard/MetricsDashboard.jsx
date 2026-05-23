@@ -17,7 +17,10 @@ export default function MetricsDashboard() {
   const [isAdmin, setIsAdmin] = useState(() => {
     const stored = localStorage.getItem('spingamma_user');
     if (stored) {
-      try { return JSON.parse(stored).is_admin === true; } catch(e) { return false; }
+      try { 
+        const parsed = JSON.parse(stored);
+        return parsed.is_admin === true || parsed.is_vendedor === true; 
+      } catch(e) { return false; }
     }
     return false;
   });

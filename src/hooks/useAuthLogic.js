@@ -1,5 +1,5 @@
-// Archivo: src/hooks/useAuthLogic.js
 import { useState, useEffect } from 'react';
+import { parsePhoneNumber } from '../utils/phone';
 
 /**
  * Custom hook que encapsula toda la lógica de autenticación
@@ -97,9 +97,10 @@ export default function useAuthLogic({ isOpen, onSuccess }) {
     }
 
     if (!isForgotMode && !isChangingPassword) {
-      const regexCelular = /^[0-9]{8}$/;
-      if (!regexCelular.test(formData.celular.trim())) {
-        nuevosErrores.celular = 'El celular debe tener exactamente 8 dígitos numéricos.';
+      const { country, number } = parsePhoneNumber(formData.celular);
+      const regexCelular = new RegExp(`^[0-9]{${country.length}}$`);
+      if (!regexCelular.test(number.trim())) {
+        nuevosErrores.celular = `El celular debe tener exactamente ${country.length} dígitos numéricos.`;
         valid = false;
       }
     }

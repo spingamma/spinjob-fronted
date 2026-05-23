@@ -5,6 +5,7 @@ import useAccionesPerfil from '../hooks/useAccionesPerfil';
 import ReviewModal from '../components/ReviewModal';
 import ModalVerificacion from '../components/ModalVerificacion';
 import CatalogModal from '../components/CatalogModal';
+import { cleanWhatsappNumber } from '../utils/phone';
 
 export default function PlantillaInmobiliaria({ profesional, volverAtras, onProtectedAction }) {
   const [loaded, setLoaded] = useState(false);
@@ -181,7 +182,7 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
               try { waNumbers = JSON.parse(profesional?.whatsapp_numbers || '[]'); } catch { waNumbers = []; }
               if (waNumbers.length === 0 && profesional?.whatsapp) waNumbers = [profesional.whatsapp];
               return waNumbers.map((num, idx) => {
-                const clean = num.replace(/[^0-9]/g, '');
+                const clean = cleanWhatsappNumber(num, profesional?.country || 'Bolivia');
                 if (!clean) return null;
                 return (
                   <a key={`wa-${idx}`} href={`https://wa.me/${clean}`} onClick={(e) => handleLinkClick(e, 'WhatsApp', `https://wa.me/${clean}`)} className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#25D366] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
@@ -349,6 +350,7 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
         catalogUrl={profesional?.catalog_url}
         whatsappNumber={(() => { try { return JSON.parse(profesional?.whatsapp_numbers || '[]')[0] || null; } catch { return null; } })()}
         businessName={profesional?.name}
+        country={profesional?.country || 'Bolivia'}
       />
     </div>
   );

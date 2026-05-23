@@ -8,6 +8,7 @@ import useAccionesPerfil from '../hooks/useAccionesPerfil';
 import ReviewModal from '../components/ReviewModal';
 import ModalVerificacion from '../components/ModalVerificacion';
 import CatalogModal from '../components/CatalogModal';
+import { cleanWhatsappNumber } from '../utils/phone';
 
 export default function PlantillaAbogado({ profesional, volverAtras, onProtectedAction }) {
   const [loaded, setLoaded] = useState(false);
@@ -58,7 +59,7 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
   const enlacesSociales = [
     { id: 'phone', icon: Phone, url: profesional.phone ? `tel:${profesional.phone.replace(/[^0-9]/g, '')}` : null, label: 'Llamar' },
     ...waNumbers.map((num, idx) => {
-      const clean = num.replace(/[^0-9]/g, '');
+      const clean = cleanWhatsappNumber(num, profesional?.country || 'Bolivia');
       return { id: `whatsapp-${idx}`, icon: MessageCircle, url: clean ? `https://wa.me/${clean}` : null, label: waNumbers.length > 1 ? `WhatsApp ${idx + 1}` : 'WhatsApp' };
     }),
     { id: 'ubicacion', icon: MapPin, url: profesional.ubicacion_url, label: 'Ubicación' },
@@ -300,6 +301,7 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
         catalogUrl={profesional?.catalog_url}
         whatsappNumber={waNumbers[0] || null}
         businessName={profesional?.name}
+        country={profesional?.country || 'Bolivia'}
       />
     </div>
   );

@@ -9,6 +9,7 @@ import useAccionesPerfil from '../hooks/useAccionesPerfil';
 import ReviewModal from '../components/ReviewModal';
 import ModalVerificacion from '../components/ModalVerificacion';
 import CatalogModal from '../components/CatalogModal';
+import { cleanWhatsappNumber } from '../utils/phone';
 
 export default function PlantillaGenerica({ profesional, volverAtras, onProtectedAction }) {
   
@@ -222,7 +223,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {waNumbers.map((num, idx) => {
-              const clean = num.replace(/[^0-9]/g, '');
+              const clean = cleanWhatsappNumber(num, profesional?.country || 'Bolivia');
               if (!clean) return null;
               return <SocialButton key={`wa-${idx}`} icon={MessageCircle} label={waNumbers.length > 1 ? `WhatsApp ${idx + 1}` : 'WhatsApp'} url={`https://wa.me/${clean}`} colorClass="text-green-500 hover:bg-green-50" />;
             })}
@@ -368,6 +369,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         catalogUrl={profesional?.catalog_url}
         whatsappNumber={waNumbers[0] || null}
         businessName={profesional?.name}
+        country={profesional?.country || 'Bolivia'}
       />
     </div>
   );
