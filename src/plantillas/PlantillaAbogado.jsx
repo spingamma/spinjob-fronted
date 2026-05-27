@@ -142,6 +142,22 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
           <h2 className="text-sm md:text-base text-[#E9CE3F] uppercase tracking-[0.2em] font-medium mb-6 font-seasons">
             {profesional.title}
           </h2>
+          
+          {(profesional.experience_years || profesional.credentials) && (
+            <div className="flex flex-wrap justify-center gap-3 mb-6">
+              {profesional.experience_years && (
+                <div className="bg-[#1a1a1a] border border-[#E9CE3F]/30 text-gray-300 px-3 py-1.5 rounded-full text-xs font-seasons flex items-center gap-1.5 shadow-sm">
+                  <Star size={12} className="text-[#E9CE3F]" /> {profesional.experience_years} Años de Experiencia
+                </div>
+              )}
+              {profesional.credentials && (
+                <div className="bg-[#1a1a1a] border border-[#E9CE3F]/30 text-gray-300 px-3 py-1.5 rounded-full text-xs font-seasons flex items-center gap-1.5 shadow-sm">
+                  <Bookmark size={12} className="text-[#E9CE3F]" /> Matrícula/Credencial: {profesional.credentials}
+                </div>
+              )}
+            </div>
+          )}
+
           {profesional.description && (
             <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-sm mx-auto font-seasons whitespace-pre-line px-2">
               {profesional.description}

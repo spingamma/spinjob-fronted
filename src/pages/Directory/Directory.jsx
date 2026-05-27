@@ -53,7 +53,7 @@ export default function Directory() {
     let isMounted = true;
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
-    const cargarDirectorio = async (intentos = 0) => {
+    async function cargarDirectorio(intentos = 0) {
       try {
         const res = await fetch(`${API_URL}/businesses/`);
         if (!res.ok) throw new Error("Error en red");
@@ -72,7 +72,7 @@ export default function Directory() {
           setCargando(false);
         }
       }
-    };
+    }
     cargarDirectorio();
     return () => { isMounted = false; };
   }, []);

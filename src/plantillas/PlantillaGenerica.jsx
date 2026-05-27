@@ -182,15 +182,34 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         {/* INFO PRINCIPAL REMOVED OLD LOCATION */}
 
         {/* 📝 ACERCA DE */}
-        {profesional.description && (
+        {(profesional.experience_years || profesional.credentials || profesional.description) && (
           <div className="bg-white rounded-3xl p-6 mb-8 border border-gray-100 shadow-sm">
             <h3 className="text-lg font-bold text-[#1E3D51] mb-3 flex items-center gap-2">
               <span className="w-1.5 h-6 bg-[#B95221] rounded-full"></span> Acerca de mí
             </h3>
+            
+            {/* E-E-A-T Datos Estructurados */}
+            {(profesional.experience_years || profesional.credentials) && (
+              <div className="flex flex-wrap gap-3 mb-4">
+                {profesional.experience_years && (
+                  <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-medium border border-blue-100">
+                    <span className="font-bold">{profesional.experience_years}</span> Años de Experiencia
+                  </div>
+                )}
+                {profesional.credentials && (
+                  <div className="flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1.5 rounded-lg text-sm font-medium border border-green-100">
+                    Matrícula/Credencial: <span className="font-bold">{profesional.credentials}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* 🚀 WHITESPACE-PRE-LINE para respetar saltos de línea de la BD */}
-            <p className="text-gray-600 leading-relaxed whitespace-pre-line text-sm sm:text-base">
-              {profesional.description}
-            </p>
+            {profesional.description && (
+              <p className="text-gray-600 leading-relaxed whitespace-pre-line text-sm sm:text-base">
+                {profesional.description}
+              </p>
+            )}
           </div>
         )}
 

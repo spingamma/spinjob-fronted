@@ -148,6 +148,22 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white drop-shadow-md">{profesional.name}</h1>
           <p className="text-xs font-bold tracking-[0.25em] text-[#C8A721] mt-3 uppercase">{profesional.title}</p>
           <div className="w-12 h-[2px] bg-gradient-to-r from-transparent via-[#425C63] to-transparent mx-auto mt-4 mb-4 opacity-70"></div>
+          
+          {(profesional.experience_years || profesional.credentials) && (
+            <div className="flex flex-wrap justify-center gap-2 mb-4">
+              {profesional.experience_years && (
+                <div className="bg-white/5 border border-[#C8A721]/30 text-gray-200 px-3 py-1 rounded-full text-xs">
+                  <span className="font-bold text-[#C8A721]">{profesional.experience_years}</span> Años de Experiencia
+                </div>
+              )}
+              {profesional.credentials && (
+                <div className="bg-white/5 border border-[#425C63]/50 text-gray-200 px-3 py-1 rounded-full text-xs">
+                  Matrícula/Credencial: <span className="font-bold text-white">{profesional.credentials}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           <p className="text-gray-300 text-sm mt-3 leading-relaxed whitespace-pre-line px-2 font-light">{profesional.description}</p>
         </div>
 

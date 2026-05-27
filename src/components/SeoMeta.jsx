@@ -7,7 +7,8 @@ const SeoMeta = ({
   image = 'https://tarjetoso.com/icon-512.png',
   url = 'https://tarjetoso.com',
   type = 'website',
-  jsonLd = null
+  jsonLd = null,
+  canonical = null
 }) => {
   const defaultTitle = "Tarjetoso | Directorio de Profesionales y Negocios en Bolivia";
   const defaultDesc = "Encuentra, contacta y califica a los mejores profesionales independientes y negocios locales de Bolivia. Tu directorio de tarjetas digitales.";
@@ -20,6 +21,7 @@ const SeoMeta = ({
       {/* Standard metadata tags */}
       <title>{finalTitle}</title>
       <meta name="description" content={finalDesc} />
+      {canonical && <link rel="canonical" href={canonical} />}
 
       {/* Open Graph / Facebook / WhatsApp */}
       <meta property="og:type" content={type} />

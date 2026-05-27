@@ -25,7 +25,8 @@ export default function CrearNegocio() {
   const [formData, setFormData] = useState({
     name: '', title: '', category: '', country: 'Bolivia', state: '', neighborhood: '', description: '',
     genero: '', phone: '', facebook: '', instagram: '',
-    linkedin: '', website: '', tiktok: '', github: '', ubicacion_url: '', catalog_url: ''
+    linkedin: '', website: '', tiktok: '', github: '', ubicacion_url: '', catalog_url: '',
+    experience_years: '', credentials: ''
   });
 
   // WhatsApp: lista de números (máx 2)
@@ -68,7 +69,8 @@ export default function CrearNegocio() {
           facebook: data.facebook || '', instagram: data.instagram || '',
           linkedin: data.linkedin || '', website: data.website || '',
           tiktok: data.tiktok || '', github: data.github || '',
-          ubicacion_url: data.ubicacion_url || '', catalog_url: data.catalog_url || ''
+          ubicacion_url: data.ubicacion_url || '', catalog_url: data.catalog_url || '',
+          experience_years: data.experience_years || '', credentials: data.credentials || ''
         });
         // Parsear whatsapp_numbers JSON
         try {
@@ -490,6 +492,22 @@ export default function CrearNegocio() {
                       <option value="Femenino">Femenino</option>
                       <option value="Empresa">Empresa / No aplica</option>
                     </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Años de Experiencia <span className="text-[10px] font-normal text-gray-400 lowercase">(opcional)</span></label>
+                  <div className={wrapperClass}>
+                    <div className="pl-4 flex items-center text-[#B95221]"><Clock size={18} /></div>
+                    <input type="number" min="0" name="experience_years" value={formData.experience_years} onChange={handleChange} placeholder="Ej. 5" className={inputClass} />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Matrícula / Credenciales <span className="text-[10px] font-normal text-gray-400 lowercase">(opcional)</span></label>
+                  <div className={wrapperClass}>
+                    <div className="pl-4 flex items-center text-[#B95221]"><Check size={18} /></div>
+                    <input type="text" name="credentials" value={formData.credentials} onChange={handleChange} placeholder="Ej. Mat. N° 12345" className={inputClass} />
                   </div>
                 </div>
 

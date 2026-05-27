@@ -29,7 +29,7 @@ function Perfil() {
   useEffect(() => {
     let isMounted = true;
 
-    const obtenerPerfil = async (intentos = 0) => {
+    async function obtenerPerfil(intentos = 0) {
       try {
         const res = await fetch(`${API_URL}/businesses/${slug}`);
 
@@ -61,7 +61,7 @@ function Perfil() {
           setCargando(false);
         }
       }
-    };
+    }
 
     obtenerPerfil();
 
@@ -106,35 +106,8 @@ function Perfil() {
   // ==========================================
   // 🔍 SEO DINÁMICO Y STRUCTURED DATA (JSON-LD)
   // ==========================================
-  const jsonLdData = useMemo(() => {
-    if (!profesional) return null;
-    const schema = {
-      "@context": "https://schema.org",
-      "@type": "ProfessionalService",
-      "name": profesional.name,
-      "description": profesional.description || `${profesional.name}, ${profesional.title}`,
-      "url": `https://tarjetoso.com/perfil/${profesional.slug}`,
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": profesional.neighborhood,
-        "addressRegion": profesional.state,
-        "addressCountry": profesional.country || "Bolivia"
-      },
-      "sameAs": [profesional.facebook, profesional.instagram, profesional.linkedin, profesional.website, profesional.tiktok, profesional.github].filter(Boolean)
-    };
-    if (profesional.image) schema.image = profesional.image;
-    if (profesional.phone) schema.telephone = profesional.phone;
-    if (profesional.reviews_count > 0) {
-      schema.aggregateRating = {
-        "@type": "AggregateRating",
-        "ratingValue": profesional.rating,
-        "reviewCount": profesional.reviews_count,
-        "bestRating": 5,
-        "worstRating": 1
-      };
-    }
-    return schema;
-  }, [profesional]);
+  // El backend ahora envía `json_ld` y `canonical_url` listos para usar
+  const jsonLdData = profesional?.json_ld || null;
 
   // ==========================================
   // 🛡️ MANEJADOR DE ENLACES PROTEGIDOS
@@ -220,7 +193,8 @@ function Perfil() {
         <SeoMeta 
           title={`${profesional.name} - ${profesional.title}`}
           description={(profesional.description || `${profesional.name}, ${profesional.title} en ${profesional.category}`).slice(0, 160)}
-          url={`https://tarjetoso.com/perfil/${profesional.slug}`}
+          url={profesional.canonical_url || `https://tarjetoso.com/perfil/${profesional.slug}`}
+          canonical={profesional.canonical_url}
           image={profesional.image}
           type="profile"
           jsonLd={jsonLdData}
