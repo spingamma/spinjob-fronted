@@ -18,7 +18,7 @@ const Header = ({
   isMobile
 }) => {
   const navigate = useNavigate();
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [deferredPrompt, setDeferredPrompt] = useState(window.deferredPromptEvent || null);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
 
@@ -31,8 +31,13 @@ const Header = ({
     if (/iphone|ipad|ipod/.test(userAgent)) {
       setIsIOS(true);
     }
+    if (window.deferredPromptEvent) {
+      setDeferredPrompt(window.deferredPromptEvent);
+    }
+
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
+      window.deferredPromptEvent = e;
       setDeferredPrompt(e);
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -48,6 +53,7 @@ const Header = ({
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
+      window.deferredPromptEvent = null;
       setDeferredPrompt(null);
     }
   };
