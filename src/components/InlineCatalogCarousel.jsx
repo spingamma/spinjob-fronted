@@ -35,7 +35,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
   return (
     <div className="mb-8 w-full px-2 sm:px-0">
       <h3 className={`text-lg font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-white font-seasons' : 'text-[#1E3D51]'}`}>
-        <span className={`w-1.5 h-6 rounded-full ${isDark ? 'bg-[#C8A721]' : 'bg-[#B95221]'}`}></span> 
+        <span className={`w-1.5 h-6 rounded-full ${isDark ? 'bg-[#C8A721]' : 'bg-[#F67927]'}`}></span> 
         Catálogo de Productos
       </h3>
       
@@ -56,15 +56,15 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
 
           {catalogUrl && (
              <div className="snap-center shrink-0 w-[220px] flex items-center justify-center">
-               <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className={`flex flex-col items-center justify-center h-full w-full rounded-2xl border border-dashed transition-all p-6 ${isDark ? 'border-[#C8A721]/30 hover:bg-[#C8A721]/10' : 'border-[#B95221]/30 hover:bg-[#B95221]/5'}`}>
-                 <ExternalLink size={24} className={`mb-2 ${isDark ? 'text-[#C8A721]' : 'text-[#B95221]'}`} />
+               <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className={`flex flex-col items-center justify-center h-full w-full rounded-2xl border border-dashed transition-all p-6 ${isDark ? 'border-[#C8A721]/30 hover:bg-[#C8A721]/10' : 'border-[#F67927]/30 hover:bg-[#F67927]/5'}`}>
+                 <ExternalLink size={24} className={`mb-2 ${isDark ? 'text-[#C8A721]' : 'text-[#F67927]'}`} />
                  <span className={`font-bold text-center text-sm ${isDark ? 'text-white' : 'text-[#1E3D51]'}`}>Ver catálogo completo</span>
                </a>
              </div>
           )}
         </div>
       ) : catalogUrl ? (
-        <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className={`w-full flex items-center justify-center gap-3 font-bold py-4 px-6 rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 border ${isDark ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-gray-200 text-[#1E3D51] hover:border-[#B95221]/30'}`}>
+        <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className={`w-full flex items-center justify-center gap-3 font-bold py-4 px-6 rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 border ${isDark ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-gray-200 text-[#1E3D51] hover:border-[#F67927]/30'}`}>
            <ExternalLink size={20} /> Ir al catálogo externo
         </a>
       ) : null}
@@ -104,7 +104,7 @@ const ProductCard = ({ product, whatsappNumber, businessName, country, isDark })
             {isLong && (
               <button 
                 onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-                className={`font-bold text-[10px] mt-1 hover:underline uppercase ${isDark ? 'text-[#C8A721]' : 'text-[#B95221]'}`}
+                className={`font-bold text-[10px] mt-1 hover:underline uppercase ${isDark ? 'text-[#C8A721]' : 'text-[#F67927]'}`}
               >
                 {expanded ? 'Ver menos' : 'Ver más'}
               </button>

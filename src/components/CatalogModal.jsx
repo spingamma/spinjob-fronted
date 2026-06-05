@@ -72,7 +72,7 @@ export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsa
           )}
           {!loading && products.length > 0 && catalogUrl && (
             <div className="mt-6 text-center">
-              <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-bold text-[#32698F] hover:text-[#B95221] transition-colors">
+              <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-bold text-[#32698F] hover:text-[#F67927] transition-colors">
                 <ExternalLink size={16} /> Ver catálogo completo
               </a>
             </div>
@@ -116,7 +116,7 @@ const ProductCard = ({ product, whatsappNumber, businessName, country }) => {
             {isLong && (
               <button 
                 onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-                className="text-[#B95221] font-bold text-[10px] mt-1 hover:underline uppercase"
+                className="text-[#F67927] font-bold text-[10px] mt-1 hover:underline uppercase"
               >
                 {expanded ? 'Ver menos' : 'Ver más'}
               </button>

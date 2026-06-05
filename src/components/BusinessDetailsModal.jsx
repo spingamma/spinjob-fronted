@@ -52,7 +52,7 @@ export default function BusinessDetailsModal({ business, onClose, actions, banne
 
           {/* Sección 1: Información Principal */}
           <div>
-            <h3 className="font-bold text-[#B95221] border-b border-gray-200 pb-2 mb-3">Información Principal</h3>
+            <h3 className="font-bold text-[#F67927] border-b border-gray-200 pb-2 mb-3">Información Principal</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <CampoLectura label="Nombre / Marca" valor={business.name} />
               <CampoLectura label="Especialidad" valor={business.title} />
@@ -70,7 +70,7 @@ export default function BusinessDetailsModal({ business, onClose, actions, banne
 
           {/* Sección 2: Contacto */}
           <div>
-            <h3 className="font-bold text-[#B95221] border-b border-gray-200 pb-2 mb-3">Contacto</h3>
+            <h3 className="font-bold text-[#F67927] border-b border-gray-200 pb-2 mb-3">Contacto</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <CampoLectura label="WhatsApp" valor={(() => { try { const nums = JSON.parse(business.whatsapp_numbers || '[]'); return nums.length > 0 ? nums.join(', ') : (business.whatsapp || null); } catch { return business.whatsapp_numbers || business.whatsapp || null; } })()} />
               <CampoLectura label="Teléfono Fijo" valor={business.phone} />
@@ -82,7 +82,7 @@ export default function BusinessDetailsModal({ business, onClose, actions, banne
 
           {/* Sección 3: Redes Sociales */}
           <div>
-            <h3 className="font-bold text-[#B95221] border-b border-gray-200 pb-2 mb-3">Redes Sociales</h3>
+            <h3 className="font-bold text-[#F67927] border-b border-gray-200 pb-2 mb-3">Redes Sociales</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <CampoLectura label="Página Web" valor={business.website} />
               <CampoLectura label="Facebook" valor={business.facebook} />

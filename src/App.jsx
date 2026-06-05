@@ -21,7 +21,7 @@ function App() {
         role="status"
         aria-label="Cargando aplicación..."
       >
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B95221]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F67927]"></div>
       </div>
     }>
       <Routes>

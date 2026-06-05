@@ -94,7 +94,7 @@ export default function ReviewModal({
                       size={40} 
                       className={`
                         ${(hoverRating || rating) >= star 
-                          ? "fill-[#B95221] text-[#B95221]" 
+                          ? "fill-[#F67927] text-[#F67927]" 
                           : "fill-gray-100 text-gray-300"} 
                         transition-colors
                       `} 
@@ -116,7 +116,7 @@ export default function ReviewModal({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="¿Cómo fue el servicio, el trato, la puntualidad?"
-                className="w-full bg-gray-50 border border-gray-200 text-[#1E3D51] rounded-2xl p-4 focus:ring-2 focus:ring-[#B95221]/30 focus:border-[#B95221] focus:bg-white outline-none transition-all resize-none disabled:opacity-60"
+                className="w-full bg-gray-50 border border-gray-200 text-[#1E3D51] rounded-2xl p-4 focus:ring-2 focus:ring-[#F67927]/30 focus:border-[#F67927] focus:bg-white outline-none transition-all resize-none disabled:opacity-60"
                 rows="4"
               />
             </div>
@@ -128,7 +128,7 @@ export default function ReviewModal({
               className={`w-full text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition-all flex justify-center items-center gap-2 mt-2
                 ${(isSubmitting || rating === 0) 
                   ? 'bg-gray-300 cursor-not-allowed text-gray-500 shadow-none' 
-                  : 'bg-[#B95221] hover:bg-[#9A4219] hover:-translate-y-0.5 hover:shadow-xl'
+                  : 'bg-[#F67927] hover:bg-[#e06516] hover:-translate-y-0.5 hover:shadow-xl'
                 }
               `}
             >

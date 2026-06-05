@@ -283,7 +283,7 @@ export default function CrearNegocio() {
 
   // Clases comunes para inputs para no repetir tanto código
   const inputClass = "w-full bg-transparent px-3 py-3 outline-none text-[#1E3D51]";
-  const wrapperClass = "flex bg-gray-50 rounded-xl border border-gray-200 focus-within:border-[#B95221] focus-within:ring-1 focus-within:ring-[#B95221] transition-all overflow-hidden";
+  const wrapperClass = "flex bg-gray-50 rounded-xl border border-gray-200 focus-within:border-[#F67927] focus-within:ring-1 focus-within:ring-[#F67927] transition-all overflow-hidden";
   const labelClass = "text-sm font-bold text-[#1E3D51] uppercase tracking-wide mb-1 block";
 
   return (
@@ -292,7 +292,7 @@ export default function CrearNegocio() {
 
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center text-[#32698F] hover:text-[#B95221] font-medium mb-6 transition-colors"
+          className="flex items-center text-[#32698F] hover:text-[#F67927] font-medium mb-6 transition-colors"
         >
           <ArrowLeft size={20} className="mr-2" />
           Volver atrás
@@ -300,7 +300,7 @@ export default function CrearNegocio() {
 
         {isLoadingData ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 size={40} className="animate-spin text-[#B95221] mb-3" />
+            <Loader2 size={40} className="animate-spin text-[#F67927] mb-3" />
             <p className="text-gray-500 font-bold">Cargando datos del negocio...</p>
           </div>
         ) : (
@@ -320,7 +320,7 @@ export default function CrearNegocio() {
 
             {/* SECCIÓN 1: INFORMACIÓN BÁSICA E IMAGEN */}
             <div>
-              <h3 className="text-lg font-extrabold text-[#B95221] border-b border-gray-200 pb-2 mb-4">Información Principal</h3>
+              <h3 className="text-lg font-extrabold text-[#F67927] border-b border-gray-200 pb-2 mb-4">Información Principal</h3>
 
               <div className="mb-6">
                 <label className={labelClass}>Foto de Perfil / Negocio (Opcional)</label>
@@ -407,8 +407,8 @@ export default function CrearNegocio() {
                                 }}
                                 className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
                                   checked
-                                    ? 'bg-[#B95221] text-white border-[#B95221] shadow-sm'
-                                    : 'bg-white text-gray-600 border-gray-200 hover:border-[#B95221]/50 hover:text-[#B95221]'
+                                    ? 'bg-[#F67927] text-white border-[#F67927] shadow-sm'
+                                    : 'bg-white text-gray-600 border-gray-200 hover:border-[#F67927]/50 hover:text-[#F67927]'
                                 }`}
                               >
                                 {checked && <Check size={14} className="inline mr-1 -mt-0.5" />}
@@ -437,7 +437,7 @@ export default function CrearNegocio() {
                               value={otherSubcategory}
                               onChange={(e) => setOtherSubcategory(e.target.value)}
                               placeholder="Escribe tu sub-especialidad..."
-                              className="w-full bg-white px-3 py-2 rounded-lg border border-gray-200 focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] outline-none text-sm text-[#1E3D51]"
+                              className="w-full bg-white px-3 py-2 rounded-lg border border-gray-200 focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927] outline-none text-sm text-[#1E3D51]"
                             />
                             <p className="text-[10px] text-gray-400 mt-1">Se agregará a la lista de sub-especialidades</p>
                           </div>
@@ -498,7 +498,7 @@ export default function CrearNegocio() {
                 <div>
                   <label className={labelClass}>Años de Experiencia <span className="text-[10px] font-normal text-gray-400 lowercase">(opcional)</span></label>
                   <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-[#B95221]"><Clock size={18} /></div>
+                    <div className="pl-4 flex items-center text-[#F67927]"><Clock size={18} /></div>
                     <input type="number" min="0" name="experience_years" value={formData.experience_years} onChange={handleChange} placeholder="Ej. 5" className={inputClass} />
                   </div>
                 </div>
@@ -506,7 +506,7 @@ export default function CrearNegocio() {
                 <div>
                   <label className={labelClass}>Matrícula / Credenciales <span className="text-[10px] font-normal text-gray-400 lowercase">(opcional)</span></label>
                   <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-[#B95221]"><Check size={18} /></div>
+                    <div className="pl-4 flex items-center text-[#F67927]"><Check size={18} /></div>
                     <input type="text" name="credentials" value={formData.credentials} onChange={handleChange} placeholder="Ej. Mat. N° 12345" className={inputClass} />
                   </div>
                 </div>
@@ -515,13 +515,13 @@ export default function CrearNegocio() {
 
               <div className="mt-5">
                 <label className={labelClass}>Descripción de Servicios <span className="text-red-500">*</span></label>
-                <textarea required name="description" value={formData.description} onChange={handleChange} rows="4" placeholder="¿Qué servicios ofreces? Destaca tu experiencia..." className="w-full bg-gray-50 rounded-xl border border-gray-200 focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] transition-all px-4 py-3 outline-none text-[#1E3D51] resize-none"></textarea>
+                <textarea required name="description" value={formData.description} onChange={handleChange} rows="4" placeholder="¿Qué servicios ofreces? Destaca tu experiencia..." className="w-full bg-gray-50 rounded-xl border border-gray-200 focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927] transition-all px-4 py-3 outline-none text-[#1E3D51] resize-none"></textarea>
               </div>
             </div>
 
             {/* SECCIÓN 2: CONTACTO Y UBICACIÓN */}
             <div>
-              <h3 className="text-lg font-extrabold text-[#B95221] border-b border-gray-200 pb-2 mb-4">Contacto</h3>
+              <h3 className="text-lg font-extrabold text-[#F67927] border-b border-gray-200 pb-2 mb-4">Contacto</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
                 <div className="md:col-span-2">
@@ -556,7 +556,7 @@ export default function CrearNegocio() {
                       <button
                         type="button"
                         onClick={() => setWhatsappList([...whatsappList, ''])}
-                        className="flex items-center gap-2 text-sm font-bold text-[#B95221] hover:text-[#1E3D51] transition-colors px-2 py-1 rounded-lg hover:bg-orange-50"
+                        className="flex items-center gap-2 text-sm font-bold text-[#F67927] hover:text-[#1E3D51] transition-colors px-2 py-1 rounded-lg hover:bg-orange-50"
                       >
                         <Plus size={16} /> Agregar segundo WhatsApp
                       </button>
@@ -579,7 +579,7 @@ export default function CrearNegocio() {
                       type="button"
                       onClick={handleDetectLocation}
                       disabled={isDetecting}
-                      className="text-xs font-bold text-[#B95221] hover:text-[#1E3D51] flex items-center gap-1 mb-1 transition-colors px-2 py-1 rounded-lg hover:bg-orange-50"
+                      className="text-xs font-bold text-[#F67927] hover:text-[#1E3D51] flex items-center gap-1 mb-1 transition-colors px-2 py-1 rounded-lg hover:bg-orange-50"
                     >
                       {isDetecting ? (
                         <>
@@ -612,7 +612,7 @@ export default function CrearNegocio() {
 
             {/* SECCIÓN 3: REDES SOCIALES (Opcionales) */}
             <div>
-              <h3 className="text-lg font-extrabold text-[#B95221] border-b border-gray-200 pb-2 mb-4">Redes Sociales (Enlaces)</h3>
+              <h3 className="text-lg font-extrabold text-[#F67927] border-b border-gray-200 pb-2 mb-4">Redes Sociales (Enlaces)</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
                 <div>

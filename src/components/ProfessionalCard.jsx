@@ -12,7 +12,7 @@ export default function ProfessionalCard({ professional, isLoggedIn, onCardClick
           onCardClick(professional.slug);
         }
       }}
-      className="group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-3 sm:p-4 transform hover:-translate-y-1 border border-gray-100 hover:border-[#B95221]/30"
+      className="group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-3 sm:p-4 transform hover:-translate-y-1 border border-gray-100 hover:border-[#F67927]/30"
     >
       <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-50 mb-3 sm:mb-4">
         <img 
@@ -27,14 +27,14 @@ export default function ProfessionalCard({ professional, isLoggedIn, onCardClick
         {/*
         {professional.verified && (
           <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-white/90 backdrop-blur-sm px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-gray-100">
-            <CheckCircle2 size={12} className="text-[#B95221] sm:w-[16px] sm:h-[16px]" />
+            <CheckCircle2 size={12} className="text-[#F67927] sm:w-[16px] sm:h-[16px]" />
             <span className="text-[10px] sm:text-xs font-bold text-[#1E3D51] uppercase tracking-wider">Verificado</span>
           </div>
         )}
         */}
         {professional.reviews_count > 0 && (
            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/95 backdrop-blur-sm px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-lg flex items-center gap-1 shadow-sm border border-gray-100">
-            <Star size={12} className="fill-[#B95221] text-[#B95221] sm:w-[14px] sm:h-[14px]" />
+            <Star size={12} className="fill-[#F67927] text-[#F67927] sm:w-[14px] sm:h-[14px]" />
             <span className="text-xs sm:text-sm font-bold text-gray-900">{professional.rating}</span>
           </div>
         )}
@@ -43,7 +43,7 @@ export default function ProfessionalCard({ professional, isLoggedIn, onCardClick
         <h3 className="font-bold text-[#1E3D51] text-base sm:text-xl leading-tight line-clamp-1 pr-1 sm:pr-2">
           {professional.name}
         </h3>
-        <p className="text-[#B95221] font-semibold text-xs sm:text-sm mb-3 line-clamp-2 leading-snug">
+        <p className="text-[#F67927] font-semibold text-xs sm:text-sm mb-3 line-clamp-2 leading-snug">
           {professional.title}
         </p>
       </div>

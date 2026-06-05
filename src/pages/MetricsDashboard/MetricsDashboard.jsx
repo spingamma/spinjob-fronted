@@ -177,7 +177,7 @@ export default function MetricsDashboard() {
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <h1 className="text-3xl font-extrabold text-[#1E3D51] flex items-center gap-3">
-            <BarChart2 className="text-[#B95221]" size={32} /> Rendimiento de la Tarjeta
+            <BarChart2 className="text-[#F67927]" size={32} /> Rendimiento de la Tarjeta
           </h1>
           
           {/* Controles de Filtro */}
@@ -231,13 +231,13 @@ export default function MetricsDashboard() {
           </div>
 
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 flex items-center justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#B95221]"></div>
+            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#F67927]"></div>
             <div>
               <p className="text-gray-500 font-bold mb-1 text-xs uppercase tracking-widest">Interacciones (Clics)</p>
-              <h3 className="text-4xl font-extrabold text-[#B95221] tracking-tight">{totalClics}</h3>
+              <h3 className="text-4xl font-extrabold text-[#F67927] tracking-tight">{totalClics}</h3>
             </div>
-            <div className="bg-[#B95221]/5 p-4 rounded-xl">
-              <MousePointerClick size={32} className="text-[#B95221]" />
+            <div className="bg-[#F67927]/5 p-4 rounded-xl">
+              <MousePointerClick size={32} className="text-[#F67927]" />
             </div>
           </div>
         </div>
@@ -265,8 +265,8 @@ export default function MetricsDashboard() {
                     <stop offset="95%" stopColor="#1E3D51" stopOpacity={0}/>
                   </linearGradient>
                   <linearGradient id="colorClics" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#B95221" stopOpacity={0.15}/>
-                    <stop offset="95%" stopColor="#B95221" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#F67927" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#F67927" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -304,11 +304,11 @@ export default function MetricsDashboard() {
                   type="monotone" 
                   dataKey="clics" 
                   name="Clics en Redes/Contacto" 
-                  stroke="#B95221" 
+                  stroke="#F67927" 
                   strokeWidth={3}
                   fillOpacity={1} 
                   fill="url(#colorClics)" 
-                  activeDot={{ r: 6, fill: "#B95221", stroke: "#fff", strokeWidth: 3 }}
+                  activeDot={{ r: 6, fill: "#F67927", stroke: "#fff", strokeWidth: 3 }}
                 />
               </AreaChart>
             </ResponsiveContainer>

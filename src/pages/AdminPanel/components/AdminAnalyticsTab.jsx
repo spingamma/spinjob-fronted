@@ -23,7 +23,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
   const [isLoadingChart, setIsLoadingChart] = useState(false);
   const [isLoadingAll, setIsLoadingAll] = useState(false);
 
-  const COLORS = ['#1E3D51', '#10B981', '#B95221', '#F59E0B', '#6366F1', '#EC4899', '#8B5CF6'];
+  const COLORS = ['#1E3D51', '#10B981', '#F67927', '#F59E0B', '#6366F1', '#EC4899', '#8B5CF6'];
 
   // Buscador de Negocios (solo para modo compare)
   useEffect(() => {
@@ -388,7 +388,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
       {/* HEADER DE CONTROLES */}
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-20">
         <h2 className="text-xl font-extrabold text-[#1E3D51] flex items-center gap-2">
-          <BarChart2 size={24} className="text-[#B95221]" />
+          <BarChart2 size={24} className="text-[#F67927]" />
           Analíticas
         </h2>
 
@@ -415,7 +415,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
               <select 
                 value={days}
                 onChange={(e) => setDays(e.target.value === 'custom' ? 'custom' : Number(e.target.value))}
-                className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-2.5 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221]/30 text-sm font-bold text-[#1E3D51] appearance-none cursor-pointer min-w-[140px]"
+                className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927]/30 text-sm font-bold text-[#1E3D51] appearance-none cursor-pointer min-w-[140px]"
               >
                 <option value={7}>Últimos 7 días</option>
                 <option value={14}>Últimos 14 días</option>
@@ -431,14 +431,14 @@ export default function AdminAnalyticsTab({ API_URL }) {
                   type="date" 
                   value={customStartDate} 
                   onChange={e => setCustomStartDate(e.target.value)}
-                  className="bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl outline-none text-sm font-bold text-gray-700 focus:border-[#B95221] w-full sm:w-auto"
+                  className="bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl outline-none text-sm font-bold text-gray-700 focus:border-[#F67927] w-full sm:w-auto"
                 />
                 <span className="text-gray-400">-</span>
                 <input 
                   type="date" 
                   value={customEndDate} 
                   onChange={e => setCustomEndDate(e.target.value)}
-                  className="bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl outline-none text-sm font-bold text-gray-700 focus:border-[#B95221] w-full sm:w-auto"
+                  className="bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl outline-none text-sm font-bold text-gray-700 focus:border-[#F67927] w-full sm:w-auto"
                 />
               </div>
             )}
@@ -507,9 +507,9 @@ export default function AdminAnalyticsTab({ API_URL }) {
               onFocus={() => setShowDropdown(true)}
               onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-gray-200 py-3.5 pl-12 pr-10 rounded-2xl outline-none focus:border-[#B95221] focus:ring-4 focus:ring-[#B95221]/10 transition-all font-medium text-[#1E3D51] shadow-sm"
+              className="w-full bg-white border border-gray-200 py-3.5 pl-12 pr-10 rounded-2xl outline-none focus:border-[#F67927] focus:ring-4 focus:ring-[#F67927]/10 transition-all font-medium text-[#1E3D51] shadow-sm"
             />
-            {isSearching && <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#B95221] animate-spin" />}
+            {isSearching && <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#F67927] animate-spin" />}
           </div>
 
           {/* Resultados flotantes */}
@@ -525,7 +525,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
                     <p className="font-bold text-[#1E3D51]">{b.name}</p>
                     <p className="text-xs text-gray-500">{b.category}</p>
                   </div>
-                  <Plus size={18} className="text-[#B95221]" />
+                  <Plus size={18} className="text-[#F67927]" />
                 </button>
               ))}
             </div>
@@ -568,7 +568,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
           </div>
         ) : isLoadingChart ? (
           <div className="py-20 flex justify-center">
-            <Loader2 size={40} className="animate-spin text-[#B95221]" />
+            <Loader2 size={40} className="animate-spin text-[#F67927]" />
           </div>
         ) : chartData.length > 0 && chartAreas.length > 0 ? (
           <div className="w-full h-[450px] min-h-[450px]">
@@ -640,7 +640,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
                       {Object.entries(stat.redes).sort((a,b) => b[1]-a[1]).map(([plataforma, cantidad]) => (
                         <div key={plataforma} className="flex justify-between items-center text-sm">
                           <span className="font-medium text-gray-600 capitalize">{plataforma}</span>
-                          <span className="font-bold text-[#B95221] bg-[#B95221]/10 px-2 py-0.5 rounded-lg">{cantidad}</span>
+                          <span className="font-bold text-[#F67927] bg-[#F67927]/10 px-2 py-0.5 rounded-lg">{cantidad}</span>
                         </div>
                       ))}
                     </div>

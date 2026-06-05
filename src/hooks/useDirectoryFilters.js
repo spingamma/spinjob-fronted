@@ -14,7 +14,7 @@ const isValidValue = (val) => {
   return !['n/a', 'na', 'null', 'undefined', 'ninguno', 'ninguna', '-', 'none'].includes(normalized);
 };
 
-export function useDirectoryFilters(professionals = []) {
+export function useDirectoryFilters(professionals = [], metadataOverride = null) {
   const { categoria, estado } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,6 +26,7 @@ export function useDirectoryFilters(professionals = []) {
 
   // Extract base lists
   const groupedCategories = useMemo(() => {
+    if (metadataOverride?.groupedCategories) return metadataOverride.groupedCategories;
     const catsFromDB = [...new Set(professionals.map(p => p.category).filter(isValidValue))].sort();
     return catsFromDB.map(c => {
       const allSubs = professionals
@@ -40,15 +41,16 @@ export function useDirectoryFilters(professionals = []) {
       const subs = [...new Set(allSubs)].sort();
       return { category: c, subcategories: subs };
     });
-  }, [professionals]);
+  }, [professionals, metadataOverride]);
 
   const groupedLocations = useMemo(() => {
+    if (metadataOverride?.groupedLocations) return metadataOverride.groupedLocations;
     const statesFromDB = [...new Set(professionals.map(p => p.state).filter(isValidValue))].sort();
     return statesFromDB.map(s => {
       const neighs = [...new Set(professionals.filter(p => p.state === s).map(p => p.neighborhood).filter(isValidValue))].sort();
       return { state: s, neighborhoods: neighs };
     });
-  }, [professionals]);
+  }, [professionals, metadataOverride]);
 
   // Compute active values from URL
   const activeCategory = useMemo(() => {

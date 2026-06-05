@@ -53,7 +53,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       <button 
         onClick={(e) => handleLinkClick(e, label, url)}
         aria-label={`Ir a ${label}`}
-        className={`flex flex-col items-center justify-center p-4 bg-white border border-gray-200 rounded-2xl transition-all group shadow-sm hover:shadow-md hover:border-[#B95221]/30 hover:-translate-y-1 ${colorClass}`}
+        className={`flex flex-col items-center justify-center p-4 bg-white border border-gray-200 rounded-2xl transition-all group shadow-sm hover:shadow-md hover:border-[#F67927]/30 hover:-translate-y-1 ${colorClass}`}
       >
         <Icon size={28} className="mb-2 transition-transform group-hover:scale-110" />
         <span className="text-xs font-semibold text-gray-500 group-hover:text-gray-800">{label}</span>
@@ -68,7 +68,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
     .join(', ');
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-[#1E3D51] pb-24 font-sans antialiased selection:bg-[#B95221] selection:text-white relative">
+    <div className="min-h-screen bg-[#F8F9FA] text-[#1E3D51] pb-24 font-sans antialiased selection:bg-[#F67927] selection:text-white relative">
       
       {/* 🖼️ HEADER Y FOTO DE PORTADA */}
       <div className="relative h-36 sm:h-48 bg-gradient-to-br from-[#1E3D51] to-[#32698F] overflow-hidden">
@@ -93,7 +93,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
                  className="flex items-center gap-2 bg-white/90 backdrop-blur-md border border-gray-200 p-1 pr-3 rounded-full hover:bg-white transition-all shadow-md group"
                  title="Cerrar sesión"
                >
-                 <div className="w-8 h-8 rounded-full bg-[#B95221] flex items-center justify-center text-white font-bold text-sm font-sans">
+                 <div className="w-8 h-8 rounded-full bg-[#F67927] flex items-center justify-center text-white font-bold text-sm font-sans">
                    {userName ? userName.charAt(0).toUpperCase() : 'U'}
                  </div>
                  <LogOut size={16} className="text-gray-500 group-hover:text-red-500 transition-colors" />
@@ -104,7 +104,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
                  aria-label="Ingresar para ver más detalles"
                  className="h-10 px-4 bg-white/90 backdrop-blur-md border border-gray-200 rounded-full flex items-center justify-center hover:bg-white transition-all text-xs font-bold uppercase text-[#1E3D51] tracking-widest gap-2 shadow-md"
                >
-                 <DoorOpen size={16} className="text-[#B95221]"/> Ingresar
+                 <DoorOpen size={16} className="text-[#F67927]"/> Ingresar
                </button>
             )}
           </div>
@@ -159,14 +159,14 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             </div>
             {profesional.verified && (
               <div className="absolute bottom-2 right-2 bg-white rounded-full p-0.5 shadow-md border border-gray-100 z-20">
-                <CheckCircle2 size={24} className="text-[#B95221] fill-white" />
+                <CheckCircle2 size={24} className="text-[#F67927] fill-white" />
               </div>
             )}
             
             {/* BADGE DE CALIFICACIÓN: Flotante inferior derecha de la foto */}
             {profesional.reviews_count > 0 && (
               <div className="absolute bottom-4 sm:bottom-6 -right-10 sm:-right-12 bg-white px-2 py-1 rounded-md border border-gray-100 shadow-md flex items-center gap-1 z-30 animate-in zoom-in duration-300">
-                <Star size={12} className="text-[#B95221] fill-[#B95221]" />
+                <Star size={12} className="text-[#F67927] fill-[#F67927]" />
                 <span className="font-bold text-[#1E3D51] text-xs">{profesional.rating}</span>
               </div>
             )}
@@ -185,7 +185,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         {(profesional.experience_years || profesional.credentials || profesional.description) && (
           <div className="bg-white rounded-3xl p-6 mb-8 border border-gray-100 shadow-sm">
             <h3 className="text-lg font-bold text-[#1E3D51] mb-3 flex items-center gap-2">
-              <span className="w-1.5 h-6 bg-[#B95221] rounded-full"></span> Acerca de mí
+              <span className="w-1.5 h-6 bg-[#F67927] rounded-full"></span> Acerca de mí
             </h3>
             
             {/* E-E-A-T Datos Estructurados */}
@@ -219,7 +219,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             <h3 className="text-lg font-bold text-[#1E3D51]">Contactar y Redes Sociales</h3>
             {ubicacionTexto && (
               <div className="flex items-center justify-end gap-1.5 text-gray-700 bg-white shadow-sm border border-gray-200 px-3 py-1.5 rounded-xl shrink-0 max-w-[50%]">
-                <MapPin size={14} className="text-[#B95221] shrink-0" />
+                <MapPin size={14} className="text-[#F67927] shrink-0" />
                 <span className="text-xs sm:text-sm font-medium leading-tight text-right">{ubicacionTexto}</span>
               </div>
             )}
@@ -261,7 +261,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               className="group flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity"
             >
               <span className="text-xs text-gray-500 font-medium">Tecnología desarrollada por</span>
-              <span className="text-sm font-extrabold text-[#1E3D51] tracking-wider group-hover:text-[#B95221] transition-colors">SPINGAMMA</span>
+              <span className="text-sm font-extrabold text-[#1E3D51] tracking-wider group-hover:text-[#F67927] transition-colors">SPINGAMMA</span>
             </a>
         </div>
 
@@ -281,7 +281,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               <X size={20} />
             </button>
             <div className="w-12 h-12 bg-orange-50 rounded-full flex items-center justify-center mb-4">
-              <QrCode size={24} className="text-[#B95221]" />
+              <QrCode size={24} className="text-[#F67927]" />
             </div>
             <h3 className="text-xl font-bold text-[#1E3D51] mb-1 text-center">Compartir Perfil</h3>
             <p className="text-gray-500 text-sm mb-6 text-center">Escanea este código para ver mi tarjeta digital en cualquier dispositivo.</p>
@@ -297,7 +297,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             <button 
               onClick={handleShare}
               aria-label="Compartir enlace de perfil"
-              className="mt-8 w-full bg-[#B95221] hover:bg-[#9A4219] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+              className="mt-8 w-full bg-[#F67927] hover:bg-[#e06516] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
             >
               <Share2 size={18} /> Enviar enlace en su lugar
             </button>
@@ -318,7 +318,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
                   <button
                       onClick={handleCalificarClick}
                       aria-label="Calificar perfil de este profesional"
-                      className="px-6 py-2.5 rounded-full bg-[#B95221] hover:bg-[#9A4219] text-white font-bold text-sm shadow-md transition-all hover:-translate-y-0.5 whitespace-nowrap flex items-center gap-1.5"
+                      className="px-6 py-2.5 rounded-full bg-[#F67927] hover:bg-[#e06516] text-white font-bold text-sm shadow-md transition-all hover:-translate-y-0.5 whitespace-nowrap flex items-center gap-1.5"
                   >
                       <Star size={16} className="fill-white" /> Calificar
                   </button>

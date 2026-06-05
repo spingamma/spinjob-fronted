@@ -1,10 +1,18 @@
 // Archivo: src/components/AuthModal.jsx
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { UserPlus, LogIn, X, Loader2, Eye, EyeOff, Phone, KeyRound, Mail, ShieldCheck } from 'lucide-react';
 import PhoneInputWithCountry from './PhoneInputWithCountry';
 import useAuthLogic from '../hooks/useAuthLogic';
+import ModalVerificacion from './ModalVerificacion';
 
 export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = false }) {
+  const [showVerify, setShowVerify] = useState(false);
+  const [userDataForVerify, setUserDataForVerify] = useState(null);
+
+  const handleRequireVerification = (userData) => {
+    setUserDataForVerify(userData);
+    setShowVerify(true);
+  };
   const {
     isLoginMode, isForgotMode, isChangingPassword, isCompletingPhone,
     isLoading, apiError, apiSuccess, showPassword, showNewPassword,
@@ -13,7 +21,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
     handleGoogleSuccess, handleSubmitNormal, handleForgotPassword,
     handleChangePassword, handleCompletarCelular,
     switchToForgot, switchFromForgot, switchMode,
-  } = useAuthLogic({ isOpen, onSuccess });
+  } = useAuthLogic({ isOpen, onSuccess, onRequireVerification: handleRequireVerification });
 
   const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
@@ -46,6 +54,24 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
 
   if (!isOpen) return null;
 
+  if (showVerify) {
+    return (
+      <ModalVerificacion 
+        isOpen={true} 
+        onClose={() => {
+          setShowVerify(false);
+          onSuccess(userDataForVerify); // Continuar con la sesión no verificada si cierran
+        }} 
+        onSuccess={() => {
+          setShowVerify(false);
+          const updatedUser = { ...userDataForVerify, is_verified: true };
+          onSuccess(updatedUser); // Continuar con sesión verificada
+        }}
+        userName={userDataForVerify?.nombre}
+      />
+    );
+  }
+
   // ══════════════════════════════════════════
   // Theme tokens
   // ══════════════════════════════════════════
@@ -54,12 +80,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
   const textTitle = isDarkTheme ? 'text-white' : 'text-[#1E3D51]';
   const textSub = isDarkTheme ? 'text-[#E6E2DF]' : 'text-gray-500';
   const btnCloseBg = isDarkTheme ? 'bg-[#32698F] text-[#E6E2DF] hover:bg-[#F67927] hover:text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-[#1E3D51]';
-  const iconWrapBg = isDarkTheme ? 'bg-[#32698F] border-[#F67927]' : 'bg-orange-50 border-[#B95221]';
-  const iconColor = isDarkTheme ? 'text-[#F67927]' : 'text-[#B95221]';
-  const labelColor = isDarkTheme ? 'text-[#F67927]' : 'text-[#B95221]';
-  const inputBg = isDarkTheme ? 'bg-[#32698F] border-[#32698F] text-white placeholder-[#E6E2DF]/50 focus:border-[#F67927] focus:ring-[#F67927]' : 'bg-gray-50 border-gray-200 text-[#1E3D51] placeholder-gray-400 focus:border-[#B95221] focus:ring-[#B95221]';
-  const btnSubmitBg = isDarkTheme ? 'bg-[#F67927] hover:bg-[#e06516] text-white' : 'bg-[#B95221] hover:bg-[#9A4219] text-white';
-  const eyeIconColor = isDarkTheme ? 'text-[#E6E2DF]/60 hover:text-[#F67927]' : 'text-gray-400 hover:text-[#B95221]';
+  const iconWrapBg = isDarkTheme ? 'bg-[#32698F] border-[#F67927]' : 'bg-orange-50 border-[#F67927]';
+  const iconColor = isDarkTheme ? 'text-[#F67927]' : 'text-[#F67927]';
+  const labelColor = isDarkTheme ? 'text-[#F67927]' : 'text-[#F67927]';
+  const inputBg = isDarkTheme ? 'bg-[#32698F] border-[#32698F] text-white placeholder-[#E6E2DF]/50 focus:border-[#F67927] focus:ring-[#F67927]' : 'bg-gray-50 border-gray-200 text-[#1E3D51] placeholder-gray-400 focus:border-[#F67927] focus:ring-[#F67927]';
+  const btnSubmitBg = isDarkTheme ? 'bg-[#F67927] hover:bg-[#e06516] text-white' : 'bg-[#F67927] hover:bg-[#e06516] text-white';
+  const eyeIconColor = isDarkTheme ? 'text-[#E6E2DF]/60 hover:text-[#F67927]' : 'text-gray-400 hover:text-[#F67927]';
   const requiredStar = isDarkTheme ? 'text-[#F67927]' : 'text-red-500';
 
   // ── Header info ──
@@ -209,7 +235,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
               <button
                 type="button"
                 onClick={switchFromForgot}
-                className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#B95221] hover:text-[#e06516]'}`}
+                className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#F67927] hover:text-[#e06516]'}`}
               >
                 ← Volver al inicio de sesión
               </button>
@@ -248,7 +274,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
                   <button
                     type="button"
                     onClick={switchToForgot}
-                    className={`text-xs font-semibold transition-colors ${isDarkTheme ? 'text-[#E6E2DF]/70 hover:text-[#F67927]' : 'text-gray-400 hover:text-[#B95221]'}`}
+                    className={`text-xs font-semibold transition-colors ${isDarkTheme ? 'text-[#E6E2DF]/70 hover:text-[#F67927]' : 'text-gray-400 hover:text-[#F67927]'}`}
                   >
                     ¿Olvidaste tu contraseña?
                   </button>
@@ -267,14 +293,14 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
               {isLoginMode ? (
                 <>
                   ¿No tienes cuenta?{' '}
-                  <button type="button" onClick={switchMode} className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#B95221] hover:text-[#e06516]'}`}>
+                  <button type="button" onClick={switchMode} className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#F67927] hover:text-[#e06516]'}`}>
                     Crear tu cuenta
                   </button>
                 </>
               ) : (
                 <>
                   ¿Ya tienes cuenta?{' '}
-                  <button type="button" onClick={switchMode} className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#B95221] hover:text-[#e06516]'}`}>
+                  <button type="button" onClick={switchMode} className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#F67927] hover:text-[#e06516]'}`}>
                     Iniciar sesión
                   </button>
                 </>

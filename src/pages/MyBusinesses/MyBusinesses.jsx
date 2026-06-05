@@ -123,9 +123,9 @@ export default function MisNegocios() {
 
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-extrabold text-[#1E3D51] flex items-center gap-3">
-            <Building className="text-[#B95221]" /> Mis Negocios
+            <Building className="text-[#F67927]" /> Mis Negocios
           </h1>
-          <Link to="/crear-negocio" className="bg-[#B95221] hover:bg-[#9A4219] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-transform hover:-translate-y-0.5">
+          <Link to="/crear-negocio" className="bg-[#F67927] hover:bg-[#e06516] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-transform hover:-translate-y-0.5">
             <PlusCircle size={18} /> Nuevo
           </Link>
         </div>
@@ -135,7 +135,7 @@ export default function MisNegocios() {
         {negocios.length === 0 ? (
           <div className="bg-white rounded-2xl p-10 text-center shadow-sm border border-gray-100">
             <p className="text-gray-500 mb-4">Aún no has registrado ningún negocio.</p>
-            <Link to="/crear-negocio" className="text-[#B95221] font-bold underline">Crea tu primer perfil profesional</Link>
+            <Link to="/crear-negocio" className="text-[#F67927] font-bold underline">Crea tu primer perfil profesional</Link>
           </div>
         ) : (
           <div className="grid gap-6">
@@ -186,7 +186,7 @@ export default function MisNegocios() {
                   {neg.status === 'aprobado' && (
                     <Link
                       to={`/perfil/${neg.slug}`}
-                      className="flex items-center gap-2 text-sm font-bold text-[#32698F] hover:text-[#B95221] transition-colors"
+                      className="flex items-center gap-2 text-sm font-bold text-[#32698F] hover:text-[#F67927] transition-colors"
                     >
                       <Eye size={18} /> Ver Tarjeta Pública
                     </Link>
@@ -266,6 +266,9 @@ export default function MisNegocios() {
           business={catalogBusiness}
         />
       </div>
+
+      {/* Spacer explícito para el BottomNavbar en móviles */}
+      <div className="h-28 md:h-12 w-full shrink-0"></div>
 
       <BottomNavbar
         isLoggedIn={isLoggedIn}

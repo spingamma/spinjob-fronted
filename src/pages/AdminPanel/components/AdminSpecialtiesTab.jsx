@@ -136,7 +136,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-xl font-extrabold text-[#1E3D51] flex items-center gap-2">
-            <Bookmark size={24} className="text-[#B95221]" />
+            <Bookmark size={24} className="text-[#F67927]" />
             Catálogo de Especialidades
           </h2>
           <p className="text-sm text-gray-500 mt-1">Gestiona las categorías y profesiones disponibles.</p>
@@ -150,7 +150,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
               placeholder="Buscar..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221]/30 text-sm font-medium"
+              className="w-full bg-gray-50 border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927]/30 text-sm font-medium"
             />
           </div>
           <button 
@@ -166,7 +166,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         {isLoading ? (
           <div className="py-20 flex justify-center">
-            <Loader2 size={40} className="animate-spin text-[#B95221]" />
+            <Loader2 size={40} className="animate-spin text-[#F67927]" />
           </div>
         ) : filteredGroups.length === 0 ? (
           <div className="py-20 text-center text-gray-400 font-bold">No se encontraron resultados.</div>
@@ -177,7 +177,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
                 <h3 className="font-black text-lg text-[#1E3D51] mb-4">{group.category}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {group.subcategories.filter(s => s.subcategory.toLowerCase().includes(searchTerm.toLowerCase()) || searchTerm === '').map(sub => (
-                    <div key={sub.id} className="bg-white border border-gray-200 rounded-xl p-3 flex justify-between items-center group/item hover:border-[#B95221]/30 transition-all">
+                    <div key={sub.id} className="bg-white border border-gray-200 rounded-xl p-3 flex justify-between items-center group/item hover:border-[#F67927]/30 transition-all">
                       <span className="font-medium text-gray-700 text-sm">{sub.subcategory}</span>
                       <div className="flex items-center gap-1 transition-opacity">
                         <button 
@@ -250,7 +250,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
                       value={formData.category}
                       onChange={(e) => setFormData({...formData, category: e.target.value})}
                       placeholder="Ej. Salud, Tecnología..."
-                      className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#B95221] transition-colors font-medium"
+                      className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#F67927] transition-colors font-medium"
                     />
                   </div>
                   <div>
@@ -261,7 +261,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
                       value={formData.subcategory}
                       onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
                       placeholder="Ej. Dentista, Programador..."
-                      className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#B95221] transition-colors font-medium"
+                      className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#F67927] transition-colors font-medium"
                     />
                   </div>
                 </form>
@@ -282,7 +282,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
                 onClick={modalMode === 'delete' ? handleSubmit : undefined}
                 disabled={isSubmitting || isLoadingDeps}
                 className={`flex-1 px-4 py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50
-                  ${modalMode === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-[#B95221] hover:bg-[#a1451a]'}
+                  ${modalMode === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-[#F67927] hover:bg-[#a1451a]'}
                 `}
               >
                 {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : 

@@ -1,6 +1,6 @@
 // Archivo: src/components/Header.jsx
-import React from 'react';
-import { Search, LogOut, DoorOpen, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, LogOut, ChevronDown, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NavMenu from './NavMenu';
 
@@ -18,22 +18,67 @@ const Header = ({
   isMobile
 }) => {
   const navigate = useNavigate();
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+      setIsStandalone(true);
+      return;
+    }
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    if (/iphone|ipad|ipod/.test(userAgent)) {
+      setIsIOS(true);
+    }
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (isIOS) {
+      alert("Para instalar en iPhone/iPad: Toca el ícono 'Compartir' en Safari y selecciona 'Agregar a inicio'.");
+      return;
+    }
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm h-16 md:h-20 flex items-center">
       <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
         
-        {/* LOGO */}
-        <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-10 h-10 bg-[#1D565D] rounded-xl flex items-center justify-center shadow-md overflow-hidden p-1.5 border border-[#1D565D]">
-            <img src="/icon-192.png" alt="Tarjetoso Logo" className="w-full h-full object-contain" />
+        {/* LOGO E INSTALAR */}
+        <div className="flex-shrink-0 flex items-center">
+          <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+            <div className="w-10 h-10 bg-[#1D565D] rounded-xl flex items-center justify-center shadow-md overflow-hidden p-1.5 border border-[#1D565D]">
+              <img src="/icon-192.png" alt="Tarjetoso Logo" className="w-full h-full object-contain" />
+            </div>
+            <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-[#1E3D51] uppercase hidden md:block ml-3">TARJETOSO</span>
           </div>
-          <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-[#1E3D51] uppercase hidden md:block ml-3">TARJETOSO</span>
+
+          {(!isStandalone && (deferredPrompt || isIOS)) && (
+            <button
+              onClick={handleInstallClick}
+              className="flex items-center justify-center bg-[#F67927] hover:bg-[#e06516] text-white rounded-xl shadow-sm transition-all w-10 h-10 shrink-0 ml-2"
+              title="Descargar App"
+            >
+              <Download size={18} />
+            </button>
+          )}
         </div>
         
         {/* BUSCADOR Y NAV */}
         <div className="flex-1 max-w-4xl px-1 sm:px-0 flex items-center justify-end md:justify-center gap-3 md:gap-8">
-          <div className="flex-1 max-w-2xl flex items-center bg-gray-50 border border-gray-200 rounded-full shadow-inner py-1.5 px-4 focus-within:ring-2 focus-within:ring-[#B95221] transition-all gap-1 sm:gap-2">
+          <div className="flex-1 max-w-2xl flex items-center bg-gray-50 border border-gray-200 rounded-full shadow-inner py-1.5 px-4 focus-within:ring-2 focus-within:ring-[#F67927] transition-all gap-1 sm:gap-2">
             <Search size={16} className="text-[#32698F] flex-shrink-0" />
             <input 
               type="text" 
@@ -99,8 +144,7 @@ const Header = ({
               onClick={() => setAuthModalOpen(true)} 
               className="flex items-center justify-center bg-[#1D565D] hover:bg-[#154045] text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-full transition-colors shadow-sm"
             >
-              <DoorOpen size={16} className="md:hidden" />
-              <span className="text-sm font-semibold hidden md:block">Ingresar</span>
+              <span className="text-xs sm:text-sm font-semibold tracking-wide">Ingresar</span>
             </button>
           )}
         </div>

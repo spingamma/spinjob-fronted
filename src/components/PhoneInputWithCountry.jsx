@@ -58,13 +58,13 @@ export default function PhoneInputWithCountry({
     
   const inputBg = isDarkTheme 
     ? 'bg-[#32698F] text-white border-[#32698F] placeholder-[#E6E2DF]/50 focus:border-[#F67927]' 
-    : 'bg-transparent text-[#1E3D51] placeholder-gray-400 focus:border-[#B95221]';
+    : 'bg-transparent text-[#1E3D51] placeholder-gray-400 focus:border-[#F67927]';
 
   return (
     <div className={`flex items-stretch rounded-xl border transition-all overflow-hidden ${
       isDarkTheme 
         ? 'border-[#32698F] focus-within:border-[#F67927] focus-within:ring-1 focus-within:ring-[#F67927]' 
-        : 'border-gray-200 focus-within:border-[#B95221] focus-within:ring-1 focus-within:ring-[#B95221]'
+        : 'border-gray-200 focus-within:border-[#F67927] focus-within:ring-1 focus-within:ring-[#F67927]'
     } ${className}`}>
       
       {/* Selector de país dinámico */}

@@ -195,9 +195,9 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                     <div className="flex items-center gap-3">
                       <label className="cursor-pointer shrink-0">
                         {formPreview ? (
-                          <img src={formPreview} alt="Preview" className="w-16 h-16 rounded-xl object-cover border-2 border-[#B95221]" />
+                          <img src={formPreview} alt="Preview" className="w-16 h-16 rounded-xl object-cover border-2 border-[#F67927]" />
                         ) : (
-                          <div className="w-16 h-16 rounded-xl bg-gray-200 flex items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#B95221] transition-colors">
+                          <div className="w-16 h-16 rounded-xl bg-gray-200 flex items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#F67927] transition-colors">
                             <ImageIcon size={24} className="text-gray-400" />
                           </div>
                         )}
@@ -208,12 +208,12 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                           type="text" value={formName} onChange={(e) => setFormName(e.target.value)}
                           placeholder="Nombre del producto *"
                           required
-                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1E3D51] outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] transition-all"
+                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1E3D51] outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927] transition-all"
                         />
                         <input
                           type="text" value={formPrice} onChange={(e) => setFormPrice(e.target.value)}
                           placeholder="Precio (ej. Bs. 120)"
-                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1E3D51] outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] transition-all"
+                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1E3D51] outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927] transition-all"
                         />
                       </div>
                     </div>
@@ -225,7 +225,7 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                         placeholder="Descripción breve (opcional)"
                         rows="2"
                         maxLength={400}
-                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 pb-7 text-sm text-[#1E3D51] outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221] transition-all resize-none overflow-y-auto"
+                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 pb-7 text-sm text-[#1E3D51] outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927] transition-all resize-none overflow-y-auto"
                       />
                       <div className="absolute bottom-2 right-3 text-[10px] font-medium text-gray-400 bg-white/80 px-1 backdrop-blur-sm rounded">
                         {formDesc.length}/400
@@ -236,7 +236,7 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                       <button type="button" onClick={resetForm} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors">
                         Cancelar
                       </button>
-                      <button type="submit" disabled={isSubmitting || !formName.trim()} className={`flex-1 py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all ${isSubmitting || !formName.trim() ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#B95221] hover:bg-[#9A4219]'}`}>
+                      <button type="submit" disabled={isSubmitting || !formName.trim()} className={`flex-1 py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all ${isSubmitting || !formName.trim() ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#F67927] hover:bg-[#e06516]'}`}>
                         {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                         {editingId ? 'Actualizar' : 'Guardar'}
                       </button>
@@ -250,10 +250,10 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                   {!showForm && products.length < limit && (
                     <button
                       onClick={() => { resetForm(); setShowForm(true); }}
-                      className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center aspect-square hover:border-[#B95221] hover:bg-orange-50 transition-all group"
+                      className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center aspect-square hover:border-[#F67927] hover:bg-orange-50 transition-all group"
                     >
-                      <Plus size={36} className="text-gray-300 group-hover:text-[#B95221] transition-colors mb-1" />
-                      <span className="text-xs font-bold text-gray-400 group-hover:text-[#B95221] transition-colors">Agregar</span>
+                      <Plus size={36} className="text-gray-300 group-hover:text-[#F67927] transition-colors mb-1" />
+                      <span className="text-xs font-bold text-gray-400 group-hover:text-[#F67927] transition-colors">Agregar</span>
                     </button>
                   )}
 
@@ -273,11 +273,11 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                   <div className="inline-flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
                     <div className="flex gap-0.5">
                       {Array.from({ length: limit }).map((_, i) => (
-                        <div key={i} className={`w-2 h-2 rounded-full ${i < products.length ? 'bg-[#B95221]' : 'bg-gray-200'}`} />
+                        <div key={i} className={`w-2 h-2 rounded-full ${i < products.length ? 'bg-[#F67927]' : 'bg-gray-200'}`} />
                       ))}
                     </div>
                     <span className="text-xs font-bold text-gray-500">{products.length}/{limit} fotos usadas</span>
-                    {!isPremium && <span className="text-xs text-[#B95221] font-medium">(Premium: 20)</span>}
+                    {!isPremium && <span className="text-xs text-[#F67927] font-medium">(Premium: 20)</span>}
                   </div>
                 </div>
               </>
@@ -325,7 +325,7 @@ const ManagerProductCard = ({ product, openEditForm, handleDelete, deletingId })
             {isLong && (
               <button
                 onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-                className="text-[#B95221] font-bold text-[10px] mt-1 hover:underline uppercase"
+                className="text-[#F67927] font-bold text-[10px] mt-1 hover:underline uppercase"
               >
                 {expanded ? 'Ver menos' : 'Ver más'}
               </button>

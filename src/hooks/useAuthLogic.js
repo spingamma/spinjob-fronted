@@ -6,7 +6,7 @@ import { parsePhoneNumber } from '../utils/phone';
  * (login, registro, Google, forgot password, change password, completar celular).
  * Retorna estados y handlers para que AuthModal solo se ocupe del renderizado.
  */
-export default function useAuthLogic({ isOpen, onSuccess }) {
+export default function useAuthLogic({ isOpen, onSuccess, onRequireVerification }) {
   // ── Estados de vista ──
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [isForgotMode, setIsForgotMode] = useState(false);
@@ -119,8 +119,14 @@ export default function useAuthLogic({ isOpen, onSuccess }) {
   // ══════════════════════════════════════════
   // Helpers para completar sesión
   // ══════════════════════════════════════════
-  const _completeSession = (userData) => {
+  const _completeSession = (userData, isRegistrationForm = false) => {
     localStorage.setItem('spingamma_user', JSON.stringify(userData));
+    if (isRegistrationForm && userData.is_verified === false) {
+      if (onRequireVerification) {
+        onRequireVerification(userData);
+        return;
+      }
+    }
     onSuccess(userData);
   };
 
@@ -143,10 +149,10 @@ export default function useAuthLogic({ isOpen, onSuccess }) {
 
       if (!data.celular) {
         setTempToken(data.access_token);
-        setTempUserData({ nombre: data.nombre, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false });
+        setTempUserData({ nombre: data.nombre, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false, is_verified: data.is_verified || false });
         setIsCompletingPhone(true);
       } else {
-        _completeSession({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false });
+        _completeSession({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false, is_verified: data.is_verified || false });
       }
     } catch (err) {
       setApiError(err.message);
@@ -191,13 +197,13 @@ export default function useAuthLogic({ isOpen, onSuccess }) {
 
       if (data.must_change_password) {
         setTempToken(data.access_token);
-        setTempUserData({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false });
+        setTempUserData({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false, is_verified: data.is_verified || false });
         setIsChangingPassword(true);
         setIsLoading(false);
         return;
       }
 
-      _completeSession({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false });
+      _completeSession({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false, is_verified: data.is_verified || false }, !isLoginMode);
     } catch (error) {
       setApiError(error.message);
     } finally {
@@ -256,7 +262,7 @@ export default function useAuthLogic({ isOpen, onSuccess }) {
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || 'Error al cambiar la contraseña.');
 
-      _completeSession({ nombre: tempUserData.nombre, celular: tempUserData.celular, is_admin: tempUserData.is_admin, is_vendedor: tempUserData.is_vendedor });
+      _completeSession({ nombre: tempUserData.nombre, celular: tempUserData.celular, is_admin: tempUserData.is_admin, is_vendedor: tempUserData.is_vendedor, is_verified: tempUserData.is_verified || false });
     } catch (error) {
       setApiError(error.message);
     } finally {
@@ -285,7 +291,7 @@ export default function useAuthLogic({ isOpen, onSuccess }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Error al completar tu celular.');
 
-      _completeSession({ nombre: tempUserData.nombre, celular: formData.celular, is_admin: tempUserData.is_admin, is_vendedor: tempUserData.is_vendedor });
+      _completeSession({ nombre: tempUserData.nombre, celular: formData.celular, is_admin: tempUserData.is_admin, is_vendedor: tempUserData.is_vendedor, is_verified: tempUserData.is_verified || false });
     } catch (error) {
       setApiError(error.message);
     } finally {

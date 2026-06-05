@@ -38,7 +38,7 @@ function ReloadPrompt() {
       {needRefresh && (
         <button
           onClick={() => updateServiceWorker(true)}
-          className="w-full flex items-center justify-center gap-2 bg-[#B95221] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#B95221]/90 transition-colors shadow-md"
+          className="w-full flex items-center justify-center gap-2 bg-[#F67927] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#F67927]/90 transition-colors shadow-md"
         >
           <RefreshCw className="w-4 h-4" />
           Actualizar ahora

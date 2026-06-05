@@ -88,7 +88,7 @@ export default function InstallPrompt() {
       <div className="bg-[#1E3D51]/95 backdrop-blur-md border border-[#32698F] p-4 sm:p-5 rounded-2xl shadow-2xl relative overflow-hidden group">
         
         {/* Efecto de luz de fondo */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#B95221] to-[#F67927]"></div>
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#F67927] to-[#F67927]"></div>
         
         <button 
           onClick={handleClose}
@@ -99,14 +99,14 @@ export default function InstallPrompt() {
         </button>
 
         <div className="flex items-start gap-4 mt-1">
-          <div className="w-12 h-12 bg-white rounded-xl shadow-inner flex items-center justify-center shrink-0 border-2 border-[#B95221]/20">
+          <div className="w-12 h-12 bg-white rounded-xl shadow-inner flex items-center justify-center shrink-0 border-2 border-[#F67927]/20">
             <img 
               src="/icon-192.png" 
               alt="SpinGamma Logo" 
               className="w-8 h-8 object-contain rounded-md"
               onError={(e) => { 
                 e.target.onerror = null; 
-                e.target.src = "https://ui-avatars.com/api/?name=SG&background=B95221&color=fff"; 
+                e.target.src = "https://ui-avatars.com/api/?name=SG&background=F67927&color=fff"; 
               }}
             />
           </div>

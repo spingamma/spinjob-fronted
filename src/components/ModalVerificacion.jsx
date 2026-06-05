@@ -101,8 +101,8 @@ export default function ModalVerificacion({ isOpen, onClose, onSuccess, userName
 
         {step === 1 ? (
           <div className="text-center">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-orange-50 border-2 border-[#B95221]">
-              <CheckCircle2 size={36} className="text-[#B95221]" />
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-orange-50 border-2 border-[#F67927]">
+              <CheckCircle2 size={36} className="text-[#F67927]" />
             </div>
             <h2 className="text-2xl font-extrabold mb-3 text-[#1E3D51]">Verifica tu Cuenta</h2>
             <p className="text-sm text-gray-500 mb-6">
@@ -143,8 +143,8 @@ export default function ModalVerificacion({ isOpen, onClose, onSuccess, userName
           </div>
         ) : (
           <div className="text-center">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-orange-50 border-2 border-[#B95221]">
-              <Mail size={36} className="text-[#B95221]" />
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-orange-50 border-2 border-[#F67927]">
+              <Mail size={36} className="text-[#F67927]" />
             </div>
             <h2 className="text-2xl font-extrabold mb-3 text-[#1E3D51]">Ingresa el Código</h2>
             <p className="text-sm text-gray-500 mb-6">
@@ -167,7 +167,7 @@ export default function ModalVerificacion({ isOpen, onClose, onSuccess, userName
                   placeholder="Ej. 123456"
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-                  className="w-full text-center tracking-[0.5em] text-2xl font-extrabold bg-gray-50 border-gray-200 focus:border-[#B95221] focus:ring-[#B95221] px-4 py-4 rounded-xl outline-none"
+                  className="w-full text-center tracking-[0.5em] text-2xl font-extrabold bg-gray-50 border-gray-200 focus:border-[#F67927] focus:ring-[#F67927] px-4 py-4 rounded-xl outline-none"
                   required
                 />
               </div>
@@ -187,7 +187,7 @@ export default function ModalVerificacion({ isOpen, onClose, onSuccess, userName
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="font-bold underline underline-offset-2 transition-colors text-[#B95221] hover:text-[#e06516]"
+                className="font-bold underline underline-offset-2 transition-colors text-[#F67927] hover:text-[#e06516]"
               >
                 Reenviar código
               </button>

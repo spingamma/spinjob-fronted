@@ -203,7 +203,7 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('negocios')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'negocios' 
-                    ? 'bg-white shadow-sm text-[#B95221] ring-1 ring-gray-200/50' 
+                    ? 'bg-white shadow-sm text-[#F67927] ring-1 ring-gray-200/50' 
                     : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
                 `}
               >
@@ -220,7 +220,7 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('analytics')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'analytics' 
-                    ? 'bg-white shadow-sm text-[#B95221] ring-1 ring-gray-200/50' 
+                    ? 'bg-white shadow-sm text-[#F67927] ring-1 ring-gray-200/50' 
                     : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
                 `}
               >
@@ -231,7 +231,7 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('especialidades')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'especialidades' 
-                    ? 'bg-white shadow-sm text-[#B95221] ring-1 ring-gray-200/50' 
+                    ? 'bg-white shadow-sm text-[#F67927] ring-1 ring-gray-200/50' 
                     : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
                 `}
               >
@@ -242,7 +242,7 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('vendedor')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'vendedor' 
-                    ? 'bg-white shadow-sm text-[#B95221] ring-1 ring-gray-200/50' 
+                    ? 'bg-white shadow-sm text-[#F67927] ring-1 ring-gray-200/50' 
                     : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
                 `}
               >
@@ -253,7 +253,7 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('usuarios')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'usuarios' 
-                    ? 'bg-white shadow-sm text-[#B95221] ring-1 ring-gray-200/50' 
+                    ? 'bg-white shadow-sm text-[#F67927] ring-1 ring-gray-200/50' 
                     : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
                 `}
               >
@@ -277,7 +277,7 @@ export default function AdminPanel() {
                   placeholder="Buscar por nombre o categoría..." 
                   value={searchPendientes}
                   onChange={(e) => setSearchPendientes(e.target.value)}
-                  className="w-full bg-white border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221]/30 transition-all text-sm font-medium"
+                  className="w-full bg-white border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927]/30 transition-all text-sm font-medium"
                 />
               </div>
             </div>
@@ -302,7 +302,7 @@ export default function AdminPanel() {
                         </div>
                         <div>
                           <h3 className="font-extrabold text-2xl text-[#1E3D51]">{neg.name}</h3>
-                          <span className="bg-[#B95221]/10 text-[#B95221] text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider border border-[#B95221]/20">
+                          <span className="bg-[#F67927]/10 text-[#F67927] text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider border border-[#F67927]/20">
                             {neg.status}
                           </span>
                         </div>
@@ -361,7 +361,7 @@ export default function AdminPanel() {
                   <select 
                     value={userStatusFilter}
                     onChange={(e) => setUserStatusFilter(e.target.value)}
-                    className="bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221]/30 text-sm font-bold text-[#1E3D51]"
+                    className="bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927]/30 text-sm font-bold text-[#1E3D51]"
                   >
                     <option value="todos">Todos los Estados</option>
                     <option value="pendientes">Pendientes</option>
@@ -376,7 +376,7 @@ export default function AdminPanel() {
                       placeholder="Buscar usuario..." 
                       value={userSearchTerm}
                       onChange={(e) => setUserSearchTerm(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#B95221] focus:ring-1 focus:ring-[#B95221]/30 transition-all text-sm font-medium"
+                      className="w-full bg-gray-50 border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927]/30 transition-all text-sm font-medium"
                     />
                   </div>
                 </div>
@@ -385,7 +385,7 @@ export default function AdminPanel() {
               <div className="p-6">
                 {isLoadingUsers ? (
                   <div className="py-20 flex flex-col items-center">
-                    <Loader2 size={40} className="animate-spin text-[#B95221] mb-2" />
+                    <Loader2 size={40} className="animate-spin text-[#F67927] mb-2" />
                     <p className="text-gray-400 font-bold">Buscando...</p>
                   </div>
                 ) : users.filter(u => userStatusFilter === 'todos' ? true : (userStatusFilter === 'verificados' ? u.is_verified : !u.is_verified)).length === 0 ? (
@@ -408,7 +408,7 @@ export default function AdminPanel() {
                               <CheckCircle size={18} />
                             </div>
                           ) : (
-                            <div className="bg-orange-100 text-[#B95221] p-1.5 rounded-full" title="Pendiente">
+                            <div className="bg-orange-100 text-[#F67927] p-1.5 rounded-full" title="Pendiente">
                               <Clock size={18} />
                             </div>
                           )}
