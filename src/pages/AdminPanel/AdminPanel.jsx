@@ -302,9 +302,16 @@ export default function AdminPanel() {
                         </div>
                         <div>
                           <h3 className="font-extrabold text-2xl text-[#1E3D51]">{neg.name}</h3>
-                          <span className="bg-[#F67927]/10 text-[#F67927] text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider border border-[#F67927]/20">
-                            {neg.status}
-                          </span>
+                          <div className="flex flex-wrap items-center gap-2 mt-1">
+                            <span className="bg-[#F67927]/10 text-[#F67927] text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider border border-[#F67927]/20">
+                              {neg.status}
+                            </span>
+                            {neg.referred_by_name && (
+                              <span className="bg-purple-100 text-purple-700 text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider border border-purple-200">
+                                🎟️ Vendedor: {neg.referred_by_name} · 3 meses prueba
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">

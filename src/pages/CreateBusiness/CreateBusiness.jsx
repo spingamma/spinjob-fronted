@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Briefcase, Building, MapPin, AlignLeft, Phone, ArrowLeft,
-  Loader2, Clock, Globe, Link as LinkIcon, User, Map, Image as ImageIcon, Check, ShoppingBag, Plus, X as XIcon
+  Loader2, Clock, Globe, Link as LinkIcon, User, Map, Image as ImageIcon, Check, ShoppingBag, Plus, X as XIcon, Tag
 } from 'lucide-react';
 import CropModal from '../../components/CropModal';
 import ModalVerificacion from '../../components/ModalVerificacion';
@@ -42,6 +42,11 @@ export default function CrearNegocio() {
   const [imageSrc, setImageSrc] = useState(null);
   const [croppedImageFile, setCroppedImageFile] = useState(null);
   const [showCropModal, setShowCropModal] = useState(false);
+
+  // Código de vendedor
+  const [sellerCode, setSellerCode] = useState('');
+  const [sellerValidation, setSellerValidation] = useState({ status: 'idle', name: '' }); // idle | loading | valid | invalid
+  const [sellerDebounceTimer, setSellerDebounceTimer] = useState(null);
   // 📦 Cargar especialidades desde la API
   useEffect(() => {
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
@@ -50,6 +55,36 @@ export default function CrearNegocio() {
       .then(data => setSpecialtiesData(data))
       .catch(() => setSpecialtiesData([]));
   }, []);
+
+  // Validar código de vendedor con debounce
+  const validateSellerCode = (code) => {
+    setSellerCode(code);
+    if (sellerDebounceTimer) clearTimeout(sellerDebounceTimer);
+    if (!code.trim()) {
+      setSellerValidation({ status: 'idle', name: '' });
+      return;
+    }
+    setSellerValidation({ status: 'loading', name: '' });
+    const timer = setTimeout(async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+        const res = await fetch(`${API_URL}/businesses/validate-seller-code?code=${encodeURIComponent(code.trim())}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.valid) {
+            setSellerValidation({ status: 'valid', name: data.seller_name });
+          } else {
+            setSellerValidation({ status: 'invalid', name: '' });
+          }
+        } else {
+          setSellerValidation({ status: 'invalid', name: '' });
+        }
+      } catch {
+        setSellerValidation({ status: 'invalid', name: '' });
+      }
+    }, 600);
+    setSellerDebounceTimer(timer);
+  };
 
   // 📦 Cargar datos del negocio en modo edición
   useEffect(() => {
@@ -224,6 +259,10 @@ export default function CrearNegocio() {
     });
     if (croppedImageFile) {
       formDataObj.append("image", croppedImageFile);
+    }
+    // Enviar código de vendedor si está validado
+    if (!isEditMode && sellerCode.trim() && sellerValidation.status === 'valid') {
+      formDataObj.append("seller_code", sellerCode.trim());
     }
 
     try {
@@ -675,6 +714,42 @@ export default function CrearNegocio() {
                 <p className="text-xs text-gray-400 mt-1 ml-1">Si tienes un catálogo en otra plataforma, pega el enlace aquí.</p>
               </div>
             </div>
+
+            {/* SECCIÓN: CÓDIGO DE VENDEDOR (solo en creación) */}
+            {!isEditMode && (
+              <div>
+                <h3 className="text-lg font-extrabold text-[#F67927] border-b border-gray-200 pb-2 mb-4">Código de Vendedor</h3>
+                <div className="bg-gradient-to-r from-purple-50 to-orange-50 rounded-2xl border border-purple-100 p-5">
+                  <label className={labelClass}>¿Tienes un código de vendedor? <span className="text-[10px] font-normal text-gray-400 lowercase">(opcional)</span></label>
+                  <p className="text-xs text-gray-500 mb-3">Ingresa el código para obtener <strong className="text-[#F67927]">3 meses de prueba gratis</strong></p>
+                  <div className={`${wrapperClass} ${sellerValidation.status === 'valid' ? 'border-green-400 ring-1 ring-green-400' : sellerValidation.status === 'invalid' ? 'border-red-400 ring-1 ring-red-400' : ''}`}>
+                    <div className="pl-4 flex items-center text-purple-500"><Tag size={18} /></div>
+                    <input
+                      type="text"
+                      value={sellerCode}
+                      onChange={(e) => validateSellerCode(e.target.value)}
+                      placeholder="Ej: wilderneytor"
+                      className={inputClass}
+                    />
+                    <div className="pr-4 flex items-center">
+                      {sellerValidation.status === 'loading' && <Loader2 size={18} className="animate-spin text-gray-400" />}
+                      {sellerValidation.status === 'valid' && <Check size={18} className="text-green-500" />}
+                      {sellerValidation.status === 'invalid' && <XIcon size={18} className="text-red-500" />}
+                    </div>
+                  </div>
+                  {sellerValidation.status === 'valid' && (
+                    <p className="text-xs text-green-600 font-bold mt-2 flex items-center gap-1">
+                      <Check size={14} /> Vendedor: {sellerValidation.name}
+                    </p>
+                  )}
+                  {sellerValidation.status === 'invalid' && (
+                    <p className="text-xs text-red-500 font-bold mt-2">
+                      Código incorrecto. Verifica con tu vendedor.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             <button
               type="submit"
