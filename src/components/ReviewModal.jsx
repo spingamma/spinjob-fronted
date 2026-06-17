@@ -51,6 +51,7 @@ export default function ReviewModal({
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay"></div>
           
           <button 
+            data-testid="review-close-btn"
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
@@ -81,6 +82,7 @@ export default function ReviewModal({
               <div className="flex gap-2 justify-center">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
+                    data-testid={`review-star-${star}`}
                     key={star}
                     type="button"
                     disabled={isSubmitting}
@@ -111,6 +113,7 @@ export default function ReviewModal({
                 Describe tu experiencia (Opcional)
               </label>
               <textarea 
+                data-testid="review-textarea"
                 id="descripcion_servicio"
                 disabled={isSubmitting}
                 value={description}
@@ -123,6 +126,7 @@ export default function ReviewModal({
 
             {/* BOTÓN ENVIAR */}
             <button 
+              data-testid="review-submit-btn"
               type="submit"
               disabled={isSubmitting || rating === 0}
               className={`w-full text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition-all flex justify-center items-center gap-2 mt-2

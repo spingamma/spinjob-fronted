@@ -95,7 +95,7 @@ export default function ModalVerificacion({ isOpen, onClose, onSuccess, userName
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#1E3D51]/80 backdrop-blur-sm transition-opacity">
       <div className="bg-white border rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 relative animate-in fade-in zoom-in duration-300">
         
-        <button onClick={onClose} className="absolute top-5 right-5 p-2 rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 transition-colors" disabled={isLoading}>
+        <button data-testid="verification-close-btn" onClick={onClose} className="absolute top-5 right-5 p-2 rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 transition-colors" disabled={isLoading}>
           <X size={20} />
         </button>
 
@@ -117,6 +117,7 @@ export default function ModalVerificacion({ isOpen, onClose, onSuccess, userName
             )}
 
             <button 
+              data-testid="verification-send-btn"
               onClick={handleSendCode}
               disabled={isLoading}
               className={`w-full font-bold py-4 px-4 rounded-xl text-white transition-all shadow-md flex justify-center items-center gap-2 mb-4 
@@ -133,6 +134,7 @@ export default function ModalVerificacion({ isOpen, onClose, onSuccess, userName
             </div>
 
             <button 
+              data-testid="verification-whatsapp-btn"
               onClick={handleFallbackWhatsapp}
               type="button"
               className="w-full font-bold py-3 px-4 rounded-xl text-[#1E3D51] transition-all border-2 border-gray-200 hover:border-[#1E3D51] hover:bg-gray-50 flex justify-center items-center gap-2"
@@ -161,6 +163,7 @@ export default function ModalVerificacion({ isOpen, onClose, onSuccess, userName
             <form onSubmit={handleVerifyCode} className="space-y-4">
               <div>
                 <input
+                  data-testid="verification-code-input"
                   type="text"
                   maxLength="6"
                   inputMode="numeric"
@@ -173,6 +176,7 @@ export default function ModalVerificacion({ isOpen, onClose, onSuccess, userName
               </div>
 
               <button 
+                data-testid="verification-submit-btn"
                 type="submit" 
                 disabled={isLoading || code.length !== 6}
                 className={`w-full font-bold py-4 px-4 rounded-xl text-white transition-all shadow-md mt-4 flex justify-center items-center gap-2 
@@ -185,6 +189,7 @@ export default function ModalVerificacion({ isOpen, onClose, onSuccess, userName
 
             <p className="text-center text-sm mt-5 text-gray-500">
               <button
+                data-testid="verification-resend-btn"
                 type="button"
                 onClick={() => setStep(1)}
                 className="font-bold underline underline-offset-2 transition-colors text-[#F67927] hover:text-[#e06516]"

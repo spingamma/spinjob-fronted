@@ -160,7 +160,7 @@ export default function CatalogManager({ isOpen, onClose, business }) {
           {/* Header */}
           <div className="bg-gradient-to-br from-[#1E3D51] to-[#32698F] p-5 relative shrink-0">
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay"></div>
-            <button onClick={onClose} aria-label="Cerrar gestor de catálogo" className="absolute top-4 right-4 z-20 text-white/80 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm">
+            <button data-testid="catalog-manager-close-btn" onClick={onClose} aria-label="Cerrar gestor de catálogo" className="absolute top-4 right-4 z-20 text-white/80 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm">
               <X size={20} />
             </button>
             <div className="relative z-10 flex items-center gap-3">
@@ -233,10 +233,10 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                     </div>
 
                     <div className="flex gap-2">
-                      <button type="button" onClick={resetForm} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors">
+                      <button data-testid="catalog-manager-cancel-btn" type="button" onClick={resetForm} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors">
                         Cancelar
                       </button>
-                      <button type="submit" disabled={isSubmitting || !formName.trim()} className={`flex-1 py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all ${isSubmitting || !formName.trim() ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#F67927] hover:bg-[#e06516]'}`}>
+                      <button data-testid="catalog-manager-submit-btn" type="submit" disabled={isSubmitting || !formName.trim()} className={`flex-1 py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all ${isSubmitting || !formName.trim() ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#F67927] hover:bg-[#e06516]'}`}>
                         {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                         {editingId ? 'Actualizar' : 'Guardar'}
                       </button>
@@ -249,6 +249,7 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                   {/* Add button */}
                   {!showForm && products.length < limit && (
                     <button
+                      data-testid="catalog-manager-add-btn"
                       onClick={() => { resetForm(); setShowForm(true); }}
                       className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center aspect-square hover:border-[#F67927] hover:bg-orange-50 transition-all group"
                     >
@@ -324,6 +325,7 @@ const ManagerProductCard = ({ product, openEditForm, handleDelete, deletingId })
             </p>
             {isLong && (
               <button
+                data-testid="catalog-manager-ver-mas-btn"
                 onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
                 className="text-[#F67927] font-bold text-[10px] mt-1 hover:underline uppercase"
               >
@@ -337,6 +339,7 @@ const ManagerProductCard = ({ product, openEditForm, handleDelete, deletingId })
           <p className="text-teal-600 font-bold text-sm">{product.price || ''}</p>
           <div className="flex gap-1.5">
             <button
+              data-testid="catalog-manager-edit-btn"
               onClick={(e) => { e.stopPropagation(); openEditForm(product); }}
               className="p-1.5 text-gray-400 hover:text-[#32698F] bg-gray-50 hover:bg-[#32698F]/10 rounded-lg transition-colors border border-gray-100 hover:border-[#32698F]/20 shadow-sm"
               title="Editar producto"
@@ -344,6 +347,7 @@ const ManagerProductCard = ({ product, openEditForm, handleDelete, deletingId })
               <Pencil size={14} />
             </button>
             <button
+              data-testid="catalog-manager-delete-btn"
               onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }}
               disabled={deletingId === product.id}
               className="p-1.5 text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-lg transition-colors border border-gray-100 hover:border-red-200 shadow-sm disabled:opacity-50"

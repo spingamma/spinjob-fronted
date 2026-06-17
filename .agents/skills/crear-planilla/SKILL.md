@@ -30,6 +30,7 @@ description: Genera una nueva plantilla de perfil profesional basada en los est√
 - Glassmorphism, gradientes, sombras profundas.
 - Avatar con `onError` fallback.
 - Secciones protegidas con `?.`.
+- SIEMPRE incluir atributos `data-testid="..."` en botones, inputs y cualquier elemento interactivo.
 
 ### 3. Registro Express
 - Editar `src/pages/Profile/Profile.jsx` usando `multi_replace_file_content` para agregar el import y el caso en el renderizado.

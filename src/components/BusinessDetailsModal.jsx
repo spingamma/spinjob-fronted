@@ -22,7 +22,7 @@ export default function BusinessDetailsModal({ business, onClose, actions, banne
           <h2 className="text-xl font-bold flex items-center gap-2">
             <Building size={20} /> Datos del Formulario
           </h2>
-          <button onClick={onClose} className="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors">
+          <button data-testid="business-details-close-btn" onClick={onClose} className="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors">
             <X size={20} />
           </button>
         </div>

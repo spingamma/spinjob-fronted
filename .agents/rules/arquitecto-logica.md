@@ -23,14 +23,15 @@ trigger: always_on
 21. **Acciones protegidas:** Clic en redes/WhatsApp sin sesión → forzar `AuthModal`.
 22. **Modales anidados:** Si un modal abre otro modal (ej. CatalogManager → CropModal), usar React Fragment `<>...</>` como wrapper y renderizar el modal hijo FUERA del div backdrop del padre. Esto evita que `onClick={onClose}` del fondo oscuro capture clicks del modal hijo.
 23. **Componentes con estado local en listas:** Si cada ítem de una lista necesita estado propio (ej. "Ver más"), extraer un sub-componente (ej. `ProductCard`) que maneje su propio `useState`. No manejar estado por índice en el padre.
+24. **Testing Hooks (OBLIGATORIO):** SIEMPRE agrega atributos `data-testid="..."` a todos los elementos interactivos (botones, inputs, modales, iconos clickeables) al crearlos o modificarlos para asegurar pruebas E2E estables.
 
 ## Terceros y APIs Nativas
-24. **Scripts:** NUNCA cargar `<script>` manual si ya lo gestiona una librería React (ej. GSI).
-25. **Compartir:** Usar `navigator.share` cuando esté disponible.
-26. **WhatsApp:** Limpiar números con `.replace(/[^0-9]/g, '')`.
+25. **Scripts:** NUNCA cargar `<script>` manual si ya lo gestiona una librería React (ej. GSI).
+26. **Compartir:** Usar `navigator.share` cuando esté disponible.
+27. **WhatsApp:** Limpiar números con `.replace(/[^0-9]/g, '')`.
 
 ## z-index Hierarchy (OBLIGATORIO)
-27. **Escala de z-index del proyecto:**
+28. **Escala de z-index del proyecto:**
     - `z-40` → `BottomNavbar` (navegación inferior móvil)
     - `z-50` → Dropdowns, tooltips, barras flotantes
     - `z-[100]` → Modales principales (CatalogManager, CatalogModal, AuthModal, ReviewModal, QR modal)

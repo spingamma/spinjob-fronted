@@ -37,12 +37,13 @@ export default function DirectoryFilterBar({
           }`}>
             
             {/* Categoría Principal */}
-            <div className="flex flex-col gap-1 relative custom-dropdown">
+            <div data-testid="filter-container-category" className="flex flex-col gap-1 relative custom-dropdown">
               <label className="text-[10px] md:text-xs font-bold text-[#F67927] uppercase tracking-widest ml-1 hidden sm:block">
                 Categoría
               </label>
               <div className="flex gap-2">
                 <div 
+                  data-testid="filter-trigger-category"
                   onClick={() => toggleDropdown('category')}
                   className={`flex-1 flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none cursor-pointer
                     ${openDropdown === 'category' ? 'border-[#F67927] ring-1 ring-[#F67927]/30' : 'border-gray-200'}
@@ -55,6 +56,7 @@ export default function DirectoryFilterBar({
                   
                   {activeCategory !== 'Todos' && (
                     <button 
+                      data-testid="filter-clear-category"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleSelectOption('category', 'Todos');
@@ -109,11 +111,12 @@ export default function DirectoryFilterBar({
 
             {/* Subcategoría (Condicional) */}
             {activeCategory !== 'Todos' && (
-              <div className="flex flex-col gap-1 relative custom-dropdown animate-in fade-in zoom-in-95 duration-300">
+              <div data-testid="filter-container-subcategory" className="flex flex-col gap-1 relative custom-dropdown animate-in fade-in zoom-in-95 duration-300">
                 <label className="text-[10px] md:text-xs font-bold text-[#F67927] uppercase tracking-widest ml-1 hidden sm:block">
                   Subcategoría
                 </label>
                 <div 
+                  data-testid="filter-trigger-subcategory"
                   onClick={() => toggleDropdown('subcategory')}
                   className={`flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none cursor-pointer
                     ${openDropdown === 'subcategory' ? 'border-[#F67927] ring-1 ring-[#F67927]/30' : 'border-gray-200'}
@@ -125,6 +128,7 @@ export default function DirectoryFilterBar({
                   </span>
                   {activeSubcategory !== 'Todas' && (
                     <button 
+                      data-testid="filter-clear-subcategory"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleSelectOption('subcategory', 'Todas');
@@ -178,13 +182,14 @@ export default function DirectoryFilterBar({
             )}
 
             {/* Ubicación */}
-            <div className={`flex flex-col gap-1 relative custom-dropdown ${isMobile && openDropdown !== 'location' ? 'hidden' : ''}`}>
+            <div data-testid="filter-container-location" className={`flex flex-col gap-1 relative custom-dropdown ${isMobile && openDropdown !== 'location' ? 'hidden' : ''}`}>
               {!isMobile && (
                 <>
                   <label className="text-[10px] md:text-xs font-bold text-[#F67927] uppercase tracking-widest ml-1 hidden sm:block">
                     Ubicación
                   </label>
                   <div 
+                    data-testid="filter-trigger-location"
                     onClick={() => toggleDropdown('location')}
                     className={`flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none cursor-pointer
                       ${openDropdown === 'location' ? 'border-[#F67927] ring-1 ring-[#F67927]/30' : 'border-gray-200'}
@@ -196,6 +201,7 @@ export default function DirectoryFilterBar({
                     </span>
                     {activeState !== 'Todas' && (
                       <button 
+                        data-testid="filter-clear-location"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleSelectOption('location', 'Todas');
@@ -264,13 +270,14 @@ export default function DirectoryFilterBar({
             </div>
 
             {/* Calificación */}
-            <div className={`flex flex-col gap-1 relative custom-dropdown ${isMobile && openDropdown !== 'rating' ? 'hidden' : ''}`}>
+            <div data-testid="filter-container-rating" className={`flex flex-col gap-1 relative custom-dropdown ${isMobile && openDropdown !== 'rating' ? 'hidden' : ''}`}>
               {!isMobile && (
                 <>
                   <label className="text-[10px] md:text-xs font-bold text-[#F67927] uppercase tracking-widest ml-1 hidden sm:block">
                     Ranking
                   </label>
                   <div 
+                    data-testid="filter-trigger-rating"
                     onClick={() => toggleDropdown('rating')}
                     className={`flex items-center bg-white border rounded-xl px-1.5 md:px-3 py-2.5 md:py-2.5 shadow-sm transition-all hover:bg-gray-50 group focus:outline-none cursor-pointer
                       ${openDropdown === 'rating' ? 'border-[#F67927] ring-1 ring-[#F67927]/30' : 'border-gray-200'}
@@ -282,6 +289,7 @@ export default function DirectoryFilterBar({
                     </span>
                     {activeRating !== 'Todos' && (
                       <button 
+                        data-testid="filter-clear-rating"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleSelectOption('rating', 'Todos');

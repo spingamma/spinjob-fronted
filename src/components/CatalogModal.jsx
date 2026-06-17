@@ -36,7 +36,7 @@ export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsa
         {/* Header */}
         <div className="bg-gradient-to-br from-[#1E3D51] to-[#32698F] p-5 relative shrink-0">
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay"></div>
-          <button onClick={onClose} aria-label="Cerrar catálogo" className="absolute top-4 right-4 z-20 text-white/80 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm">
+          <button data-testid="catalog-close-btn" onClick={onClose} aria-label="Cerrar catálogo" className="absolute top-4 right-4 z-20 text-white/80 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm">
             <X size={20} />
           </button>
           <div className="relative z-10 flex items-center gap-3">
@@ -115,6 +115,7 @@ const ProductCard = ({ product, whatsappNumber, businessName, country }) => {
             </p>
             {isLong && (
               <button 
+                data-testid="catalog-ver-mas-btn"
                 onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
                 className="text-[#F67927] font-bold text-[10px] mt-1 hover:underline uppercase"
               >
@@ -131,6 +132,7 @@ const ProductCard = ({ product, whatsappNumber, businessName, country }) => {
         {/* Botón "Me interesa" → redirige a WhatsApp */}
         {waUrl && (
           <a
+            data-testid="catalog-contact-btn"
             href={waUrl}
             target="_blank"
             rel="noopener noreferrer"

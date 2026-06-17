@@ -87,6 +87,7 @@ const Header = ({
           <div className="flex-1 max-w-2xl flex items-center bg-gray-50 border border-gray-200 rounded-full shadow-inner py-1.5 px-4 focus-within:ring-2 focus-within:ring-[#F67927] transition-all gap-1 sm:gap-2">
             <Search size={16} className="text-[#32698F] flex-shrink-0" />
             <input 
+              data-testid="search-input"
               type="text" 
               aria-label="Buscar profesional" 
               placeholder="Buscar profesional..." 

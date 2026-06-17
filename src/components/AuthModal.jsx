@@ -131,6 +131,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
         ) : (
           <div className={showEye ? 'relative' : ''}>
             <input
+              data-testid={`auth-input-${field}`}
               required={required}
               type={showEye ? (currentShowState ? 'text' : 'password') : type}
               inputMode={inputMode}
@@ -145,6 +146,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
             />
             {showEye && (
               <button
+                data-testid={`auth-show-pwd-${field}`}
                 type="button"
                 onClick={toggleShow}
                 className={`absolute inset-y-0 right-0 pr-3.5 flex items-center active:scale-95 transition-all ${eyeIconColor}`}
@@ -186,7 +188,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
     <div className={`fixed inset-0 z-[200] flex items-center justify-center p-4 ${bgOverlay} backdrop-blur-sm transition-opacity`}>
       <div className={`${bgModal} border rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 relative animate-in fade-in zoom-in duration-300`}>
         
-        <button onClick={onClose} className={`absolute top-5 right-5 p-2 rounded-full transition-colors ${btnCloseBg}`} disabled={isLoading}>
+        <button data-testid="auth-close-btn" onClick={onClose} className={`absolute top-5 right-5 p-2 rounded-full transition-colors ${btnCloseBg}`} disabled={isLoading}>
           <X size={20} />
         </button>
 
@@ -204,7 +206,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
            <form onSubmit={handleCompletarCelular} className="space-y-4">
              {renderInput('celular', 'Celular / WhatsApp (OBLIGATORIO)', 'tel', 'Ej. 71234567', { inputMode: 'numeric' })}
              {renderError()}
-             <button type="submit" disabled={isLoading} className={submitBtnClass}>
+             <button data-testid="auth-submit-btn-phone" type="submit" disabled={isLoading} className={submitBtnClass}>
                {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Completar Registro'}
              </button>
            </form>
@@ -215,7 +217,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
             {renderInput('newPassword', 'Nueva Contraseña', 'password', 'Mínimo 4 caracteres', { isPassword: true })}
             {renderInput('confirmPassword', 'Confirmar Contraseña', 'password', 'Repite tu nueva contraseña', { isPassword: true })}
             {renderError()}
-            <button type="submit" disabled={isLoading} className={submitBtnClass}>
+            <button data-testid="auth-submit-btn-pwd" type="submit" disabled={isLoading} className={submitBtnClass}>
               {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Guardar Nueva Contraseña'}
             </button>
           </form>
@@ -227,12 +229,13 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
             {renderError()}
             {renderSuccess()}
 
-            <button type="submit" disabled={isLoading || !!apiSuccess} className={`${submitBtnClass} ${apiSuccess ? 'opacity-70 cursor-not-allowed' : ''}`}>
+            <button data-testid="auth-submit-btn-forgot" type="submit" disabled={isLoading || !!apiSuccess} className={`${submitBtnClass} ${apiSuccess ? 'opacity-70 cursor-not-allowed' : ''}`}>
               {isLoading ? <Loader2 size={18} className="animate-spin" /> : (apiSuccess ? 'Correo Enviado ✓' : 'Enviar Contraseña Temporal')}
             </button>
 
             <p className={`text-center text-sm mt-5 ${textSub}`}>
               <button
+                data-testid="auth-back-login"
                 type="button"
                 onClick={switchFromForgot}
                 className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#F67927] hover:text-[#e06516]'}`}
@@ -272,6 +275,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
               {isLoginMode && (
                 <div className="text-center -mt-1">
                   <button
+                    data-testid="auth-forgot-pwd"
                     type="button"
                     onClick={switchToForgot}
                     className={`text-xs font-semibold transition-colors ${isDarkTheme ? 'text-[#E6E2DF]/70 hover:text-[#F67927]' : 'text-gray-400 hover:text-[#F67927]'}`}
@@ -283,7 +287,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
 
               {renderError()}
 
-              <button type="submit" disabled={isLoading} className={submitBtnClass}>
+              <button data-testid="auth-submit-btn" type="submit" disabled={isLoading} className={submitBtnClass}>
                 {isLoading && <Loader2 size={18} className="animate-spin" />}
                 {isLoading ? 'Procesando...' : (isLoginMode ? 'Ingresar a mi cuenta' : 'Crear mi cuenta gratis')}
               </button>
@@ -293,14 +297,14 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
               {isLoginMode ? (
                 <>
                   ¿No tienes cuenta?{' '}
-                  <button type="button" onClick={switchMode} className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#F67927] hover:text-[#e06516]'}`}>
+                  <button data-testid="auth-switch-mode" type="button" onClick={switchMode} className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#F67927] hover:text-[#e06516]'}`}>
                     Crear tu cuenta
                   </button>
                 </>
               ) : (
                 <>
                   ¿Ya tienes cuenta?{' '}
-                  <button type="button" onClick={switchMode} className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#F67927] hover:text-[#e06516]'}`}>
+                  <button data-testid="auth-switch-mode-alt" type="button" onClick={switchMode} className={`font-bold underline underline-offset-2 transition-colors ${isDarkTheme ? 'text-[#F67927] hover:text-[#ff9a52]' : 'text-[#F67927] hover:text-[#e06516]'}`}>
                     Iniciar sesión
                   </button>
                 </>

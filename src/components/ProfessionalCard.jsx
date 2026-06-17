@@ -5,6 +5,7 @@ import { Star } from 'lucide-react';
 export default function ProfessionalCard({ professional, isLoggedIn, onCardClick }) {
   return (
     <Link 
+      data-testid="professional-card"
       to={isLoggedIn ? `/perfil/${professional.slug}` : "#"}
       onClick={(e) => {
         if (!isLoggedIn) {
