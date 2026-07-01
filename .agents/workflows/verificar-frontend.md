@@ -73,3 +73,13 @@ Al realizar reemplazos en lote o editar cabeceras de archivos para añadir impor
 
 Si creas scripts en Python, Node o Bash de utilidad rápida que se ejecuten en la terminal de Windows:
 - **NO utilices emojis ni caracteres Unicode complejos** en los prints o salidas estándar. La terminal de Windows con codificación nativa `cp1252` fallará arrojando `UnicodeEncodeError`. Utiliza texto plano seguro como `[INFO]`, `[SUCCESS]`, `[WARN]` o `[ERROR]`.
+
+## 10. Verificación de Testing (data-testid)
+
+Busca cualquier botón o enlace interactivo nuevo y asegúrate de que tiene `data-testid`. Si tú mismo has modificado o creado componentes recientemente, es **obligatorio** que verifiques esto.
+
+```
+cd c:\Users\jhona\Desktop\spinjob-fronted && npx -y grep -rn "<button" src/ --include="*.jsx" | grep -v "data-testid"
+```
+
+Si encuentras botones interactivos o enlaces sin `data-testid`, debes agregarlos antes de terminar.

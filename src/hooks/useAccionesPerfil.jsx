@@ -5,13 +5,7 @@ import fetchAuth from '../utils/fetchAuth';
 export default function useAccionesPerfil(profesional, onProtectedAction) {
   const [mostrarQR, setMostrarQR] = useState(false);
 
-  const pendingRateKey = `spingamma_pending_rate_${profesional?.slug}`;
   const pendingInteractionKey = `spingamma_pending_interaction_${profesional?.slug}`;
-
-  const [mostrarCalificacion, setMostrarCalificacion] = useState(() => {
-    if (!profesional) return false;
-    return localStorage.getItem(pendingRateKey) === 'true';
-  });
 
   // Nuevo estado para el modal de calificacion y verificacion
   const [mostrarModalCalificando, setMostrarModalCalificando] = useState(false);
@@ -46,8 +40,6 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
       const parsed = JSON.parse(userStr);
       if (!parsed.is_admin && !parsed.is_vendedor) {
         registrarInteraccionBackend(pendingPlatform);
-        localStorage.setItem(pendingRateKey, 'true');
-        setMostrarCalificacion(true);
       }
       localStorage.removeItem(pendingInteractionKey);
     }
@@ -72,6 +64,40 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
   }, [isLoggedIn, profesional]);
 
   const toggleQR = useCallback(() => setMostrarQR(prev => !prev), []);
+
+  const handleDownloadQR = useCallback(async (colorHex = '1E3D51', bgColorHex = 'FFFFFF') => {
+    if (!profesional) return;
+    try {
+      const canvas = document.getElementById('qr-canvas');
+      if (canvas) {
+        const url = canvas.toDataURL("image/png");
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `QR_${profesional.name.replace(/\s+/g, '_')}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+      }
+
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(window.location.href)}&color=${colorHex}&bgcolor=${bgColorHex}`;
+      const response = await fetch(qrUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `QR_${profesional.name.replace(/\s+/g, '_')}.png`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error('Error al descargar el QR', err);
+      window.open(`https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(window.location.href)}&color=${colorHex}&bgcolor=${bgColorHex}`, '_blank');
+    }
+  }, [profesional]);
 
   const handleShare = useCallback(async () => {
     if (!profesional) return;
@@ -149,15 +175,13 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     if (isLoggedIn) {
       if (!isAdmin) {
         await registrarInteraccionBackend(platformName);
-        localStorage.setItem(pendingRateKey, 'true');
-        setMostrarCalificacion(true);
       }
       onProtectedAction(url);
     } else {
       localStorage.setItem(pendingInteractionKey, platformName);
       onProtectedAction(url);
     }
-  }, [onProtectedAction, registrarInteraccionBackend, pendingRateKey, pendingInteractionKey, isLoggedIn, isAdmin]);
+  }, [onProtectedAction, registrarInteraccionBackend, pendingInteractionKey, isLoggedIn, isAdmin]);
 
   const handleCalificarClick = useCallback(async () => {
     if (!profesional) return;
@@ -209,8 +233,6 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
       }
       
       setMostrarModalCalificando(true);
-      localStorage.removeItem(pendingRateKey);
-      setMostrarCalificacion(false);
       
     } catch (err) {
       console.error("Error validando perfiles o reseña", err);
@@ -218,7 +240,7 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     } finally {
       setIsSubmittingReview(false);
     }
-  }, [profesional, userName, userObj, pendingRateKey]);
+  }, [profesional, userName, userObj]);
 
   const handleSubmitReview = useCallback(async ({ rating, description, esEdicion }) => {
     if (!profesional || !userObj) return;
@@ -253,10 +275,6 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     }
   }, [profesional, userObj]);
 
-  const handleCerrarPanelCalificacion = useCallback(() => {
-    localStorage.removeItem(pendingRateKey);
-    setMostrarCalificacion(false);
-  }, [pendingRateKey]);
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem('spingamma_user');
@@ -266,13 +284,12 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
   return {
     mostrarQR,
     toggleQR,
-    mostrarCalificacion,
+    handleDownloadQR,
     isLoggedIn,
     userName,
     handleShare,
     handleLinkClick,
     handleCalificarClick,
-    handleCerrarPanelCalificacion,
     handleLogout,
     // Propiedades nuevas para Modal:
     mostrarModalCalificando,

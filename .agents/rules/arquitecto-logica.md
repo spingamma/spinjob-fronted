@@ -23,7 +23,7 @@ trigger: always_on
 21. **Acciones protegidas:** Clic en redes/WhatsApp sin sesión → forzar `AuthModal`.
 22. **Modales anidados:** Si un modal abre otro modal (ej. CatalogManager → CropModal), usar React Fragment `<>...</>` como wrapper y renderizar el modal hijo FUERA del div backdrop del padre. Esto evita que `onClick={onClose}` del fondo oscuro capture clicks del modal hijo.
 23. **Componentes con estado local en listas:** Si cada ítem de una lista necesita estado propio (ej. "Ver más"), extraer un sub-componente (ej. `ProductCard`) que maneje su propio `useState`. No manejar estado por índice en el padre.
-24. **Testing Hooks (OBLIGATORIO):** SIEMPRE agrega atributos `data-testid="..."` a todos los elementos interactivos (botones, inputs, modales, iconos clickeables) al crearlos o modificarlos para asegurar pruebas E2E estables.
+24. **Testing Hooks (OBLIGATORIO EXTREMO):** 🚨 SIEMPRE agrega atributos `data-testid="..."` a TODOS los elementos interactivos (botones, inputs, `<a>`, modales, iconos clickeables). ES UN ERROR GRAVE olvidar esto al crearlos o modificarlos, ya que rompe las pruebas E2E.
 
 ## Terceros y APIs Nativas
 25. **Scripts:** NUNCA cargar `<script>` manual si ya lo gestiona una librería React (ej. GSI).

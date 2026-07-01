@@ -139,7 +139,7 @@ export default function MetricsDashboard() {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-[#1E3D51]/95 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-xl text-white">
+        <div className="bg-[#1A535C]/95 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-xl text-white">
           <p className="font-bold text-lg mb-2 border-b border-white/10 pb-1">{label}</p>
           {payload.map((entry, index) => (
             <div key={index} className="flex items-center gap-2 text-sm my-1">
@@ -176,18 +176,18 @@ export default function MetricsDashboard() {
         </button>
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <h1 className="text-3xl font-extrabold text-[#1E3D51] flex items-center gap-3">
-            <BarChart2 className="text-[#F67927]" size={32} /> Rendimiento de la Tarjeta
+          <h1 className="text-3xl font-extrabold text-[#1A535C] flex items-center gap-3">
+            <BarChart2 className="text-[#F9842C]" size={32} /> Rendimiento de la Tarjeta
           </h1>
           
           {/* Controles de Filtro */}
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <div className="bg-white px-4 py-2.5 rounded-xl shadow-sm border border-gray-200 flex items-center gap-2 focus-within:ring-2 focus-within:ring-[#1E3D51]/20 transition-all">
-              <Calendar size={18} className="text-[#1E3D51]" />
+            <div className="bg-white px-4 py-2.5 rounded-xl shadow-sm border border-gray-200 flex items-center gap-2 focus-within:ring-2 focus-within:ring-[#1A535C]/20 transition-all">
+              <Calendar size={18} className="text-[#1A535C]" />
               <select 
                 value={timeFilter} 
                 onChange={(e) => setTimeFilter(e.target.value)}
-                className="bg-transparent text-[#1E3D51] font-semibold outline-none cursor-pointer flex-1 text-sm"
+                className="bg-transparent text-[#1A535C] font-semibold outline-none cursor-pointer flex-1 text-sm"
               >
                 <option value="general">General (Todos los tiempos)</option>
                 <option value="1_month">Último mes</option>
@@ -203,14 +203,14 @@ export default function MetricsDashboard() {
                   type="date" 
                   value={customStart}
                   onChange={(e) => setCustomStart(e.target.value)}
-                  className="bg-transparent text-sm text-[#1E3D51] font-medium outline-none w-full"
+                  className="bg-transparent text-sm text-[#1A535C] font-medium outline-none w-full"
                 />
                 <span className="text-gray-300 font-bold">-</span>
                 <input 
                   type="date" 
                   value={customEnd}
                   onChange={(e) => setCustomEnd(e.target.value)}
-                  className="bg-transparent text-sm text-[#1E3D51] font-medium outline-none w-full"
+                  className="bg-transparent text-sm text-[#1A535C] font-medium outline-none w-full"
                 />
               </div>
             )}
@@ -220,24 +220,24 @@ export default function MetricsDashboard() {
         {/* Tarjetas de Resumen Visual */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 flex items-center justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#1E3D51]"></div>
+            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#1A535C]"></div>
             <div>
-              <p className="text-gray-500 font-bold mb-1 text-xs uppercase tracking-widest">Aperturas de Tarjeta</p>
-              <h3 className="text-4xl font-extrabold text-[#1E3D51] tracking-tight">{totalVistas}</h3>
+              <p className="text-[#757778] font-bold mb-1 text-xs uppercase tracking-widest">Aperturas de Tarjeta</p>
+              <h3 className="text-4xl font-extrabold text-[#1A535C] tracking-tight">{totalVistas}</h3>
             </div>
-            <div className="bg-[#1E3D51]/5 p-4 rounded-xl">
-              <Users size={32} className="text-[#1E3D51]" />
+            <div className="bg-[#1A535C]/5 p-4 rounded-xl">
+              <Users size={32} className="text-[#1A535C]" />
             </div>
           </div>
 
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 flex items-center justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#F67927]"></div>
+            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#F9842C]"></div>
             <div>
-              <p className="text-gray-500 font-bold mb-1 text-xs uppercase tracking-widest">Interacciones (Clics)</p>
-              <h3 className="text-4xl font-extrabold text-[#F67927] tracking-tight">{totalClics}</h3>
+              <p className="text-[#757778] font-bold mb-1 text-xs uppercase tracking-widest">Interacciones (Clics)</p>
+              <h3 className="text-4xl font-extrabold text-[#F9842C] tracking-tight">{totalClics}</h3>
             </div>
-            <div className="bg-[#F67927]/5 p-4 rounded-xl">
-              <MousePointerClick size={32} className="text-[#F67927]" />
+            <div className="bg-[#F9842C]/5 p-4 rounded-xl">
+              <MousePointerClick size={32} className="text-[#F9842C]" />
             </div>
           </div>
         </div>
@@ -246,12 +246,12 @@ export default function MetricsDashboard() {
         <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
-              <div className="bg-[#1E3D51]/5 p-3 rounded-xl border border-[#1E3D51]/10">
-                <TrendingUp size={24} className="text-[#1E3D51]" />
+              <div className="bg-[#1A535C]/5 p-3 rounded-xl border border-[#1A535C]/10">
+                <TrendingUp size={24} className="text-[#1A535C]" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-[#1E3D51] tracking-tight">Evolución de Tráfico</h2>
-                <p className="text-sm text-gray-500 font-medium mt-0.5">Métricas de impacto generadas por tu tarjeta</p>
+                <h2 className="text-xl font-bold text-[#1A535C] tracking-tight">Evolución de Tráfico</h2>
+                <p className="text-sm text-[#757778] font-medium mt-0.5">Métricas de impacto generadas por tu tarjeta</p>
               </div>
             </div>
           </div>
@@ -261,12 +261,12 @@ export default function MetricsDashboard() {
               <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorVistas" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#1E3D51" stopOpacity={0.15}/>
-                    <stop offset="95%" stopColor="#1E3D51" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#1A535C" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#1A535C" stopOpacity={0}/>
                   </linearGradient>
                   <linearGradient id="colorClics" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#F67927" stopOpacity={0.15}/>
-                    <stop offset="95%" stopColor="#F67927" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#F9842C" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#F9842C" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -294,21 +294,21 @@ export default function MetricsDashboard() {
                   type="monotone" 
                   dataKey="vistas" 
                   name="Aperturas de Tarjeta" 
-                  stroke="#1E3D51" 
+                  stroke="#1A535C" 
                   strokeWidth={3}
                   fillOpacity={1} 
                   fill="url(#colorVistas)" 
-                  activeDot={{ r: 6, fill: "#1E3D51", stroke: "#fff", strokeWidth: 3 }}
+                  activeDot={{ r: 6, fill: "#1A535C", stroke: "#fff", strokeWidth: 3 }}
                 />
                 <Area 
                   type="monotone" 
                   dataKey="clics" 
                   name="Clics en Redes/Contacto" 
-                  stroke="#F67927" 
+                  stroke="#F9842C" 
                   strokeWidth={3}
                   fillOpacity={1} 
                   fill="url(#colorClics)" 
-                  activeDot={{ r: 6, fill: "#F67927", stroke: "#fff", strokeWidth: 3 }}
+                  activeDot={{ r: 6, fill: "#F9842C", stroke: "#fff", strokeWidth: 3 }}
                 />
               </AreaChart>
             </ResponsiveContainer>

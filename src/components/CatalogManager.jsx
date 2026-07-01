@@ -152,13 +152,13 @@ export default function CatalogManager({ isOpen, onClose, business }) {
 
   return (
     <>
-      <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-[#1E3D51]/60 backdrop-blur-md" onClick={onClose}>
+      <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-[#1A535C]/60 backdrop-blur-md" onClick={onClose}>
         <div
           className="bg-white w-full sm:max-w-2xl sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh] animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-gradient-to-br from-[#1E3D51] to-[#32698F] p-5 relative shrink-0">
+          <div className="bg-gradient-to-br from-[#1A535C] to-[#32698F] p-5 relative shrink-0">
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay"></div>
             <button data-testid="catalog-manager-close-btn" onClick={onClose} aria-label="Cerrar gestor de catálogo" className="absolute top-4 right-4 z-20 text-white/80 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm">
               <X size={20} />
@@ -189,15 +189,15 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                 {/* Form */}
                 {showForm && (
                   <form onSubmit={handleSubmit} className="mb-6 bg-gray-50 rounded-2xl p-4 border border-gray-200 space-y-3">
-                    <h4 className="font-bold text-[#1E3D51] text-sm">{editingId ? 'Editar Producto' : 'Nuevo Producto'}</h4>
+                    <h4 className="font-bold text-[#1A535C] text-sm">{editingId ? 'Editar Producto' : 'Nuevo Producto'}</h4>
 
                     {/* Image upload */}
                     <div className="flex items-center gap-3">
                       <label className="cursor-pointer shrink-0">
                         {formPreview ? (
-                          <img src={formPreview} alt="Preview" className="w-16 h-16 rounded-xl object-cover border-2 border-[#F67927]" />
+                          <img src={formPreview} alt="Preview" className="w-16 h-16 rounded-xl object-cover border-2 border-[#F9842C]" />
                         ) : (
-                          <div className="w-16 h-16 rounded-xl bg-gray-200 flex items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#F67927] transition-colors">
+                          <div className="w-16 h-16 rounded-xl bg-gray-200 flex items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#F9842C] transition-colors">
                             <ImageIcon size={24} className="text-gray-400" />
                           </div>
                         )}
@@ -208,12 +208,12 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                           type="text" value={formName} onChange={(e) => setFormName(e.target.value)}
                           placeholder="Nombre del producto *"
                           required
-                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1E3D51] outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927] transition-all"
+                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all"
                         />
                         <input
                           type="text" value={formPrice} onChange={(e) => setFormPrice(e.target.value)}
                           placeholder="Precio (ej. Bs. 120)"
-                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1E3D51] outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927] transition-all"
+                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all"
                         />
                       </div>
                     </div>
@@ -225,7 +225,7 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                         placeholder="Descripción breve (opcional)"
                         rows="2"
                         maxLength={400}
-                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 pb-7 text-sm text-[#1E3D51] outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927] transition-all resize-none overflow-y-auto"
+                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 pb-7 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all resize-none overflow-y-auto"
                       />
                       <div className="absolute bottom-2 right-3 text-[10px] font-medium text-gray-400 bg-white/80 px-1 backdrop-blur-sm rounded">
                         {formDesc.length}/400
@@ -233,10 +233,10 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                     </div>
 
                     <div className="flex gap-2">
-                      <button data-testid="catalog-manager-cancel-btn" type="button" onClick={resetForm} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors">
+                      <button data-testid="catalog-manager-cancel-btn" type="button" onClick={resetForm} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-[#757778] bg-gray-100 hover:bg-gray-200 transition-colors">
                         Cancelar
                       </button>
-                      <button data-testid="catalog-manager-submit-btn" type="submit" disabled={isSubmitting || !formName.trim()} className={`flex-1 py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all ${isSubmitting || !formName.trim() ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#F67927] hover:bg-[#e06516]'}`}>
+                      <button data-testid="catalog-manager-submit-btn" type="submit" disabled={isSubmitting || !formName.trim()} className={`flex-1 py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all ${isSubmitting || !formName.trim() ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#F9842C] hover:bg-[#e06516]'}`}>
                         {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                         {editingId ? 'Actualizar' : 'Guardar'}
                       </button>
@@ -251,10 +251,10 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                     <button
                       data-testid="catalog-manager-add-btn"
                       onClick={() => { resetForm(); setShowForm(true); }}
-                      className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center aspect-square hover:border-[#F67927] hover:bg-orange-50 transition-all group"
+                      className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center aspect-square hover:border-[#F9842C] hover:bg-orange-50 transition-all group"
                     >
-                      <Plus size={36} className="text-gray-300 group-hover:text-[#F67927] transition-colors mb-1" />
-                      <span className="text-xs font-bold text-gray-400 group-hover:text-[#F67927] transition-colors">Agregar</span>
+                      <Plus size={36} className="text-gray-300 group-hover:text-[#F9842C] transition-colors mb-1" />
+                      <span className="text-xs font-bold text-gray-400 group-hover:text-[#F9842C] transition-colors">Agregar</span>
                     </button>
                   )}
 
@@ -274,11 +274,11 @@ export default function CatalogManager({ isOpen, onClose, business }) {
                   <div className="inline-flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
                     <div className="flex gap-0.5">
                       {Array.from({ length: limit }).map((_, i) => (
-                        <div key={i} className={`w-2 h-2 rounded-full ${i < products.length ? 'bg-[#F67927]' : 'bg-gray-200'}`} />
+                        <div key={i} className={`w-2 h-2 rounded-full ${i < products.length ? 'bg-[#F9842C]' : 'bg-gray-200'}`} />
                       ))}
                     </div>
-                    <span className="text-xs font-bold text-gray-500">{products.length}/{limit} fotos usadas</span>
-                    {!isPremium && <span className="text-xs text-[#F67927] font-medium">(Premium: 20)</span>}
+                    <span className="text-xs font-bold text-[#757778]">{products.length}/{limit} fotos usadas</span>
+                    {!isPremium && <span className="text-xs text-[#F9842C] font-medium">(Premium: 20)</span>}
                   </div>
                 </div>
               </>
@@ -320,14 +320,14 @@ const ManagerProductCard = ({ product, openEditForm, handleDelete, deletingId })
 
         {product.description && (
           <div className="mt-0.5">
-            <p className={`text-xs text-gray-500 whitespace-pre-wrap ${!expanded ? 'line-clamp-2' : ''}`}>
+            <p className={`text-xs text-[#757778] whitespace-pre-wrap ${!expanded ? 'line-clamp-2' : ''}`}>
               {product.description}
             </p>
             {isLong && (
               <button
                 data-testid="catalog-manager-ver-mas-btn"
                 onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-                className="text-[#F67927] font-bold text-[10px] mt-1 hover:underline uppercase"
+                className="text-[#F9842C] font-bold text-[10px] mt-1 hover:underline uppercase"
               >
                 {expanded ? 'Ver menos' : 'Ver más'}
               </button>
@@ -341,7 +341,7 @@ const ManagerProductCard = ({ product, openEditForm, handleDelete, deletingId })
             <button
               data-testid="catalog-manager-edit-btn"
               onClick={(e) => { e.stopPropagation(); openEditForm(product); }}
-              className="p-1.5 text-gray-400 hover:text-[#32698F] bg-gray-50 hover:bg-[#32698F]/10 rounded-lg transition-colors border border-gray-100 hover:border-[#32698F]/20 shadow-sm"
+              className="p-1.5 text-gray-400 hover:text-[#6A431F] bg-gray-50 hover:bg-[#6A431F]/10 rounded-lg transition-colors border border-gray-100 hover:border-[#6A431F]/20 shadow-sm"
               title="Editar producto"
             >
               <Pencil size={14} />

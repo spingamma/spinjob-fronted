@@ -135,11 +135,11 @@ export default function AdminSpecialtiesTab({ API_URL }) {
       {/* Header y Buscador */}
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-xl font-extrabold text-[#1E3D51] flex items-center gap-2">
-            <Bookmark size={24} className="text-[#F67927]" />
+          <h2 className="text-xl font-extrabold text-[#1A535C] flex items-center gap-2">
+            <Bookmark size={24} className="text-[#F9842C]" />
             Catálogo de Especialidades
           </h2>
-          <p className="text-sm text-gray-500 mt-1">Gestiona las categorías y profesiones disponibles.</p>
+          <p className="text-sm text-[#757778] mt-1">Gestiona las categorías y profesiones disponibles.</p>
         </div>
 
         <div className="flex w-full md:w-auto gap-3">
@@ -150,12 +150,12 @@ export default function AdminSpecialtiesTab({ API_URL }) {
               placeholder="Buscar..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927]/30 text-sm font-medium"
+              className="w-full bg-gray-50 border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 text-sm font-medium"
             />
           </div>
           <button 
             onClick={openCreateModal}
-            className="bg-[#1E3D51] hover:bg-[#152b39] text-white px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shrink-0"
+            className="bg-[#1A535C] hover:bg-[#152b39] text-white px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shrink-0"
           >
             <Plus size={18} /> Nuevo
           </button>
@@ -166,7 +166,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         {isLoading ? (
           <div className="py-20 flex justify-center">
-            <Loader2 size={40} className="animate-spin text-[#F67927]" />
+            <Loader2 size={40} className="animate-spin text-[#F9842C]" />
           </div>
         ) : filteredGroups.length === 0 ? (
           <div className="py-20 text-center text-gray-400 font-bold">No se encontraron resultados.</div>
@@ -174,15 +174,15 @@ export default function AdminSpecialtiesTab({ API_URL }) {
           <div className="divide-y divide-gray-100">
             {filteredGroups.map(group => (
               <div key={group.category} className="p-6 hover:bg-gray-50/50 transition-colors">
-                <h3 className="font-black text-lg text-[#1E3D51] mb-4">{group.category}</h3>
+                <h3 className="font-black text-lg text-[#1A535C] mb-4">{group.category}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {group.subcategories.filter(s => s.subcategory.toLowerCase().includes(searchTerm.toLowerCase()) || searchTerm === '').map(sub => (
-                    <div key={sub.id} className="bg-white border border-gray-200 rounded-xl p-3 flex justify-between items-center group/item hover:border-[#F67927]/30 transition-all">
-                      <span className="font-medium text-gray-700 text-sm">{sub.subcategory}</span>
+                    <div key={sub.id} className="bg-white border border-gray-200 rounded-xl p-3 flex justify-between items-center group/item hover:border-[#F9842C]/30 transition-all">
+                      <span className="font-medium text-[#6A431F] text-sm">{sub.subcategory}</span>
                       <div className="flex items-center gap-1 transition-opacity">
                         <button 
                           onClick={() => openEditModal(sub)}
-                          className="p-1.5 text-gray-400 hover:text-[#1E3D51] hover:bg-gray-100 rounded-lg transition-all"
+                          className="p-1.5 text-gray-400 hover:text-[#1A535C] hover:bg-gray-100 rounded-lg transition-all"
                         >
                           <Edit3 size={16} />
                         </button>
@@ -206,7 +206,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className={`p-6 text-white flex justify-between items-center ${modalMode === 'delete' ? 'bg-red-600' : 'bg-[#1E3D51]'}`}>
+            <div className={`p-6 text-white flex justify-between items-center ${modalMode === 'delete' ? 'bg-red-600' : 'bg-[#1A535C]'}`}>
               <h3 className="font-extrabold text-xl">
                 {modalMode === 'create' ? 'Nueva Especialidad' : modalMode === 'edit' ? 'Editar Especialidad' : 'Eliminar Especialidad'}
               </h3>
@@ -230,38 +230,38 @@ export default function AdminSpecialtiesTab({ API_URL }) {
                         )}
                       </p>
                     ) : (
-                      <p className="text-xs mt-1 text-green-700 font-medium">Ningún negocio se verá afectado por esta acción.</p>
+                      <p className="text-xs mt-1 text-[#1A535C] font-medium">Ningún negocio se verá afectado por esta acción.</p>
                     )}
                   </div>
                 </div>
               )}
 
               {modalMode === 'delete' ? (
-                <p className="text-gray-600">
+                <p className="text-[#757778]">
                   ¿Estás seguro de que deseas eliminar permanentemente <strong>{selectedSpec?.category} - {selectedSpec?.subcategory}</strong>? Esta acción no se puede deshacer.
                 </p>
               ) : (
                 <form id="spec-form" onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Categoría Principal</label>
+                    <label className="block text-sm font-bold text-[#757778] mb-1">Categoría Principal</label>
                     <input 
                       type="text" 
                       required
                       value={formData.category}
                       onChange={(e) => setFormData({...formData, category: e.target.value})}
                       placeholder="Ej. Salud, Tecnología..."
-                      className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#F67927] transition-colors font-medium"
+                      className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#F9842C] transition-colors font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Subcategoría / Profesión</label>
+                    <label className="block text-sm font-bold text-[#757778] mb-1">Subcategoría / Profesión</label>
                     <input 
                       type="text" 
                       required
                       value={formData.subcategory}
                       onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
                       placeholder="Ej. Dentista, Programador..."
-                      className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#F67927] transition-colors font-medium"
+                      className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#F9842C] transition-colors font-medium"
                     />
                   </div>
                 </form>
@@ -272,7 +272,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
               <button 
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="flex-1 px-4 py-3 rounded-xl font-bold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
+                className="flex-1 px-4 py-3 rounded-xl font-bold text-[#757778] bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
               >
                 Cancelar
               </button>
@@ -282,7 +282,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
                 onClick={modalMode === 'delete' ? handleSubmit : undefined}
                 disabled={isSubmitting || isLoadingDeps}
                 className={`flex-1 px-4 py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50
-                  ${modalMode === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-[#F67927] hover:bg-[#a1451a]'}
+                  ${modalMode === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-[#F9842C] hover:bg-[#a1451a]'}
                 `}
               >
                 {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : 

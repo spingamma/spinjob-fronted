@@ -4,7 +4,7 @@ import { Building, X, Globe, Link as LinkIcon, Phone, MapPin, User, AlignLeft, B
 export const CampoLectura = ({ label, valor }) => (
   <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
     <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{label}</span>
-    <span className="block text-sm font-medium text-[#1E3D51] break-words whitespace-pre-wrap">
+    <span className="block text-sm font-medium text-[#1A535C] break-words whitespace-pre-wrap">
       {valor ? valor : <span className="text-gray-300 italic">No especificado</span>}
     </span>
   </div>
@@ -14,11 +14,11 @@ export default function BusinessDetailsModal({ business, onClose, actions, banne
   if (!business) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1E3D51]/80 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1A535C]/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-[#F8F9FA] rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
-        
+
         {/* Header con gradiente */}
-        <div className="bg-gradient-to-r from-[#1E3D51] to-[#32698F] p-5 flex justify-between items-center text-white shrink-0">
+        <div className="bg-gradient-to-r from-[#1A535C] to-[#32698F] p-5 flex justify-between items-center text-white shrink-0">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <Building size={20} /> Datos del Formulario
           </h2>
@@ -26,10 +26,10 @@ export default function BusinessDetailsModal({ business, onClose, actions, banne
             <X size={20} />
           </button>
         </div>
-        
+
         {/* Contenido Scrollable */}
         <div className="p-6 overflow-y-auto flex-1 space-y-6">
-          
+
           {/* Banner Opcional (Status o Instrucciones) */}
           {banner && (
             <div className={`p-4 rounded-xl border text-sm ${banner.type === 'error' ? 'bg-red-50 text-red-800 border-red-200' : banner.type === 'warning' ? 'bg-orange-50 text-orange-800 border-orange-200' : 'bg-blue-50 text-blue-800 border-blue-200'}`}>
@@ -52,7 +52,7 @@ export default function BusinessDetailsModal({ business, onClose, actions, banne
 
           {/* Sección 1: Información Principal */}
           <div>
-            <h3 className="font-bold text-[#F67927] border-b border-gray-200 pb-2 mb-3">Información Principal</h3>
+            <h3 className="font-bold text-[#F9842C] border-b border-gray-200 pb-2 mb-3">Información Principal</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <CampoLectura label="Nombre / Marca" valor={business.name} />
               <CampoLectura label="Especialidad" valor={business.title} />
@@ -70,7 +70,7 @@ export default function BusinessDetailsModal({ business, onClose, actions, banne
 
           {/* Sección 2: Contacto */}
           <div>
-            <h3 className="font-bold text-[#F67927] border-b border-gray-200 pb-2 mb-3">Contacto</h3>
+            <h3 className="font-bold text-[#F9842C] border-b border-gray-200 pb-2 mb-3">Contacto</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <CampoLectura label="WhatsApp" valor={(() => { try { const nums = JSON.parse(business.whatsapp_numbers || '[]'); return nums.length > 0 ? nums.join(', ') : (business.whatsapp || null); } catch { return business.whatsapp_numbers || business.whatsapp || null; } })()} />
               <CampoLectura label="Teléfono Fijo" valor={business.phone} />
@@ -82,7 +82,7 @@ export default function BusinessDetailsModal({ business, onClose, actions, banne
 
           {/* Sección 3: Redes Sociales */}
           <div>
-            <h3 className="font-bold text-[#F67927] border-b border-gray-200 pb-2 mb-3">Redes Sociales</h3>
+            <h3 className="font-bold text-[#F9842C] border-b border-gray-200 pb-2 mb-3">Redes Sociales</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <CampoLectura label="Página Web" valor={business.website} />
               <CampoLectura label="Facebook" valor={business.facebook} />

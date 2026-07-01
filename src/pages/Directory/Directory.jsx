@@ -5,6 +5,7 @@ import Header from '../../components/Header';
 import AuthModal from '../../components/AuthModal';
 import BottomNavbar from '../../components/BottomNavbar';
 import DirectoryFilterBar from '../../components/DirectoryFilterBar';
+import CategoryGrid from '../../components/CategoryGrid';
 import ProfessionalCard from '../../components/ProfessionalCard';
 import { useDirectoryFilters } from '../../hooks/useDirectoryFilters';
 import SeoMeta from '../../components/SeoMeta';
@@ -23,22 +24,22 @@ export default function Directory() {
   const [userName, setUserName] = useState(() => {
     const stored = localStorage.getItem('spingamma_user');
     if (stored) {
-      try { return JSON.parse(stored).nombre; } catch(e) { return ''; }
+      try { return JSON.parse(stored).nombre; } catch (e) { return ''; }
     }
     return '';
   });
-  
+
   const [isAdmin, setIsAdmin] = useState(() => {
     const stored = localStorage.getItem('spingamma_user');
     if (stored) {
-      try { 
+      try {
         const parsed = JSON.parse(stored);
-        return parsed.is_admin === true || parsed.is_vendedor === true; 
-      } catch(e) { return false; }
+        return parsed.is_admin === true || parsed.is_vendedor === true;
+      } catch (e) { return false; }
     }
     return false;
   });
-  
+
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingSlug, setPendingSlug] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -56,6 +57,9 @@ export default function Directory() {
 
   const filterHook = useDirectoryFilters(profesionales, metadata);
   const { activeCategory, activeState, searchTerm, activeNeighborhood, activeRating, activeSubcategory } = filterHook.states;
+
+  // Determine if we should show the category grid (home state)
+  const showCategoryGrid = activeCategory === 'Todos' && !searchTerm;
 
   // 1. Fetch Metadata (Dropdown options)
   useEffect(() => {
@@ -77,7 +81,15 @@ export default function Directory() {
   }, []);
 
   // 2. Fetch Directory List based on Backend Filtering
+  // Skip fetch when showing the category grid (no category selected & no search)
   useEffect(() => {
+    // If showing category grid, clear professionals and skip fetch
+    if (showCategoryGrid) {
+      setProfesionales([]);
+      setCargandoLista(false);
+      return;
+    }
+
     let isMounted = true;
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
@@ -94,7 +106,7 @@ export default function Directory() {
 
         const res = await fetch(url);
         if (!res.ok) throw new Error("Error en red");
-        
+
         const data = await res.json();
         if (isMounted) {
           setProfesionales(data);
@@ -108,15 +120,15 @@ export default function Directory() {
         }
       }
     }
-    
+
     // Si no hay slugs en la URL, podemos hacer el fetch en paralelo con la metadata. 
     // Si hay slugs, DEBEMOS esperar a la metadata para mapearlos correctamente.
     if (metadata || (!categoria && !estado)) {
       cargarDirectorio();
     }
-    
+
     return () => { isMounted = false; };
-  }, [metadata, activeCategory, activeState, searchTerm, activeNeighborhood, activeRating, activeSubcategory, categoria, estado]);
+  }, [metadata, activeCategory, activeState, searchTerm, activeNeighborhood, activeRating, activeSubcategory, categoria, estado, showCategoryGrid]);
 
   const cargarMas = async () => {
     setCargandoMas(true);
@@ -133,7 +145,7 @@ export default function Directory() {
 
       const res = await fetch(url);
       const data = await res.json();
-      
+
       setProfesionales(prev => [...prev, ...data]);
       setHayMas(data.length === 10);
     } catch (err) {
@@ -145,10 +157,10 @@ export default function Directory() {
 
   const categoryStr = filterHook.states.activeCategory !== 'Todos' ? filterHook.states.activeCategory : '';
   const stateStr = filterHook.states.activeState !== 'Todas' ? `en ${filterHook.states.activeState}` : '';
-  
+
   let seoTitle = 'Tarjetoso | Directorio de Profesionales y Negocios en Bolivia';
   let seoDesc = 'Encuentra, contacta y califica a los mejores profesionales independientes y negocios locales de Bolivia. Tu directorio de tarjetas digitales profesionales.';
-  
+
   if (categoryStr || stateStr) {
     seoTitle = `${categoryStr || 'Profesionales'} ${stateStr} | Tarjetoso`.trim();
     seoDesc = `Encuentra los mejores ${categoryStr ? categoryStr.toLowerCase() : 'profesionales'} ${stateStr} en Tarjetoso. Tu directorio de confianza.`.trim();
@@ -178,17 +190,22 @@ export default function Directory() {
     setAuthModalOpen(true);
   };
 
+  // --- Category Grid: select a category ---
+  const handleSelectCategory = (categoryName) => {
+    filterHook.actions.handleSelectOption('category', categoryName);
+  };
+
   // --- Intersection Observer for Infinite Scroll ---
   const lastElementRef = useCallback((node) => {
     if (cargandoLista || cargandoMas || !hayMas) return;
     if (observer.current) observer.current.disconnect();
-    
+
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting) {
         cargarMas();
       }
     });
-    
+
     if (node) observer.current.observe(node);
   }, [cargandoLista, cargandoMas, hayMas]);
 
@@ -196,15 +213,15 @@ export default function Directory() {
   const visibleProfessionals = filterHook.computed.filteredProfessionals;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-[#1E3D51] font-sans pb-12 antialiased selection:bg-[#F67927] selection:text-white relative">
-      <SeoMeta 
-        title={categoryStr || stateStr ? `${categoryStr || 'Profesionales'} ${stateStr}` : null} 
-        description={seoDesc} 
-        url={window.location.href} 
+    <div className="min-h-screen bg-[#F8F9FA] text-[#1A535C] font-sans pb-12 antialiased selection:bg-[#F9842C] selection:text-white relative">
+      <SeoMeta
+        title={categoryStr || stateStr ? `${categoryStr || 'Profesionales'} ${stateStr}` : null}
+        description={seoDesc}
+        url={window.location.href}
       />
-      
+
       {/* HEADER GLOBAL */}
-      <Header 
+      <Header
         searchTerm={filterHook.states.searchTerm}
         setSearchTerm={filterHook.setters.setSearchTerm}
         isLoggedIn={isLoggedIn}
@@ -218,8 +235,8 @@ export default function Directory() {
         isMobile={isMobile}
       />
 
-      {/* BARRA DE FILTROS PREMIUM CUSTOM */}
-      <DirectoryFilterBar 
+      {/* FILTER BAR (only shows when category is selected) */}
+      <DirectoryFilterBar
         isMobile={isMobile}
         states={filterHook.states}
         setters={filterHook.setters}
@@ -228,64 +245,97 @@ export default function Directory() {
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-        <h1 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">Directorio de Profesionales</h1>
-        {cargandoLista && profesionales.length === 0 ? (
-          <div className="text-center py-20 flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#F67927] mb-4"></div>
-            <p className="text-[#1E3D51] font-bold text-lg mb-2">Cargando profesionales...</p>
-          </div>
-        ) : (
+
+        {/* HOME STATE: Category Grid */}
+        {showCategoryGrid ? (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-5">
-              {visibleProfessionals.map((prof, index) => {
-                const isLast = index === visibleProfessionals.length - 1;
-                return (
-                  <div key={prof.slug} ref={isLast ? lastElementRef : null}>
-                    <ProfessionalCard 
-                      professional={prof}
-                      isLoggedIn={isLoggedIn}
-                      onCardClick={handleCardClick}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-            {/* Loading Indicator for Infinite Scroll */}
-            {cargandoMas && (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F67927]"></div>
+            {/* Welcome Section */}
+            {isLoggedIn && userName && (
+              <div className="mb-6">
+                <h2 className="text-xl md:text-2xl font-bold text-[#1A535C]">
+                  ¡Hola, {userName}! 👋
+                </h2>
               </div>
             )}
-            
-            {/* Empty State */}
-            {!cargandoLista && visibleProfessionals.length === 0 && (
-              <div className="text-center py-20 text-gray-500">
-                <p>No se encontraron profesionales con estos filtros.</p>
-                <button 
-                  onClick={filterHook.actions.handleCleanFilters}
-                  className="mt-4 text-[#F67927] font-bold hover:underline"
-                >
-                  Limpiar filtros
-                </button>
+
+            {!metadata ? (
+              <div className="text-center py-20 flex flex-col items-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#F9842C] mb-4"></div>
+                <p className="text-[#1A535C] font-bold text-lg mb-2">Cargando categorías...</p>
               </div>
+            ) : (
+              <CategoryGrid
+                categories={metadata.groupedCategories}
+                onSelectCategory={handleSelectCategory}
+              />
+            )}
+          </>
+        ) : (
+          /* FILTERED STATE: Professional Cards */
+          <>
+
+
+            {cargandoLista && profesionales.length === 0 ? (
+              <div className="text-center py-20 flex flex-col items-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#F9842C] mb-4"></div>
+                <p className="text-[#1A535C] font-bold text-lg mb-2">Cargando profesionales...</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-5">
+                  {visibleProfessionals.map((prof, index) => {
+                    const isLast = index === visibleProfessionals.length - 1;
+                    return (
+                      <div key={prof.slug} ref={isLast ? lastElementRef : null}>
+                        <ProfessionalCard
+                          professional={prof}
+                          isLoggedIn={isLoggedIn}
+                          isAdmin={isAdmin}
+                          onCardClick={handleCardClick}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Loading Indicator for Infinite Scroll */}
+                {cargandoMas && (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F9842C]"></div>
+                  </div>
+                )}
+
+                {/* Empty State */}
+                {!cargandoLista && visibleProfessionals.length === 0 && (
+                  <div className="text-center py-20 text-[#757778]">
+                    <p>No se encontraron profesionales con estos filtros.</p>
+                    <button
+                      onClick={filterHook.actions.handleCleanFilters}
+                      className="mt-4 text-[#F9842C] font-bold hover:underline"
+                    >
+                      Limpiar filtros
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
+
         {/* Spacer explícito para el BottomNavbar en móviles */}
         <div className="h-28 md:h-12 w-full shrink-0"></div>
       </main>
 
-      <AuthModal 
-        isOpen={authModalOpen} 
-        onClose={() => setAuthModalOpen(false)} 
-        onSuccess={handleRegisterSuccess} 
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onSuccess={handleRegisterSuccess}
       />
-      
+
       {/* BARRA DE NAVEGACIÓN MOBILE */}
-      <BottomNavbar 
-        isLoggedIn={isLoggedIn} 
-        isAdmin={isAdmin} 
-        onHomeClick={filterHook.actions.handleCleanFilters} 
+      <BottomNavbar
+        isLoggedIn={isLoggedIn}
+        isAdmin={isAdmin}
+        onHomeClick={filterHook.actions.handleCleanFilters}
       />
     </div>
   );

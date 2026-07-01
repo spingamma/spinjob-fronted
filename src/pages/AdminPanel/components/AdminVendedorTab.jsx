@@ -159,21 +159,21 @@ export default function AdminVendedorTab({ API_URL }) {
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4 relative z-20">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h2 className="text-xl font-extrabold text-[#1E3D51] flex items-center gap-2">
-              <Store size={24} className="text-[#F67927]" />
+            <h2 className="text-xl font-extrabold text-[#1A535C] flex items-center gap-2">
+              <Store size={24} className="text-[#F9842C]" />
               Gestión de Ventas
             </h2>
             {isAdmin && (
               <div className="flex bg-gray-100 rounded-xl p-1 mt-3 w-fit">
                 <button
                   onClick={() => setInternalTab('mis_ventas')}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${internalTab === 'mis_ventas' ? 'bg-white text-[#F67927] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${internalTab === 'mis_ventas' ? 'bg-white text-[#F9842C] shadow-sm' : 'text-[#757778] hover:text-[#757778]'}`}
                 >
                   Mis Ventas (Pendientes)
                 </button>
                 <button
                   onClick={() => setInternalTab('general')}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${internalTab === 'general' ? 'bg-white text-[#F67927] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${internalTab === 'general' ? 'bg-white text-[#F9842C] shadow-sm' : 'text-[#757778] hover:text-[#757778]'}`}
                 >
                   General (Todos los Vendedores)
                 </button>
@@ -185,7 +185,7 @@ export default function AdminVendedorTab({ API_URL }) {
             <select 
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="w-full sm:w-auto bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927]/30 text-sm font-bold text-[#1E3D51] appearance-none"
+              className="w-full sm:w-auto bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 text-sm font-bold text-[#1A535C] appearance-none"
             >
               <option value="todos">Todos los Negocios</option>
               <option value="possible">Con Posible Dueño</option>
@@ -200,7 +200,7 @@ export default function AdminVendedorTab({ API_URL }) {
                 placeholder="Buscar negocio..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-white border border-gray-200 py-2.5 pl-11 pr-4 rounded-xl outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927]/10 transition-all font-medium text-[#1E3D51]"
+                className="w-full bg-white border border-gray-200 py-2.5 pl-11 pr-4 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/10 transition-all font-medium text-[#1A535C]"
               />
             </div>
           </div>
@@ -210,7 +210,7 @@ export default function AdminVendedorTab({ API_URL }) {
       {/* LISTADO DE NEGOCIOS */}
       {isLoading ? (
         <div className="py-20 flex justify-center">
-          <Loader2 size={40} className="animate-spin text-[#F67927]" />
+          <Loader2 size={40} className="animate-spin text-[#F9842C]" />
         </div>
       ) : filteredBusinesses.length === 0 ? (
         <div className="bg-white rounded-3xl p-16 text-center border border-gray-100 shadow-sm">
@@ -230,19 +230,19 @@ export default function AdminVendedorTab({ API_URL }) {
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-[#1E3D51] truncate" title={b.name}>{b.name}</h3>
-                  <p className="text-xs text-gray-500 truncate">{b.title || 'Sin título'}</p>
+                  <h3 className="font-bold text-[#1A535C] truncate" title={b.name}>{b.name}</h3>
+                  <p className="text-xs text-[#757778] truncate">{b.title || 'Sin título'}</p>
                 </div>
               </div>
               
               <div className="mt-auto pt-4 border-t border-gray-50">
                 <div className="p-4 bg-gray-50 flex flex-col gap-3">
                   {b.owner_id && !b.is_held_by_seller ? (
-                    <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-xl border border-green-100">
+                    <div className="flex items-center gap-2 text-[#1A535C] bg-[#1A535C]/10 p-3 rounded-xl border border-[#1A535C]/20">
                       <CheckCircle size={18} className="shrink-0" />
                       <div>
                         <p className="text-xs font-bold">Dueño Asignado</p>
-                        <p className="text-[10px] text-green-600/80">Transferido exitosamente.</p>
+                        <p className="text-[10px] text-[#1A535C]/80">Transferido exitosamente.</p>
                       </div>
                     </div>
                   ) : b.is_held_by_seller ? (
@@ -254,11 +254,11 @@ export default function AdminVendedorTab({ API_URL }) {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 text-gray-500 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                    <div className="flex items-center gap-2 text-[#757778] bg-gray-50 p-3 rounded-xl border border-gray-100">
                       <XCircle size={18} className="shrink-0" />
                       <div>
                         <p className="text-xs font-bold">Sin usuario registrado</p>
-                        <p className="text-[10px] text-gray-500/80">Nadie se registró con este WhatsApp.</p>
+                        <p className="text-[10px] text-[#757778]/80">Nadie se registró con este WhatsApp.</p>
                       </div>
                     </div>
                   )}
@@ -266,18 +266,18 @@ export default function AdminVendedorTab({ API_URL }) {
                   {b.is_held_by_seller && b.possible_owners && b.possible_owners.length > 0 && (
                     <div className="flex flex-col gap-3 mt-1">
                       {b.possible_owners.map((po, idx) => (
-                        <div key={idx} className="flex flex-col gap-2 p-3 rounded-xl border border-[#F67927]/20 bg-[#F67927]/5 relative">
-                          <div className="flex items-start gap-2 text-[#F67927]">
+                        <div key={idx} className="flex flex-col gap-2 p-3 rounded-xl border border-[#F9842C]/20 bg-[#F9842C]/5 relative">
+                          <div className="flex items-start gap-2 text-[#F9842C]">
                             <AlertCircle size={18} className="shrink-0 mt-0.5" />
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-bold truncate">Posible Dueño: {po.name}</p>
-                              <p className="text-[10px] text-[#F67927]/80">{po.phone}</p>
+                              <p className="text-[10px] text-[#F9842C]/80">{po.phone}</p>
                             </div>
                           </div>
                           <button 
                             onClick={() => handleTransfer(b, po)}
                             disabled={transfering === b.slug}
-                            className="w-full bg-[#1E3D51] hover:bg-[#152b39] text-white py-1.5 rounded-lg text-[11px] font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                            className="w-full bg-[#1A535C] hover:bg-[#152b39] text-white py-1.5 rounded-lg text-[11px] font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
                           >
                             {transfering === b.slug ? <Loader2 size={12} className="animate-spin" /> : <ArrowRightLeft size={12} />}
                             Transferir a {po.name.split(' ')[0]}
@@ -291,7 +291,7 @@ export default function AdminVendedorTab({ API_URL }) {
                 {(!b.owner_id || b.is_held_by_seller) && (
                   <button
                     onClick={() => { setSelectedBusiness(b); setManualModalOpen(true); }}
-                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors"
+                    className="w-full bg-gray-100 hover:bg-gray-200 text-[#757778] py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors"
                   >
                     <Search size={14} /> Transferir Manualmente
                   </button>
@@ -304,14 +304,14 @@ export default function AdminVendedorTab({ API_URL }) {
 
       {/* MODAL ASIGNACIÓN MANUAL */}
       {manualModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1E3D51]/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1A535C]/50 backdrop-blur-sm">
           <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
               <div>
-                <h3 className="font-extrabold text-[#1E3D51] text-lg">Asignar Dueño Manual</h3>
-                <p className="text-xs text-gray-500">Negocio: {selectedBusiness?.name}</p>
+                <h3 className="font-extrabold text-[#1A535C] text-lg">Asignar Dueño Manual</h3>
+                <p className="text-xs text-[#757778]">Negocio: {selectedBusiness?.name}</p>
               </div>
-              <button onClick={() => setManualModalOpen(false)} className="text-gray-400 hover:text-gray-600 bg-white p-2 rounded-full shadow-sm">
+              <button onClick={() => setManualModalOpen(false)} className="text-gray-400 hover:text-[#757778] bg-white p-2 rounded-full shadow-sm">
                 <XCircle size={24} />
               </button>
             </div>
@@ -324,17 +324,17 @@ export default function AdminVendedorTab({ API_URL }) {
                   placeholder="Buscar usuario por nombre o celular..." 
                   value={manualSearch}
                   onChange={(e) => setManualSearch(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 py-3 pl-11 pr-4 rounded-xl outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927]/10 text-sm font-medium text-[#1E3D51]"
+                  className="w-full bg-gray-50 border border-gray-200 py-3 pl-11 pr-4 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/10 text-sm font-medium text-[#1A535C]"
                 />
-                {isSearchingManual && <Loader2 size={16} className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-[#F67927]" />}
+                {isSearchingManual && <Loader2 size={16} className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-[#F9842C]" />}
               </div>
 
               <div className="space-y-3">
                 {manualUsers.map(u => (
-                  <div key={u.id} className="flex justify-between items-center p-3 rounded-xl border border-gray-100 hover:border-[#F67927]/30 transition-all bg-white hover:shadow-sm">
+                  <div key={u.id} className="flex justify-between items-center p-3 rounded-xl border border-gray-100 hover:border-[#F9842C]/30 transition-all bg-white hover:shadow-sm">
                     <div>
-                      <p className="font-bold text-sm text-[#1E3D51]">{u.name}</p>
-                      <p className="text-xs text-gray-500">{u.phone}</p>
+                      <p className="font-bold text-sm text-[#1A535C]">{u.name}</p>
+                      <p className="text-xs text-[#757778]">{u.phone}</p>
                     </div>
                     <button 
                       onClick={() => handleManualTransfer(u)}

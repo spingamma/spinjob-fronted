@@ -163,7 +163,7 @@ export default function AdminPanel() {
     }
   };
 
-  if (cargando) return <div className="text-center py-20 text-[#1E3D51] font-bold">Verificando credenciales...</div>;
+  if (cargando) return <div className="text-center py-20 text-[#1A535C] font-bold">Verificando credenciales...</div>;
 
   if (error) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -181,7 +181,7 @@ export default function AdminPanel() {
         
         {/* Header Dashboard */}
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-[#1E3D51] to-[#32698F] p-8 flex flex-col sm:flex-row justify-between items-center gap-6">
+          <div className="bg-[#1A535C] p-8 flex flex-col sm:flex-row justify-between items-center gap-6">
             <div className="text-white">
               <h1 className="text-3xl font-extrabold flex items-center gap-3">
                 <ShieldCheck size={32} /> Panel de Control
@@ -203,8 +203,8 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('negocios')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'negocios' 
-                    ? 'bg-white shadow-sm text-[#F67927] ring-1 ring-gray-200/50' 
-                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
+                    ? 'bg-white shadow-sm text-[#F9842C] ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-[#757778] hover:bg-gray-100/50'}
                 `}
               >
                 <Building size={18} />
@@ -220,8 +220,8 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('analytics')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'analytics' 
-                    ? 'bg-white shadow-sm text-[#F67927] ring-1 ring-gray-200/50' 
-                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
+                    ? 'bg-white shadow-sm text-[#F9842C] ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-[#757778] hover:bg-gray-100/50'}
                 `}
               >
                 <BarChart2 size={18} />
@@ -231,8 +231,8 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('especialidades')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'especialidades' 
-                    ? 'bg-white shadow-sm text-[#F67927] ring-1 ring-gray-200/50' 
-                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
+                    ? 'bg-white shadow-sm text-[#F9842C] ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-[#757778] hover:bg-gray-100/50'}
                 `}
               >
                 <Bookmark size={18} />
@@ -242,8 +242,8 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('vendedor')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'vendedor' 
-                    ? 'bg-white shadow-sm text-[#F67927] ring-1 ring-gray-200/50' 
-                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
+                    ? 'bg-white shadow-sm text-[#F9842C] ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-[#757778] hover:bg-gray-100/50'}
                 `}
               >
                 <Store size={18} />
@@ -253,8 +253,8 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('usuarios')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'usuarios' 
-                    ? 'bg-white shadow-sm text-[#F67927] ring-1 ring-gray-200/50' 
-                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50'}
+                    ? 'bg-white shadow-sm text-[#F9842C] ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-[#757778] hover:bg-gray-100/50'}
                 `}
               >
                 <Users size={18} />
@@ -268,7 +268,7 @@ export default function AdminPanel() {
         {activeTab === 'negocios' && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
-              <h2 className="text-xl font-extrabold text-[#1E3D51]">Revisiones Pendientes</h2>
+              <h2 className="text-xl font-extrabold text-[#1A535C]">Revisiones Pendientes</h2>
               
               <div className="relative w-full sm:w-72">
                 <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -277,7 +277,7 @@ export default function AdminPanel() {
                   placeholder="Buscar por nombre o categoría..." 
                   value={searchPendientes}
                   onChange={(e) => setSearchPendientes(e.target.value)}
-                  className="w-full bg-white border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927]/30 transition-all text-sm font-medium"
+                  className="w-full bg-white border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 transition-all text-sm font-medium"
                 />
               </div>
             </div>
@@ -301,9 +301,9 @@ export default function AdminPanel() {
                           />
                         </div>
                         <div>
-                          <h3 className="font-extrabold text-2xl text-[#1E3D51]">{neg.name}</h3>
+                          <h3 className="font-extrabold text-2xl text-[#1A535C]">{neg.name}</h3>
                           <div className="flex flex-wrap items-center gap-2 mt-1">
-                            <span className="bg-[#F67927]/10 text-[#F67927] text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider border border-[#F67927]/20">
+                            <span className="bg-[#F9842C]/10 text-[#F9842C] text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider border border-[#F9842C]/20">
                               {neg.status}
                             </span>
                             {neg.referred_by_name && (
@@ -315,16 +315,16 @@ export default function AdminPanel() {
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
-                        <p className="text-gray-600 font-medium flex items-center gap-2">
-                          <ShieldCheck size={16} className="text-[#32698F]" />
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-gray-500">
+                          <ShieldCheck size={16} className="text-[#1A535C]" />
                           {neg.title} • {neg.category}
-                        </p>
-                        <p className="text-gray-500 flex items-center gap-2">
-                          <Clock size={16} className="text-[#32698F]" />
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-gray-500">
+                          <Clock size={16} className="text-[#1A535C]" />
                           {[neg.neighborhood, neg.state].filter(Boolean).join(', ')}
-                        </p>
+                        </div>
                       </div>
-                      <p className="text-sm text-gray-600 bg-gray-50/80 p-4 rounded-2xl border border-gray-100 leading-relaxed italic">
+                      <p className="text-sm text-[#757778] bg-gray-50/80 p-4 rounded-2xl border border-gray-100 leading-relaxed italic">
                         "{neg.description}"
                       </p>
                     </div>
@@ -332,13 +332,13 @@ export default function AdminPanel() {
                     <div className="flex flex-col sm:flex-row lg:flex-col gap-3 w-full sm:w-auto lg:min-w-[160px] justify-center">
                       <button 
                         onClick={() => handleAccion(neg.slug, 'aprobar')}
-                        className="flex-1 bg-green-500 hover:bg-green-600 text-white py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm hover:-translate-y-0.5"
+                        className="flex-1 bg-[#1A535C] hover:bg-[#133d44] text-white py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm hover:-translate-y-0.5"
                       >
                         <CheckCircle size={20} /> Aprobar
                       </button>
                       <button 
                         onClick={() => setNegocioSeleccionado(neg)}
-                        className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-600 py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all"
+                        className="flex-1 bg-gray-50 hover:bg-gray-100 text-[#757778] py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all"
                       >
                         <FileText size={20} /> Ver Datos
                       </button>
@@ -361,14 +361,14 @@ export default function AdminPanel() {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-6 border-b border-gray-50 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                <h2 className="text-xl font-extrabold text-[#1E3D51]">Gestión de Verificaciones</h2>
+                <h2 className="text-xl font-extrabold text-[#1A535C]">Gestión de Verificaciones</h2>
                 
                 <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3">
                   {/* Select Filtro */}
                   <select 
                     value={userStatusFilter}
                     onChange={(e) => setUserStatusFilter(e.target.value)}
-                    className="bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927]/30 text-sm font-bold text-[#1E3D51]"
+                    className="bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 text-sm font-bold text-[#1A535C]"
                   >
                     <option value="todos">Todos los Estados</option>
                     <option value="pendientes">Pendientes</option>
@@ -383,7 +383,7 @@ export default function AdminPanel() {
                       placeholder="Buscar usuario..." 
                       value={userSearchTerm}
                       onChange={(e) => setUserSearchTerm(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927]/30 transition-all text-sm font-medium"
+                      className="w-full bg-gray-50 border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 transition-all text-sm font-medium"
                     />
                   </div>
                 </div>
@@ -392,30 +392,30 @@ export default function AdminPanel() {
               <div className="p-6">
                 {isLoadingUsers ? (
                   <div className="py-20 flex flex-col items-center">
-                    <Loader2 size={40} className="animate-spin text-[#F67927] mb-2" />
+                    <Loader2 size={40} className="animate-spin text-[#F9842C] mb-2" />
                     <p className="text-gray-400 font-bold">Buscando...</p>
                   </div>
                 ) : users.filter(u => userStatusFilter === 'todos' ? true : (userStatusFilter === 'verificados' ? u.is_verified : !u.is_verified)).length === 0 ? (
-                  <div className="py-20 text-center">
-                    <Users size={48} className="mx-auto mb-4 text-gray-200" />
+                  <div className="text-center py-16">
+                    <CheckCircle size={48} className="mx-auto mb-4 text-[#1A535C] opacity-20" />
                     <p className="text-gray-400 font-bold">No se encontraron usuarios.</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {users.filter(u => userStatusFilter === 'todos' ? true : (userStatusFilter === 'verificados' ? u.is_verified : !u.is_verified)).map(user => (
-                      <div key={user.id} className="group bg-gray-50/50 rounded-2xl border border-gray-100 p-5 hover:border-[#F67927]/30 transition-all hover:bg-white hover:shadow-md flex flex-col h-full">
+                      <div key={user.id} className="group bg-gray-50/50 rounded-2xl border border-gray-100 p-5 hover:border-[#F9842C]/30 transition-all hover:bg-white hover:shadow-md flex flex-col h-full">
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-[#1E3D51] leading-tight truncate" title={user.name}>{user.name}</h3>
-                            <p className="text-xs text-gray-500 truncate mt-0.5">{user.email || 'Sin correo'}</p>
-                            <p className="text-[10px] bg-gray-100 inline-block px-1.5 py-0.5 rounded mt-1 font-mono text-gray-600">{user.phone}</p>
+                            <h3 className="font-bold text-[#1A535C] leading-tight truncate" title={user.name}>{user.name}</h3>
+                            <p className="text-xs text-[#757778] truncate mt-0.5">{user.email || 'Sin correo'}</p>
+                            <p className="text-[10px] bg-gray-100 inline-block px-1.5 py-0.5 rounded mt-1 font-mono text-[#757778]">{user.phone}</p>
                           </div>
                           {user.is_verified ? (
-                            <div className="bg-green-100 text-green-700 p-1.5 rounded-full" title="Verificado">
+                            <div className="bg-[#1A535C]/10 text-[#1A535C] p-1.5 rounded-full" title="Verificado">
                               <CheckCircle size={18} />
                             </div>
                           ) : (
-                            <div className="bg-orange-100 text-[#F67927] p-1.5 rounded-full" title="Pendiente">
+                            <div className="bg-orange-100 text-[#F9842C] p-1.5 rounded-full" title="Pendiente">
                               <Clock size={18} />
                             </div>
                           )}
@@ -426,7 +426,7 @@ export default function AdminPanel() {
                             <button 
                               onClick={() => verifyUserManually(user.phone)}
                               disabled={isVerifyingUser === user.phone}
-                              className="w-full font-bold py-2 rounded-xl bg-[#F67927] hover:bg-[#e06516] text-white text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                              className="w-full font-bold py-2 rounded-xl bg-[#F9842C] hover:bg-[#e06516] text-white text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                             >
                               {isVerifyingUser === user.phone ? <Loader2 size={14} className="animate-spin"/> : <ShieldCheck size={14} />}
                               Verificar Ahora
@@ -477,7 +477,7 @@ export default function AdminPanel() {
                 handleAccion(negocioSeleccionado.slug, 'aprobar');
                 setNegocioSeleccionado(null);
               }}
-              className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
+              className="flex-1 bg-[#1A535C] hover:bg-[#133d44] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
             >
               <CheckCircle size={18} /> Aprobar Ahora
             </button>

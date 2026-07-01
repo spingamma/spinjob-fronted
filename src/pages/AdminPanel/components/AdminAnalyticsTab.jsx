@@ -23,7 +23,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
   const [isLoadingChart, setIsLoadingChart] = useState(false);
   const [isLoadingAll, setIsLoadingAll] = useState(false);
 
-  const COLORS = ['#1E3D51', '#10B981', '#F67927', '#F59E0B', '#6366F1', '#EC4899', '#8B5CF6'];
+  const COLORS = ['#1A535C', '#F9842C', '#6A431F', '#757778', '#1A535C', '#F9842C', '#6A431F'];
 
   // Buscador de Negocios (solo para modo compare)
   useEffect(() => {
@@ -175,7 +175,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
 
           setGlobalStats({ totalVisitas: sumVisitas, totalContactos: sumContactos });
           setChartData(Object.values(groupedData));
-          setNetworkStats([{ business: { name: "Toda la Aplicación", color: '#1E3D51' }, redes: redesCount, visitas: sumVisitas, users: uniqueUsersGlobal }]);
+          setNetworkStats([{ business: { name: "Toda la Aplicación", color: '#1A535C' }, redes: redesCount, visitas: sumVisitas, users: uniqueUsersGlobal }]);
 
         } else if (viewMode === 'compare') {
           // ================= MODO COMPARADOR =================
@@ -308,7 +308,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
       networkStats.forEach(stat => {
         // Título del Negocio
         doc.setFontSize(14);
-        doc.setTextColor(30, 61, 81); // #1E3D51
+        doc.setTextColor(30, 61, 81); // #1A535C
         doc.text(`Negocio: ${stat.business.name}`, 14, finalY);
         finalY += 6;
 
@@ -351,7 +351,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
             body: usersBody,
             startY: finalY,
             styles: { fontSize: 9, cellPadding: 2 },
-            headStyles: { fillColor: [16, 185, 129] } // Verde para usuarios
+            headStyles: { fillColor: [249, 132, 44] } // Naranja (Secundario)
           });
           
           finalY = doc.lastAutoTable.finalY + 15;
@@ -367,8 +367,8 @@ export default function AdminAnalyticsTab({ API_URL }) {
   const getChartAreas = () => {
     if (viewMode === 'global' || (viewMode === 'compare' && selectedBusinesses.length === 1)) {
       return [
-        { dataKey: 'Visitas', name: 'Visitas', color: '#1E3D51' },
-        { dataKey: 'Redes / WhatsApp', name: 'Redes / WhatsApp', color: '#10B981', customName: 'Redes / WhatsApp' }
+        { dataKey: 'Visitas', name: 'Visitas', color: '#1A535C' },
+        { dataKey: 'Redes / WhatsApp', name: 'Redes / WhatsApp', color: '#F9842C', customName: 'Redes / WhatsApp' }
       ];
     } else if (viewMode === 'compare' && selectedBusinesses.length > 1) {
       return selectedBusinesses.map(b => ({
@@ -387,8 +387,8 @@ export default function AdminAnalyticsTab({ API_URL }) {
       
       {/* HEADER DE CONTROLES */}
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-20">
-        <h2 className="text-xl font-extrabold text-[#1E3D51] flex items-center gap-2">
-          <BarChart2 size={24} className="text-[#F67927]" />
+        <h2 className="text-xl font-extrabold text-[#1A535C] flex items-center gap-2">
+          <BarChart2 size={24} className="text-[#F9842C]" />
           Analíticas
         </h2>
 
@@ -397,13 +397,13 @@ export default function AdminAnalyticsTab({ API_URL }) {
           <div className="flex bg-gray-100 p-1 rounded-xl w-full sm:w-auto shrink-0">
             <button
               onClick={() => setViewMode('global')}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'global' ? 'bg-white shadow-sm text-[#1E3D51]' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'global' ? 'bg-white shadow-sm text-[#1A535C]' : 'text-[#757778] hover:text-[#757778]'}`}
             >
               <Globe size={16} /> Aplicación
             </button>
             <button
               onClick={() => setViewMode('compare')}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'compare' ? 'bg-white shadow-sm text-[#1E3D51]' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'compare' ? 'bg-white shadow-sm text-[#1A535C]' : 'text-[#757778] hover:text-[#757778]'}`}
             >
               <Building size={16} /> Negocios
             </button>
@@ -415,7 +415,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
               <select 
                 value={days}
                 onChange={(e) => setDays(e.target.value === 'custom' ? 'custom' : Number(e.target.value))}
-                className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927]/30 text-sm font-bold text-[#1E3D51] appearance-none cursor-pointer min-w-[140px]"
+                className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 text-sm font-bold text-[#1A535C] appearance-none cursor-pointer min-w-[140px]"
               >
                 <option value={7}>Últimos 7 días</option>
                 <option value={14}>Últimos 14 días</option>
@@ -431,14 +431,14 @@ export default function AdminAnalyticsTab({ API_URL }) {
                   type="date" 
                   value={customStartDate} 
                   onChange={e => setCustomStartDate(e.target.value)}
-                  className="bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl outline-none text-sm font-bold text-gray-700 focus:border-[#F67927] w-full sm:w-auto"
+                  className="bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl outline-none text-sm font-bold text-[#757778] focus:border-[#F9842C] w-full sm:w-auto"
                 />
                 <span className="text-gray-400">-</span>
                 <input 
                   type="date" 
                   value={customEndDate} 
                   onChange={e => setCustomEndDate(e.target.value)}
-                  className="bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl outline-none text-sm font-bold text-gray-700 focus:border-[#F67927] w-full sm:w-auto"
+                  className="bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl outline-none text-sm font-bold text-[#757778] focus:border-[#F9842C] w-full sm:w-auto"
                 />
               </div>
             )}
@@ -448,7 +448,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
           {chartData.length > 0 && (
             <button 
               onClick={handleDownloadPDF}
-              className="w-full sm:w-auto bg-[#10B981] hover:bg-[#0d9b6c] text-white font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shrink-0 shadow-sm"
+              className="w-full sm:w-auto bg-[#1A535C] hover:bg-[#133d44] text-white font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shrink-0 shadow-sm"
               title="Descargar Reporte en PDF"
             >
               <Download size={18} />
@@ -461,7 +461,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
 
       {/* TARJETAS RESUMEN (KPIs) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-gradient-to-br from-[#1E3D51] to-[#2A526D] rounded-3xl p-6 shadow-sm border border-[#1E3D51]/10 text-white relative overflow-hidden group">
+        <div className="bg-[#1A535C] rounded-3xl p-6 shadow-sm border border-[#1A535C]/10 text-white relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
           <p className="text-[#E6E2DF] font-bold mb-1 text-xs uppercase tracking-widest relative z-10">Total Visitas a Tarjetas</p>
           <div className="flex items-end gap-3 relative z-10">
@@ -472,11 +472,11 @@ export default function AdminAnalyticsTab({ API_URL }) {
           </div>
         </div>
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#10B981]/5 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
-          <p className="text-gray-500 font-bold mb-1 text-xs uppercase tracking-widest relative z-10">Clics Redes & WhatsApp</p>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#F9842C]/5 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
+          <p className="text-[#757778] font-bold mb-1 text-xs uppercase tracking-widest relative z-10">Clics Redes & WhatsApp</p>
           <div className="flex items-end gap-3 relative z-10">
-            <h3 className="text-4xl font-black text-[#10B981]">{globalStats.totalContactos}</h3>
-            <span className="text-sm bg-gray-50 text-gray-500 border border-gray-100 px-2 py-1 rounded-lg font-medium mb-1">
+            <h3 className="text-4xl font-black text-[#F9842C]">{globalStats.totalContactos}</h3>
+            <span className="text-sm bg-gray-50 text-[#757778] border border-gray-100 px-2 py-1 rounded-lg font-medium mb-1">
               {days === 'custom' ? 'Rango' : `En ${days} días`}
             </span>
           </div>
@@ -487,11 +487,11 @@ export default function AdminAnalyticsTab({ API_URL }) {
       {viewMode === 'compare' && (
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative z-10">
           <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-4">
-            <h3 className="font-bold text-gray-700">Selecciona Negocios a Comparar</h3>
+            <h3 className="font-bold text-[#757778]">Selecciona Negocios a Comparar</h3>
             <button 
               onClick={handleAddAllBusinesses}
               disabled={isLoadingAll}
-              className="text-sm font-bold bg-[#1E3D51] hover:bg-[#152b39] text-white px-4 py-2 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2"
+              className="text-sm font-bold bg-[#1A535C] hover:bg-[#152b39] text-white px-4 py-2 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2"
             >
               {isLoadingAll ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
               Cargar Todos (Top 50)
@@ -507,9 +507,9 @@ export default function AdminAnalyticsTab({ API_URL }) {
               onFocus={() => setShowDropdown(true)}
               onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-gray-200 py-3.5 pl-12 pr-10 rounded-2xl outline-none focus:border-[#F67927] focus:ring-4 focus:ring-[#F67927]/10 transition-all font-medium text-[#1E3D51] shadow-sm"
+              className="w-full bg-white border border-gray-200 py-3.5 pl-12 pr-10 rounded-2xl outline-none focus:border-[#F9842C] focus:ring-4 focus:ring-[#F9842C]/10 transition-all font-medium text-[#1A535C] shadow-sm"
             />
-            {isSearching && <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#F67927] animate-spin" />}
+            {isSearching && <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#F9842C] animate-spin" />}
           </div>
 
           {/* Resultados flotantes */}
@@ -522,10 +522,10 @@ export default function AdminAnalyticsTab({ API_URL }) {
                   className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-50 last:border-0"
                 >
                   <div>
-                    <p className="font-bold text-[#1E3D51]">{b.name}</p>
-                    <p className="text-xs text-gray-500">{b.category}</p>
+                    <p className="font-bold text-[#1A535C]">{b.name}</p>
+                    <p className="text-xs text-[#757778]">{b.category}</p>
                   </div>
-                  <Plus size={18} className="text-[#F67927]" />
+                  <Plus size={18} className="text-[#F9842C]" />
                 </button>
               ))}
             </div>
@@ -554,7 +554,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
 
       {/* GRÁFICA */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 z-0">
-        <h3 className="font-bold text-gray-600 mb-6 flex items-center gap-2">
+        <h3 className="font-bold text-[#757778] mb-6 flex items-center gap-2">
           {viewMode === 'global' ? 'Comportamiento de la App (Visitas vs Contactos)' : 
            (selectedBusinesses.length === 1 ? `Comportamiento de ${selectedBusinesses[0].name}` : 'Comparativa de Interacciones Totales')}
         </h3>
@@ -568,11 +568,11 @@ export default function AdminAnalyticsTab({ API_URL }) {
           </div>
         ) : isLoadingChart ? (
           <div className="py-20 flex justify-center">
-            <Loader2 size={40} className="animate-spin text-[#F67927]" />
+            <Loader2 size={40} className="animate-spin text-[#F9842C]" />
           </div>
         ) : chartData.length > 0 && chartAreas.length > 0 ? (
           <div className="w-full h-[450px] min-h-[450px]">
-            <ResponsiveContainer width="99%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
                 <defs>
                   {chartAreas.map(a => (
@@ -587,7 +587,7 @@ export default function AdminAnalyticsTab({ API_URL }) {
                 <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} dx={-10} allowDecimals={false} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
-                  labelStyle={{ fontWeight: 'bold', color: '#1E3D51', marginBottom: '8px' }}
+                  labelStyle={{ fontWeight: 'bold', color: '#1A535C', marginBottom: '8px' }}
                   formatter={(value, name) => {
                     const area = chartAreas.find(a => a.dataKey === name);
                     return [value, area ? (area.customName || area.name) : name];
@@ -625,12 +625,12 @@ export default function AdminAnalyticsTab({ API_URL }) {
         {/* DESGLOSE DE REDES DEBAJO DE LA GRÁFICA */}
         {chartData.length > 0 && networkStats.length > 0 && (
           <div className="mt-8 pt-8 border-t border-gray-100">
-            <h4 className="font-bold text-[#1E3D51] mb-4">Desglose de Redes y Contactos</h4>
+            <h4 className="font-bold text-[#1A535C] mb-4">Desglose de Redes y Contactos</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {networkStats.map((stat, i) => (
                 <div key={i} className="bg-gray-50 rounded-2xl p-4 border border-gray-100 relative group overflow-hidden">
-                  <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl" style={{ backgroundColor: stat.business.color || '#1E3D51' }}></div>
-                  <p className="font-black text-gray-700 mb-3 truncate pl-2" style={{ color: stat.business.color || '#1E3D51' }}>
+                  <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl" style={{ backgroundColor: stat.business.color || '#1A535C' }}></div>
+                  <p className="font-black text-[#757778] mb-3 truncate pl-2" style={{ color: stat.business.color || '#1A535C' }}>
                     {stat.business.name}
                   </p>
                   {Object.keys(stat.redes).length === 0 ? (
@@ -639,8 +639,8 @@ export default function AdminAnalyticsTab({ API_URL }) {
                     <div className="space-y-2 pl-2">
                       {Object.entries(stat.redes).sort((a,b) => b[1]-a[1]).map(([plataforma, cantidad]) => (
                         <div key={plataforma} className="flex justify-between items-center text-sm">
-                          <span className="font-medium text-gray-600 capitalize">{plataforma}</span>
-                          <span className="font-bold text-[#F67927] bg-[#F67927]/10 px-2 py-0.5 rounded-lg">{cantidad}</span>
+                          <span className="font-medium text-[#757778] capitalize">{plataforma}</span>
+                          <span className="font-bold text-[#F9842C] bg-[#F9842C]/10 px-2 py-0.5 rounded-lg">{cantidad}</span>
                         </div>
                       ))}
                     </div>

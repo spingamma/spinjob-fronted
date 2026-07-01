@@ -4,7 +4,7 @@ import { X, Check } from 'lucide-react';
 import Cropper from 'react-easy-crop';
 import { getCroppedImgFile } from '../utils/cropImage';
 
-export default function CropModal({ isOpen, imageSrc, onClose, onCropDone, cropShape = "round" }) {
+export default function CropModal({ isOpen, imageSrc, onClose, onCropDone, cropShape = "round", aspect = 1 }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
@@ -28,7 +28,7 @@ export default function CropModal({ isOpen, imageSrc, onClose, onCropDone, cropS
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 p-4">
       <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col h-[80vh] max-h-[600px]">
         <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50">
-          <h3 className="font-bold text-[#1E3D51] text-lg">Recortar Imagen</h3>
+          <h3 className="font-bold text-[#1A535C] text-lg">Recortar Imagen</h3>
           <button data-testid="crop-close-btn" onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors p-1">
             <X size={24} />
           </button>
@@ -39,7 +39,7 @@ export default function CropModal({ isOpen, imageSrc, onClose, onCropDone, cropS
             image={imageSrc}
             crop={crop}
             zoom={zoom}
-            aspect={1}
+            aspect={aspect}
             cropShape={cropShape}
             showGrid={false}
             onCropChange={setCrop}
@@ -50,7 +50,7 @@ export default function CropModal({ isOpen, imageSrc, onClose, onCropDone, cropS
 
         <div className="p-5 bg-white space-y-4">
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase block mb-2">Zoom</label>
+            <label className="text-xs font-bold text-[#757778] uppercase block mb-2">Zoom</label>
             <input
               data-testid="crop-zoom-input"
               type="range"
@@ -60,7 +60,7 @@ export default function CropModal({ isOpen, imageSrc, onClose, onCropDone, cropS
               step={0.1}
               aria-labelledby="Zoom"
               onChange={(e) => setZoom(e.target.value)}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#F67927]"
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#F9842C]"
             />
           </div>
           <div className="flex gap-3">
@@ -68,7 +68,7 @@ export default function CropModal({ isOpen, imageSrc, onClose, onCropDone, cropS
               data-testid="crop-cancel-btn"
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 px-4 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+              className="flex-1 py-3 px-4 rounded-xl font-bold text-[#757778] bg-gray-100 hover:bg-gray-200 transition-colors"
             >
               Cancelar
             </button>
@@ -76,7 +76,7 @@ export default function CropModal({ isOpen, imageSrc, onClose, onCropDone, cropS
               data-testid="crop-submit-btn"
               type="button"
               onClick={handleApply}
-              className="flex-1 py-3 px-4 rounded-xl font-bold text-white bg-[#F67927] hover:bg-[#e06516] transition-colors flex items-center justify-center gap-2"
+              className="flex-1 py-3 px-4 rounded-xl font-bold text-white bg-[#F9842C] hover:bg-[#e06516] transition-colors flex items-center justify-center gap-2"
             >
               <Check size={20} />
               Aplicar

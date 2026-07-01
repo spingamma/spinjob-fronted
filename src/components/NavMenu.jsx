@@ -94,7 +94,7 @@ const NavMenu = ({ isLoggedIn, isAdmin, onHomeClick, isMobile = false }) => {
             ${isMobile 
               ? 'p-2 flex-1' 
               : 'p-2 rounded-xl hover:bg-orange-50/50 group relative min-w-[72px]'}
-            ${item.active ? 'text-[#F67927]' : 'text-gray-500 hover:text-[#F67927]'}
+            ${item.active ? 'text-[#F9842C]' : 'text-[#757778] hover:text-[#F9842C]'}
           `}
         >
           <div className={`${item.active ? 'scale-110' : 'group-hover:scale-110'} transition-transform mb-1`}>
@@ -103,7 +103,7 @@ const NavMenu = ({ isLoggedIn, isAdmin, onHomeClick, isMobile = false }) => {
           <span className={`
             font-bold uppercase tracking-tighter text-center
             ${isMobile ? 'text-[10px]' : 'text-[10px]'}
-            ${item.active ? 'text-[#F67927]' : 'text-gray-400 group-hover:text-[#F67927]'}
+            ${item.active ? 'text-[#F9842C]' : 'text-gray-400 group-hover:text-[#F9842C]'}
           `}>
             {item.label}
           </span>

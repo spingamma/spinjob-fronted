@@ -90,13 +90,13 @@ export default function Tarjetero() {
 
   if (cargando) return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#F67927] mb-4"></div>
-      <p className="text-[#1E3D51] font-bold text-lg">Cargando tu tarjetero...</p>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#F9842C] mb-4"></div>
+      <p className="text-[#1A535C] font-bold text-lg">Cargando tu tarjetero...</p>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] font-sans pb-20 antialiased selection:bg-[#F67927] selection:text-white">
+    <div className="min-h-screen bg-[#F8F9FA] font-sans pb-20 antialiased selection:bg-[#F9842C] selection:text-white">
       <Header 
         searchTerm={filterHook.states.searchTerm}
         setSearchTerm={filterHook.setters.setSearchTerm}
@@ -120,18 +120,18 @@ export default function Tarjetero() {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
-        <button onClick={() => navigate(-1)} className="flex items-center text-[#32698F] hover:text-[#F67927] font-bold mb-6 transition-colors group">
+        <button onClick={() => navigate(-1)} className="flex items-center text-[#6A431F] hover:text-[#F9842C] font-bold mb-6 transition-colors group">
           <ArrowLeft size={20} className="mr-2 transition-transform group-hover:-translate-x-1" /> Volver
         </button>
 
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-extrabold text-[#1E3D51] flex items-center gap-3">
-            <div className="p-2.5 bg-[#F67927]/10 rounded-2xl shadow-sm">
-               <BookmarkIcon className="text-[#F67927]" size={28} />
+          <h1 className="text-3xl font-extrabold text-[#1A535C] flex items-center gap-3">
+            <div className="p-2.5 bg-[#F9842C]/10 rounded-2xl shadow-sm">
+               <BookmarkIcon className="text-[#F9842C]" size={28} />
             </div>
             Mi Tarjetero
           </h1>
-          <span className="bg-white px-4 py-2 rounded-full text-xs font-bold text-[#1E3D51] border border-gray-100 shadow-sm">
+          <span className="bg-white px-4 py-2 rounded-full text-xs font-bold text-[#6A431F] border border-gray-100 shadow-sm">
             {filterHook.computed.filteredProfessionals.length} {filterHook.computed.filteredProfessionals.length === 1 ? 'Tarjeta' : 'Tarjetas'}
           </span>
         </div>
@@ -148,11 +148,11 @@ export default function Tarjetero() {
             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
               <BookmarkIcon size={40} className="text-gray-200" />
             </div>
-            <p className="text-[#1E3D51] font-extrabold mb-3 text-xl">Tu tarjetero está vacío</p>
+            <p className="text-[#1A535C] font-extrabold mb-3 text-xl">Tu tarjetero está vacío</p>
             <p className="text-gray-400 text-sm mb-8 max-w-xs mx-auto leading-relaxed">
               Explora el directorio y guarda los perfiles de los profesionales que te interesen para tenerlos siempre a mano.
             </p>
-            <Link to="/" className="bg-[#F67927] hover:bg-[#a3481d] text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-[#F67927]/20">
+            <Link to="/" className="bg-[#F9842C] hover:bg-[#a3481d] text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-[#F9842C]/20">
               <Search size={20} /> Explorar Directorio
             </Link>
           </div>
@@ -161,11 +161,11 @@ export default function Tarjetero() {
             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
               <Search size={32} className="text-gray-200" />
             </div>
-            <p className="text-[#1E3D51] font-bold mb-2">No encontramos coincidencias</p>
+            <p className="text-[#1A535C] font-bold mb-2">No encontramos coincidencias</p>
             <p className="text-gray-400 text-sm mb-6">Intenta con otros filtros o términos de búsqueda.</p>
             <button 
               onClick={filterHook.actions.handleCleanFilters}
-              className="text-[#F67927] font-bold hover:underline"
+              className="text-[#F9842C] font-bold hover:underline"
             >
               Limpiar filtros
             </button>
@@ -173,7 +173,7 @@ export default function Tarjetero() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filterHook.computed.filteredProfessionals.map(neg => (
-              <div key={neg.slug} className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex flex-col gap-4 transition-all hover:shadow-xl hover:border-[#F67927]/20 relative group w-full overflow-hidden">
+              <div key={neg.slug} className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex flex-col gap-4 transition-all hover:shadow-xl hover:border-[#F9842C]/20 relative group w-full overflow-hidden">
                 
                 <div className="flex items-start gap-3 sm:gap-4 w-full">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-gray-50 shrink-0 border border-gray-100">
@@ -188,10 +188,10 @@ export default function Tarjetero() {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-base sm:text-lg text-[#1E3D51] leading-tight line-clamp-1">{neg.name}</h3>
-                    <p className="text-[#F67927] text-xs sm:text-sm font-bold line-clamp-1 mt-0.5">{neg.title}</p>
+                    <h3 className="font-bold text-base sm:text-lg text-[#1A535C] leading-tight line-clamp-1">{neg.name}</h3>
+                    <p className="text-[#F9842C] text-xs sm:text-sm font-bold line-clamp-1 mt-0.5">{neg.title}</p>
                     <div className="flex items-center flex-wrap gap-2 mt-2">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-50 text-gray-500 border border-gray-100 uppercase tracking-tighter truncate max-w-full">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-50 text-[#757778] border border-gray-100 uppercase tracking-tighter truncate max-w-full">
                         {neg.category}
                       </span>
                     </div>
@@ -210,7 +210,7 @@ export default function Tarjetero() {
 
                   <Link 
                     to={`/perfil/${neg.slug}`} 
-                    className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold text-white bg-[#1E3D51] hover:bg-[#32698F] py-2 sm:py-2.5 px-2 rounded-xl transition-all shadow-sm active:scale-95 whitespace-nowrap overflow-hidden text-ellipsis"
+                    className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold text-white bg-[#6A431F] hover:bg-[#523317] py-2 sm:py-2.5 px-2 rounded-xl transition-all shadow-sm active:scale-95 whitespace-nowrap overflow-hidden text-ellipsis"
                   >
                     <Eye size={16} className="shrink-0 sm:w-[18px] sm:h-[18px]" /> <span className="truncate">Ver Perfil</span>
                   </Link>

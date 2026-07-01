@@ -2,8 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { 
   LogOut, DoorOpen, X, Share2, QrCode, Star, ArrowLeft, 
-  Phone, MessageCircle, MapPin, Globe, Facebook, Instagram, Linkedin, Bookmark, ShoppingBag
+  Phone, MessageCircle, MapPin, Globe, Facebook, Instagram, Linkedin, Bookmark, ShoppingBag, Download
 } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
 import ReviewModal from '../components/ReviewModal';
 import ModalVerificacion from '../components/ModalVerificacion';
@@ -12,10 +13,12 @@ import { cleanWhatsappNumber } from '../utils/phone';
 
 export default function PlantillaAbogado({ profesional, volverAtras, onProtectedAction }) {
   const [loaded, setLoaded] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const isLongDescription = profesional?.description?.length > 150;
 
   // 🚀 Lógica de negocio centralizada
   const {
-    mostrarQR, toggleQR, mostrarCalificacion, isLoggedIn, userName,
+    mostrarQR, toggleQR, handleDownloadQR, mostrarCalificacion, isLoggedIn, userName,
     handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion, handleLogout,
     mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview,
     mostrarModalVerificacion, setMostrarModalVerificacion,
@@ -35,6 +38,12 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
     </svg>
   );
 
+  const WhatsappIcon = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+    </svg>
+  );
+
   // Parsear whatsapp_numbers (JSON array) con fallback al campo viejo
   let waNumbers = [];
   try { waNumbers = JSON.parse(profesional?.whatsapp_numbers || '[]'); } catch { waNumbers = []; }
@@ -45,7 +54,7 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
     { id: 'phone', icon: Phone, url: profesional.phone ? `tel:${profesional.phone.replace(/[^0-9]/g, '')}` : null, label: 'Llamar' },
     ...waNumbers.map((num, idx) => {
       const clean = cleanWhatsappNumber(num, profesional?.country || 'Bolivia');
-      return { id: `whatsapp-${idx}`, icon: MessageCircle, url: clean ? `https://wa.me/${clean}` : null, label: waNumbers.length > 1 ? `WhatsApp ${idx + 1}` : 'WhatsApp' };
+      return { id: `whatsapp-${idx}`, icon: WhatsappIcon, url: clean ? `https://wa.me/${clean}` : null, label: waNumbers.length > 1 ? `WhatsApp ${idx + 1}` : 'WhatsApp' };
     }),
     { id: 'ubicacion', icon: MapPin, url: profesional.ubicacion_url, label: 'Ubicación' },
     { id: 'website', icon: Globe, url: profesional.website, label: 'Sitio Web' },
@@ -81,9 +90,10 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
         <div className="w-full flex justify-between items-start mb-6">
           <button 
             onClick={volverAtras}
-            className="w-11 h-11 rounded-full bg-[#1a1a1a] border border-[#E9CE3F]/20 flex items-center justify-center text-gray-300 hover:text-[#E9CE3F] transition-all shadow-md"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#E9CE3F]/20 text-gray-300 hover:text-[#6A431F] transition-all shadow-md font-medium text-sm"
           >
-            <ArrowLeft size={18} />
+            <DoorOpen size={18} />
+            <span>Salir del negocio</span>
           </button>
           
           <div className="flex flex-col items-end gap-3">
@@ -107,18 +117,10 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
             )}
             
             <div className="flex gap-3">
-              <button 
-                onClick={toggleSaveCard}
-                disabled={isSaving}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-sm ${isSaved ? 'bg-[#E9CE3F] text-[#121212] border-transparent' : 'bg-[#1a1a1a] text-gray-300 border border-[#E9CE3F]/20 hover:text-[#E9CE3F]'} ${isSaving ? 'opacity-70' : ''}`}
-                title={isSaved ? "Quitar del tarjetero" : "Guardar en mi tarjetero"}
-              >
-                <Bookmark size={16} className={isSaved ? 'fill-[#121212]' : ''} />
-              </button>
-              <button onClick={toggleQR} className="w-10 h-10 rounded-full bg-[#1a1a1a] border border-[#E9CE3F]/20 flex items-center justify-center text-gray-300 hover:text-[#E9CE3F] shadow-md">
+              <button onClick={toggleQR} className="w-10 h-10 rounded-full bg-[#1a1a1a] border border-[#E9CE3F]/20 flex items-center justify-center text-gray-300 hover:text-[#6A431F] shadow-md">
                 <QrCode size={16} />
               </button>
-              <button onClick={() => handleShare(window.location.href)} className="w-10 h-10 rounded-full bg-[#1a1a1a] border border-[#E9CE3F]/20 flex items-center justify-center text-gray-300 hover:text-[#E9CE3F] shadow-md">
+              <button onClick={() => handleShare(window.location.href)} className="w-10 h-10 rounded-full bg-[#1a1a1a] border border-[#E9CE3F]/20 flex items-center justify-center text-gray-300 hover:text-[#6A431F] shadow-md">
                 <Share2 size={16} />
               </button>
             </div>
@@ -146,8 +148,8 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
           {(profesional.experience_years || profesional.credentials) && (
             <div className="flex flex-wrap justify-center gap-3 mb-6">
               {profesional.experience_years && (
-                <div className="bg-[#1a1a1a] border border-[#E9CE3F]/30 text-gray-300 px-3 py-1.5 rounded-full text-xs font-seasons flex items-center gap-1.5 shadow-sm">
-                  <Star size={12} className="text-[#E9CE3F]" /> {profesional.experience_years} Años de Experiencia
+                <div className="bg-[#1a1a1a] border border-[#F9842C]/30 text-gray-300 px-3 py-1.5 rounded-full text-xs font-seasons flex items-center gap-1.5 shadow-sm">
+                  <Star size={12} className="text-[#F9842C]" /> {profesional.experience_years} Años de Experiencia
                 </div>
               )}
               {profesional.credentials && (
@@ -159,9 +161,19 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
           )}
 
           {profesional.description && (
-            <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-sm mx-auto font-seasons whitespace-pre-line px-2">
-              {profesional.description}
-            </p>
+            <div className="relative">
+              <p className={`text-gray-400 text-sm md:text-base leading-relaxed max-w-sm mx-auto font-seasons whitespace-pre-line px-2 ${!isDescriptionExpanded ? 'line-clamp-3' : ''}`}>
+                {profesional.description}
+              </p>
+              {isLongDescription && (
+                <button 
+                  onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                  className="text-[#E9CE3F] hover:text-white font-seasons font-medium text-sm mt-2 focus:outline-none"
+                >
+                  {isDescriptionExpanded ? 'Ver menos' : 'Ver más'}
+                </button>
+              )}
+            </div>
           )}
         </div>
 
@@ -180,16 +192,27 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
               <span className="text-4xl text-[#E9CE3F] font-seasons font-bold">{profesional.name?.[0]}</span>
             </div>
           )}
+          {/* BOTÓN GUARDAR (Top Right de la imagen) */}
+          <button 
+            onClick={toggleSaveCard}
+            disabled={isSaving}
+            className={`absolute top-0 -right-2 w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-sm z-30 ${isSaved ? 'bg-[#6A431F] text-white border-transparent' : 'bg-[#1a1a1a] text-gray-300 border border-[#E9CE3F]/50 hover:text-[#6A431F] hover:bg-[#222]'}`}
+            title={isSaved ? "Quitar del tarjetero" : "Guardar en mi tarjetero"}
+          >
+            <Bookmark size={18} className={isSaved ? 'fill-white' : ''} />
+          </button>
+          {/*
           {profesional.verified && (
             <div className="absolute bottom-2 right-2 bg-[#E9CE3F] text-[#121212] p-1.5 rounded-full shadow-lg">
               <Star size={14} className="fill-current" />
             </div>
           )}
+          */}
         </div>
 
         {/* Contacto Digital */}
         <div className="w-full max-w-sm">
-          <h3 className="text-center text-xs text-gray-500 uppercase tracking-[0.3em] mb-8 font-semibold flex items-center gap-4 before:content-[''] before:flex-1 before:h-px before:bg-gray-800 after:content-[''] after:flex-1 after:h-px after:bg-gray-800">
+          <h3 className="text-center text-xs text-[#757778] uppercase tracking-[0.3em] mb-8 font-semibold flex items-center gap-4 before:content-[''] before:flex-1 before:h-px before:bg-gray-800 after:content-[''] after:flex-1 after:h-px after:bg-gray-800">
             Contacto Digital
           </h3>
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-8">
@@ -197,6 +220,7 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
               const Icono = link.icon;
               return (
                 <button 
+                  data-testid={`link-${link.id}`}
                   key={link.id}
                   onClick={(e) => handleLinkClick(e, link.label, link.url)} 
                   className="flex flex-col items-center gap-3 group w-[80px]"
@@ -222,8 +246,18 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
           country={profesional.country || 'Bolivia'}
           theme="dark"
         />
-      </div>
+        {/* Botón Calificar */}
+        <div className="mt-8 flex justify-center w-full z-10 relative">
+          <button
+              data-testid="button-calificar"
+              onClick={handleCalificarClick}
+              className="px-8 py-3.5 rounded-full bg-[#F9842C] hover:bg-[#e07323] text-white font-bold text-sm shadow-lg transition-all flex items-center justify-center gap-2 w-full max-w-xs font-seasons"
+          >
+              <Star size={18} className="fill-white text-white" /> Danos tu opinión
+          </button>
+        </div>
 
+      </div>
       {/* Modal QR */}
       {mostrarQR && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/95 backdrop-blur-md" onClick={toggleQR}>
@@ -232,42 +266,40 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
               <X size={18} />
             </button>
             <p className="text-[#E9CE3F] text-xs uppercase tracking-[0.2em] mb-6 font-bold">Código QR</p>
-            <div className="bg-white p-4 rounded-2xl border border-gray-200">
-              <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.href)}&color=121212&bgcolor=FFFFFF`} 
-                alt="Código QR" 
-                className="w-48 h-48 md:w-52 md:h-52 object-contain"
+            <div className="bg-white p-4 rounded-2xl border border-gray-200 flex justify-center items-center">
+              <QRCodeCanvas 
+                id="qr-canvas"
+                value={window.location.href}
+                size={1024}
+                className="w-48 h-48 md:w-52 md:h-52"
+                style={{ width: "100%", height: "100%" }}
+                bgColor={"#ffffff"}
+                fgColor={"#1D565F"}
+                level={"H"}
+                includeMargin={true}
+                imageSettings={{
+                  src: "/paw.png",
+                  height: 256,
+                  width: 256,
+                  excavate: true,
+                }}
               />
             </div>
-          </div>
-        </div>
-      )}
 
-      {/* Panel de Calificación */}
-      {mostrarCalificacion && isLoggedIn && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#1a1a1a]/95 backdrop-blur-md border-t border-[#E9CE3F]/20 z-50">
-          <div className="max-w-xl mx-auto flex items-center justify-between gap-4">
-            <div className="flex-1">
-              <p className="text-sm font-bold text-[#E9CE3F] font-seasons">¿Qué te pareció mi perfil?</p>
-            </div>
-            <button
-              onClick={handleCalificarClick}
-              className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#C2A562] to-[#E9CE3F] text-[#121212] font-bold text-sm shadow-md font-seasons"
+            <button 
+              data-testid="button-descargar-qr"
+              onClick={() => handleDownloadQR('1D565F', 'FFFFFF')}
+              aria-label="Descargar código QR"
+              className="mt-8 w-full bg-[#E9CE3F] hover:bg-[#FFF3A3] text-[#1a1a1a] font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
             >
-              <Star size={16} className="fill-[#121212]" /> Evaluar
-            </button>
-            <button
-              onClick={handleCerrarPanelCalificacion}
-              className="p-2 text-gray-500 hover:text-red-400 bg-[#222] rounded-full transition-colors"
-            >
-              <X size={18} />
+              <Download size={18} /> Descargar QR
             </button>
           </div>
         </div>
       )}
 
       <footer className="w-full text-center pb-6 mt-4">
-          <a href="https://spingamma.github.io/spingamma-landing/" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.25em] font-medium uppercase text-gray-600 hover:text-[#E9CE3F] transition-colors">
+          <a href="https://spingamma.github.io/spingamma-landing/" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.25em] font-medium uppercase text-[#757778] hover:text-[#E9CE3F] transition-colors">
               Tecnología desarrollada por SPINGAMMA
           </a>
       </footer>

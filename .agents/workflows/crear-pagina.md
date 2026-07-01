@@ -30,7 +30,7 @@ export default function NombrePagina() {
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
       {/* Contenido */}
-      {/* OBLIGATORIO: Usar data-testid="ejemplo-btn" en botones, inputs y elementos interactivos */}
+      {/* 🚨🚨🚨 CRÍTICO: TODOS los <button>, <a> e inputs DEBEN tener data-testid="ejemplo-btn" 🚨🚨🚨 */}
     </div>
   );
 }

@@ -192,11 +192,11 @@ export default function CrearNegocio() {
       setIsSubmitting(false);
       return;
     }
-    
+
     // VERIFICACIÓN DE USUARIO (Nuevo Flujo EMAIL)
     const userObj = JSON.parse(localStorage.getItem('spingamma_user') || '{}');
     let isVerifiedStrict = userObj?.is_verified === true || userObj?.is_verified === "true" || userObj?.is_verified === 1;
-    
+
     if (!isVerifiedStrict) {
       // Re-verificar con el backend por seguridad
       try {
@@ -209,13 +209,13 @@ export default function CrearNegocio() {
           if (verifyData.is_verified === true || verifyData.is_verified === "true" || verifyData.is_verified === 1) {
             userObj.is_verified = true;
             localStorage.setItem('spingamma_user', JSON.stringify(userObj));
-            isVerifiedStrict = true; 
+            isVerifiedStrict = true;
           }
         }
       } catch (err) {
         console.error("Error consultando estado de verificación al backend", err);
       }
-      
+
       if (!isVerifiedStrict) {
         setShowVerificationModal(true);
         setIsSubmitting(false);
@@ -267,7 +267,7 @@ export default function CrearNegocio() {
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      const endpoint = isEditMode 
+      const endpoint = isEditMode
         ? `${API_URL}/businesses/${editSlug}/editar`
         : `${API_URL}/businesses/`;
       const method = isEditMode ? 'PUT' : 'POST';
@@ -301,16 +301,16 @@ export default function CrearNegocio() {
         {isEditMode ? (
           <>
             <Check size={64} className="text-green-500 mb-4" />
-            <h2 className="text-2xl font-bold text-[#1E3D51]">¡Información actualizada!</h2>
-            <p className="text-gray-500 mt-2 max-w-md">
+            <h2 className="text-2xl font-bold text-[#1A535C]">¡Información actualizada!</h2>
+            <p className="text-[#757778] mt-2 max-w-md">
               Los cambios se han guardado correctamente. Te estamos redirigiendo...
             </p>
           </>
         ) : (
           <>
-            <Clock size={64} className="text-[#F67927] mb-4" />
-            <h2 className="text-2xl font-bold text-[#1E3D51]">¡Solicitud enviada con éxito!</h2>
-            <p className="text-gray-500 mt-2 max-w-md">
+            <Clock size={64} className="text-[#F9842C] mb-4" />
+            <h2 className="text-2xl font-bold text-[#1A535C]">¡Solicitud enviada con éxito!</h2>
+            <p className="text-[#757778] mt-2 max-w-md">
               Tu negocio ha sido registrado y está en estado <strong>Pendiente de Revisión</strong>.
               Te estamos redirigiendo a tu panel...
             </p>
@@ -321,9 +321,9 @@ export default function CrearNegocio() {
   }
 
   // Clases comunes para inputs para no repetir tanto código
-  const inputClass = "w-full bg-transparent px-3 py-3 outline-none text-[#1E3D51]";
-  const wrapperClass = "flex bg-gray-50 rounded-xl border border-gray-200 focus-within:border-[#F67927] focus-within:ring-1 focus-within:ring-[#F67927] transition-all overflow-hidden";
-  const labelClass = "text-sm font-bold text-[#1E3D51] uppercase tracking-wide mb-1 block";
+  const inputClass = "w-full bg-transparent px-3 py-3 outline-none text-[#1A535C]";
+  const wrapperClass = "flex bg-gray-50 rounded-xl border border-gray-200 focus-within:border-[#F9842C] focus-within:ring-1 focus-within:ring-[#F9842C] transition-all overflow-hidden";
+  const labelClass = "text-sm font-bold text-[#1A535C] uppercase tracking-wide mb-1 block";
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] py-10 px-4 sm:px-6 lg:px-8 font-sans">
@@ -331,7 +331,7 @@ export default function CrearNegocio() {
 
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center text-[#32698F] hover:text-[#F67927] font-medium mb-6 transition-colors"
+          className="flex items-center text-[#32698F] hover:text-[#F9842C] font-medium mb-6 transition-colors"
         >
           <ArrowLeft size={20} className="mr-2" />
           Volver atrás
@@ -339,433 +339,431 @@ export default function CrearNegocio() {
 
         {isLoadingData ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 size={40} className="animate-spin text-[#F67927] mb-3" />
-            <p className="text-gray-500 font-bold">Cargando datos del negocio...</p>
+            <Loader2 size={40} className="animate-spin text-[#F9842C] mb-3" />
+            <p className="text-[#757778] font-bold">Cargando datos del negocio...</p>
           </div>
         ) : (
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-          <div className="bg-gradient-to-r from-[#1E3D51] to-[#32698F] p-8 text-white text-center">
-            <h1 className="text-3xl font-extrabold mb-2">{isEditMode ? 'Editar Información' : 'Registra tu Negocio'}</h1>
-            <p className="text-[#E6E2DF]">{isEditMode ? 'Modifica los datos de tu perfil profesional.' : 'Completa tu perfil para destacar en Tarjetoso.'}</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-8">
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium">
-                {error}
-              </div>
-            )}
-
-            {/* SECCIÓN 1: INFORMACIÓN BÁSICA E IMAGEN */}
-            <div>
-              <h3 className="text-lg font-extrabold text-[#F67927] border-b border-gray-200 pb-2 mb-4">Información Principal</h3>
-
-              <div className="mb-6">
-                <label className={labelClass}>Foto de Perfil / Negocio (Opcional)</label>
-                <div className={`${wrapperClass} flex-col sm:flex-row items-center justify-between p-4 bg-white border-dashed`}>
-                  <div className="flex items-center gap-4 mb-4 sm:mb-0">
-                    {croppedImageFile ? (
-                      <img src={URL.createObjectURL(croppedImageFile)} alt="Preview" className="w-20 h-20 rounded-full object-cover border-2 border-[#1E3D51]" />
-                    ) : currentAvatarUrl ? (
-                      <img src={currentAvatarUrl} alt="Avatar actual" className="w-20 h-20 rounded-full object-cover border-2 border-[#32698F]" />
-                    ) : (
-                      <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center border-2 border-gray-300">
-                        <ImageIcon size={30} className="text-gray-400" />
-                      </div>
-                    )}
-                    <div className="text-sm text-gray-500">
-                      <p className="font-bold text-[#1E3D51]">Sube una foto clara</p>
-                      <p>JPG, PNG (Max 5MB)</p>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="cursor-pointer bg-[#32698F] hover:bg-[#1E3D51] text-white px-5 py-2.5 rounded-xl font-medium transition-colors inline-block text-sm">
-                      Elegir Imagen
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={onFileChange}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                <div>
-                  <label className={labelClass}>Nombre / Marca <span className="text-red-500">*</span></label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-gray-400"><Briefcase size={18} /></div>
-                    <input required name="name" value={formData.name} onChange={handleChange} placeholder="Ej. Dra. Ana López" className={inputClass} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Especialidad / Título <span className="text-red-500">*</span></label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-gray-400"><AlignLeft size={18} /></div>
-                    <input required name="title" value={formData.title} onChange={handleChange} placeholder="Ej. Odontóloga Especialista" className={inputClass} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Categoría <span className="text-red-500">*</span></label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-gray-400"><Building size={18} /></div>
-                    <select required name="category" value={formData.category} onChange={(e) => { handleChange(e); setSelectedSubcategories([]); setOtherSubcategory(''); setShowOtherInput(false); }} className={`${inputClass} bg-transparent cursor-pointer`}>
-                      <option value="">Seleccionar categoría...</option>
-                      {specialtiesData.map(g => (
-                        <option key={g.category} value={g.category}>{g.category}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Sub-especialidades: checkboxes múltiples */}
-                {formData.category && (() => {
-                  const group = specialtiesData.find(g => g.category === formData.category);
-                  const subs = group ? group.subcategories : [];
-                  return (
-                    <div className="md:col-span-2">
-                      <label className={labelClass}>Sub-especialidades (puedes elegir varias)</label>
-                      <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 space-y-2">
-                        <div className="flex flex-wrap gap-2">
-                          {subs.map(s => {
-                            const checked = selectedSubcategories.includes(s.subcategory);
-                            return (
-                              <button
-                                type="button"
-                                key={s.subcategory}
-                                onClick={() => {
-                                  setSelectedSubcategories(prev =>
-                                    checked ? prev.filter(x => x !== s.subcategory) : [...prev, s.subcategory]
-                                  );
-                                }}
-                                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
-                                  checked
-                                    ? 'bg-[#F67927] text-white border-[#F67927] shadow-sm'
-                                    : 'bg-white text-gray-600 border-gray-200 hover:border-[#F67927]/50 hover:text-[#F67927]'
-                                }`}
-                              >
-                                {checked && <Check size={14} className="inline mr-1 -mt-0.5" />}
-                                {s.subcategory}
-                                {s.source === 'user_other' && <span className="ml-1 text-[10px] opacity-60">(otro)</span>}
-                              </button>
-                            );
-                          })}
-                          {/* Botón "Otro" */}
-                          <button
-                            type="button"
-                            onClick={() => setShowOtherInput(!showOtherInput)}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
-                              showOtherInput
-                                ? 'bg-[#1E3D51] text-white border-[#1E3D51]'
-                                : 'bg-white text-[#1E3D51] border-dashed border-gray-300 hover:border-[#1E3D51]'
-                            }`}
-                          >
-                            <Plus size={14} className="inline mr-1 -mt-0.5" /> Otro
-                          </button>
-                        </div>
-                        {showOtherInput && (
-                          <div className="mt-3">
-                            <input
-                              type="text"
-                              value={otherSubcategory}
-                              onChange={(e) => setOtherSubcategory(e.target.value)}
-                              placeholder="Escribe tu sub-especialidad..."
-                              className="w-full bg-white px-3 py-2 rounded-lg border border-gray-200 focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927] outline-none text-sm text-[#1E3D51]"
-                            />
-                            <p className="text-[10px] text-gray-400 mt-1">Se agregará a la lista de sub-especialidades</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                <div>
-                  <label className={labelClass}>País <span className="text-red-500">*</span></label>
-                  <div className={`${wrapperClass} opacity-70`}>
-                    <div className="pl-4 flex items-center text-gray-400"><MapPin size={18} /></div>
-                    <input name="country" value={formData.country} readOnly disabled className={inputClass} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Ciudad / Departamento <span className="text-red-500">*</span></label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-gray-400"><MapPin size={18} /></div>
-                    <select required name="state" value={formData.state} onChange={handleChange} className={`${inputClass} bg-transparent cursor-pointer`}>
-                      <option value="">Seleccionar...</option>
-                      <option value="La Paz">La Paz</option>
-                      <option value="Santa Cruz">Santa Cruz</option>
-                      <option value="Cochabamba">Cochabamba</option>
-                      <option value="Oruro">Oruro</option>
-                      <option value="Potosí">Potosí</option>
-                      <option value="Chuquisaca">Chuquisaca</option>
-                      <option value="Tarija">Tarija</option>
-                      <option value="Beni">Beni</option>
-                      <option value="Pando">Pando</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Zona / Barrio <span className="text-red-500">*</span></label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-gray-400"><Map size={18} /></div>
-                    <input required name="neighborhood" value={formData.neighborhood} onChange={handleChange} placeholder="Ej. Zona Sur" className={inputClass} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Género (Opcional)</label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-gray-400"><User size={18} /></div>
-                    <select name="genero" value={formData.genero} onChange={handleChange} className={`${inputClass} bg-transparent cursor-pointer`}>
-                      <option value="">Seleccionar...</option>
-                      <option value="Masculino">Masculino</option>
-                      <option value="Femenino">Femenino</option>
-                      <option value="Empresa">Empresa / No aplica</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Años de Experiencia <span className="text-[10px] font-normal text-gray-400 lowercase">(opcional)</span></label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-[#F67927]"><Clock size={18} /></div>
-                    <input type="number" min="0" name="experience_years" value={formData.experience_years} onChange={handleChange} placeholder="Ej. 5" className={inputClass} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Matrícula / Credenciales <span className="text-[10px] font-normal text-gray-400 lowercase">(opcional)</span></label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-[#F67927]"><Check size={18} /></div>
-                    <input type="text" name="credentials" value={formData.credentials} onChange={handleChange} placeholder="Ej. Mat. N° 12345" className={inputClass} />
-                  </div>
-                </div>
-
-              </div>
-
-              <div className="mt-5">
-                <label className={labelClass}>Descripción de Servicios <span className="text-red-500">*</span></label>
-                <textarea required name="description" value={formData.description} onChange={handleChange} rows="4" placeholder="¿Qué servicios ofreces? Destaca tu experiencia..." className="w-full bg-gray-50 rounded-xl border border-gray-200 focus:border-[#F67927] focus:ring-1 focus:ring-[#F67927] transition-all px-4 py-3 outline-none text-[#1E3D51] resize-none"></textarea>
-              </div>
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+            <div className="bg-gradient-to-r from-[#1A535C] to-[#32698F] p-8 text-white text-center">
+              <h1 className="text-3xl font-extrabold mb-2">{isEditMode ? 'Editar Información' : 'Registra tu Negocio'}</h1>
+              <p className="text-[#E6E2DF]">{isEditMode ? 'Modifica los datos de tu perfil profesional.' : 'Completa tu perfil para destacar en Tarjetoso.'}</p>
             </div>
 
-            {/* SECCIÓN 2: CONTACTO Y UBICACIÓN */}
-            <div>
-              <h3 className="text-lg font-extrabold text-[#F67927] border-b border-gray-200 pb-2 mb-4">Contacto</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-8">
 
-                <div className="md:col-span-2">
-                  <label className={labelClass}>WhatsApp (máximo 2 números)</label>
-                  <div className="space-y-3">
-                    {whatsappList.map((num, idx) => (
-                      <div key={idx} className="flex gap-2 items-center">
-                        <div className="flex-1">
-                          <PhoneInputWithCountry
-                            value={num}
-                            countryName={formData.country || 'Bolivia'}
-                            onChange={(val) => {
-                              const updated = [...whatsappList];
-                              updated[idx] = val;
-                              setWhatsappList(updated);
-                            }}
-                            placeholder={idx === 0 ? 'WhatsApp principal' : 'WhatsApp secundario'}
-                          />
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium">
+                  {error}
+                </div>
+              )}
+
+              {/* SECCIÓN 1: INFORMACIÓN BÁSICA E IMAGEN */}
+              <div>
+                <h3 className="text-lg font-extrabold text-[#F9842C] border-b border-gray-200 pb-2 mb-4">Información Principal</h3>
+
+                <div className="mb-6">
+                  <label className={labelClass}>Foto de Perfil / Negocio (Opcional)</label>
+                  <div className={`${wrapperClass} flex-col sm:flex-row items-center justify-between p-4 bg-white border-dashed`}>
+                    <div className="flex items-center gap-4 mb-4 sm:mb-0">
+                      {croppedImageFile ? (
+                        <img src={URL.createObjectURL(croppedImageFile)} alt="Preview" className="w-20 h-20 rounded-full object-cover border-2 border-[#1A535C]" />
+                      ) : currentAvatarUrl ? (
+                        <img src={currentAvatarUrl} alt="Avatar actual" className="w-20 h-20 rounded-full object-cover border-2 border-[#32698F]" />
+                      ) : (
+                        <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center border-2 border-gray-300">
+                          <ImageIcon size={30} className="text-gray-400" />
                         </div>
-                        {idx > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => setWhatsappList(whatsappList.filter((_, i) => i !== idx))}
-                            className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                          >
-                            <XIcon size={18} />
-                          </button>
-                        )}
+                      )}
+                      <div className="text-sm text-[#757778]">
+                        <p className="font-bold text-[#1A535C]">Sube una foto clara</p>
+                        <p>JPG, PNG (Max 5MB)</p>
                       </div>
-                    ))}
-                    {whatsappList.length < 2 && (
+                    </div>
+                    <div>
+                      <label className="cursor-pointer bg-[#32698F] hover:bg-[#1A535C] text-white px-5 py-2.5 rounded-xl font-medium transition-colors inline-block text-sm">
+                        Elegir Imagen
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={onFileChange}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                  <div>
+                    <label className={labelClass}>Nombre / Marca <span className="text-red-500">*</span></label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-gray-400"><Briefcase size={18} /></div>
+                      <input required name="name" value={formData.name} onChange={handleChange} placeholder="Ej. Dra. Ana López" className={inputClass} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Especialidad / Título <span className="text-red-500">*</span></label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-gray-400"><AlignLeft size={18} /></div>
+                      <input required name="title" value={formData.title} onChange={handleChange} placeholder="Ej. Odontóloga Especialista" className={inputClass} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Categoría <span className="text-red-500">*</span></label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-gray-400"><Building size={18} /></div>
+                      <select required name="category" value={formData.category} onChange={(e) => { handleChange(e); setSelectedSubcategories([]); setOtherSubcategory(''); setShowOtherInput(false); }} className={`${inputClass} bg-transparent cursor-pointer`}>
+                        <option value="">Seleccionar categoría...</option>
+                        {specialtiesData.map(g => (
+                          <option key={g.category} value={g.category}>{g.category}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Sub-especialidades: checkboxes múltiples */}
+                  {formData.category && (() => {
+                    const group = specialtiesData.find(g => g.category === formData.category);
+                    const subs = group ? group.subcategories : [];
+                    return (
+                      <div className="md:col-span-2">
+                        <label className={labelClass}>Sub-especialidades (puedes elegir varias)</label>
+                        <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 space-y-2">
+                          <div className="flex flex-wrap gap-2">
+                            {subs.map(s => {
+                              const checked = selectedSubcategories.includes(s.subcategory);
+                              return (
+                                <button
+                                  type="button"
+                                  key={s.subcategory}
+                                  onClick={() => {
+                                    setSelectedSubcategories(prev =>
+                                      checked ? prev.filter(x => x !== s.subcategory) : [...prev, s.subcategory]
+                                    );
+                                  }}
+                                  className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${checked
+                                      ? 'bg-[#F9842C] text-white border-[#F9842C] shadow-sm'
+                                      : 'bg-white text-[#757778] border-gray-200 hover:border-[#F9842C]/50 hover:text-[#F9842C]'
+                                    }`}
+                                >
+                                  {checked && <Check size={14} className="inline mr-1 -mt-0.5" />}
+                                  {s.subcategory}
+                                  {s.source === 'user_other' && <span className="ml-1 text-[10px] opacity-60">(otro)</span>}
+                                </button>
+                              );
+                            })}
+                            {/* Botón "Otro" */}
+                            <button
+                              type="button"
+                              onClick={() => setShowOtherInput(!showOtherInput)}
+                              className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${showOtherInput
+                                  ? 'bg-[#1A535C] text-white border-[#1A535C]'
+                                  : 'bg-white text-[#1A535C] border-dashed border-gray-300 hover:border-[#1A535C]'
+                                }`}
+                            >
+                              <Plus size={14} className="inline mr-1 -mt-0.5" /> Otro
+                            </button>
+                          </div>
+                          {showOtherInput && (
+                            <div className="mt-3">
+                              <input
+                                type="text"
+                                value={otherSubcategory}
+                                onChange={(e) => setOtherSubcategory(e.target.value)}
+                                placeholder="Escribe tu sub-especialidad..."
+                                className="w-full bg-white px-3 py-2 rounded-lg border border-gray-200 focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] outline-none text-sm text-[#1A535C]"
+                              />
+                              <p className="text-[10px] text-gray-400 mt-1">Se agregará a la lista de sub-especialidades</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  <div>
+                    <label className={labelClass}>País <span className="text-red-500">*</span></label>
+                    <div className={`${wrapperClass} opacity-70`}>
+                      <div className="pl-4 flex items-center text-gray-400"><MapPin size={18} /></div>
+                      <input name="country" value={formData.country} readOnly disabled className={inputClass} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Ciudad / Departamento <span className="text-red-500">*</span></label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-gray-400"><MapPin size={18} /></div>
+                      <select required name="state" value={formData.state} onChange={handleChange} className={`${inputClass} bg-transparent cursor-pointer`}>
+                        <option value="">Seleccionar...</option>
+                        <option value="La Paz">La Paz</option>
+                        <option value="Santa Cruz">Santa Cruz</option>
+                        <option value="Cochabamba">Cochabamba</option>
+                        <option value="Oruro">Oruro</option>
+                        <option value="Potosí">Potosí</option>
+                        <option value="Chuquisaca">Chuquisaca</option>
+                        <option value="Tarija">Tarija</option>
+                        <option value="Beni">Beni</option>
+                        <option value="Pando">Pando</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Zona / Barrio <span className="text-red-500">*</span></label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-gray-400"><Map size={18} /></div>
+                      <input required name="neighborhood" value={formData.neighborhood} onChange={handleChange} placeholder="Ej. Zona Sur" className={inputClass} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Género (Opcional)</label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-gray-400"><User size={18} /></div>
+                      <select name="genero" value={formData.genero} onChange={handleChange} className={`${inputClass} bg-transparent cursor-pointer`}>
+                        <option value="">Seleccionar...</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                        <option value="Empresa">Empresa / No aplica</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Años de Experiencia <span className="text-[10px] font-normal text-gray-400 lowercase">(opcional)</span></label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-[#F9842C]"><Clock size={18} /></div>
+                      <input type="number" min="0" name="experience_years" value={formData.experience_years} onChange={handleChange} placeholder="Ej. 5" className={inputClass} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Matrícula / Credenciales <span className="text-[10px] font-normal text-gray-400 lowercase">(opcional)</span></label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-[#F9842C]"><Check size={18} /></div>
+                      <input type="text" name="credentials" value={formData.credentials} onChange={handleChange} placeholder="Ej. Mat. N° 12345" className={inputClass} />
+                    </div>
+                  </div>
+
+                </div>
+
+                <div className="mt-5">
+                  <label className={labelClass}>Descripción de Servicios <span className="text-red-500">*</span></label>
+                  <textarea required name="description" value={formData.description} onChange={handleChange} rows="4" placeholder="¿Qué servicios ofreces? Destaca tu experiencia..." className="w-full bg-gray-50 rounded-xl border border-gray-200 focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all px-4 py-3 outline-none text-[#1A535C] resize-none"></textarea>
+                </div>
+              </div>
+
+              {/* SECCIÓN 2: CONTACTO Y UBICACIÓN */}
+              <div>
+                <h3 className="text-lg font-extrabold text-[#F9842C] border-b border-gray-200 pb-2 mb-4">Contacto</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                  <div className="md:col-span-2">
+                    <label className={labelClass}>WhatsApp (máximo 2 números)</label>
+                    <div className="space-y-3">
+                      {whatsappList.map((num, idx) => (
+                        <div key={idx} className="flex gap-2 items-center">
+                          <div className="flex-1">
+                            <PhoneInputWithCountry
+                              value={num}
+                              countryName={formData.country || 'Bolivia'}
+                              onChange={(val) => {
+                                const updated = [...whatsappList];
+                                updated[idx] = val;
+                                setWhatsappList(updated);
+                              }}
+                              placeholder={idx === 0 ? 'WhatsApp principal' : 'WhatsApp secundario'}
+                            />
+                          </div>
+                          {idx > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => setWhatsappList(whatsappList.filter((_, i) => i !== idx))}
+                              className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                            >
+                              <XIcon size={18} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      {whatsappList.length < 2 && (
+                        <button
+                          type="button"
+                          onClick={() => setWhatsappList([...whatsappList, ''])}
+                          className="flex items-center gap-2 text-sm font-bold text-[#F9842C] hover:text-[#1A535C] transition-colors px-2 py-1 rounded-lg hover:bg-orange-50"
+                        >
+                          <Plus size={16} /> Agregar segundo WhatsApp
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Teléfono Fijo / Otro</label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-gray-400"><Phone size={18} /></div>
+                      <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="Ej. 2123456" className={inputClass} />
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <div className="flex justify-between items-end mb-1">
+                      <label className={labelClass}>Link de Google Maps (Ubicación)</label>
                       <button
                         type="button"
-                        onClick={() => setWhatsappList([...whatsappList, ''])}
-                        className="flex items-center gap-2 text-sm font-bold text-[#F67927] hover:text-[#1E3D51] transition-colors px-2 py-1 rounded-lg hover:bg-orange-50"
+                        onClick={handleDetectLocation}
+                        disabled={isDetecting}
+                        className="text-xs font-bold text-[#F9842C] hover:text-[#1A535C] flex items-center gap-1 mb-1 transition-colors px-2 py-1 rounded-lg hover:bg-orange-50"
                       >
-                        <Plus size={16} /> Agregar segundo WhatsApp
+                        {isDetecting ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            Detectando...
+                          </>
+                        ) : (
+                          <>
+                            <MapPin size={14} />
+                            Detectar mi ubicación actual
+                          </>
+                        )}
                       </button>
+                    </div>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-gray-400"><Map size={18} /></div>
+                      <input
+                        type="url"
+                        name="ubicacion_url"
+                        value={formData.ubicacion_url}
+                        onChange={handleChange}
+                        placeholder="https://maps.app.goo.gl/..."
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* SECCIÓN 3: REDES SOCIALES (Opcionales) */}
+              <div>
+                <h3 className="text-lg font-extrabold text-[#F9842C] border-b border-gray-200 pb-2 mb-4">Redes Sociales (Enlaces)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                  <div>
+                    <label className="text-xs font-bold text-[#757778] uppercase block mb-1">Facebook</label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-blue-600"><LinkIcon size={16} /></div>
+                      <input type="url" name="facebook" value={formData.facebook} onChange={handleChange} placeholder="https://facebook.com/..." className={inputClass} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-[#757778] uppercase block mb-1">Instagram</label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-pink-600"><LinkIcon size={16} /></div>
+                      <input type="url" name="instagram" value={formData.instagram} onChange={handleChange} placeholder="https://instagram.com/..." className={inputClass} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-[#757778] uppercase block mb-1">LinkedIn</label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-blue-800"><LinkIcon size={16} /></div>
+                      <input type="url" name="linkedin" value={formData.linkedin} onChange={handleChange} placeholder="https://linkedin.com/in/..." className={inputClass} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-[#757778] uppercase block mb-1">TikTok</label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-black"><LinkIcon size={16} /></div>
+                      <input type="url" name="tiktok" value={formData.tiktok} onChange={handleChange} placeholder="https://tiktok.com/@..." className={inputClass} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-[#757778] uppercase block mb-1">Página Web</label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-[#757778]"><Globe size={16} /></div>
+                      <input type="url" name="website" value={formData.website} onChange={handleChange} placeholder="https://miweb.com" className={inputClass} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-[#757778] uppercase block mb-1">GitHub (Programadores)</label>
+                    <div className={wrapperClass}>
+                      <div className="pl-4 flex items-center text-gray-800"><LinkIcon size={16} /></div>
+                      <input type="url" name="github" value={formData.github} onChange={handleChange} placeholder="https://github.com/..." className={inputClass} />
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* SECCIÓN: CATÁLOGO EXTERNO */}
+                <div className="md:col-span-2">
+                  <label className="text-xs font-bold text-[#757778] uppercase block mb-1">Enlace a Catálogo Externo (Opcional)</label>
+                  <div className={wrapperClass}>
+                    <div className="pl-4 flex items-center text-teal-600"><ShoppingBag size={16} /></div>
+                    <input type="url" name="catalog_url" value={formData.catalog_url} onChange={handleChange} placeholder="https://mitienda.com/catalogo" className={inputClass} />
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1 ml-1">Si tienes un catálogo en otra plataforma, pega el enlace aquí.</p>
+                </div>
+              </div>
+
+              {/* SECCIÓN: CÓDIGO DE VENDEDOR (solo en creación) */}
+              {!isEditMode && (
+                <div>
+                  <h3 className="text-lg font-extrabold text-[#F9842C] border-b border-gray-200 pb-2 mb-4">Código de Vendedor</h3>
+                  <div className="bg-gradient-to-r from-purple-50 to-orange-50 rounded-2xl border border-purple-100 p-5">
+                    <label className={labelClass}>¿Tienes un código de vendedor? <span className="text-[10px] font-normal text-gray-400 lowercase">(opcional)</span></label>
+                    <p className="text-xs text-[#757778] mb-3">Ingresa el código para obtener <strong className="text-[#F9842C]">3 meses de prueba gratis</strong></p>
+                    <div className={`${wrapperClass} ${sellerValidation.status === 'valid' ? 'border-green-400 ring-1 ring-green-400' : sellerValidation.status === 'invalid' ? 'border-red-400 ring-1 ring-red-400' : ''}`}>
+                      <div className="pl-4 flex items-center text-purple-500"><Tag size={18} /></div>
+                      <input
+                        type="text"
+                        value={sellerCode}
+                        onChange={(e) => validateSellerCode(e.target.value)}
+                        placeholder="Ej: wilderneytor"
+                        className={inputClass}
+                      />
+                      <div className="pr-4 flex items-center">
+                        {sellerValidation.status === 'loading' && <Loader2 size={18} className="animate-spin text-gray-400" />}
+                        {sellerValidation.status === 'valid' && <Check size={18} className="text-green-500" />}
+                        {sellerValidation.status === 'invalid' && <XIcon size={18} className="text-red-500" />}
+                      </div>
+                    </div>
+                    {sellerValidation.status === 'valid' && (
+                      <p className="text-xs text-green-600 font-bold mt-2 flex items-center gap-1">
+                        <Check size={14} /> Vendedor: {sellerValidation.name}
+                      </p>
+                    )}
+                    {sellerValidation.status === 'invalid' && (
+                      <p className="text-xs text-red-500 font-bold mt-2">
+                        Código incorrecto. Verifica con tu vendedor.
+                      </p>
                     )}
                   </div>
                 </div>
+              )}
 
-                <div>
-                  <label className={labelClass}>Teléfono Fijo / Otro</label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-gray-400"><Phone size={18} /></div>
-                    <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="Ej. 2123456" className={inputClass} />
-                  </div>
-                </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`w-full font-bold py-4 px-6 rounded-xl text-white transition-all shadow-md flex justify-center items-center gap-2 mt-8 
+                ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#F9842C] hover:bg-[#e06516] hover:-translate-y-1'}`}
+              >
+                {isSubmitting && <Loader2 size={20} className="animate-spin" />}
+                {isSubmitting
+                  ? (isEditMode ? 'Guardando Cambios...' : 'Guardando Perfil...')
+                  : (isEditMode ? 'Guardar Cambios' : 'Enviar para Revisión')
+                }
+              </button>
 
-                <div className="md:col-span-2">
-                  <div className="flex justify-between items-end mb-1">
-                    <label className={labelClass}>Link de Google Maps (Ubicación)</label>
-                    <button
-                      type="button"
-                      onClick={handleDetectLocation}
-                      disabled={isDetecting}
-                      className="text-xs font-bold text-[#F67927] hover:text-[#1E3D51] flex items-center gap-1 mb-1 transition-colors px-2 py-1 rounded-lg hover:bg-orange-50"
-                    >
-                      {isDetecting ? (
-                        <>
-                          <Loader2 size={14} className="animate-spin" />
-                          Detectando...
-                        </>
-                      ) : (
-                        <>
-                          <MapPin size={14} />
-                          Detectar mi ubicación actual
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-gray-400"><Map size={18} /></div>
-                    <input
-                      type="url"
-                      name="ubicacion_url"
-                      value={formData.ubicacion_url}
-                      onChange={handleChange}
-                      placeholder="https://maps.app.goo.gl/..."
-                      className={inputClass}
-                    />
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            {/* SECCIÓN 3: REDES SOCIALES (Opcionales) */}
-            <div>
-              <h3 className="text-lg font-extrabold text-[#F67927] border-b border-gray-200 pb-2 mb-4">Redes Sociales (Enlaces)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Facebook</label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-blue-600"><LinkIcon size={16} /></div>
-                    <input type="url" name="facebook" value={formData.facebook} onChange={handleChange} placeholder="https://facebook.com/..." className={inputClass} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Instagram</label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-pink-600"><LinkIcon size={16} /></div>
-                    <input type="url" name="instagram" value={formData.instagram} onChange={handleChange} placeholder="https://instagram.com/..." className={inputClass} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase block mb-1">LinkedIn</label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-blue-800"><LinkIcon size={16} /></div>
-                    <input type="url" name="linkedin" value={formData.linkedin} onChange={handleChange} placeholder="https://linkedin.com/in/..." className={inputClass} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase block mb-1">TikTok</label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-black"><LinkIcon size={16} /></div>
-                    <input type="url" name="tiktok" value={formData.tiktok} onChange={handleChange} placeholder="https://tiktok.com/@..." className={inputClass} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Página Web</label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-gray-600"><Globe size={16} /></div>
-                    <input type="url" name="website" value={formData.website} onChange={handleChange} placeholder="https://miweb.com" className={inputClass} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase block mb-1">GitHub (Programadores)</label>
-                  <div className={wrapperClass}>
-                    <div className="pl-4 flex items-center text-gray-800"><LinkIcon size={16} /></div>
-                    <input type="url" name="github" value={formData.github} onChange={handleChange} placeholder="https://github.com/..." className={inputClass} />
-                  </div>
-                </div>
-
-              </div>
-
-              {/* SECCIÓN: CATÁLOGO EXTERNO */}
-              <div className="md:col-span-2">
-                <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Enlace a Catálogo Externo (Opcional)</label>
-                <div className={wrapperClass}>
-                  <div className="pl-4 flex items-center text-teal-600"><ShoppingBag size={16} /></div>
-                  <input type="url" name="catalog_url" value={formData.catalog_url} onChange={handleChange} placeholder="https://mitienda.com/catalogo" className={inputClass} />
-                </div>
-                <p className="text-xs text-gray-400 mt-1 ml-1">Si tienes un catálogo en otra plataforma, pega el enlace aquí.</p>
-              </div>
-            </div>
-
-            {/* SECCIÓN: CÓDIGO DE VENDEDOR (solo en creación) */}
-            {!isEditMode && (
-              <div>
-                <h3 className="text-lg font-extrabold text-[#F67927] border-b border-gray-200 pb-2 mb-4">Código de Vendedor</h3>
-                <div className="bg-gradient-to-r from-purple-50 to-orange-50 rounded-2xl border border-purple-100 p-5">
-                  <label className={labelClass}>¿Tienes un código de vendedor? <span className="text-[10px] font-normal text-gray-400 lowercase">(opcional)</span></label>
-                  <p className="text-xs text-gray-500 mb-3">Ingresa el código para obtener <strong className="text-[#F67927]">3 meses de prueba gratis</strong></p>
-                  <div className={`${wrapperClass} ${sellerValidation.status === 'valid' ? 'border-green-400 ring-1 ring-green-400' : sellerValidation.status === 'invalid' ? 'border-red-400 ring-1 ring-red-400' : ''}`}>
-                    <div className="pl-4 flex items-center text-purple-500"><Tag size={18} /></div>
-                    <input
-                      type="text"
-                      value={sellerCode}
-                      onChange={(e) => validateSellerCode(e.target.value)}
-                      placeholder="Ej: wilderneytor"
-                      className={inputClass}
-                    />
-                    <div className="pr-4 flex items-center">
-                      {sellerValidation.status === 'loading' && <Loader2 size={18} className="animate-spin text-gray-400" />}
-                      {sellerValidation.status === 'valid' && <Check size={18} className="text-green-500" />}
-                      {sellerValidation.status === 'invalid' && <XIcon size={18} className="text-red-500" />}
-                    </div>
-                  </div>
-                  {sellerValidation.status === 'valid' && (
-                    <p className="text-xs text-green-600 font-bold mt-2 flex items-center gap-1">
-                      <Check size={14} /> Vendedor: {sellerValidation.name}
-                    </p>
-                  )}
-                  {sellerValidation.status === 'invalid' && (
-                    <p className="text-xs text-red-500 font-bold mt-2">
-                      Código incorrecto. Verifica con tu vendedor.
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`w-full font-bold py-4 px-6 rounded-xl text-white transition-all shadow-md flex justify-center items-center gap-2 mt-8 
-                ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#F67927] hover:bg-[#e06516] hover:-translate-y-1'}`}
-            >
-              {isSubmitting && <Loader2 size={20} className="animate-spin" />}
-              {isSubmitting 
-                ? (isEditMode ? 'Guardando Cambios...' : 'Guardando Perfil...') 
-                : (isEditMode ? 'Guardar Cambios' : 'Enviar para Revisión')
-              }
-            </button>
-
-          </form>
-        </div>
+            </form>
+          </div>
         )}
       </div>
 
@@ -777,12 +775,14 @@ export default function CrearNegocio() {
           setCroppedImageFile(file);
           setShowCropModal(false);
         }}
+        cropShape="rect"
+        aspect={16 / 9}
       />
 
       {/* Modal de Verificación por Email */}
-      <ModalVerificacion 
-        isOpen={showVerificationModal} 
-        onClose={() => setShowVerificationModal(false)} 
+      <ModalVerificacion
+        isOpen={showVerificationModal}
+        onClose={() => setShowVerificationModal(false)}
         onSuccess={() => {
           setShowVerificationModal(false);
           // Auto-continuar si desea, pero por seguridad y UX dejamos que presione enviar de nuevo

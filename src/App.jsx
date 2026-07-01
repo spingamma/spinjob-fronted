@@ -1,5 +1,5 @@
 // Archivo: src/App.jsx
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ReloadPrompt from './components/ReloadPrompt';
 
@@ -13,15 +13,36 @@ const BusinessCardHolder = lazy(() => import('./pages/BusinessCardHolder/Busines
 const MetricsDashboard = lazy(() => import('./pages/MetricsDashboard/MetricsDashboard'));
 
 function App() {
+  // Dismiss the HTML splash screen once React mounts
+  useEffect(() => {
+    const splash = document.getElementById('splash-screen');
+    if (splash) {
+      splash.classList.add('fade-out');
+      setTimeout(() => splash.remove(), 500);
+    }
+  }, []);
+
   return (
     <>
     <Suspense fallback={
       <div
-        className="min-h-screen flex items-center justify-center bg-[#F8F9FA]"
+        className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#1D565F]"
         role="status"
         aria-label="Cargando aplicación..."
       >
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F67927]"></div>
+        <img
+          src="/icon-512.png"
+          alt="Tarjetoso"
+          className="w-[120px] h-[120px] rounded-3xl animate-pulse"
+        />
+        <span className="mt-5 text-white text-[22px] font-bold tracking-wide">
+          Tarjetoso
+        </span>
+        <div className="mt-7 flex gap-2">
+          <span className="w-2 h-2 rounded-full bg-white/40 animate-bounce [animation-delay:0ms]"></span>
+          <span className="w-2 h-2 rounded-full bg-white/40 animate-bounce [animation-delay:200ms]"></span>
+          <span className="w-2 h-2 rounded-full bg-white/40 animate-bounce [animation-delay:400ms]"></span>
+        </div>
       </div>
     }>
       <Routes>

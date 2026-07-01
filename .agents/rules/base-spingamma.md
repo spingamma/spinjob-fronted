@@ -109,3 +109,13 @@ Tienes acceso al backend en `c:\Users\jhona\Desktop\spinjob-backend`. Si un camb
 # 📦 FORMATO DE ENTREGA
 - Comienza CADA bloque con: `// Archivo: src/ruta/Nombre.jsx`.
 - PROHIBIDO `// ... resto del código`. Entrega archivos completos.
+
+---
+
+# 🛡️ PREVENCIÓN DE ERRORES DE EDICIÓN Y SINTAXIS (CRÍTICO)
+
+1. **Verificar el contexto antes de reemplazar:** Cuando utilices `replace_file_content` o `multi_replace_file_content` para mover o eliminar bloques de código que terminan en etiquetas de cierre genéricas (ej. `</div>`, `)}`, `</>`), **OBLIGATORIAMENTE** debes hacer un `view_file` de unas 20-30 líneas hacia arriba para comprender exactamente qué bloque JSX estás cerrando.
+2. **Evitar coincidir cierres genéricos ciegamente:** Es un error común incluir múltiples `</div>` en el `TargetContent` basándose solo en un `grep_search`. Si borras o te olvidas de reponer un `</div>` que correspondía a un div contenedor superior, romperás el árbol de React (Error común de Vite/Oxc: `Expected , or ) but found {` o `Unexpected token`).
+3. **JSX y Renderizado Condicional:** Si vas a agregar un elemento (ej. un `<button>`) cerca de un bloque condicional como `{condicion && (<div.../>)}`, asegúrate de insertarlo DESPUÉS del `)}` o ANTES de la apertura `{condicion...`. Nunca lo insertes dentro de los paréntesis sin un wrapper (Fragment `<>...</>`).
+4. **Reposición exacta:** Si tu `TargetContent` abarca cierres que no deseas eliminar, asegúrate de que el `ReplacementContent` los incluya nuevamente exactamente como estaban.
+5. **Testing e Interacciones (CRÍTICO Y OBLIGATORIO):** 🚨 JAMÁS agregues un nuevo botón (`<button>`), enlace (`<a>`) u otro elemento interactivo sin incluirle su respectivo atributo `data-testid="nombre-descriptivo"`. Esta es la regla más olvidada, pero es VITAL para las pruebas E2E. Revisa tus propios cambios: si creas un elemento clickeable sin `data-testid`, ES UN ERROR GRAVE.

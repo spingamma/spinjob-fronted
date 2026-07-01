@@ -68,13 +68,13 @@ const Header = ({
             <div className="w-10 h-10 bg-[#1D565D] rounded-xl flex items-center justify-center shadow-md overflow-hidden p-1.5 border border-[#1D565D]">
               <img src="/icon-192.png" alt="Tarjetoso Logo" className="w-full h-full object-contain" />
             </div>
-            <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-[#1E3D51] uppercase hidden md:block ml-3">TARJETOSO</span>
+            <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-[#1A535C] uppercase hidden md:block ml-3">TARJETOSO</span>
           </div>
 
           {(!isStandalone && (deferredPrompt || isIOS)) && (
             <button
               onClick={handleInstallClick}
-              className="flex items-center justify-center bg-[#F67927] hover:bg-[#e06516] text-white rounded-xl shadow-sm transition-all w-10 h-10 shrink-0 ml-2"
+              className="flex items-center justify-center bg-[#F9842C] hover:bg-[#e06516] text-white rounded-xl shadow-sm transition-all w-10 h-10 shrink-0 ml-2"
               title="Descargar App"
             >
               <Download size={18} />
@@ -84,7 +84,7 @@ const Header = ({
         
         {/* BUSCADOR Y NAV */}
         <div className="flex-1 max-w-4xl px-1 sm:px-0 flex items-center justify-end md:justify-center gap-3 md:gap-8">
-          <div className="flex-1 max-w-2xl flex items-center bg-gray-50 border border-gray-200 rounded-full shadow-inner py-1.5 px-4 focus-within:ring-2 focus-within:ring-[#F67927] transition-all gap-1 sm:gap-2">
+          <div className="flex-1 max-w-2xl flex items-center bg-gray-50 border border-gray-200 rounded-full shadow-inner py-1.5 px-4 focus-within:ring-2 focus-within:ring-[#F9842C] transition-all gap-1 sm:gap-2">
             <Search size={16} className="text-[#32698F] flex-shrink-0" />
             <input 
               data-testid="search-input"
@@ -93,7 +93,7 @@ const Header = ({
               placeholder="Buscar profesional..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)} 
-              className="w-full bg-transparent text-[#1E3D51] placeholder-gray-400 outline-none text-sm sm:text-base" 
+              className="w-full bg-transparent text-[#1A535C] placeholder-gray-400 outline-none text-sm sm:text-base" 
             />
           </div>
 
@@ -126,8 +126,8 @@ const Header = ({
                       {userName ? userName.charAt(0).toUpperCase() : 'U'}
                     </span>
                   </div>
-                  <span className="text-sm text-gray-600 hidden lg:block mr-1 truncate max-w-[100px]">
-                    Hola, <strong className="text-[#1E3D51] font-semibold">{userName.split(' ')[0]}</strong>
+                  <span className="text-sm text-[#757778] hidden lg:block mr-1 truncate max-w-[100px]">
+                    Hola, <strong className="text-[#1A535C] font-semibold">{userName.split(' ')[0]}</strong>
                   </span>
                   <ChevronDown size={16} className={`text-gray-400 transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -137,7 +137,7 @@ const Header = ({
                     <div className="p-2">
                       <button 
                         onClick={() => { handleLogout(); setIsUserMenuOpen(false); }} 
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-50 hover:text-gray-700 rounded-xl transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-[#757778] hover:bg-gray-50 hover:text-[#757778] rounded-xl transition-colors"
                       >
                         <LogOut size={18} /> Cerrar sesión
                       </button>

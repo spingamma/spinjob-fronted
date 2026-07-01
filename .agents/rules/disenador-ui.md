@@ -12,7 +12,7 @@ trigger: always_on
 1. **Reutilización:** Elementos visuales compartidos → `src/components/`.
 2. **Renderizado seguro:** Proteger con `&&` o `?.`.
 3. **Imágenes:** SIEMPRE `onError` con fallback a `ui-avatars.com`.
-4. **Testing Hooks (OBLIGATORIO):** SIEMPRE agrega atributos `data-testid="..."` a todos los elementos interactivos (botones, inputs, modales, iconos clickeables) para que las pruebas E2E no dependan de textos frágiles o selectores de clase.
+4. **Testing Hooks (OBLIGATORIO EXTREMO):** 🚨 SIEMPRE agrega atributos `data-testid="..."` a TODOS los elementos interactivos (botones, inputs, `<a>`, modales, iconos clickeables). ES UN ERROR GRAVE olvidar esto, ya que las pruebas E2E no deben depender de textos frágiles o selectores de clase.
 
 ## Formularios
 4. **Validación Regex:** Nombres `/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/`, celulares 8 dígitos (Bolivia).
