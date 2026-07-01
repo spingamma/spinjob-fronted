@@ -142,24 +142,31 @@ export default function ProfileHero({
             <div className="text-left flex-1">
               {isEditing ? (
                 <>
-                  <input 
-                    name="name"
-                    value={editFormData.name}
-                    onChange={handleEditChange}
-                    className="w-full text-3xl font-extrabold text-[#1A535C] leading-tight mb-1 bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded px-2 outline-none transition-all"
-                    placeholder="Nombre del Profesional / Negocio"
-                  />
-                  <input 
-                    name="title"
-                    value={editFormData.title}
-                    onChange={handleEditChange}
-                    className="w-full text-[#F9842C] text-sm font-bold uppercase tracking-widest bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded px-2 mt-1 outline-none transition-all"
-                    placeholder="Título o Especialidad"
-                  />
+                  <div className="flex items-center gap-1 mb-1 w-full relative">
+                    <input 
+                      name="name"
+                      value={editFormData.name}
+                      onChange={handleEditChange}
+                      className="w-full text-3xl font-extrabold text-[#1A535C] leading-tight bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded px-2 outline-none transition-all pr-6"
+                      placeholder="Nombre del Profesional / Negocio"
+                    />
+                    <span className="absolute right-2 text-red-500 font-bold text-xl" title="Campo obligatorio">*</span>
+                  </div>
+                  <div className="flex items-center gap-1 mt-1 w-full relative">
+                    <input 
+                      name="title"
+                      value={editFormData.title}
+                      onChange={handleEditChange}
+                      className="w-full text-[#F9842C] text-sm font-bold uppercase tracking-widest bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded px-2 outline-none transition-all pr-6"
+                      placeholder="Título o Especialidad"
+                    />
+                    <span className="absolute right-2 text-red-500 font-bold text-lg" title="Campo obligatorio">*</span>
+                  </div>
                   
                   {/* Edición de Categoría y Código de Vendedor */}
                   <div className="mt-3 flex flex-col sm:flex-row gap-2">
-                    <div className="flex-1">
+                    <div className="flex-1 flex flex-col">
+                      <label className="text-xs font-bold text-gray-500 mb-1">Categoría Principal <span className="text-red-500" title="Campo obligatorio">*</span></label>
                       <select 
                         name="category" 
                         value={editFormData.category || ''} 
@@ -176,13 +183,14 @@ export default function ProfileHero({
                       </select>
                     </div>
                     {isCreateMode && (
-                      <div className="flex-1">
+                      <div className="flex-1 flex flex-col">
+                        <label className="text-xs font-bold text-gray-500 mb-1">Cód. Referido (Opcional)</label>
                         <input 
                           name="seller_code" 
                           value={editFormData.seller_code || ''} 
                           onChange={handleEditChange} 
                           className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded p-2 outline-none transition-all"
-                          placeholder="Código de Vendedor (opcional)"
+                          placeholder="Ej. maria"
                         />
                       </div>
                     )}
@@ -205,7 +213,7 @@ export default function ProfileHero({
                     </div>
 
                     <div className="flex flex-col">
-                      <label className="text-xs font-bold text-gray-500 mb-1">Departamento</label>
+                      <label className="text-xs font-bold text-gray-500 mb-1">Departamento <span className="text-red-500" title="Campo obligatorio">*</span></label>
                       <select 
                         name="state" 
                         value={editFormData.state || ''} 

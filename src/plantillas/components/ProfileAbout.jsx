@@ -55,13 +55,16 @@ export default function ProfileAbout({
       {(profesional.description || isEditing) && (
         <div className="relative">
           {isEditing ? (
-            <textarea
-              name="description"
-              value={editFormData.description}
-              onChange={handleEditChange}
-              className="w-full min-h-[120px] text-[#757778] leading-relaxed text-sm sm:text-base bg-white/60 border border-dashed border-gray-400 rounded-xl p-3 outline-none focus:border-[#F9842C] focus:bg-white resize-y"
-              placeholder="Describe tus servicios, experiencia, y lo que te hace único..."
-            />
+            <div className="relative">
+              <textarea
+                name="description"
+                value={editFormData.description}
+                onChange={handleEditChange}
+                className="w-full min-h-[120px] text-[#757778] leading-relaxed text-sm sm:text-base bg-white/60 border border-dashed border-gray-400 rounded-xl p-3 outline-none focus:border-[#F9842C] focus:bg-white resize-y pr-6"
+                placeholder="Describe tus servicios, experiencia, y lo que te hace único..."
+              />
+              <span className="absolute top-2 right-3 text-red-500 font-bold text-lg" title="Campo obligatorio">*</span>
+            </div>
           ) : (
             <>
               <p className={`text-[#757778] leading-relaxed whitespace-pre-line text-sm sm:text-base ${!isDescriptionExpanded ? 'line-clamp-2' : ''}`}>

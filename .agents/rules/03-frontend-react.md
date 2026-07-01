@@ -28,3 +28,21 @@ setItems(prev => prev.filter(p => {
   return p.tempId !== item.tempId;
 }));
 ```
+
+## Manejo de Fechas y Timezones
+10. **Fechas Locales vs UTC:** NUNCA uses `new Date().toISOString().split('T')[0]` para obtener la fecha de "hoy" en el frontend si el backend usa fechas locales. Esto causa bugs de filtrado donde la fecha salta al "día siguiente" en la tarde-noche por la diferencia horaria con UTC. 
+**FORMA CORRECTA:** Usa los métodos locales de `Date` para construir strings de fecha de forma robusta frente al timezone del navegador:
+```javascript
+const today = new Date();
+const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+```
+
+## Formularios y Manejo de Errores
+11. **Campos Obligatorios:** Todo campo obligatorio en un formulario debe indicar explícitamente su obligatoriedad usando un asterisco rojo (`<span className="text-red-500">*</span>`) en su label o a su lado.
+12. **Validación Frontend (Prevención 422):** Nunca confíes solo en la validación del backend. Valida en el cliente (frontend) que los campos obligatorios no estén vacíos antes de hacer el fetch. Esto evita errores 422 (Unprocessable Entity).
+13. **Parseo de Errores FastAPI:** NUNCA pases el `errData.detail` crudo a un `Error` o `alert()` sin verificar su tipo. Si FastAPI devuelve un error de validación (array de objetos), al convertirlo a string se verá como `[object Object]`. Parsea el array a un string legible:
+```javascript
+if (Array.isArray(errData.detail)) {
+  errorMessage = errData.detail.map(e => `${e.loc ? e.loc[e.loc.length-1] : 'Campo'}: ${e.msg}`).join('\n');
+}
+```

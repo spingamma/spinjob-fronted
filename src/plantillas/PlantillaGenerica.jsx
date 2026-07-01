@@ -123,6 +123,11 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
   };
 
   const handleSaveEdit = async () => {
+    if (!editFormData.name?.trim() || !editFormData.title?.trim() || !editFormData.description?.trim() || !editFormData.category?.trim() || !editFormData.state?.trim()) {
+      alert("Faltan campos obligatorios. Por favor completa: Nombre, Título, Descripción, Categoría y Departamento/Estado.");
+      return;
+    }
+
     if (isCreateMode) {
       const isVerifiedStrict = userObj?.is_verified === true || userObj?.is_verified === "true" || userObj?.is_verified === 1;
       if (!isVerifiedStrict) {
@@ -176,7 +181,15 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
 
       if (!res.ok) {
         const errData = await res.json();
-        throw new Error(errData.detail || "Error al guardar cambios");
+        let errorMessage = "Error al guardar cambios";
+        if (errData.detail) {
+          if (Array.isArray(errData.detail)) {
+             errorMessage = errData.detail.map(e => `${e.loc ? e.loc[e.loc.length-1] : 'Campo'}: ${e.msg}`).join('\n');
+          } else {
+             errorMessage = errData.detail;
+          }
+        }
+        throw new Error(errorMessage);
       }
       
       const responseData = await res.json();
