@@ -29,7 +29,11 @@ function Perfil() {
 
     async function obtenerPerfil(intentos = 0) {
       try {
-        const res = await fetch(`${API_URL}/businesses/${slug}`);
+        const token = localStorage.getItem('spingamma_token');
+        const headers = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${API_URL}/businesses/${slug}`, { headers });
 
         if (res.ok) {
           const data = await res.json();
@@ -175,7 +179,11 @@ function Perfil() {
   const handleUpdate = () => {
     // Para recargar los datos
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-    fetch(`${API_URL}/businesses/${slug}`)
+    const token = localStorage.getItem('spingamma_token');
+    const headers = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    fetch(`${API_URL}/businesses/${slug}`, { headers })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data) setProfesional(data);
