@@ -40,11 +40,10 @@ Revisar endpoints POST/PUT/DELETE en `routers/`:
 - `db.commit()` dentro de `try/except`
 - `db.rollback()` en CADA `except` ANTES del `raise HTTPException`
 
-## 6. Arquitectura limpia
-
+## 6. Arquitectura limpia y Validación de Datos
 - **SRP:** ¿Hay endpoints con lógica compleja? → Mover a `services/`.
 - **DRY:** ¿Código repetido? → Extraer a utilidades compartidas.
-- **Validación:** ¿Schemas Pydantic tienen validaciones suficientes?
+- **Validación Estricta:** Las validaciones de esquemas y routers deben REQUERIR campos relacionales obligatorios (ej. categorías, dependencias). NO permitas que modelos críticos se guarden "huérfanos" (ej. un negocio sin categoría) por omisión en el request.
 
 ## 7. Servidor arranca
 

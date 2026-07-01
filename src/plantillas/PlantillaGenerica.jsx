@@ -123,8 +123,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
   };
 
   const handleSaveEdit = async () => {
-    if (!editFormData.name?.trim() || !editFormData.title?.trim() || !editFormData.description?.trim() || !editFormData.category?.trim() || !editFormData.state?.trim()) {
-      alert("Faltan campos obligatorios. Por favor completa: Nombre, Título, Descripción, Categoría y Departamento/Estado.");
+    if (!editFormData.name?.trim() || !editFormData.title?.trim() || !editFormData.description?.trim() || !editFormData.category?.trim() || !editFormData.state?.trim() || !editFormData.subcategories || editFormData.subcategories.length === 0) {
+      alert("Faltan campos obligatorios. Por favor completa: Nombre, Título, Descripción, Categoría, Subcategoría y Departamento/Estado.");
       return;
     }
 

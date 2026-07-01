@@ -57,6 +57,9 @@ router = APIRouter(prefix="/nueva-entidad", tags=["NuevaEntidad"])
 
 @router.post("/", response_model=EntidadResponse)
 def create(data: EntidadCreate, current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+    # VALIDACIÓN OBLIGATORIA: Nunca permitas campos relacionales o categóricos vacíos si son clave para la lógica (ej. categorías, dependencias).
+    # if not data.categoria_id: raise HTTPException(status_code=400, detail="Categoría obligatoria")
+
     try:
         entity = NuevaEntidad(**data.dict(), user_id=current_user.id)
         db.add(entity)
