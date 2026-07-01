@@ -43,7 +43,7 @@ export default defineConfig({
         short_name: "Tarjetoso",      // 🚀 CAMBIADO AQUÍ (Nombre en el ícono del celular)
         start_url: "/",
         display: "standalone",
-        background_color: "#FFFFFF",
+        background_color: "#1D565F",
         theme_color: "#1E3D51",
         description: "Directorio de Tarjetas Digitales Tarjetoso", // 🚀 CAMBIADO AQUÍ
         icons: [

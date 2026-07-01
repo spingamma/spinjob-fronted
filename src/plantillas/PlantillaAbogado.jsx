@@ -14,7 +14,7 @@ import { cleanWhatsappNumber } from '../utils/phone';
 export default function PlantillaAbogado({ profesional, volverAtras, onProtectedAction }) {
   const [loaded, setLoaded] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const isLongDescription = profesional?.description?.length > 150;
+  const isLongDescription = profesional?.description?.length > 70;
 
   // 🚀 Lógica de negocio centralizada
   const {
@@ -162,7 +162,7 @@ export default function PlantillaAbogado({ profesional, volverAtras, onProtected
 
           {profesional.description && (
             <div className="relative">
-              <p className={`text-gray-400 text-sm md:text-base leading-relaxed max-w-sm mx-auto font-seasons whitespace-pre-line px-2 ${!isDescriptionExpanded ? 'line-clamp-3' : ''}`}>
+              <p className={`text-gray-400 text-sm md:text-base leading-relaxed max-w-sm mx-auto font-seasons whitespace-pre-line px-2 ${!isDescriptionExpanded ? 'line-clamp-2' : ''}`}>
                 {profesional.description}
               </p>
               {isLongDescription && (

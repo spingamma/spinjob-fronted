@@ -14,7 +14,7 @@ import { cleanWhatsappNumber } from '../utils/phone';
 
 export default function PlantillaGenerica({ profesional, volverAtras, onProtectedAction }) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const isLongDescription = profesional?.description?.length > 150;
+  const isLongDescription = profesional?.description?.length > 70;
   
   // 🚀 EXTRAÍDO AL HOOK: Lógica centralizada
   const {
@@ -243,7 +243,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             {/* 🚀 WHITESPACE-PRE-LINE para respetar saltos de línea de la BD */}
             {profesional.description && (
               <div className="relative">
-                <p className={`text-[#757778] leading-relaxed whitespace-pre-line text-sm sm:text-base ${!isDescriptionExpanded ? 'line-clamp-3' : ''}`}>
+                <p className={`text-[#757778] leading-relaxed whitespace-pre-line text-sm sm:text-base ${!isDescriptionExpanded ? 'line-clamp-2' : ''}`}>
                   {profesional.description}
                 </p>
                 {isLongDescription && (
@@ -300,6 +300,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         </div>
 
         {/* 📱 REDES DE CONTACTO */}
+        {(links.website || links.facebook || links.instagram || links.linkedin || links.tiktok || links.github) && (
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4 gap-4">
             <h3 className="text-lg font-bold text-[#1A535C] flex items-center gap-2">
@@ -315,6 +316,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             <SocialButton icon={Github} label="GitHub" url={links.github} colorClass="text-[#757778] hover:bg-gray-700" />
           </div>
         </div>
+        )}
 
 
 

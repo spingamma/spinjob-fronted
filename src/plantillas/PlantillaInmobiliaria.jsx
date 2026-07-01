@@ -11,7 +11,7 @@ import { cleanWhatsappNumber } from '../utils/phone';
 export default function PlantillaInmobiliaria({ profesional, volverAtras, onProtectedAction }) {
   const [loaded, setLoaded] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const isLongDescription = profesional?.description?.length > 150;
+  const isLongDescription = profesional?.description?.length > 70;
 
   // 🚀 EXTRAÍDO AL HOOK: Lógica de UI limpia y enfocada en diseño
   const {
@@ -170,7 +170,7 @@ export default function PlantillaInmobiliaria({ profesional, volverAtras, onProt
           )}
 
           <div className="relative mt-3">
-            <p className={`text-gray-300 text-sm leading-relaxed whitespace-pre-line px-2 font-light ${!isDescriptionExpanded ? 'line-clamp-3' : ''}`}>
+            <p className={`text-gray-300 text-sm leading-relaxed whitespace-pre-line px-2 font-light ${!isDescriptionExpanded ? 'line-clamp-2' : ''}`}>
               {profesional.description}
             </p>
             {isLongDescription && (

@@ -92,7 +92,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
 
   const submitBtnClass = `w-full font-bold py-4 px-4 rounded-xl transition-all shadow-md mt-4 flex justify-center items-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-0.5 active:scale-[0.98]'} ${btnSubmitBg}`;
 
-  const defaultWhatsApp = '59100000000'; // Fallback
+  const defaultWhatsApp = '59164016676'; // Fallback
   const contactNumber = supportWhatsApp || defaultWhatsApp;
   const whatsappLink = `https://wa.me/${contactNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hola tarjetoso tengo problemas ingresando a mi cuenta')}`;
 
