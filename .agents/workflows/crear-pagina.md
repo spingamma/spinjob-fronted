@@ -4,17 +4,16 @@ description: Crear una nueva página completa (vista de ruta) siguiendo los est�
 
 # Workflow: Crear Nueva Página (/crear-pagina)
 
-// turbo-all
-
 ## 1. Leer App.jsx (para conocer imports y rutas existentes)
 
-```
+```bash
 cd c:\Users\jhona\Desktop\spinjob-fronted && powershell -Command "Get-Content src/App.jsx | Select-Object -First 40"
 ```
 
 ## 2. Crear carpeta y componente
 
-Crear `src/pages/[NombrePagina]/[NombrePagina].jsx` con la estructura base:
+Crear `src/pages/[NombrePagina]/[NombrePagina].jsx` con la estructura base.
+**REGLA:** El componente NO debe exceder las 300 líneas.
 
 ```jsx
 // Archivo: src/pages/[NombrePagina]/[NombrePagina].jsx
@@ -42,8 +41,6 @@ Agregar en `src/App.jsx`:
 1. Lazy import: `const NombrePagina = lazy(() => import('./pages/NombrePagina/NombrePagina'));`
 2. Route: `<Route path="/ruta" element={<NombrePagina />} />`
 
-> Usar `multi_replace_file_content` para agregar ambos cambios (import + route) en 1 sola llamada.
-
 ## 4. Agregar navegación (si aplica)
 
 Si la página debe ser accesible desde navegación global, editar EN PARALELO:
@@ -59,6 +56,6 @@ Si la página consume un endpoint:
 
 ## 6. Verificar
 
-```
+```bash
 cd c:\Users\jhona\Desktop\spinjob-fronted && npm run build
 ```

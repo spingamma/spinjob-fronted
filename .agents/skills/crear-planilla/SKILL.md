@@ -5,13 +5,6 @@ description: Genera una nueva plantilla de perfil profesional basada en los est�
 
 # Skill: Crear Plantilla Profesional
 
-// turbo-all
-
-## 🏎️ REGLAS DE VELOCIDAD
-1. **Copia y Pega Masivo:** Lee `PlantillaGenerica.jsx` y crea el nuevo archivo con todo el contenido de una vez.
-2. **Edición en Lote:** Registra la plantilla en `Profile.jsx` y crea el archivo `.jsx` en el mismo turno.
-3. **No Preguntar Estilos:** Usa la paleta Tarjetoso (`#1E3D51`, `#B95221`) por defecto.
-
 ## Cuándo usar
 - Usuario pide: "Crea una plantilla de Médico/Abogado/etc."
 
@@ -24,13 +17,15 @@ description: Genera una nueva plantilla de perfil profesional basada en los est�
 
 ### 1. Crear el archivo
 - Ruta: `src/plantillas/Plantilla[Profesion].jsx`.
+- **LÍMITE ESTRICTO:** La plantilla NO debe exceder las 300 líneas.
 - Usar `write_to_file` con el código completo.
 
-### 2. Diseño premium
+### 2. Diseño premium (Tarjetoso)
+- Usa los colores base (`#1E3D51`, `#B95221`).
 - Glassmorphism, gradientes, sombras profundas.
 - Avatar con `onError` fallback.
 - Secciones protegidas con `?.`.
-- 🚨 **CRÍTICO - TESTING:** SIEMPRE incluir atributos `data-testid="..."` en botones, enlaces (`<a>`), inputs y cualquier elemento interactivo. JAMÁS crear un botón sin esto.
+- 🚨 **CRÍTICO - TESTING:** SIEMPRE incluir atributos `data-testid="..."` en botones e inputs interactivos. JAMÁS crear un botón sin esto.
 
 ### 3. Registro Express
 - Editar `src/pages/Profile/Profile.jsx` usando `multi_replace_file_content` para agregar el import y el caso en el renderizado.

@@ -4,8 +4,6 @@ description: Verificación pre-deploy del backend — Revisa database.py, auth.p
 
 # Workflow: Verificar Backend (/verificar-backend)
 
-// turbo-all
-
 Ejecuta esta checklist antes de deploy o al terminar un feature complejo que involucró base de datos.
 
 ## 1. Resiliencia de conexión (Neon DB)
@@ -33,7 +31,7 @@ Confirmar que:
 ## 4. Gestión Estricta de Esquemas de BD (Zero Orphans & Normalization)
 
 Si modificaste `models.py`:
-- **¿Renombraste o eliminaste una columna?**: Revisa inmediatamente si dejaste columnas huérfanas en Neon DB. Ejecuta un script de limpieza de migración en Python usando `text('ALTER TABLE x DROP COLUMN y')`. Asegúrate de que tu script **no contenga emojis** para no causar problemas de `UnicodeEncodeError`.
+- **¿Renombraste o eliminaste una columna?**: Revisa inmediatamente si dejaste columnas huérfanas en Neon DB. Ejecuta un script de limpieza de migración en Python usando `text('ALTER TABLE x DROP COLUMN y')`. Asegúrate de que tu script no contenga emojis para no causar problemas de `UnicodeEncodeError`.
 - **¿Usas Foreign Keys?**: Revisa en los modelos actualizados si estás guardando datos redundantes (como `user_phone` o `user_name`). Transfórmalos a relaciones usando `user_id = Column(String, ForeignKey("users.id"))`.
 
 ## 5. Manejo de errores en escrituras

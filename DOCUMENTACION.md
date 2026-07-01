@@ -34,7 +34,7 @@ El sistema relacional se basa en 6 tablas principales (`models.py`):
 ## 5. Arquitectura del Frontend (React)
 ### 5.1. Componentes Principales
 - **Directory.jsx:** Landing page y vista principal del directorio. Integrado profundamente con React Router para soportar URLs amigables (ej. `/directorio/:categoria/:estado`). Inyecta etiquetas SEO dinámicas según los parámetros de la URL y renderiza tarjetas usando `ProfessionalCard`.
-- **Profile.jsx:** Renderizado dinámico (`/perfil/:slug`). Inyecta SEO dinámico (JSON-LD) para Google. Decide qué plantilla renderizar (PlantillaGenerica, PlantillaInmobiliaria, PlantillaAbogado) basándose en si el negocio es `premium` y analizando su `subcategory`. Registra automáticamente interacciones de "Visita Perfil" en base de datos.
+- **Profile.jsx:** Renderizado dinámico (`/perfil/:slug`). Inyecta SEO dinámico (JSON-LD) para Google. Registra automáticamente interacciones de "Visita Perfil" en base de datos.
 - **CreateBusiness.jsx:** Formulario de registro. Integra `navigator.geolocation` para generar enlaces de Google Maps. Solo permite el envío si el usuario es `is_verified` (comprobado en LocalStorage y validado contra el backend).
 - **AdminPanel.jsx:** Dashboard para usuarios `is_admin`. Permite revisar formularios crudos (mediante `BusinessDetailsModal`), aprobar/rechazar negocios y verificar usuarios manualmente.
 - **MyBusinesses.jsx & BusinessCardHolder.jsx:** Paneles de usuario para gestionar sus propias creaciones y sus perfiles guardados favoritos.

@@ -4,13 +4,11 @@ description: Verificación rápida del frontend — Revisa build, imports y estr
 
 # Workflow: Verificar Frontend (/verificar-frontend)
 
-// turbo-all
-
 Ejecuta esta checklist antes de hacer deploy o al terminar un feature.
 
 ## 1. Build limpio
 
-```
+```bash
 cd c:\Users\jhona\Desktop\spinjob-fronted && npm run build
 ```
 
@@ -40,7 +38,7 @@ Abre `vite.config.js` y confirma que `VitePWA.manifest` tiene:
 
 ## 5. Buscar referencias a marca antigua
 
-```
+```bash
 cd c:\Users\jhona\Desktop\spinjob-fronted && npx -y grep -ri "spinjob" src/ --include="*.jsx" --include="*.js"
 ```
 
@@ -48,38 +46,36 @@ Si aparecen resultados, reemplazar por "Tarjetoso".
 
 ## 6. Verificar que no hay God Components
 
-```
-cd c:\Users\jhona\Desktop\spinjob-fronted && powershell -Command "Get-ChildItem -Recurse src -Include *.jsx,*.js | Where-Object { (Get-Content $_.FullName | Measure-Object -Line).Lines -gt 400 } | ForEach-Object { Write-Output \"$($_.FullName): $((Get-Content $_.FullName | Measure-Object -Line).Lines) líneas\" }"
+```bash
+cd c:\Users\jhona\Desktop\spinjob-fronted && powershell -Command "Get-ChildItem -Recurse src -Include *.jsx,*.js | Where-Object { (Get-Content $_.FullName | Measure-Object -Line).Lines -gt 300 } | ForEach-Object { Write-Output \"$($_.FullName): $((Get-Content $_.FullName | Measure-Object -Line).Lines) líneas\" }"
 ```
 
-Si aparecen archivos con más de 400 líneas, considerar refactorizarlos.
+Si aparecen archivos con más de 300 líneas, debes refactorizarlos a subcomponentes o custom hooks.
 
 ## 7. Verificar dev server
 
-```
+```bash
 cd c:\Users\jhona\Desktop\spinjob-fronted && npm run dev
 ```
 
 Si el servidor arranca sin warnings críticos, la verificación pasó.
 
-## 8. Preservación e Integridad de Módulos (Ediciones de Múltiples Líneas)
+## 8. Preservación e Integridad de Módulos
 
 Al realizar reemplazos en lote o editar cabeceras de archivos para añadir imports (`import ...`), confirma siempre:
-- **No eliminar imports colaterales necesarios** (e.g., `useState`, `useEffect` o hooks del sistema).
-- **No duplicar imports** del mismo módulo.
-- **Mantener el formato internacional dinámico**: NUNCA hardcodear prefijos de países (`591`) o nombres de países (`Bolivia`) como fallbacks estáticos en código utilitario. Utiliza siempre la resolución dinámica basada en la lista de configuración centralizada (`COUNTRIES`).
+- No eliminar imports colaterales necesarios.
+- No duplicar imports.
+- Mantener el formato internacional dinámico (NO hardcodear países).
 
-## 9. Compatibilidad de Terminal Windows (Scripts de Saneamiento/Migración)
+## 9. Compatibilidad de Terminal Windows
 
 Si creas scripts en Python, Node o Bash de utilidad rápida que se ejecuten en la terminal de Windows:
-- **NO utilices emojis ni caracteres Unicode complejos** en los prints o salidas estándar. La terminal de Windows con codificación nativa `cp1252` fallará arrojando `UnicodeEncodeError`. Utiliza texto plano seguro como `[INFO]`, `[SUCCESS]`, `[WARN]` o `[ERROR]`.
+- NO utilices emojis ni caracteres Unicode complejos en los prints o salidas estándar.
 
 ## 10. Verificación de Testing (data-testid)
 
-Busca cualquier botón o enlace interactivo nuevo y asegúrate de que tiene `data-testid`. Si tú mismo has modificado o creado componentes recientemente, es **obligatorio** que verifiques esto.
+Busca cualquier botón o enlace interactivo nuevo y asegúrate de que tiene `data-testid`.
 
-```
+```bash
 cd c:\Users\jhona\Desktop\spinjob-fronted && npx -y grep -rn "<button" src/ --include="*.jsx" | grep -v "data-testid"
 ```
-
-Si encuentras botones interactivos o enlaces sin `data-testid`, debes agregarlos antes de terminar.

@@ -7,8 +7,6 @@ import AuthModal from '../../components/AuthModal';
 // 📥 IMPORTACIÓN DE PLANTILLAS
 // ==========================================
 import PlantillaGenerica from '../../plantillas/PlantillaGenerica';
-import PlantillaInmobiliaria from '../../plantillas/PlantillaInmobiliaria';
-import PlantillaAbogado from '../../plantillas/PlantillaAbogado';
 
 function Perfil() {
   const { slug } = useParams();
@@ -171,22 +169,6 @@ function Perfil() {
 
   const volverAtras = () => navigate("/");
 
-  // Lógica para determinar la plantilla automáticamente
-  const normalizeText = (text) => text ? text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : '';
-  const esPremium = profesional?.premium === true;
-
-  let tipoPlantilla = 'generica';
-  if (esPremium) {
-    // Buscamos en subcategoría (singular y plural) y en el título como respaldo
-    const searchArea = normalizeText(`${profesional.subcategory || ''} ${profesional.subcategories || ''} ${profesional.title || ''}`);
-    
-    if (searchArea.includes('abogad') || searchArea.includes('legal') || searchArea.includes('derecho')) {
-      tipoPlantilla = 'abogado';
-    } else if (searchArea.includes('inmo') || searchArea.includes('casa') || searchArea.includes('propied')) {
-      tipoPlantilla = 'inmobiliaria';
-    }
-  }
-
   return (
     <>
       {profesional && (
@@ -202,25 +184,11 @@ function Perfil() {
       )}
       
       {/* RENDERIZADO DE PLANTILLAS */}
-      {tipoPlantilla === 'inmobiliaria' ? (
-        <PlantillaInmobiliaria
-          profesional={profesional}
-          volverAtras={volverAtras}
-          onProtectedAction={handleProtectedAction}
-        />
-      ) : tipoPlantilla === 'abogado' ? (
-        <PlantillaAbogado
-          profesional={profesional}
-          volverAtras={volverAtras}
-          onProtectedAction={handleProtectedAction}
-        />
-      ) : (
-        <PlantillaGenerica
-          profesional={profesional}
-          volverAtras={volverAtras}
-          onProtectedAction={handleProtectedAction}
-        />
-      )}
+      <PlantillaGenerica
+        profesional={profesional}
+        volverAtras={volverAtras}
+        onProtectedAction={handleProtectedAction}
+      />
 
       {/* ==========================================
           MODAL DE REGISTRO REUTILIZABLE (TEMA OSCURO)
