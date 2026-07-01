@@ -134,15 +134,20 @@ export default function ProfileCatalogEdit({ localProducts, setLocalProducts, de
 
             {/* Image upload */}
             <div className="flex items-center gap-3">
-              <label className="cursor-pointer shrink-0">
+              <label htmlFor="productImageInput" className="cursor-pointer shrink-0 relative group">
                 {formPreview ? (
-                  <img src={formPreview} alt="Preview" className="w-16 h-16 rounded-xl object-cover border-2 border-[#F9842C]" />
+                  <>
+                    <img src={formPreview} alt="Preview" className="w-16 h-16 rounded-xl object-cover border-2 border-[#F9842C]" />
+                    <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Pencil size={16} className="text-white" />
+                    </div>
+                  </>
                 ) : (
                   <div className="w-16 h-16 rounded-xl bg-gray-200 flex items-center justify-center border-2 border-dashed border-gray-300 hover:border-[#F9842C] transition-colors">
                     <ImageIcon size={24} className="text-gray-400" />
                   </div>
                 )}
-                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                <input id="productImageInput" type="file" accept="image/*" onChange={handleImageChange} onClick={(e) => { e.target.value = null }} className="hidden" />
               </label>
               <div className="flex-1 space-y-2">
                 <input
