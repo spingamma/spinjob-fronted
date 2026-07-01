@@ -1,0 +1,1563 @@
+commit 946be3f19ebd094656544d954a1f598934aa1680
+Author: jhonatanfc94 <jhonatanfc94@gmail.com>
+Date:   Wed Jul 1 13:39:08 2026 -0400
+
+    new premium
+
+diff --git a/.agents/rules/01-reglas-base.md b/.agents/rules/01-reglas-base.md
+new file mode 100644
+index 0000000..8640288
+--- /dev/null
++++ b/.agents/rules/01-reglas-base.md
+@@ -0,0 +1,11 @@
++# Reglas de Agente y Sincronización
++
++## Eficiencia y Velocidad del Agente
++1. **Paralelizar SIEMPRE:** Si necesitas leer N archivos o editar N archivos independientes, lanza TODAS las llamadas en paralelo.
++2. **Direct Edit:** Cuando necesites buscar y reemplazar un texto global, usa `grep_search` y lanza los `replace_file_content` directos SIN leer los archivos enteros.
++3. **Ediciones multi-chunk:** Si un archivo tiene múltiples cambios, usa `multi_replace_file_content` en 1 sola llamada.
++4. **No leas para editar si ya sabes el contenido:** Un `grep_search` da línea exacta + contenido. Úsalo directo.
++5. **Idioma:** Variables, funciones, archivos → inglés. Textos al usuario → español.
++
++## Sincronización Full-Stack (Frontend ↔ Backend)
++6. **Edición Cross-Repo:** Tienes acceso local al backend en `c:\Users\jhona\Desktop\spinjob-backend` y al frontend en `c:\Users\jhona\Desktop\spinjob-fronted`. Si un cambio en el frontend requiere modificar la base de datos o crear un endpoint, VE AL BACKEND y aplícalo tú mismo. NO des un prompt para que el usuario lo haga.
+diff --git a/.agents/rules/02-frontend-ui.md b/.agents/rules/02-frontend-ui.md
+new file mode 100644
+index 0000000..c2c2e36
+--- /dev/null
++++ b/.agents/rules/02-frontend-ui.md
+@@ -0,0 +1,21 @@
++# Estándares de Diseño UI/UX y Branding (Tarjetoso)
++
++## Branding y Estética
++1. **Paleta Premium:** Usa la paleta de Tarjetoso: `#1E3D51` (Primario) y `#B95221` (Acento) siempre. Nunca preguntes colores.
++2. **Tailwind 4 & Glassmorphism:** Usa `bg-white/10 backdrop-blur-md border border-white/20`, gradientes (`from-[#1E3D51] to-[#B95221]`) y animaciones (`transition-all duration-300 ease-out hover:scale-[1.02]`).
++3. **Nombre de marca:** Tarjetoso (NUNCA usar "SpinJob" en textos visibles al usuario).
++4. **Imágenes:** SIEMPRE usar `onError` con fallback a `ui-avatars.com`. Toda subida de imagen debe pasar por `CropModal` (`cropShape="rect"` para productos, `"round"` para avatares).
++
++## Mobile-First Responsivo
++5. **NUNCA usar hover para acciones críticas:** En móvil no existe hover. Acciones deben ser siempre visibles.
++6. **Grids en móvil:** Usar `grid-cols-1` en móvil, `sm:grid-cols-2`, `md:grid-cols-3`. NUNCA empezar con 2 en móvil.
++7. **Prevenir Overflow:** Usa `w-full` y `overflow-hidden` o `min-w-0` en contenedores anidados dentro de flex/grid.
++8. **Textareas:** Usar auto-grow con `useRef` + `useEffect` y contador visual.
++
++## z-index Hierarchy
++9. **Escala obligatoria:**
++    - `z-40` → `BottomNavbar` (navegación inferior móvil)
++    - `z-50` → Dropdowns, tooltips, barras flotantes
++    - `z-[100]` → Modales principales
++    - `z-[999]` → Modales sobre modales (ej. CropModal sobre otro modal)
++    - NUNCA igualar z-index entre BottomNavbar y modales.
+diff --git a/.agents/rules/03-frontend-react.md b/.agents/rules/03-frontend-react.md
+new file mode 100644
+index 0000000..bd5408a
+--- /dev/null
++++ b/.agents/rules/03-frontend-react.md
+@@ -0,0 +1,15 @@
++# Clean Code React y Estructura
++
++## Límites y Arquitectura
++1. **LÍMITE ESTRICTO DE 300 LÍNEAS:** Ningún componente, hook o página debe exceder las 300 líneas. Si se acerca a esto, extrae lógica a un Custom Hook (`hooks/`) o a subcomponentes (`components/`). 1 responsabilidad por archivo.
++2. **DRY + SRP:** Lógica repetida se vuelve Custom Hook. Componentes repetidos van a `src/components/`.
++
++## Reglas Críticas de Testing e Interacción
++3. **Testing Hooks (OBLIGATORIO EXTREMO):** 🚨 SIEMPRE agrega atributos `data-testid="..."` a TODOS los elementos interactivos (botones, inputs, `<a>`, modales). ES UN ERROR GRAVE olvidar esto.
++4. **Reposición exacta (Oxc/Vite):** Cuidado al borrar JSX. Si borras un div de cierre `</div>` huérfano, romperás el árbol y causarás "Unexpected token". Lee el archivo con `view_file` hacia arriba si dudas.
++
++## Estado, Hooks y Modales
++5. **Early returns:** NUNCA retornes antes de que TODOS los hooks (useMemo, useEffect, etc.) hayan sido invocados.
++6. **Listas con estado:** Si cada ítem necesita estado propio (ej. "Ver más"), extrae un sub-componente (`ProductCard`). No uses arrays de estado en el padre.
++7. **Modales anidados:** Si un modal abre otro, usa React Fragment `<>...</>` como wrapper y renderiza el hijo FUERA del div backdrop del padre.
++8. **Acciones protegidas:** Click en redes/WhatsApp sin sesión → forzar `AuthModal`.
+diff --git a/.agents/rules/04-backend-fastapi.md b/.agents/rules/04-backend-fastapi.md
+new file mode 100644
+index 0000000..4045439
+--- /dev/null
++++ b/.agents/rules/04-backend-fastapi.md
+@@ -0,0 +1,16 @@
++# Estándares de Arquitectura Backend (Tarjetoso)
++
++## Bases de Datos (Neon DB)
++1. **Resiliencia:** `create_engine(URL, pool_pre_ping=True, pool_recycle=300)`.
++2. **Zero Orphans (Gestión de Esquemas):** Si eliminas un campo de un modelo SQLAlchemy, SIEMPRE ejecuta un script de migración temporal (`ALTER TABLE DROP COLUMN`) en Neon DB. Nunca dejes columnas huérfanas. NUNCA uses emojis en scripts de consola Windows (`cp1252`).
++3. **Normalización (Relaciones):** Prohibido guardar datos replicados (`user_phone`, `user_name`). Usa `user_id` Foreign Key y expón con `@property`.
++4. **Filtros en Properties:** NUNCA usar filtros `.ilike()` sobre campos calculados o properties de SQLAlchemy.
++
++## Autenticación y Seguridad
++5. **Hashing Estricto:** Usa `bcrypt` directo. PROHIBIDO `passlib`.
++6. **IDs:** Usa `generate_uuid()` basada en `uuid.uuid4()`.
++
++## Transacciones y API
++7. **Transacciones Seguras:** `db.commit()` SIEMPRE en `try/except` con `db.rollback()` en el except ANTES del HTTPException.
++8. **Esquemas Pydantic:** Todo payload validado. Usar `from_attributes = True` en ResponseModels.
++9. **Límites de Búsqueda UI:** Usa límites razonables (`limit(50)`) para que las gráficas no fallen, no limites a 20.
+diff --git a/.agents/rules/arquitecto-logica.md b/.agents/rules/arquitecto-logica.md
+deleted file mode 100644
+index 5dd7cdf..0000000
+--- a/.agents/rules/arquitecto-logica.md
++++ /dev/null
+@@ -1,51 +0,0 @@
+----
+-trigger: always_on
+----
+-
+-# Estándares de Arquitectura y Clean Code
+-
+-## Código
+-1. **DRY + SRP:** Lógica repetida → Custom Hook. Máx 300-400 líneas por archivo. 1 responsabilidad por componente/hook.
+-2. **Idioma:** Variables, funciones, archivos → inglés. Textos al usuario → español.
+-3. **Estructura:** `pages/` vistas, `components/` reutilizables, `hooks/` lógica, `plantillas/` templates de perfil, `utils/` utilidades puras.
+-
+-## API y Estado
+-4. **Base URL:** `import.meta.env.VITE_API_URL` (nunca hardcodeado).
+-5. **Sesión:** `localStorage.getItem('spingamma_user')` → objeto usuario.
+-15. **JWT:** `localStorage.getItem('spingamma_token')` → token Bearer.
+-16. **Errores:** SIEMPRE `try/catch` o `.catch()` en fetches. Manejar 4xx/5xx explícitamente.
+-17. **Fechas Robustas:** NUNCA uses `.split('T')[0]` ciegamente para extraer `YYYY-MM-DD` de respuestas del backend, ya que el backend puede enviar `YYYY-MM-DD HH:MM:SS` (con espacio). Usa SIEMPRE `.substring(0, 10)` para evitar bugs de parseo o chequea bien el formato.
+-18. **Strings Exactos (Hardcodes):** Cuando compares literales (`platform === "Visita Perfil"` vs `perfil_view`), verifica la coincidencia EXACTA con lo que emite/guarda el backend en sus routers. No asumas traducciones ni formatos.
+-
+-## Reglas React
+-19. **Hooks en orden:** Nunca leas variables de `useMemo`/`useCallback` dentro de un `useEffect` declarado ANTES. Orden semántico descendente.
+-20. **Early returns:** NUNCA antes de que TODOS los hooks hayan sido invocados.
+-21. **Acciones protegidas:** Clic en redes/WhatsApp sin sesión → forzar `AuthModal`.
+-22. **Modales anidados:** Si un modal abre otro modal (ej. CatalogManager → CropModal), usar React Fragment `<>...</>` como wrapper y renderizar el modal hijo FUERA del div backdrop del padre. Esto evita que `onClick={onClose}` del fondo oscuro capture clicks del modal hijo.
+-23. **Componentes con estado local en listas:** Si cada ítem de una lista necesita estado propio (ej. "Ver más"), extraer un sub-componente (ej. `ProductCard`) que maneje su propio `useState`. No manejar estado por índice en el padre.
+-24. **Testing Hooks (OBLIGATORIO EXTREMO):** 🚨 SIEMPRE agrega atributos `data-testid="..."` a TODOS los elementos interactivos (botones, inputs, `<a>`, modales, iconos clickeables). ES UN ERROR GRAVE olvidar esto al crearlos o modificarlos, ya que rompe las pruebas E2E.
+-
+-## Terceros y APIs Nativas
+-25. **Scripts:** NUNCA cargar `<script>` manual si ya lo gestiona una librería React (ej. GSI).
+-26. **Compartir:** Usar `navigator.share` cuando esté disponible.
+-27. **WhatsApp:** Limpiar números con `.replace(/[^0-9]/g, '')`.
+-
+-## z-index Hierarchy (OBLIGATORIO)
+-28. **Escala de z-index del proyecto:**
+-    - `z-40` → `BottomNavbar` (navegación inferior móvil)
+-    - `z-50` → Dropdowns, tooltips, barras flotantes
+-    - `z-[100]` → Modales principales (CatalogManager, CatalogModal, AuthModal, ReviewModal, QR modal)
+-    - `z-[999]` → Modales sobre modales (CropModal que se abre desde otro modal)
+-    - NUNCA igualar z-index entre BottomNavbar y modales. Los modales SIEMPRE deben estar por encima.
+-
+-## Eficiencia del Agente
+-41. **Ediciones en lote:** Si una tarea toca N archivos independientes → editar TODOS en paralelo. Nunca secuencialmente.
+-42. **No leer para editar si ya conoces el contenido.** Un `grep_search` con `MatchPerLine=true` da línea exacta + contenido suficiente para `replace_file_content` directo.
+-43. **Multi-chunk para mismo archivo.** Si un archivo necesita 2+ ediciones no contiguas → usar `multi_replace_file_content` en 1 sola llamada.
+-
+-## Backend (FastAPI / SQLAlchemy)
+-44. **Filtros en Properties:** NUNCA usar filtros `.ilike()` u otros operadores directos de búsqueda sobre campos calculados o propiedades (properties) de SQLAlchemy. Causan errores 500 a nivel de BD que el frontend interpreta como problemas de CORS. Si la propiedad deriva de una relación, usa la sintaxis de relación (ej. `modelo.relacion.any(...)`).
+-45. **Límites de Búsqueda UI:** En rutas de búsqueda que alimentan gráficas o selectores masivos en la UI, asegura usar límites razonables para la vista de usuario (`limit(50)`) y no límites muy restrictivos (`limit(20)`) que corten el flujo esperado.
+-
+-## Librerías y Reportes
+-46. **Exportación PDF (jsPDF):** La librería `jspdf-autotable` debe importarse explícitamente y ejecutarse pasando el documento por parámetro: `import autoTable from 'jspdf-autotable'` y luego `autoTable(doc, {...})`. NO usar `doc.autoTable(...)` ya que genera el error `doc.autoTable is not a function` en ES6 Modules.
+\ No newline at end of file
+diff --git a/.agents/rules/backend-standards.md b/.agents/rules/backend-standards.md
+deleted file mode 100644
+index 1dd7f0c..0000000
+--- a/.agents/rules/backend-standards.md
++++ /dev/null
+@@ -1,93 +0,0 @@
+----
+-trigger: always_on
+----
+-
+-# Contexto Base: Tarjetoso Backend
+-
+-* **Proyecto:** Tarjetoso — API RESTful para Directorio de Tarjetas Digitales.
+-* **Stack:** FastAPI + SQLAlchemy + Neon DB (PostgreSQL serverless).
+-* **Integraciones:** Cloudinary (imágenes), bcrypt (hashing), JWT (autenticación).
+-* **Frontend:** React (repo: `c:\Users\jhona\Desktop\spinjob-fronted`).
+-
+----
+-
+-# 🗺️ MAPA DE ARCHIVOS CLAVE
+-
+-## Raíz
+-| Archivo | Propósito |
+-|---------|-----------|
+-| `main.py` | Entrada FastAPI, CORS, registro de routers |
+-| `models.py` | Modelos SQLAlchemy (tablas de la BD) |
+-| `schemas.py` | Esquemas Pydantic (validación I/O) |
+-| `database.py` | Conexión a Neon DB (pool_pre_ping, pool_recycle) |
+-| `auth.py` | Hashing bcrypt, JWT, autenticación |
+-| `requirements.txt` | Dependencias pinneadas |
+-
+-## `routers/` (Endpoints por dominio)
+-| Archivo | Propósito |
+-|---------|-----------|
+-| `auth.py` | Login, registro, Google OAuth |
+-| `businesses.py` | CRUD de negocios/profesionales |
+-| `users.py` | Gestión de usuarios |
+-| `admin.py` | Panel de administración |
+-| `tarjetero.py` | Tarjetero (guardar/quitar tarjetas) |
+-| `reviews.py` | Reseñas e interacciones de usuarios |
+-
+-## Otros
+-| Archivo | Propósito |
+-|---------|-----------|
+-| `migrate_businesses.py` | Script de migración de datos |
+-| `upgrade_db.py` | Script de actualización de esquema BD |
+-| `backup_to_drive.py` | Backup a Google Drive |
+-
+----
+-
+-# ⚡ REGLAS DE BÚSQUEDA RÁPIDA
+-
+-1. **Archivo conocido → `view_file` directo.** NUNCA `grep_search` en un solo archivo.
+-2. **Patrón en muchos archivos → `grep_search`** con `Includes: ["*.py"]`.
+-3. **Lecturas paralelas:** 3+ archivos → lanzar TODOS en paralelo.
+-4. **Limita líneas:** Solo imports → `StartLine=1, EndLine=20`.
+-5. **Modelo/Tabla → `models.py`.** Esquema → `schemas.py`. Endpoint → `routers/`.
+-
+----
+-
+-# 🏗️ ESTÁNDARES DE ARQUITECTURA Y BASES DE DATOS
+-
+-## Código Backend
+-1. **Inyección de dependencias:** SIEMPRE `db: Session = Depends(get_db)`.
+-2. **Esquemas Pydantic:** Todo payload validado. Usar `from_attributes = True` en ResponseModels.
+-3. **Transacciones:** `db.commit()` SIEMPRE en `try/except` con `db.rollback()` en el except.
+-4. **IDs:** `generate_uuid()` basada en `uuid.uuid4()` para PKs.
+-5. **Hashing:** `bcrypt` directo. PROHIBIDO `passlib`.
+-6. **SRP:** Lógica compleja → `services/`. Rutas delgadas.
+-7. **KISS + DRY:** No sobre-ingenierizar. No duplicar lógica.
+-8. **Validación temprana:** Falla rápido con Pydantic (Field, regex, min_length).
+-
+-## Diseño de Base de Datos (Reglas Estrictas)
+-9. **Zero Orphans (Gestión de Esquemas):** Si eliminas un campo de un modelo SQLAlchemy en `models.py`, **SIEMPRE** debes crear y ejecutar un script de migración temporal (ej. usando `ALTER TABLE DROP COLUMN`) para eliminarlo de la base de datos real Neon DB. Nunca dejes columnas huérfanas en la base de datos que ya no mapean al modelo.
+-10. **Normalización (Relaciones vs Duplicación):** Está completamente prohibido guardar datos de un usuario replicados (como `user_phone` o `user_name`) en tablas hijas. Siempre usa un `user_id` de tipo Foreign Key relacionando la tabla a `users.id`. En caso de necesitar exponer los datos de ese usuario en el schema de respuesta de la tabla hija, utiliza propiedades derivadas en el modelo (ej. `@property def user_name(self): return self.user.name if self.user else "Anónimo"`).
+-11. **Pool resiliente (Neon DB):** `create_engine(URL, pool_pre_ping=True, pool_recycle=300)`. Si `database.py` NO tiene estos parámetros → CORREGIR INMEDIATAMENTE.
+-
+-## Scripts y Mantenimiento en Terminal (Windows)
+-12. **Scripts Windows (Compatibilidad de Terminal):** En cualquier script de saneamiento, migración o limpieza escrito en Python o Bash que vaya a correrse en consola local, está **ESTRICTAMENTE PROHIBIDO usar emojis** (ej. ✅, 🗑️, 🎉). Esto causará invariablemente `UnicodeEncodeError` debido a la codificación nativa `cp1252` de Windows. Utiliza prefijos de texto plano seguro como `[INFO]`, `[ERROR]`, `[WARN]` o `[SUCCESS]`.
+-
+-## Hashing (auth.py)
+-```python
+-import bcrypt
+-def get_password_hash(password: str) -> str:
+-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+-def verify_password(plain_password: str, hashed_password: str) -> bool:
+-    if not hashed_password: return False
+-    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
+-```
+-
+----
+-
+-# 🚨 REGLA DE SINCRONIZACIÓN FRONTEND
+-Dado que estás operando en el repositorio del frontend (`spinjob-fronted`) pero tienes acceso local a `spinjob-backend`, si determinas que un cambio que te pidieron en React requiere modificar la base de datos o crear un nuevo endpoint en FastAPI, ve al backend y aplícalo tú mismo. Sigue el workflow y los comandos estándares de Python.
+-
+-# 📦 FORMATO DE ENTREGA
+-- Comienza CADA bloque con: `# Archivo: ruta/del/archivo.py`.
+-- PROHIBIDO `# ... resto del código`. Entrega archivos completos si la modificación es extensa.
+-- Dependencias: SIEMPRE pinneadas con rango (ej. `bcrypt>=4.0,<6.0`). NUNCA incluir `passlib`.
+diff --git a/.agents/rules/base-spingamma.md b/.agents/rules/base-spingamma.md
+deleted file mode 100644
+index 880dacf..0000000
+--- a/.agents/rules/base-spingamma.md
++++ /dev/null
+@@ -1,121 +0,0 @@
+----
+-trigger: always_on
+----
+-
+-# Contexto Base: Tarjetoso Frontend
+-
+-* **Proyecto:** Tarjetoso — Directorio de Tarjetas Digitales Profesionales.
+-* **Nombre de marca:** Tarjetoso (NUNCA usar "SpinJob" en textos visibles al usuario).
+-* **Stack:** React 19 + Vite 8 + Tailwind CSS 4 + react-router-dom 7.
+-* **PWA:** vite-plugin-pwa (Workbox, service worker autoUpdate).
+-* **Auth:** Google Identity Services vía `@react-oauth/google`. Botón custom + API nativa GSI.
+-* **Backend:** FastAPI (repo separado: `c:\Users\jhona\Desktop\spinjob-backend`).
+-* **Deploy:** Vercel (SPA con `vercel.json` rewrite `/*` → `/index.html`).
+-
+----
+-
+-# 🏎️ REGLAS DE VELOCIDAD (MÁXIMA PRIORIDAD)
+-
+-> **Meta:** Resolver TODO en la menor cantidad de tool calls posible. Cada llamada extra = tiempo perdido.
+-
+-1. **Paralelizar SIEMPRE.** Si necesitas leer N archivos, grep en N rutas, o editar N archivos independientes → lanzar TODAS las llamadas en paralelo (sin `waitForPreviousTools`).
+-2. **grep → edit directo.** Cuando necesites buscar y reemplazar un texto global (ej. renombrar marca), usa `grep_search` UNA vez con `CaseInsensitive=true` en `src/`. Con los resultados, lanza TODOS los `replace_file_content` en paralelo en el mismo turno, SIN leer los archivos antes (la línea del grep ya da suficiente contexto).
+-3. **NO leer archivos completos si ya tienes la línea.** `grep_search` te da `LineNumber` + `LineContent`. Usa esos datos directamente para `StartLine`/`EndLine` en los reemplazos.
+-4. **Un solo grep basta.** No hacer múltiples búsquedas variando capitalización si puedes usar `CaseInsensitive=true`.
+-5. **Ediciones multi-chunk.** Si un archivo tiene 2+ cambios, usa `multi_replace_file_content` con todos los chunks en una sola llamada.
+-6. **Verificación final con 1 grep.** Después de todos los edits, confirma con un solo `grep_search` que no quedan ocurrencias.
+-
+----
+-
+-# 🗺️ MAPA DE ARCHIVOS CLAVE (LEER ANTES DE BUSCAR)
+-
+-## Raíz
+-| Archivo | Propósito |
+-|---------|-----------|
+-| `package.json` | Dependencias, scripts (`dev`, `build`) |
+-| `index.html` | HTML shell, SEO meta tags, tema |
+-| `vite.config.js` | Plugins (React, Tailwind, PWA manifest) |
+-| `vercel.json` | Rewrites SPA para Vercel |
+-| `.env` / `.env.development` | Variables de entorno |
+-
+-## `src/`
+-| Archivo / Carpeta | Propósito |
+-|--------------------|-----------|
+-| `main.jsx` | Entrada React: StrictMode, GoogleOAuthProvider, BrowserRouter |
+-| `App.jsx` | Router principal (Routes + Suspense con lazy loading) |
+-| `App.css` | Estilos globales |
+-| `index.css` | Importación Tailwind |
+-
+-## `src/pages/` (Vistas de ruta)
+-| Carpeta | Ruta | Descripción |
+-|---------|------|-------------|
+-| `Directory/` | `/` | Directorio principal, lista de profesionales |
+-| `Profile/` | `/perfil/:slug` | Perfil individual de un profesional |
+-| `CreateBusiness/` | `/crear-negocio` | Formulario de creación de negocio |
+-| `MyBusinesses/` | `/mis-negocios` | Negocios del usuario autenticado |
+-| `AdminPanel/` | `/admin` | Panel de administración |
+-| `BusinessCardHolder/` | `/tarjetero` | Tarjetero del usuario |
+-
+-## `src/components/` (Piezas reutilizables)
+-| Archivo | Propósito |
+-|---------|-----------|
+-| `Header.jsx` | Cabecera global con logo y navegación |
+-| `BottomNavbar.jsx` | Navegación inferior móvil |
+-| `NavMenu.jsx` | Menú lateral / hamburguesa |
+-| `AuthModal.jsx` | Modal de login/registro (Google + email) |
+-| `DirectoryFilterBar.jsx` | Barra de filtros del directorio (categoría, ubicación, rating) |
+-| `ProfessionalCard.jsx` | Tarjeta de resumen de un profesional |
+-| `ReviewModal.jsx` | Modal de reseñas/calificaciones |
+-| `ModalVerificacion.jsx` | Modal de verificación de cuenta |
+-| `InstallPrompt.jsx` | Prompt de instalación PWA |
+-| `CatalogManager.jsx` | Gestor CRUD de productos del catálogo (subir, editar, eliminar). Límites: 10 general / 20 premium |
+-| `CatalogModal.jsx` | Vista pública del catálogo de un negocio (solo lectura, con "Ver más") |
+-| `CropModal.jsx` | Modal de recorte de imagen con `react-easy-crop`. Acepta `cropShape` prop: `"round"` (avatar) o `"rect"` (producto) |
+-
+-## `src/hooks/` (Lógica extraída)
+-| Archivo | Propósito |
+-|---------|-----------|
+-| `useDirectoryFilters.js` | Filtrado, búsqueda y agrupación del directorio |
+-| `useAccionesPerfil.jsx` | Acciones del perfil (compartir, contactar, guardar) |
+-
+-## `src/plantillas/` (Templates de perfil por profesión)
+-| Archivo | Propósito |
+-|---------|-----------|
+-| `PlantillaGenerica.jsx` | Template base (todas las profesiones) |
+-| `PlantillaAbogado.jsx` | Template especializado: Abogados |
+-| `PlantillaInmobiliaria.jsx` | Template especializado: Inmobiliarias |
+-
+-## `src/utils/`
+-| Archivo | Propósito |
+-|---------|-----------|
+-| `cropImage.js` | Utilidad de recorte de imágenes |
+-
+----
+-
+-# ⚡ REGLAS DE BÚSQUEDA RÁPIDA (CRÍTICO)
+-
+-1. **Archivo conocido → `view_file` directo.** NUNCA `grep_search` en un solo archivo.
+-2. **Patrón en muchos archivos → `grep_search` en `src/`** con `Includes` para filtrar (ej. `["*.jsx"]`).
+-3. **Lecturas paralelas:** Si necesitas revisar 3+ archivos, lánzalos TODOS en paralelo.
+-4. **Limita líneas:** Si solo necesitas ver imports/exports, usa `StartLine=1, EndLine=30`.
+-5. **Rutas → `App.jsx`.** Endpoints → `src/hooks/` o el componente que hace fetch.
+-6. **Estilos → `App.css`** para globales, inline Tailwind para componentes.
+-
+----
+-
+-# 🚨 REGLA DE SINCRONIZACIÓN BACKEND
+-Tienes acceso al backend en `c:\Users\jhona\Desktop\spinjob-backend`. Si un cambio frontend requiere un nuevo endpoint o campo en la API, ve al backend y aplícalo tú mismo. NO des un prompt para el backend.
+-
+-# 📦 FORMATO DE ENTREGA
+-- Comienza CADA bloque con: `// Archivo: src/ruta/Nombre.jsx`.
+-- PROHIBIDO `// ... resto del código`. Entrega archivos completos.
+-
+----
+-
+-# 🛡️ PREVENCIÓN DE ERRORES DE EDICIÓN Y SINTAXIS (CRÍTICO)
+-
+-1. **Verificar el contexto antes de reemplazar:** Cuando utilices `replace_file_content` o `multi_replace_file_content` para mover o eliminar bloques de código que terminan en etiquetas de cierre genéricas (ej. `</div>`, `)}`, `</>`), **OBLIGATORIAMENTE** debes hacer un `view_file` de unas 20-30 líneas hacia arriba para comprender exactamente qué bloque JSX estás cerrando.
+-2. **Evitar coincidir cierres genéricos ciegamente:** Es un error común incluir múltiples `</div>` en el `TargetContent` basándose solo en un `grep_search`. Si borras o te olvidas de reponer un `</div>` que correspondía a un div contenedor superior, romperás el árbol de React (Error común de Vite/Oxc: `Expected , or ) but found {` o `Unexpected token`).
+-3. **JSX y Renderizado Condicional:** Si vas a agregar un elemento (ej. un `<button>`) cerca de un bloque condicional como `{condicion && (<div.../>)}`, asegúrate de insertarlo DESPUÉS del `)}` o ANTES de la apertura `{condicion...`. Nunca lo insertes dentro de los paréntesis sin un wrapper (Fragment `<>...</>`).
+-4. **Reposición exacta:** Si tu `TargetContent` abarca cierres que no deseas eliminar, asegúrate de que el `ReplacementContent` los incluya nuevamente exactamente como estaban.
+-5. **Testing e Interacciones (CRÍTICO Y OBLIGATORIO):** 🚨 JAMÁS agregues un nuevo botón (`<button>`), enlace (`<a>`) u otro elemento interactivo sin incluirle su respectivo atributo `data-testid="nombre-descriptivo"`. Esta es la regla más olvidada, pero es VITAL para las pruebas E2E. Revisa tus propios cambios: si creas un elemento clickeable sin `data-testid`, ES UN ERROR GRAVE.
+\ No newline at end of file
+diff --git a/.agents/rules/disenador-ui.md b/.agents/rules/disenador-ui.md
+deleted file mode 100644
+index f98be61..0000000
+--- a/.agents/rules/disenador-ui.md
++++ /dev/null
+@@ -1,41 +0,0 @@
+----
+-trigger: always_on
+----
+-
+-# Estándares de Diseño UI/UX Premium
+-
+-## 🏎️ VELOCIDAD DE DISEÑO
+-1. **Decisión Proactiva:** No preguntes si usar azul o naranja. Usa la paleta `#1E3D51` (Primario) y `#B95221` (Acento) siempre.
+-2. **Componentes Atómicos:** Si un elemento visual se repite 2+ veces, extráelo a `src/components/` inmediatamente en paralelo con la edición de la página.
+-
+-## Componentes
+-1. **Reutilización:** Elementos visuales compartidos → `src/components/`.
+-2. **Renderizado seguro:** Proteger con `&&` o `?.`.
+-3. **Imágenes:** SIEMPRE `onError` con fallback a `ui-avatars.com`.
+-4. **Testing Hooks (OBLIGATORIO EXTREMO):** 🚨 SIEMPRE agrega atributos `data-testid="..."` a TODOS los elementos interactivos (botones, inputs, `<a>`, modales, iconos clickeables). ES UN ERROR GRAVE olvidar esto, ya que las pruebas E2E no deben depender de textos frágiles o selectores de clase.
+-
+-## Formularios
+-4. **Validación Regex:** Nombres `/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/`, celulares 8 dígitos (Bolivia).
+-5. **Feedback visual:** Mostrar `Loader2` en botones durante `isSubmitting`.
+-
+-## Layout Responsivo
+-6. **Mobile-first:** `BottomNavbar` solo en móvil, Grid responsivo en desktop.
+-7. **Grid/Flex:** Usar `gap` y `flex-wrap`.
+-8. **Grids en móvil:** En contenedores tipo catálogo/galería usar `grid-cols-1` en móvil, `sm:grid-cols-2` en tablet, `md:grid-cols-3` en desktop. NUNCA empezar con `grid-cols-2` en móvil (las tarjetas quedan muy pequeñas).
+-
+-## Estética Premium (Tailwind 4)
+-9. **Glassmorphism:** `bg-white/10 backdrop-blur-md border border-white/20`.
+-10. **Gradientes:** `bg-gradient-to-br from-[#1E3D51] to-[#B95221]`.
+-11. **Sombras:** `shadow-xl shadow-black/5`.
+-12. **Animaciones:** `transition-all duration-300 ease-out hover:scale-[1.02]`.
+-
+-## 📱 Reglas Mobile-First (CRÍTICO)
+-13. **NUNCA usar hover para acciones críticas.** En móvil no existe hover. Botones de Editar/Eliminar deben ser SIEMPRE visibles (usar iconos `Pencil` + `Trash2` en la esquina de la tarjeta). El overlay oscuro con hover solo aplica como efecto visual extra en desktop.
+-14. **z-index de modales > z-index de BottomNavbar.** `BottomNavbar` usa `z-40`. Modales usan `z-[100]`. Modales sobre modales (ej. CropModal dentro de CatalogManager) usan `z-[999]`. NUNCA igualar z-index entre navbar y modales.
+-15. **Textareas con auto-grow.** Para campos de descripción multiline, usar `useRef` + `useEffect` para ajustar `style.height` automáticamente según el contenido. Agregar `maxLength` y un contador visual `{value.length}/{max}`.
+-16. **Subida de imágenes → siempre pasar por CropModal.** Cualquier input de imagen debe abrir `CropModal` para que el usuario recorte antes de subir. Usar `cropShape="rect"` para productos/catálogo y `cropShape="round"` (default) para avatares.
+-17. **Modales anidados → Fragmentos React.** Si un modal (ej. CatalogManager) abre otro modal (ej. CropModal), el segundo debe renderizarse FUERA del div backdrop del primero usando `<>...</>` (Fragment). De lo contrario, clicks en el modal hijo (zoom, drag) propagarán y cerrarán el modal padre.
+-18. **Descripciones largas → "Ver más".** Usar `line-clamp-2` por defecto + botón "Ver más" / "Ver menos" que alterna la clase. Detectar si el texto es largo con `text.length > 70`.
+-19. **Prevenir Overflow en Flex/Grid:** SIEMPRE usa `w-full` y `overflow-hidden` o `min-w-0` en contenedores anidados dentro de grids/flexbox en listados de tarjetas. Esto evita que textos muy largos (a pesar de usar `truncate` o `line-clamp`) expandan el contenedor y rompan el diseño responsivo en móviles.
+-20. **Gráficas Responsivas (Recharts):** En gráficos con muchas líneas o series de datos (ej. comparadores), SIEMPRE configura la `<Legend>` en la parte inferior (`verticalAlign="bottom"`) con un margen/padding top, y asegura un alto mínimo estricto al `<ResponsiveContainer>` (ej. `minHeight={450}`). Dejar la leyenda arriba en móviles provocará que esta se envuelva y empuje la gráfica ocultando las líneas.
+-21. **Flexbox en Cabeceras de Controles:** En barras de herramientas que contengan inputs nativos (fechas, calendarios, buscadores) y botones de acción (ej. "Descargar"), SIEMPRE usar `flex-wrap` en el contenedor principal. Los inputs nativos en pantallas pequeñas sin wrap desbordan la pantalla hacia la derecha, sacando los botones críticos fuera del área visible del móvil.
+\ No newline at end of file
+diff --git a/.agents/skills/crear-componente/SKILL.md b/.agents/skills/crear-componente/SKILL.md
+new file mode 100644
+index 0000000..3f73228
+--- /dev/null
++++ b/.agents/skills/crear-componente/SKILL.md
+@@ -0,0 +1,25 @@
++---
++name: crear-componente
++description: Genera un nuevo componente UI React respetando el branding de Tarjetoso y el límite estricto de 300 líneas.
++---
++
++# Skill: Crear Componente
++
++## Cuándo usar
++- "Agrega un componente para mostrar X", "Crea una tarjeta de Y", "Haz un modal para Z".
++
++## Pasos
++
++### 1. Ubicación y Estructura
++- Crea el archivo en `src/components/` o en una subcarpeta si pertenece a una vista específica (ej. `src/pages/AdminPanel/components/`).
++- **LÍMITE ESTRICTO:** El componente NO debe exceder las 300 líneas. Si parece que lo hará, divídelo en subcomponentes antes de empezar.
++
++### 2. Diseño y Branding (Tarjetoso)
++- Usa los colores oficiales: `#1E3D51` y `#B95221`.
++- Aplica Tailwind 4: Usa flex/grid responsivos (mobile-first).
++- Glassmorphism: `bg-white/10 backdrop-blur-md` si el diseño lo amerita.
++- Para avatares/imágenes, agrega `onError` de `ui-avatars.com`.
++
++### 3. Código y Testing
++- Asegura que todos los `<button>`, `<a>`, e inputs tengan `data-testid="nombre-del-elemento"`.
++- Protege los renderizados con `?.` o `&&`.
+diff --git a/.agents/skills/crear-modulo-api/SKILL.md b/.agents/skills/crear-modulo-api/SKILL.md
+index 10542e6..4118e3e 100644
+--- a/.agents/skills/crear-modulo-api/SKILL.md
++++ b/.agents/skills/crear-modulo-api/SKILL.md
+@@ -10,31 +10,27 @@ description: Genera un módulo API completo (Modelo SQLAlchemy + Esquemas Pydant
+ 
+ ## Pre-vuelo (leer en paralelo ANTES de escribir código)
+ 1. `database.py` → Confirmar `pool_pre_ping=True`, `pool_recycle=300`.
+-2. `auth.py` → Si involucra auth, confirmar que usa `bcrypt` (NO `passlib`).
+-3. `requirements.txt` → Confirmar que NO contiene `passlib`.
+-4. `models.py` → Ver modelos existentes para mantener consistencia.
+-5. `schemas.py` → Ver esquemas existentes.
++2. `auth.py` → Confirmar que usa `bcrypt` (NO `passlib`).
++3. `models.py` → Ver modelos existentes para mantener consistencia.
++4. `schemas.py` → Ver esquemas existentes.
+ 
+ ## Pasos
+ 
++### 0. Límite de Tamaño
++- **REGLA:** Ningún archivo (`models.py`, routers, schemas) generado debe agregar más de 300 líneas a un archivo existente. Si el router es complejo, extrae la lógica a `services/`.
++
+ ### 1. Modelo (`models.py`)
+ ```python
+ class NuevaEntidad(Base):
+     __tablename__ = "nueva_entidades"  # plural
+     id = Column(String, primary_key=True, default=generate_uuid, index=True)
+     
+-    # ... campos propios de la entidad ...
+     # REGLA CRÍTICA DE NORMALIZACIÓN:
+-    # Si esta entidad pertenece o es creada por un usuario, SIEMPRE usa Foreign Key.
+-    # NUNCA uses columnas "user_phone" o "user_name".
+     user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+-    
+-    # Relaciones
+     user = relationship("User")
+     
+     @property
+     def user_name(self):
+-        """Propiedad derivada para evitar duplicidad de datos"""
+         return self.user.name if self.user else "Anónimo"
+ ```
+ 
+@@ -62,7 +58,6 @@ router = APIRouter(prefix="/nueva-entidad", tags=["NuevaEntidad"])
+ @router.post("/", response_model=EntidadResponse)
+ def create(data: EntidadCreate, current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+     try:
+-        # Extraemos datos del current_user, NO del payload
+         entity = NuevaEntidad(**data.dict(), user_id=current_user.id)
+         db.add(entity)
+         db.commit()
+@@ -80,10 +75,9 @@ app.include_router(nueva_entidad_router)
+ ```
+ 
+ ### 5. Sincronizar frontend
+-Si el endpoint será consumido por el frontend, crea o modifica el componente React correspondiente en `spinjob-fronted` conectando mediante `fetchAuth` usando las reglas definidas.
++Si el endpoint será consumido por el frontend, crea o modifica el componente React conectando mediante `fetchAuth`.
+ 
+ ### 6. Verificar
+ ```bash
+ cd c:\Users\jhona\Desktop\spinjob-backend && uvicorn main:app --reload
+ ```
+-Probar endpoints en `/docs` (Swagger UI).
+diff --git a/.agents/skills/crear-planilla/SKILL.md b/.agents/skills/crear-planilla/SKILL.md
+index 4219491..92c8d88 100644
+--- a/.agents/skills/crear-planilla/SKILL.md
++++ b/.agents/skills/crear-planilla/SKILL.md
+@@ -5,13 +5,6 @@ description: Genera una nueva plantilla de perfil profesional basada en los est
+ 
+ # Skill: Crear Plantilla Profesional
+ 
+-// turbo-all
+-
+-## 🏎️ REGLAS DE VELOCIDAD
+-1. **Copia y Pega Masivo:** Lee `PlantillaGenerica.jsx` y crea el nuevo archivo con todo el contenido de una vez.
+-2. **Edición en Lote:** Registra la plantilla en `Profile.jsx` y crea el archivo `.jsx` en el mismo turno.
+-3. **No Preguntar Estilos:** Usa la paleta Tarjetoso (`#1E3D51`, `#B95221`) por defecto.
+-
+ ## Cuándo usar
+ - Usuario pide: "Crea una plantilla de Médico/Abogado/etc."
+ 
+@@ -24,13 +17,15 @@ description: Genera una nueva plantilla de perfil profesional basada en los est
+ 
+ ### 1. Crear el archivo
+ - Ruta: `src/plantillas/Plantilla[Profesion].jsx`.
++- **LÍMITE ESTRICTO:** La plantilla NO debe exceder las 300 líneas.
+ - Usar `write_to_file` con el código completo.
+ 
+-### 2. Diseño premium
++### 2. Diseño premium (Tarjetoso)
++- Usa los colores base (`#1E3D51`, `#B95221`).
+ - Glassmorphism, gradientes, sombras profundas.
+ - Avatar con `onError` fallback.
+ - Secciones protegidas con `?.`.
+-- 🚨 **CRÍTICO - TESTING:** SIEMPRE incluir atributos `data-testid="..."` en botones, enlaces (`<a>`), inputs y cualquier elemento interactivo. JAMÁS crear un botón sin esto.
++- 🚨 **CRÍTICO - TESTING:** SIEMPRE incluir atributos `data-testid="..."` en botones e inputs interactivos. JAMÁS crear un botón sin esto.
+ 
+ ### 3. Registro Express
+ - Editar `src/pages/Profile/Profile.jsx` usando `multi_replace_file_content` para agregar el import y el caso en el renderizado.
+diff --git a/.agents/workflows/crear-pagina.md b/.agents/workflows/crear-pagina.md
+index ad0c8f0..cecc1ae 100644
+--- a/.agents/workflows/crear-pagina.md
++++ b/.agents/workflows/crear-pagina.md
+@@ -4,17 +4,16 @@ description: Crear una nueva página completa (vista de ruta) siguiendo los est
+ 
+ # Workflow: Crear Nueva Página (/crear-pagina)
+ 
+-// turbo-all
+-
+ ## 1. Leer App.jsx (para conocer imports y rutas existentes)
+ 
+-```
++```bash
+ cd c:\Users\jhona\Desktop\spinjob-fronted && powershell -Command "Get-Content src/App.jsx | Select-Object -First 40"
+ ```
+ 
+ ## 2. Crear carpeta y componente
+ 
+-Crear `src/pages/[NombrePagina]/[NombrePagina].jsx` con la estructura base:
++Crear `src/pages/[NombrePagina]/[NombrePagina].jsx` con la estructura base.
++**REGLA:** El componente NO debe exceder las 300 líneas.
+ 
+ ```jsx
+ // Archivo: src/pages/[NombrePagina]/[NombrePagina].jsx
+@@ -42,8 +41,6 @@ Agregar en `src/App.jsx`:
+ 1. Lazy import: `const NombrePagina = lazy(() => import('./pages/NombrePagina/NombrePagina'));`
+ 2. Route: `<Route path="/ruta" element={<NombrePagina />} />`
+ 
+-> Usar `multi_replace_file_content` para agregar ambos cambios (import + route) en 1 sola llamada.
+-
+ ## 4. Agregar navegación (si aplica)
+ 
+ Si la página debe ser accesible desde navegación global, editar EN PARALELO:
+@@ -59,6 +56,6 @@ Si la página consume un endpoint:
+ 
+ ## 6. Verificar
+ 
+-```
++```bash
+ cd c:\Users\jhona\Desktop\spinjob-fronted && npm run build
+ ```
+diff --git a/.agents/workflows/google-auth.md b/.agents/workflows/google-auth.md
+deleted file mode 100644
+index 2e4c5e0..0000000
+--- a/.agents/workflows/google-auth.md
++++ /dev/null
+@@ -1,58 +0,0 @@
+----
+-description: Cómo implementar Google Sign-In correctamente en Tarjetoso (evitar bugs conocidos)
+----
+-
+-# Google Auth — Patrón Correcto para Tarjetoso
+-
+-// turbo-all
+-
+-## 🏎️ REGLAS DE VELOCIDAD
+-1. **Direct Edit:** Si necesitas corregir un error de Auth, no pidas confirmación, aplica el parche directamente usando `multi_replace_file_content`.
+-2. **Checklist Paralelo:** Verifica `.env`, `App.jsx` y el componente de Auth en una sola ráfaga de `view_file` paralelo.
+-
+-## Arquitectura Actual
+-- **Librería:** `@react-oauth/google` (`GoogleOAuthProvider` en `main.jsx`).
+-- **Endpoint backend:** `POST /auth/google` espera `{ google_token: "<JWT credential>" }`.
+-- **Botón:** Custom HTML/CSS en español (NO usa el componente `<GoogleLogin>`).
+-- **API usada:** `window.google.accounts.id.initialize()` + `.prompt()`.
+-
+-## ⚠️ Bugs Conocidos
+-
+-| Bug | Causa | Solución |
+-|-----|-------|----------|
+-| Backend rechaza token `ya29...` | `useGoogleLogin()` devuelve `access_token`, no `credential` | Usar API nativa GSI, NO `useGoogleLogin()` |
+-| `initialize() called multiple times` | `<GoogleLogin>` + StrictMode | Usar botón custom + API nativa |
+-| `contentType undefined` crash | Script GSI duplicado | NO agregar `<script>` manual en `index.html` |
+-| Popup de Google no aparece | Origen no autorizado | Agregar origin en Google Cloud Console → Credentials |
+-| `width` crash en `<GoogleLogin>` | Espera número, no string | Pasar `width={400}`, no `width="100%"` |
+-
+-## Implementación Correcta
+-
+-```jsx
+-// Botón custom que usa API nativa GSI
+-<button onClick={() => {
+-  window.google.accounts.id.initialize({
+-    client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+-    callback: (response) => handleGoogleSuccess({ credential: response.credential }),
+-  });
+-  window.google.accounts.id.prompt();
+-}}>
+-  Iniciar sesión con Google
+-</button>
+-
+-// Handler envía credential (JWT) al backend
+-const handleGoogleSuccess = async (credentialResponse) => {
+-  const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/google`, {
+-    method: 'POST',
+-    headers: { 'Content-Type': 'application/json' },
+-    body: JSON.stringify({ google_token: credentialResponse.credential })
+-  });
+-};
+-```
+-
+-## Checklist Pre-Deploy
+-- [ ] `VITE_GOOGLE_CLIENT_ID` en `.env` y `.env.production`
+-- [ ] Origen de producción en Google Cloud Console
+-- [ ] NO hay `<script>` manual de GSI en `index.html`
+-- [ ] Botón usa API nativa, NO `<GoogleLogin>` ni `useGoogleLogin()`
+-- [ ] Se envía `credential` (JWT), NO `access_token` (ya29...)
+diff --git a/.agents/workflows/verificar-backend.md b/.agents/workflows/verificar-backend.md
+index a8625b4..26873bc 100644
+--- a/.agents/workflows/verificar-backend.md
++++ b/.agents/workflows/verificar-backend.md
+@@ -4,8 +4,6 @@ description: Verificación pre-deploy del backend — Revisa database.py, auth.p
+ 
+ # Workflow: Verificar Backend (/verificar-backend)
+ 
+-// turbo-all
+-
+ Ejecuta esta checklist antes de deploy o al terminar un feature complejo que involucró base de datos.
+ 
+ ## 1. Resiliencia de conexión (Neon DB)
+@@ -33,7 +31,7 @@ Confirmar que:
+ ## 4. Gestión Estricta de Esquemas de BD (Zero Orphans & Normalization)
+ 
+ Si modificaste `models.py`:
+-- **¿Renombraste o eliminaste una columna?**: Revisa inmediatamente si dejaste columnas huérfanas en Neon DB. Ejecuta un script de limpieza de migración en Python usando `text('ALTER TABLE x DROP COLUMN y')`. Asegúrate de que tu script **no contenga emojis** para no causar problemas de `UnicodeEncodeError`.
++- **¿Renombraste o eliminaste una columna?**: Revisa inmediatamente si dejaste columnas huérfanas en Neon DB. Ejecuta un script de limpieza de migración en Python usando `text('ALTER TABLE x DROP COLUMN y')`. Asegúrate de que tu script no contenga emojis para no causar problemas de `UnicodeEncodeError`.
+ - **¿Usas Foreign Keys?**: Revisa en los modelos actualizados si estás guardando datos redundantes (como `user_phone` o `user_name`). Transfórmalos a relaciones usando `user_id = Column(String, ForeignKey("users.id"))`.
+ 
+ ## 5. Manejo de errores en escrituras
+diff --git a/.agents/workflows/verificar-frontend.md b/.agents/workflows/verificar-frontend.md
+index 501ccfc..a76c25e 100644
+--- a/.agents/workflows/verificar-frontend.md
++++ b/.agents/workflows/verificar-frontend.md
+@@ -4,13 +4,11 @@ description: Verificación rápida del frontend — Revisa build, imports y estr
+ 
+ # Workflow: Verificar Frontend (/verificar-frontend)
+ 
+-// turbo-all
+-
+ Ejecuta esta checklist antes de hacer deploy o al terminar un feature.
+ 
+ ## 1. Build limpio
+ 
+-```
++```bash
+ cd c:\Users\jhona\Desktop\spinjob-fronted && npm run build
+ ```
+ 
+@@ -40,7 +38,7 @@ Abre `vite.config.js` y confirma que `VitePWA.manifest` tiene:
+ 
+ ## 5. Buscar referencias a marca antigua
+ 
+-```
++```bash
+ cd c:\Users\jhona\Desktop\spinjob-fronted && npx -y grep -ri "spinjob" src/ --include="*.jsx" --include="*.js"
+ ```
+ 
+@@ -48,38 +46,36 @@ Si aparecen resultados, reemplazar por "Tarjetoso".
+ 
+ ## 6. Verificar que no hay God Components
+ 
+-```
+-cd c:\Users\jhona\Desktop\spinjob-fronted && powershell -Command "Get-ChildItem -Recurse src -Include *.jsx,*.js | Where-Object { (Get-Content $_.FullName | Measure-Object -Line).Lines -gt 400 } | ForEach-Object { Write-Output \"$($_.FullName): $((Get-Content $_.FullName | Measure-Object -Line).Lines) líneas\" }"
++```bash
++cd c:\Users\jhona\Desktop\spinjob-fronted && powershell -Command "Get-ChildItem -Recurse src -Include *.jsx,*.js | Where-Object { (Get-Content $_.FullName | Measure-Object -Line).Lines -gt 300 } | ForEach-Object { Write-Output \"$($_.FullName): $((Get-Content $_.FullName | Measure-Object -Line).Lines) líneas\" }"
+ ```
+ 
+-Si aparecen archivos con más de 400 líneas, considerar refactorizarlos.
++Si aparecen archivos con más de 300 líneas, debes refactorizarlos a subcomponentes o custom hooks.
+ 
+ ## 7. Verificar dev server
+ 
+-```
++```bash
+ cd c:\Users\jhona\Desktop\spinjob-fronted && npm run dev
+ ```
+ 
+ Si el servidor arranca sin warnings críticos, la verificación pasó.
+ 
+-## 8. Preservación e Integridad de Módulos (Ediciones de Múltiples Líneas)
++## 8. Preservación e Integridad de Módulos
+ 
+ Al realizar reemplazos en lote o editar cabeceras de archivos para añadir imports (`import ...`), confirma siempre:
+-- **No eliminar imports colaterales necesarios** (e.g., `useState`, `useEffect` o hooks del sistema).
+-- **No duplicar imports** del mismo módulo.
+-- **Mantener el formato internacional dinámico**: NUNCA hardcodear prefijos de países (`591`) o nombres de países (`Bolivia`) como fallbacks estáticos en código utilitario. Utiliza siempre la resolución dinámica basada en la lista de configuración centralizada (`COUNTRIES`).
++- No eliminar imports colaterales necesarios.
++- No duplicar imports.
++- Mantener el formato internacional dinámico (NO hardcodear países).
+ 
+-## 9. Compatibilidad de Terminal Windows (Scripts de Saneamiento/Migración)
++## 9. Compatibilidad de Terminal Windows
+ 
+ Si creas scripts en Python, Node o Bash de utilidad rápida que se ejecuten en la terminal de Windows:
+-- **NO utilices emojis ni caracteres Unicode complejos** en los prints o salidas estándar. La terminal de Windows con codificación nativa `cp1252` fallará arrojando `UnicodeEncodeError`. Utiliza texto plano seguro como `[INFO]`, `[SUCCESS]`, `[WARN]` o `[ERROR]`.
++- NO utilices emojis ni caracteres Unicode complejos en los prints o salidas estándar.
+ 
+ ## 10. Verificación de Testing (data-testid)
+ 
+-Busca cualquier botón o enlace interactivo nuevo y asegúrate de que tiene `data-testid`. Si tú mismo has modificado o creado componentes recientemente, es **obligatorio** que verifiques esto.
++Busca cualquier botón o enlace interactivo nuevo y asegúrate de que tiene `data-testid`.
+ 
+-```
++```bash
+ cd c:\Users\jhona\Desktop\spinjob-fronted && npx -y grep -rn "<button" src/ --include="*.jsx" | grep -v "data-testid"
+ ```
+-
+-Si encuentras botones interactivos o enlaces sin `data-testid`, debes agregarlos antes de terminar.
+diff --git a/DOCUMENTACION.md b/DOCUMENTACION.md
+index fd17dbe..01a2127 100644
+--- a/DOCUMENTACION.md
++++ b/DOCUMENTACION.md
+@@ -34,7 +34,7 @@ El sistema relacional se basa en 6 tablas principales (`models.py`):
+ ## 5. Arquitectura del Frontend (React)
+ ### 5.1. Componentes Principales
+ - **Directory.jsx:** Landing page y vista principal del directorio. Integrado profundamente con React Router para soportar URLs amigables (ej. `/directorio/:categoria/:estado`). Inyecta etiquetas SEO dinámicas según los parámetros de la URL y renderiza tarjetas usando `ProfessionalCard`.
+-- **Profile.jsx:** Renderizado dinámico (`/perfil/:slug`). Inyecta SEO dinámico (JSON-LD) para Google. Decide qué plantilla renderizar (PlantillaGenerica, PlantillaInmobiliaria, PlantillaAbogado) basándose en si el negocio es `premium` y analizando su `subcategory`. Registra automáticamente interacciones de "Visita Perfil" en base de datos.
++- **Profile.jsx:** Renderizado dinámico (`/perfil/:slug`). Inyecta SEO dinámico (JSON-LD) para Google. Registra automáticamente interacciones de "Visita Perfil" en base de datos.
+ - **CreateBusiness.jsx:** Formulario de registro. Integra `navigator.geolocation` para generar enlaces de Google Maps. Solo permite el envío si el usuario es `is_verified` (comprobado en LocalStorage y validado contra el backend).
+ - **AdminPanel.jsx:** Dashboard para usuarios `is_admin`. Permite revisar formularios crudos (mediante `BusinessDetailsModal`), aprobar/rechazar negocios y verificar usuarios manualmente.
+ - **MyBusinesses.jsx & BusinessCardHolder.jsx:** Paneles de usuario para gestionar sus propias creaciones y sus perfiles guardados favoritos.
+diff --git a/src/pages/Profile/Profile.jsx b/src/pages/Profile/Profile.jsx
+index ddd8a48..f63fe2d 100644
+--- a/src/pages/Profile/Profile.jsx
++++ b/src/pages/Profile/Profile.jsx
+@@ -7,8 +7,6 @@ import AuthModal from '../../components/AuthModal';
+ // 📥 IMPORTACIÓN DE PLANTILLAS
+ // ==========================================
+ import PlantillaGenerica from '../../plantillas/PlantillaGenerica';
+-import PlantillaInmobiliaria from '../../plantillas/PlantillaInmobiliaria';
+-import PlantillaAbogado from '../../plantillas/PlantillaAbogado';
+ 
+ function Perfil() {
+   const { slug } = useParams();
+@@ -171,22 +169,6 @@ function Perfil() {
+ 
+   const volverAtras = () => navigate("/");
+ 
+-  // Lógica para determinar la plantilla automáticamente
+-  const normalizeText = (text) => text ? text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : '';
+-  const esPremium = profesional?.premium === true;
+-
+-  let tipoPlantilla = 'generica';
+-  if (esPremium) {
+-    // Buscamos en subcategoría (singular y plural) y en el título como respaldo
+-    const searchArea = normalizeText(`${profesional.subcategory || ''} ${profesional.subcategories || ''} ${profesional.title || ''}`);
+-    
+-    if (searchArea.includes('abogad') || searchArea.includes('legal') || searchArea.includes('derecho')) {
+-      tipoPlantilla = 'abogado';
+-    } else if (searchArea.includes('inmo') || searchArea.includes('casa') || searchArea.includes('propied')) {
+-      tipoPlantilla = 'inmobiliaria';
+-    }
+-  }
+-
+   return (
+     <>
+       {profesional && (
+@@ -202,25 +184,11 @@ function Perfil() {
+       )}
+       
+       {/* RENDERIZADO DE PLANTILLAS */}
+-      {tipoPlantilla === 'inmobiliaria' ? (
+-        <PlantillaInmobiliaria
+-          profesional={profesional}
+-          volverAtras={volverAtras}
+-          onProtectedAction={handleProtectedAction}
+-        />
+-      ) : tipoPlantilla === 'abogado' ? (
+-        <PlantillaAbogado
+-          profesional={profesional}
+-          volverAtras={volverAtras}
+-          onProtectedAction={handleProtectedAction}
+-        />
+-      ) : (
+-        <PlantillaGenerica
+-          profesional={profesional}
+-          volverAtras={volverAtras}
+-          onProtectedAction={handleProtectedAction}
+-        />
+-      )}
++      <PlantillaGenerica
++        profesional={profesional}
++        volverAtras={volverAtras}
++        onProtectedAction={handleProtectedAction}
++      />
+ 
+       {/* ==========================================
+           MODAL DE REGISTRO REUTILIZABLE (TEMA OSCURO)
+diff --git a/src/plantillas/PlantillaAbogado.jsx b/src/plantillas/PlantillaAbogado.jsx
+deleted file mode 100644
+index 88462a5..0000000
+--- a/src/plantillas/PlantillaAbogado.jsx
++++ /dev/null
+@@ -1,328 +0,0 @@
+-// Archivo: src/plantillas/PlantillaAbogado.jsx
+-import React, { useEffect, useState } from 'react';
+-import { 
+-  LogOut, DoorOpen, X, Share2, QrCode, Star, ArrowLeft, 
+-  Phone, MessageCircle, MapPin, Globe, Facebook, Instagram, Linkedin, Bookmark, ShoppingBag, Download
+-} from 'lucide-react';
+-import { QRCodeCanvas } from 'qrcode.react';
+-import useAccionesPerfil from '../hooks/useAccionesPerfil';
+-import ReviewModal from '../components/ReviewModal';
+-import ModalVerificacion from '../components/ModalVerificacion';
+-import InlineCatalogCarousel from '../components/InlineCatalogCarousel';
+-import { cleanWhatsappNumber } from '../utils/phone';
+-
+-export default function PlantillaAbogado({ profesional, volverAtras, onProtectedAction }) {
+-  const [loaded, setLoaded] = useState(false);
+-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+-  const isLongDescription = profesional?.description?.length > 70;
+-
+-  // 🚀 Lógica de negocio centralizada
+-  const {
+-    mostrarQR, toggleQR, handleDownloadQR, mostrarCalificacion, isLoggedIn, userName,
+-    handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion, handleLogout,
+-    mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview,
+-    mostrarModalVerificacion, setMostrarModalVerificacion,
+-    isSaved, isSaving, toggleSaveCard
+-  } = useAccionesPerfil(profesional, onProtectedAction);
+-
+-  useEffect(() => {
+-    const timer = setTimeout(() => setLoaded(true), 100);
+-    return () => clearTimeout(timer);
+-  }, []);
+-
+-  if (!profesional) return null;
+-
+-  const TiktokIcon = ({ className }) => (
+-    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+-      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+-    </svg>
+-  );
+-
+-  const WhatsappIcon = ({ className }) => (
+-    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+-    </svg>
+-  );
+-
+-  // Parsear whatsapp_numbers (JSON array) con fallback al campo viejo
+-  let waNumbers = [];
+-  try { waNumbers = JSON.parse(profesional?.whatsapp_numbers || '[]'); } catch { waNumbers = []; }
+-  if (waNumbers.length === 0 && profesional?.whatsapp) waNumbers = [profesional.whatsapp];
+-
+-  // 📱 Mapeo de redes sociales incluyendo el teléfono como un icono estándar
+-  const enlacesSociales = [
+-    { id: 'phone', icon: Phone, url: profesional.phone ? `tel:${profesional.phone.replace(/[^0-9]/g, '')}` : null, label: 'Llamar' },
+-    ...waNumbers.map((num, idx) => {
+-      const clean = cleanWhatsappNumber(num, profesional?.country || 'Bolivia');
+-      return { id: `whatsapp-${idx}`, icon: WhatsappIcon, url: clean ? `https://wa.me/${clean}` : null, label: waNumbers.length > 1 ? `WhatsApp ${idx + 1}` : 'WhatsApp' };
+-    }),
+-    { id: 'ubicacion', icon: MapPin, url: profesional.ubicacion_url, label: 'Ubicación' },
+-    { id: 'website', icon: Globe, url: profesional.website, label: 'Sitio Web' },
+-    { id: 'facebook', icon: Facebook, url: profesional.facebook, label: 'Facebook' },
+-    { id: 'instagram', icon: Instagram, url: profesional.instagram, label: 'Instagram' },
+-    { id: 'tiktok', icon: TiktokIcon, url: profesional.tiktok, label: 'TikTok' },
+-    { id: 'linkedin', icon: Linkedin, url: profesional.linkedin, label: 'LinkedIn' }
+-  ].filter(link => link.url);
+-
+-  return (
+-    <div className={`min-h-[100dvh] flex flex-col relative overflow-hidden bg-[#121212] text-white transition-opacity duration-700 ${loaded ? 'opacity-100' : 'opacity-0'}`}>
+-      
+-      <style>{`
+-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap');
+-        .font-seasons { font-family: 'Playfair Display', 'Times New Roman', Times, serif; }
+-        .bg-pattern {
+-            background-image: radial-gradient(#E9CE3F 0.5px, transparent 0.5px);
+-            background-size: 24px 24px;
+-            opacity: 0.03;
+-        }
+-      `}</style>
+-
+-      {/* Fondos y gradientes */}
+-      <div className="absolute inset-0 z-0 pointer-events-none">
+-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#E9CE3F]/5 rounded-full blur-[100px]"></div>
+-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#C2A562]/5 rounded-full blur-[100px]"></div>
+-        <div className="absolute inset-0 bg-pattern"></div>
+-      </div>
+-
+-      <div className="relative z-10 flex-1 flex flex-col items-center w-full max-w-xl mx-auto px-6 py-8">
+-        
+-        {/* Barra Superior con Logout Pill */}
+-        <div className="w-full flex justify-between items-start mb-6">
+-          <button 
+-            onClick={volverAtras}
+-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] border border-[#E9CE3F]/20 text-gray-300 hover:text-[#6A431F] transition-all shadow-md font-medium text-sm"
+-          >
+-            <DoorOpen size={18} />
+-            <span>Salir del negocio</span>
+-          </button>
+-          
+-          <div className="flex flex-col items-end gap-3">
+-            {isLoggedIn ? (
+-              <button 
+-                onClick={handleLogout}
+-                className="flex items-center gap-2 bg-[#1a1a1a] border border-[#E9CE3F]/30 p-1 pr-3 rounded-full hover:border-red-400/50 transition-all shadow-lg group"
+-              >
+-                <div className="w-8 h-8 rounded-full bg-[#C2A562] flex items-center justify-center text-[#121212] font-bold text-sm">
+-                  {userName ? userName.charAt(0).toUpperCase() : 'U'}
+-                </div>
+-                <LogOut size={16} className="text-gray-400 group-hover:text-red-400 transition-colors" />
+-              </button>
+-            ) : (
+-              <button 
+-                onClick={() => onProtectedAction(null)} 
+-                className="h-10 px-4 rounded-full bg-[#1a1a1a] border border-[#E9CE3F]/20 flex items-center justify-center text-[#E9CE3F] text-xs font-bold uppercase tracking-widest gap-2 shadow-md"
+-              >
+-                <DoorOpen size={16} /> Ingresar
+-              </button>
+-            )}
+-            
+-            <div className="flex gap-3">
+-              <button onClick={toggleQR} className="w-10 h-10 rounded-full bg-[#1a1a1a] border border-[#E9CE3F]/20 flex items-center justify-center text-gray-300 hover:text-[#6A431F] shadow-md">
+-                <QrCode size={16} />
+-              </button>
+-              <button onClick={() => handleShare(window.location.href)} className="w-10 h-10 rounded-full bg-[#1a1a1a] border border-[#E9CE3F]/20 flex items-center justify-center text-gray-300 hover:text-[#6A431F] shadow-md">
+-                <Share2 size={16} />
+-              </button>
+-            </div>
+-          </div>
+-        </div>
+-
+-        {/* ⚖️ LOGO DE BALANZA RESTAURADO */}
+-        <div className="mb-4">
+-            <svg className="w-16 h-16 text-[#E9CE3F]" viewBox="0 0 100 100" fill="currentColor">
+-                <path d="M 30 88 L 70 88 L 73 94 L 27 94 Z" /><path d="M 35 82 L 65 82 L 68 88 L 32 88 Z" /><path d="M 42 76 L 58 76 L 61 82 L 39 82 Z" /><rect x="47" y="20" width="6" height="56" /><polygon points="50,8 43,20 57,20" /><rect x="15" y="22" width="70" height="3" rx="1.5" />
+-                <line x1="17" y1="24" x2="5" y2="55" stroke="currentColor" strokeWidth="1.5" /><line x1="17" y1="24" x2="17" y2="55" stroke="currentColor" strokeWidth="1.5" /><line x1="17" y1="24" x2="29" y2="55" stroke="currentColor" strokeWidth="1.5" /><path d="M 3 55 Q 17 68 31 55 Z" />
+-                <line x1="83" y1="24" x2="71" y2="55" stroke="currentColor" strokeWidth="1.5" /><line x1="83" y1="24" x2="83" y2="55" stroke="currentColor" strokeWidth="1.5" /><line x1="83" y1="24" x2="95" y2="55" stroke="currentColor" strokeWidth="1.5" /><path d="M 69 55 Q 83 68 97 55 Z" />
+-            </svg>
+-        </div>
+-
+-        {/* Textos Principales sin cursiva */}
+-        <div className="text-center mb-10 w-full px-2">
+-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 font-seasons tracking-wide">
+-            {profesional.name}
+-          </h1>
+-          <h2 className="text-sm md:text-base text-[#E9CE3F] uppercase tracking-[0.2em] font-medium mb-6 font-seasons">
+-            {profesional.title}
+-          </h2>
+-          
+-          {(profesional.experience_years || profesional.credentials) && (
+-            <div className="flex flex-wrap justify-center gap-3 mb-6">
+-              {profesional.experience_years && (
+-                <div className="bg-[#1a1a1a] border border-[#F9842C]/30 text-gray-300 px-3 py-1.5 rounded-full text-xs font-seasons flex items-center gap-1.5 shadow-sm">
+-                  <Star size={12} className="text-[#F9842C]" /> {profesional.experience_years} Años de Experiencia
+-                </div>
+-              )}
+-              {profesional.credentials && (
+-                <div className="bg-[#1a1a1a] border border-[#E9CE3F]/30 text-gray-300 px-3 py-1.5 rounded-full text-xs font-seasons flex items-center gap-1.5 shadow-sm">
+-                  <Bookmark size={12} className="text-[#E9CE3F]" /> Matrícula/Credencial: {profesional.credentials}
+-                </div>
+-              )}
+-            </div>
+-          )}
+-
+-          {profesional.description && (
+-            <div className="relative">
+-              <p className={`text-gray-400 text-sm md:text-base leading-relaxed max-w-sm mx-auto font-seasons whitespace-pre-line px-2 ${!isDescriptionExpanded ? 'line-clamp-2' : ''}`}>
+-                {profesional.description}
+-              </p>
+-              {isLongDescription && (
+-                <button 
+-                  onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+-                  className="text-[#E9CE3F] hover:text-white font-seasons font-medium text-sm mt-2 focus:outline-none"
+-                >
+-                  {isDescriptionExpanded ? 'Ver menos' : 'Ver más'}
+-                </button>
+-              )}
+-            </div>
+-          )}
+-        </div>
+-
+-        {/* Avatar */}
+-        <div className="relative w-36 h-36 mb-10">
+-          <div className="absolute inset-0 rounded-full border border-[#E9CE3F]/50 animate-[spin_10s_linear_infinite]"></div>
+-          {profesional.image ? (
+-            <img 
+-              src={profesional.image} 
+-              alt={profesional.name} 
+-              className="w-full h-full object-cover rounded-full p-3 bg-[#121212]"
+-              onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name)}&background=1a1a1a&color=E9CE3F&size=256`; }}
+-            />
+-          ) : (
+-            <div className="w-full h-full rounded-full p-3 bg-[#121212] flex items-center justify-center">
+-              <span className="text-4xl text-[#E9CE3F] font-seasons font-bold">{profesional.name?.[0]}</span>
+-            </div>
+-          )}
+-          {/* BOTÓN GUARDAR (Top Right de la imagen) */}
+-          <button 
+-            onClick={toggleSaveCard}
+-            disabled={isSaving}
+-            className={`absolute top-0 -right-2 w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-sm z-30 ${isSaved ? 'bg-[#6A431F] text-white border-transparent' : 'bg-[#1a1a1a] text-gray-300 border border-[#E9CE3F]/50 hover:text-[#6A431F] hover:bg-[#222]'}`}
+-            title={isSaved ? "Quitar del tarjetero" : "Guardar en mi tarjetero"}
+-          >
+-            <Bookmark size={18} className={isSaved ? 'fill-white' : ''} />
+-          </button>
+-          {/*
+-          {profesional.verified && (
+-            <div className="absolute bottom-2 right-2 bg-[#E9CE3F] text-[#121212] p-1.5 rounded-full shadow-lg">
+-              <Star size={14} className="fill-current" />
+-            </div>
+-          )}
+-          */}
+-        </div>
+-
+-        {/* Contacto Digital */}
+-        <div className="w-full max-w-sm">
+-          <h3 className="text-center text-xs text-[#757778] uppercase tracking-[0.3em] mb-8 font-semibold flex items-center gap-4 before:content-[''] before:flex-1 before:h-px before:bg-gray-800 after:content-[''] after:flex-1 after:h-px after:bg-gray-800">
+-            Contacto Digital
+-          </h3>
+-          <div className="flex flex-wrap justify-center gap-x-8 gap-y-8">
+-            {enlacesSociales.map((link) => {
+-              const Icono = link.icon;
+-              return (
+-                <button 
+-                  data-testid={`link-${link.id}`}
+-                  key={link.id}
+-                  onClick={(e) => handleLinkClick(e, link.label, link.url)} 
+-                  className="flex flex-col items-center gap-3 group w-[80px]"
+-                >
+-                  <div className="w-14 h-14 rounded-2xl border border-[#E9CE3F]/20 flex items-center justify-center bg-[#1a1a1a] shadow-lg group-hover:bg-[#E9CE3F]/10 group-hover:border-[#E9CE3F]/50 transition-all duration-300">
+-                    <Icono className="text-[#E9CE3F] w-6 h-6 group-hover:scale-110" />
+-                  </div>
+-                  <span className="text-xs text-gray-400 group-hover:text-[#E9CE3F] font-seasons tracking-wide">
+-                    {link.label}
+-                  </span>
+-                </button>
+-              );
+-            })}
+-          </div>
+-        </div>
+-
+-        {/* 📦 CATÁLOGO INLINE (CARRUSEL) */}
+-        <InlineCatalogCarousel 
+-          slug={profesional.slug} 
+-          catalogUrl={profesional.catalog_url}
+-          whatsappNumber={waNumbers[0] || null}
+-          businessName={profesional.name}
+-          country={profesional.country || 'Bolivia'}
+-          theme="dark"
+-        />
+-        {/* Botón Calificar */}
+-        <div className="mt-8 flex justify-center w-full z-10 relative">
+-          <button
+-              data-testid="button-calificar"
+-              onClick={handleCalificarClick}
+-              className="px-8 py-3.5 rounded-full bg-[#F9842C] hover:bg-[#e07323] text-white font-bold text-sm shadow-lg transition-all flex items-center justify-center gap-2 w-full max-w-xs font-seasons"
+-          >
+-              <Star size={18} className="fill-white text-white" /> Danos tu opinión
+-          </button>
+-        </div>
+-
+-      </div>
+-      {/* Modal QR */}
+-      {mostrarQR && (
+-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/95 backdrop-blur-md" onClick={toggleQR}>
+-          <div className="relative bg-[#1a1a1a] border border-[#E9CE3F]/30 p-8 rounded-3xl flex flex-col items-center z-10 shadow-2xl font-seasons" onClick={(e) => e.stopPropagation()}>
+-            <button onClick={toggleQR} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white bg-[#222] rounded-full transition-colors">
+-              <X size={18} />
+-            </button>
+-            <p className="text-[#E9CE3F] text-xs uppercase tracking-[0.2em] mb-6 font-bold">Código QR</p>
+-            <div className="bg-white p-4 rounded-2xl border border-gray-200 flex justify-center items-center">
+-              <QRCodeCanvas 
+-                id="qr-canvas"
+-                value={window.location.href}
+-                size={1024}
+-                className="w-48 h-48 md:w-52 md:h-52"
+-                style={{ width: "100%", height: "100%" }}
+-                bgColor={"#ffffff"}
+-                fgColor={"#1D565F"}
+-                level={"H"}
+-                includeMargin={true}
+-                imageSettings={{
+-                  src: "/paw.png",
+-                  height: 256,
+-                  width: 256,
+-                  excavate: true,
+-                }}
+-              />
+-            </div>
+-
+-            <button 
+-              data-testid="button-descargar-qr"
+-              onClick={() => handleDownloadQR('1D565F', 'FFFFFF')}
+-              aria-label="Descargar código QR"
+-              className="mt-8 w-full bg-[#E9CE3F] hover:bg-[#FFF3A3] text-[#1a1a1a] font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+-            >
+-              <Download size={18} /> Descargar QR
+-            </button>
+-          </div>
+-        </div>
+-      )}
+-
+-      <footer className="w-full text-center pb-6 mt-4">
+-          <a href="https://spingamma.github.io/spingamma-landing/" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-[0.25em] font-medium uppercase text-[#757778] hover:text-[#E9CE3F] transition-colors">
+-              Tecnología desarrollada por SPINGAMMA
+-          </a>
+-      </footer>
+-
+-      {/* Modal de Calificación */}
+-      <ReviewModal 
+-        isOpen={mostrarModalCalificando}
+-        onClose={() => setMostrarModalCalificando(false)}
+-        onSubmit={handleSubmitReview}
+-        isSubmitting={isSubmittingReview}
+-        calificacionPrevia={calificacionPrevia}
+-        profesionalName={profesional.name}
+-      />
+-
+-      <ModalVerificacion 
+-        isOpen={mostrarModalVerificacion}
+-        onClose={() => setMostrarModalVerificacion(false)}
+-        onSuccess={() => {
+-          setMostrarModalVerificacion(false);
+-          setMostrarModalCalificando(true);
+-        }}
+-        userName={userName}
+-      />
+-    </div>
+-  );
+-}
+\ No newline at end of file
+diff --git a/src/plantillas/PlantillaInmobiliaria.jsx b/src/plantillas/PlantillaInmobiliaria.jsx
+deleted file mode 100644
+index 35adee5..0000000
+--- a/src/plantillas/PlantillaInmobiliaria.jsx
++++ /dev/null
+@@ -1,379 +0,0 @@
+-// Archivo: src/plantillas/PlantillaInmobiliaria.jsx
+-import React, { useEffect, useState } from 'react';
+-import { LogOut, DoorOpen, X, Share2, QrCode, Star, Bookmark, ShoppingBag, Download } from 'lucide-react';
+-import { QRCodeCanvas } from 'qrcode.react';
+-import useAccionesPerfil from '../hooks/useAccionesPerfil';
+-import ReviewModal from '../components/ReviewModal';
+-import ModalVerificacion from '../components/ModalVerificacion';
+-import InlineCatalogCarousel from '../components/InlineCatalogCarousel';
+-import { cleanWhatsappNumber } from '../utils/phone';
+-
+-export default function PlantillaInmobiliaria({ profesional, volverAtras, onProtectedAction }) {
+-  const [loaded, setLoaded] = useState(false);
+-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+-  const isLongDescription = profesional?.description?.length > 70;
+-
+-  // 🚀 EXTRAÍDO AL HOOK: Lógica de UI limpia y enfocada en diseño
+-  const {
+-    mostrarQR, toggleQR, handleDownloadQR, mostrarCalificacion, isLoggedIn, userName,
+-    handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion, handleLogout,
+-    mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview,
+-    mostrarModalVerificacion, setMostrarModalVerificacion,
+-    isSaved, isSaving, toggleSaveCard
+-  } = useAccionesPerfil(profesional, onProtectedAction);
+-
+-  // Simulador del Loader
+-  useEffect(() => {
+-    const timer = setTimeout(() => setLoaded(true), 800);
+-    return () => clearTimeout(timer);
+-  }, []);
+-
+-  if (!profesional) return null;
+-
+-  return (
+-    <div className="h-screen w-full flex items-center justify-center p-3 sm:p-4 relative overflow-hidden bg-[#11181A] font-sans text-white">
+-      
+-      <style>{`
+-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+-        .font-montserrat { font-family: 'Montserrat', sans-serif; }
+-        .ambient-bg { background: radial-gradient(circle at 50% 50%, #1A2629 0%, #11181A 100%); }
+-        .glass-panel-dark {
+-          background: linear-gradient(145deg, rgba(66, 92, 99, 0.25) 0%, rgba(17, 24, 26, 0.6) 100%);
+-          backdrop-filter: blur(24px);
+-          border: 1px solid rgba(255, 255, 255, 0.08);
+-          box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+-        }
+-        .hide-scroll::-webkit-scrollbar { display: none; }
+-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+-        
+-        @keyframes blobAnim {
+-          0% { transform: translate(0px, 0px) scale(1); }
+-          50% { transform: translate(20px, -30px) scale(1.1); }
+-          100% { transform: translate(-20px, 20px) scale(0.9); }
+-        }
+-        .animate-blob-custom { animation: blobAnim 10s infinite alternate; }
+-        @keyframes spinRing {
+-          0% { transform: rotate(0deg); }
+-          100% { transform: rotate(360deg); }
+-        }
+-        .spinner-ring-custom {
+-           border: 2px solid rgba(66, 92, 99, 0.3); border-top: 2px solid #C8A721; border-right: 2px solid #425C63;
+-           animation: spinRing 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+-        }
+-      `}</style>
+-
+-      {/* --- FONDO ANIMADO --- */}
+-      <div className="fixed inset-0 z-0 ambient-bg overflow-hidden">
+-        <div className="absolute top-[-15%] left-[-15%] w-[500px] h-[500px] bg-[#425C63] rounded-full mix-blend-screen filter blur-[120px] opacity-40 animate-blob-custom"></div>
+-        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-[#C8A721] rounded-full mix-blend-screen filter blur-[150px] opacity-15 animate-blob-custom" style={{ animationDelay: '2s' }}></div>
+-        <div className="absolute top-[30%] left-[20%] w-[300px] h-[300px] bg-[#425C63] rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob-custom" style={{ animationDelay: '4s' }}></div>
+-      </div>
+-
+-      {/* --- LOADER --- */}
+-      {!loaded && (
+-        <div className="fixed inset-0 bg-[#11181A] flex flex-col items-center justify-center z-[1000]">
+-          <div className="relative flex justify-center items-center mb-6">
+-            <div className="w-[60px] h-[60px] rounded-full spinner-ring-custom absolute"></div>
+-            <div className="w-8 h-8 bg-[#425C63]/20 rounded-full flex items-center justify-center animate-pulse">
+-              <div className="w-2 h-2 bg-[#C8A721] rounded-full"></div>
+-            </div>
+-          </div>
+-          <p className="text-[#C8A721] text-[10px] tracking-[0.4em] uppercase font-semibold">Cargando</p>
+-        </div>
+-      )}
+-
+-      {/* --- TARJETA PRINCIPAL --- */}
+-      <div className={`relative z-10 w-full max-w-[420px] h-[95vh] sm:h-full max-h-[850px] glass-panel-dark rounded-[2.5rem] pt-6 p-6 sm:p-8 flex flex-col items-center overflow-y-auto hide-scroll font-montserrat transition-all duration-1000 pb-28 ${loaded ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}>
+-        
+-        {/* ENCABEZADO SUPERIOR */}
+-        <div className="w-full flex justify-between items-start z-20 mb-2">
+-          <button onClick={volverAtras} className="text-sm flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full text-gray-300 hover:text-[#6A431F] hover:border-white/30 transition-all shadow-md backdrop-blur-sm shrink-0 font-medium">
+-            <DoorOpen size={18} />
+-            <span>Salir del negocio</span>
+-          </button>
+-
+-          <div className="flex flex-col items-end gap-3">
+-             {/* 🚀 BOTÓN LOGOUT TIPO PILL EN LA ESQUINA SUPERIOR */}
+-            {isLoggedIn ? (
+-              <button 
+-                onClick={handleLogout}
+-                className="flex items-center gap-2 bg-white/5 border border-white/10 p-1 pr-3 rounded-full hover:border-red-400/50 transition-all shadow-lg backdrop-blur-sm group"
+-                title="Cerrar sesión"
+-              >
+-                <div className="w-8 h-8 rounded-full bg-[#C8A721] flex items-center justify-center text-[#11181A] font-bold text-sm font-sans">
+-                  {userName ? userName.charAt(0).toUpperCase() : 'U'}
+-                </div>
+-                <LogOut size={16} className="text-gray-300 group-hover:text-red-400 transition-colors" />
+-              </button>
+-            ) : (
+-              <button onClick={() => onProtectedAction(null)} className="text-xs uppercase tracking-wider font-bold flex items-center gap-1.5 bg-[#425C63] hover:bg-[#C8A721] hover:text-[#11181A] text-white py-2 px-3.5 rounded-full transition-all shadow-md">
+-                <DoorOpen size={14} /> Ingresar
+-              </button>
+-            )}
+-
+-            {/* 🚀 BOTONES DE ACCIÓN: QR Y COMPARTIR */}
+-            <div className="flex gap-2.5">
+-              <button onClick={toggleQR} className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-[#6A431F] rounded-full transition-all text-gray-300 hover:text-white backdrop-blur-sm shadow-md" title="Mostrar QR">
+-                <QrCode size={18} />
+-              </button>
+-              <button onClick={handleShare} className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:bg-[#6A431F] rounded-full transition-all text-gray-300 hover:text-white backdrop-blur-sm shadow-md" title="Compartir">
+-                <Share2 size={18} />
+-              </button>
+-            </div>
+-          </div>
+-        </div>
+-
+-        {/* CONTENEDOR FOTO */}
+-        <div className="relative w-full flex flex-col items-center">
+-          <div className="relative flex-shrink-0 mt-6 mb-6">
+-            <div className="w-36 h-36 sm:w-40 sm:h-40 rounded-full p-[2px] bg-gradient-to-br from-[#425C63] via-[#C8A721]/50 to-[#425C63] flex items-center justify-center shadow-[0_0_30px_rgba(66,92,99,0.5)]">
+-              <div className="w-full h-full rounded-full overflow-hidden bg-[#11181A] border-[4px] border-[#1A2629]">
+-                <img 
+-                  src={profesional.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name)}&background=11181A&color=C8A721&size=256`} 
+-                  onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name)}&background=11181A&color=C8A721&size=256`; }}
+-                  alt={profesional.name} 
+-                  className="w-full h-full object-cover" 
+-                />
+-              </div>
+-            </div>
+-            {/* BOTÓN GUARDAR (Top Right de la imagen) */}
+-            <button 
+-              onClick={toggleSaveCard}
+-              disabled={isSaving}
+-              className={`absolute top-0 -right-2 w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-sm z-30 ${isSaved ? 'bg-[#6A431F] text-white border-transparent' : 'bg-[#11181A] text-gray-300 border border-[#C8A721]/50 hover:text-[#6A431F] hover:bg-[#222]'}`}
+-              title={isSaved ? "Quitar del tarjetero" : "Guardar en mi tarjetero"}
+-            >
+-              <Bookmark size={18} className={isSaved ? 'fill-white' : ''} />
+-            </button>
+-          </div>
+-        </div>
+-
+-        {/* TEXTOS */}
+-        <div className="text-center w-full mb-8">
+-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white drop-shadow-md">{profesional.name}</h1>
+-          <p className="text-xs font-bold tracking-[0.25em] text-[#C8A721] mt-3 uppercase">{profesional.title}</p>
+-          <div className="w-12 h-[2px] bg-gradient-to-r from-transparent via-[#425C63] to-transparent mx-auto mt-4 mb-4 opacity-70"></div>
+-          
+-          {(profesional.experience_years || profesional.credentials) && (
+-            <div className="flex flex-wrap justify-center gap-2 mb-4">
+-              {profesional.experience_years && (
+-                <div className="bg-white/5 border border-[#F9842C]/30 text-gray-200 px-3 py-1 rounded-full text-xs">
+-                  <span className="font-bold text-[#F9842C]">{profesional.experience_years}</span> Años de Experiencia
+-                </div>
+-              )}
+-              {profesional.credentials && (
+-                <div className="bg-white/5 border border-[#6A431F]/50 text-gray-200 px-3 py-1 rounded-full text-xs">
+-                  Matrícula/Credencial: <span className="font-bold text-white">{profesional.credentials}</span>
+-                </div>
+-              )}
+-            </div>
+-          )}
+-
+-          <div className="relative mt-3">
+-            <p className={`text-gray-300 text-sm leading-relaxed whitespace-pre-line px-2 font-light ${!isDescriptionExpanded ? 'line-clamp-2' : ''}`}>
+-              {profesional.description}
+-            </p>
+-            {isLongDescription && (
+-              <button 
+-                data-testid="button-ver-mas"
+-                onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+-                className="text-[#C8A721] hover:text-white font-medium text-xs mt-2 uppercase tracking-wider focus:outline-none"
+-              >
+-                {isDescriptionExpanded ? 'Ver menos' : 'Ver más'}
+-              </button>
+-            )}
+-          </div>
+-        </div>
+-
+-        {/* BOTONES REDES */}
+-        <div className="flex flex-wrap justify-center gap-3 sm:gap-4 w-full mt-2">
+-            {profesional.phone && (
+-              <a data-testid="link-phone" href={`tel:${profesional.phone}`} onClick={(e) => handleLinkClick(e, 'Llamar', `tel:${profesional.phone}`)} className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#425C63] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+-                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 group-hover:bg-[#425C63] text-gray-200 group-hover:text-white transition-all mb-2">
+-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+-                  </div>
+-                  <span className="font-semibold text-[10px] text-gray-300 group-hover:text-white uppercase tracking-wider">Llamar</span>
+-              </a>
+-            )}
+-
+-            {(() => {
+-              let waNumbers = [];
+-              try { waNumbers = JSON.parse(profesional?.whatsapp_numbers || '[]'); } catch { waNumbers = []; }
+-              if (waNumbers.length === 0 && profesional?.whatsapp) waNumbers = [profesional.whatsapp];
+-              return waNumbers.map((num, idx) => {
+-                const clean = cleanWhatsappNumber(num, profesional?.country || 'Bolivia');
+-                if (!clean) return null;
+-                return (
+-                  <a data-testid={`link-whatsapp-${idx}`} key={`wa-${idx}`} href={`https://wa.me/${clean}`} onClick={(e) => handleLinkClick(e, 'WhatsApp', `https://wa.me/${clean}`)} className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#25D366] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+-                    <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#25D366]/20 group-hover:bg-[#25D366] text-[#25D366] group-hover:text-white transition-all mb-2">
+-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+-                    </div>
+-                    <span className="font-semibold text-[10px] text-gray-300 group-hover:text-[#25D366] uppercase tracking-wider">{waNumbers.length > 1 ? `WhatsApp ${idx+1}` : 'WhatsApp'}</span>
+-                  </a>
+-                );
+-              });
+-            })()}
+-
+-            {profesional.website && (
+-              <a data-testid="link-website" href={profesional.website} onClick={(e) => handleLinkClick(e, 'Website', profesional.website)} className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#425C63] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+-                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#425C63]/20 group-hover:bg-[#425C63] text-[#425C63] group-hover:text-white transition-all mb-2">
+-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="2" x2="22" y1="12" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+-                  </div>
+-                  <span className="font-semibold text-[10px] text-gray-300 group-hover:text-white uppercase tracking-wider">Web</span>
+-              </a>
+-            )}
+-
+-            {profesional.facebook && (
+-              <a data-testid="link-facebook" href={profesional.facebook} onClick={(e) => handleLinkClick(e, 'Facebook', profesional.facebook)} className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#1877F2] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+-                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#1877F2]/20 group-hover:bg-[#1877F2] text-[#1877F2] group-hover:text-white transition-all mb-2">
+-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+-                  </div>
+-                  <span className="font-semibold text-[10px] text-gray-300 group-hover:text-white uppercase tracking-wider">Facebook</span>
+-              </a>
+-            )}
+-
+-            {profesional.instagram && (
+-              <a data-testid="link-instagram" href={profesional.instagram} onClick={(e) => handleLinkClick(e, 'Instagram', profesional.instagram)} className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#E1306C] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+-                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#E1306C]/20 group-hover:bg-[#E1306C] text-[#E1306C] group-hover:text-white transition-all mb-2">
+-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><rect width="16" height="16" x="4" y="4" rx="4"></rect><circle cx="12" cy="12" r="3"></circle><line x1="16.5" x2="16.5" y1="7.5" y2="7.5"></line></svg>
+-                  </div>
+-                  <span className="font-semibold text-[10px] text-gray-300 group-hover:text-white uppercase tracking-wider">Instagram</span>
+-              </a>
+-            )}
+-
+-            {profesional.tiktok && (
+-              <a data-testid="link-tiktok" href={profesional.tiktok} onClick={(e) => handleLinkClick(e, 'TikTok', profesional.tiktok)} className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-white rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+-                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 group-hover:bg-white text-gray-300 group-hover:text-[#11181A] transition-all mb-2">
+-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+-                  </div>
+-                  <span className="font-semibold text-[10px] text-gray-300 group-hover:text-white uppercase tracking-wider">TikTok</span>
+-              </a>
+-            )}
+-
+-            {profesional.linkedin && (
+-              <a href={profesional.linkedin} onClick={(e) => handleLinkClick(e, 'LinkedIn', profesional.linkedin)} className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#0A66C2] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+-                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#0A66C2]/20 group-hover:bg-[#0A66C2] text-[#0A66C2] group-hover:text-white transition-all mb-2">
+-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+-                  </div>
+-                  <span className="font-semibold text-[10px] text-gray-300 group-hover:text-white uppercase tracking-wider">LinkedIn</span>
+-              </a>
+-            )}
+-
+-            {profesional.github && (
+-              <a href={profesional.github} onClick={(e) => handleLinkClick(e, 'GitHub', profesional.github)} className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#425C63] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+-                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 group-hover:bg-white text-gray-300 group-hover:text-[#11181A] transition-all mb-2">
+-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.24c3-.34 6-1.53 6-6.76a5.5 5.5 0 0 0-1.5-3.82 5.2 5.2 0 0 0-.15-3.78s-1.2-.38-3.9 1.45a13.4 13.4 0 0 0-7 0c-2.7-1.83-3.9-1.45-3.9-1.45a5.2 5.2 0 0 0-.15 3.78A5.5 5.5 0 0 0 3 8.2c0 5.22 3 6.42 6 6.76a4.8 4.8 0 0 0-1 3.24v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+-                  </div>
+-                  <span className="font-semibold text-[10px] text-gray-300 group-hover:text-white uppercase tracking-wider">GitHub</span>
+-              </a>
+-            )}
+-
+-            {profesional.ubicacion_url && (
+-              <a href={profesional.ubicacion_url} onClick={(e) => handleLinkClick(e, 'Ubicación', profesional.ubicacion_url)} className="group flex flex-col items-center justify-center w-[30%] min-w-[90px] aspect-square bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-[#C8A721] rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+-                  <div className="w-11 h-11 flex items-center justify-center rounded-full bg-[#C8A721]/20 group-hover:bg-[#C8A721] text-[#C8A721] group-hover:text-[#11181A] transition-all mb-2">
+-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.242-4.243a8 8 0 1111.314 0z"></path></svg>
+-                  </div>
+-                  <span className="font-semibold text-[10px] text-gray-300 group-hover:text-white uppercase tracking-wider">Ubicación</span>
+-              </a>
+-            )}
+-        </div>
+-
+-        {/* 📦 CATÁLOGO INLINE (CARRUSEL) */}
+-        <div className="w-full mt-8 mb-4">
+-          <InlineCatalogCarousel 
+-            slug={profesional.slug} 
+-            catalogUrl={profesional.catalog_url}
+-            whatsappNumber={(() => { try { return JSON.parse(profesional?.whatsapp_numbers || '[]')[0] || null; } catch { return null; } })()}
+-            businessName={profesional.name}
+-            country={profesional.country || 'Bolivia'}
+-            theme="dark"
+-          />
+-        </div>
+-        
+-        
+-        {/* --- BOTÓN CALIFICAR --- */}
+-        <div className="mt-8 flex justify-center w-full z-10 relative">
+-          <button
+-              onClick={handleCalificarClick}
+-              className="px-8 py-3.5 rounded-2xl bg-[#F9842C] hover:bg-[#e07323] text-white font-bold text-sm shadow-lg transition-all flex items-center justify-center gap-2 w-full uppercase tracking-wider max-w-xs"
+-          >
+-              <Star size={18} className="fill-white text-white" /> Danos tu opinión
+-          </button>
+-        </div>
+-
+-        {/* FOOTER */}
+-        <div className="mt-12 mb-4 text-center flex flex-col items-center justify-center w-full">
+-            <a href="https://spingamma.github.io/spingamma-landing/" target="_blank" rel="noopener noreferrer" className="group flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
+-              <span className="text-[10px] text-gray-400 font-medium tracking-wide">Tecnología desarrollada por</span>
+-              <span className="text-xs font-extrabold text-white tracking-[0.2em] group-hover:text-[#C8A721] transition-colors">SPINGAMMA</span>
+-            </a>
+-        </div>
+-      </div>
+-
+-
+-
+-      {/* --- MODAL QR --- */}
+-      {mostrarQR && (
+-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#11181A]/90 backdrop-blur-md transition-opacity">
+-            <div className="relative bg-gradient-to-b from-[#1A2629] to-[#11181A] border border-[#425C63]/30 p-8 rounded-[2rem] flex flex-col items-center z-10 font-montserrat shadow-2xl animate-in fade-in zoom-in duration-300">
+-                <button onClick={toggleQR} className="absolute top-4 right-4 text-gray-400 hover:text-white bg-white/5 p-2 rounded-full transition-colors hover:bg-[#425C63]">
+-                    <X size={20} />
+-                </button>
+-                <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3 border border-[#C8A721]/50 shadow-inner">
+-                  <QrCode size={24} className="text-[#C8A721]" />
+-                </div>
+-                <p className="text-[#C8A721] text-[10px] uppercase tracking-[0.25em] mb-6 font-bold">Código QR</p>
+-                <div className="bg-white p-3 rounded-2xl shadow-inner border-[3px] border-[#425C63] flex justify-center items-center">
+-                  <QRCodeCanvas 
+-                    id="qr-canvas"
+-                    value={window.location.href}
+-                    size={1024}
+-                    className="w-48 h-48 md:w-56 md:h-56"
+-                    style={{ width: "100%", height: "100%" }}
+-                    bgColor={"#ffffff"}
+-                    fgColor={"#1D565F"}
+-                    level={"H"}
+-                    includeMargin={true}
+-                    imageSettings={{
+-                      src: "/paw.png",
+-                      height: 256,
+-                      width: 256,
+-                      excavate: true,
+-                    }}
+-                  />
+-                </div>
+-                
+-                <button 
+-                  onClick={() => handleDownloadQR('1D565F', 'FFFFFF')}
+-                  aria-label="Descargar código QR"
+-                  className="mt-8 w-full bg-[#C8A721] hover:bg-[#E9CE3F] text-[#11181A] font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+-                >
+-                  <Download size={18} /> Descargar QR
+-                </button>
+-                <p className="text-gray-400 text-xs mt-6 text-center max-w-[200px] font-light">Escanea para ver el perfil de {profesional.name}</p>
+-            </div>
+-        </div>
+-      )}
+-
+-      {/* --- MODAL DE CALIFICACIÓN --- */}
+-      <ReviewModal 
+-        isOpen={mostrarModalCalificando}
+-        onClose={() => setMostrarModalCalificando(false)}
+-        onSubmit={handleSubmitReview}
+-        isSubmitting={isSubmittingReview}
+-        calificacionPrevia={calificacionPrevia}
+-        profesionalName={profesional.name}
+-      />
+-
+-      <ModalVerificacion 
+-        isOpen={mostrarModalVerificacion}
+-        onClose={() => setMostrarModalVerificacion(false)}
+-        onSuccess={() => {
+-          setMostrarModalVerificacion(false);
+-          setMostrarModalCalificando(true);
+-        }}
+-        userName={userName}
+-      />
+-    </div>
+-  );
+-}
+\ No newline at end of file

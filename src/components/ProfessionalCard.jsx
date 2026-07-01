@@ -25,20 +25,7 @@ export default function ProfessionalCard({ professional, isLoggedIn, isAdmin, on
             e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(professional.name)}&background=F8F9FA&color=1E3D51&size=256`;
           }}
         />
-        {isAdmin && (
-          <button
-            data-testid="button-edit-negocio"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              window.location.href = `/editar-negocio/${professional.slug}`;
-            }}
-            className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-[#6A431F] hover:bg-[#523317] text-white p-1.5 sm:p-2 rounded-lg flex items-center shadow-md z-10 transition-colors"
-            title="Editar Negocio (Admin)"
-          >
-            <Edit3 size={14} className="sm:w-[16px] sm:h-[16px]" />
-          </button>
-        )}
+
         {/*
         {professional.verified && (
           <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-white/90 backdrop-blur-sm px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-gray-100">

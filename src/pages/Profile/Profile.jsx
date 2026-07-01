@@ -169,6 +169,20 @@ function Perfil() {
 
   const volverAtras = () => navigate("/");
 
+  // ==========================================
+  // 🔄 REFRESH DEL PERFIL (LUEGO DE EDITAR)
+  // ==========================================
+  const handleUpdate = () => {
+    // Para recargar los datos
+    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+    fetch(`${API_URL}/businesses/${slug}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) setProfesional(data);
+      })
+      .catch(err => console.error("Error refreshing profile", err));
+  };
+
   return (
     <>
       {profesional && (
@@ -188,6 +202,7 @@ function Perfil() {
         profesional={profesional}
         volverAtras={volverAtras}
         onProtectedAction={handleProtectedAction}
+        onUpdate={handleUpdate}
       />
 
       {/* ==========================================

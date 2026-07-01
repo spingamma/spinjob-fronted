@@ -48,7 +48,7 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
   // Verificar estado de Mi Tarjetero al montar
   useEffect(() => {
     const token = localStorage.getItem('spingamma_token');
-    if (isLoggedIn && token && profesional) {
+    if (isLoggedIn && token && profesional && profesional.slug) {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
       fetch(`${API_URL}/tarjetero/${profesional.slug}/status`, {
         headers: { 'Authorization': `Bearer ${token}` }

@@ -1,13 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Package, ExternalLink, Loader2, MoreHorizontal } from 'lucide-react';
+import { Package, ExternalLink, Loader2, MoreHorizontal, Plus, Minus, ShoppingCart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cleanWhatsappNumber } from '../utils/phone';
+import miCarrito from '../assets/oso-carrito.png';
 
-export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia', theme = 'light' }) {
+export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia', theme = 'light', isPremium = false }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cart, setCart] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!slug) return;
+    if (!slug) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
     fetch(`${API_URL}/businesses/${slug}/products`)
@@ -32,49 +39,116 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
 
   const isDark = theme === 'dark';
 
-  // Dividimos los productos en chunks de 5 para simular categorías si no las tienen
-  const chunks = [products.slice(0, 5), products.slice(5, 10)].filter(chunk => chunk.length > 0);
+  // Agrupar productos por carousel_name
+  let grouped = {};
+  if (isPremium) {
+    products.forEach(p => {
+      const cname = p.carousel_name || 'Catálogo';
+      if (!grouped[cname]) grouped[cname] = [];
+      grouped[cname].push(p);
+    });
+  } else {
+    grouped['Catálogo'] = products;
+  }
+
+  // Tomar hasta 3 carruseles si es premium, si no 1
+  const maxCarousels = isPremium ? 3 : 1;
+  const carouselKeys = Object.keys(grouped).slice(0, maxCarousels);
+
+  const updateCart = (product, delta) => {
+    setCart(prev => {
+      const current = prev[product.id]?.quantity || 0;
+      const newQuantity = current + delta;
+      if (newQuantity <= 0) {
+        const newCart = { ...prev };
+        delete newCart[product.id];
+        return newCart;
+      }
+      return {
+        ...prev,
+        [product.id]: { product, quantity: newQuantity }
+      };
+    });
+  };
+
+  const totalItems = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = Object.values(cart).reduce((sum, item) => {
+    // try to parse price as float. e.g., "Bs. 120" -> 120
+    const priceNum = parseFloat((item.product.price || "0").replace(/[^\d.-]/g, ''));
+    return sum + (priceNum || 0) * item.quantity;
+  }, 0);
+
+  const handleOrder = () => {
+    const token = localStorage.getItem('spingamma_token');
+    if (!token) {
+      alert("Para realizar un pedido necesitas iniciar sesión. Por favor ve a la página principal e ingresa a tu cuenta.");
+      return;
+    }
+    navigate(`/perfil/${slug}/orden`, { state: { cart, businessName, slug } });
+  };
 
   return (
     <div className="w-full relative">
-      {chunks.length > 0 ? (
+      {carouselKeys.length > 0 ? (
         <div className="flex flex-col gap-4">
-          {chunks.map((chunk, chunkIdx) => (
-            <CarouselBlock 
-              key={chunkIdx}
-              title={chunkIdx === 0 ? "NUESTROS PRODUCTOS" : "MÁS PRODUCTOS"}
-              products={chunk}
+          {carouselKeys.map((cname, idx) => (
+            <CarouselBlock
+              key={idx}
+              title={cname.toUpperCase()}
+              products={grouped[cname]}
               isDark={isDark}
               whatsappNumber={whatsappNumber}
               businessName={businessName}
               country={country}
+              isPremium={isPremium}
+              cart={cart}
+              updateCart={updateCart}
             />
           ))}
-          
+
           {/* Si hay URL de catálogo externo y ya mostramos productos, lo ofrecemos al final */}
           {catalogUrl && (
-             <div className="px-4 mt-2 mb-8">
-               <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className={`w-full flex items-center justify-center gap-3 font-bold py-4 px-6 rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 border ${isDark ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-gray-200 text-[#1A535C] hover:border-[#F9842C]/30'}`}>
-                 <ExternalLink size={20} /> Ver catálogo completo
-               </a>
-             </div>
+            <div className="px-4 mt-2 mb-8">
+              <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className={`w-full flex items-center justify-center gap-3 font-bold py-4 px-6 rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 border ${isDark ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-gray-200 text-[#1A535C] hover:border-[#F9842C]/30'}`}>
+                <ExternalLink size={20} /> Ver catálogo completo
+              </a>
+            </div>
           )}
         </div>
       ) : catalogUrl ? (
         <div className="px-4 mb-8">
           <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className={`w-full flex items-center justify-center gap-3 font-bold py-4 px-6 rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 border ${isDark ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-gray-200 text-[#1A535C] hover:border-[#F9842C]/30'}`}>
-             <ExternalLink size={20} /> Ir al catálogo externo
+            <ExternalLink size={20} /> Ir al catálogo externo
           </a>
         </div>
       ) : null}
+
+      {/* Floating Order Button */}
+      {isPremium && totalItems > 0 && (
+        <div className="fixed bottom-6 left-0 right-0 px-4 z-[90] flex justify-center animate-in slide-in-from-bottom-10">
+          <button
+            data-testid="order-checkout-btn"
+            onClick={handleOrder}
+            className="w-full max-w-sm bg-[#F9842C] hover:bg-[#e06516] text-white font-bold py-4 px-6 rounded-2xl shadow-xl flex items-center justify-between transition-all transform hover:scale-[1.02]"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center">
+                <img src={miCarrito} alt="Carrito" className="w-7 h-7 object-contain drop-shadow-md" />
+              </div>
+              <span className="text-lg">Ordenar ({totalItems})</span>
+            </div>
+            <span className="text-lg">Bs. {totalPrice.toFixed(2)}</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, country }) => {
+const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, country, isPremium, cart, updateCart }) => {
   // Crear un carrusel pseudo-infinito repitiendo los productos 20 veces (nadie hace swipe 50+ veces)
   const displayProducts = products.length > 0 ? Array(20).fill(products).flat() : [];
-  
+
   const [activeIndex, setActiveIndex] = useState(0);
   const containerRef = useRef(null);
 
@@ -83,13 +157,13 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
     const container = containerRef.current;
     const scrollLeft = container.scrollLeft;
     const containerCenter = scrollLeft + container.offsetWidth / 2;
-    
+
     let closestIndex = 0;
     let minDistance = Infinity;
-    
+
     Array.from(container.children).forEach((child) => {
       if (!child.hasAttribute('data-product-idx')) return;
-      
+
       const childCenter = child.offsetLeft + child.offsetWidth / 2;
       const distance = Math.abs(childCenter - containerCenter);
       if (distance < minDistance) {
@@ -97,7 +171,7 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
         closestIndex = parseInt(child.getAttribute('data-product-idx'), 10);
       }
     });
-    
+
     if (closestIndex !== activeIndex) {
       setActiveIndex(closestIndex);
     }
@@ -105,10 +179,10 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
 
   useEffect(() => {
     if (products.length === 0 || !containerRef.current) return;
-    
+
     // Inicializar en el medio de las copias para tener scroll "infinito" hacia ambos lados
     const startIndex = products.length * 10;
-    
+
     const initTimer = setTimeout(() => {
       if (!containerRef.current) return;
       const targetChild = containerRef.current.children[startIndex + 1]; // +1 por <style>
@@ -131,30 +205,29 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
   return (
     <div className="w-full overflow-hidden mb-2">
       <h3 className={`text-xs font-extrabold tracking-widest mb-4 flex items-center gap-2 px-4 uppercase ${isDark ? 'text-white' : 'text-[#1A535C]'}`}>
-        <span className={`w-1 h-4 rounded-full ${isDark ? 'bg-[#C8A721]' : 'bg-[#1D565F]'}`}></span> 
+        <span className={`w-1 h-4 rounded-full ${isDark ? 'bg-[#C8A721]' : 'bg-[#1D565F]'}`}></span>
         {title}
       </h3>
-      
-      <div 
+
+      <div
         ref={containerRef}
         onScroll={handleScroll}
         className="flex overflow-x-auto snap-x snap-mandatory hide-scroll px-[calc(50%-97.5px)] sm:px-[calc(50%-117.5px)] md:px-[calc(50%-135px)] gap-4 sm:gap-6 pb-4 pt-2 -mb-2"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         <style>{`.hide-scroll::-webkit-scrollbar { display: none; }`}</style>
-        
+
         {displayProducts.map((product, idx) => {
           const isActive = activeIndex === idx;
-          
+
           return (
-            <div 
-              key={`${product.id}-${idx}`} 
+            <div
+              key={`${product.id}-${idx}`}
               data-product-idx={idx}
-              className={`snap-center shrink-0 w-[195px] sm:w-[235px] md:w-[270px] transition-all duration-300 ease-out flex flex-col rounded-[1.25rem] overflow-hidden border cursor-pointer ${
-                isActive 
-                  ? (isDark ? 'bg-[#1e1e1e] border-white/10 shadow-[0_15px_30px_-10px_rgba(0,0,0,0.5)] scale-100 z-10' : 'bg-white border-transparent shadow-[0_15px_30px_-10px_rgba(30,61,81,0.15)] scale-100 z-10') 
-                  : (isDark ? 'bg-[#1e1e1e]/50 border-white/5 scale-90 opacity-100 z-0' : 'bg-white border-gray-200 scale-90 opacity-100 z-0 hover:bg-gray-50')
-              }`}
+              className={`snap-center shrink-0 w-[195px] sm:w-[235px] md:w-[270px] transition-all duration-300 ease-out flex flex-col rounded-[1.25rem] overflow-hidden border cursor-pointer ${isActive
+                ? (isDark ? 'bg-[#1e1e1e] border-white/10 shadow-[0_15px_30px_-10px_rgba(0,0,0,0.5)] scale-100 z-10' : 'bg-white border-transparent shadow-[0_15px_30px_-10px_rgba(30,61,81,0.15)] scale-100 z-10')
+                : (isDark ? 'bg-[#1e1e1e]/50 border-white/5 scale-90 opacity-100 z-0' : 'bg-white border-gray-200 scale-90 opacity-100 z-0 hover:bg-gray-50')
+                }`}
               onClick={() => {
                 if (!isActive && containerRef.current) {
                   const child = containerRef.current.children[idx];
@@ -175,7 +248,7 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
                     <Package size={48} className={`sm:w-16 sm:h-16 ${isDark ? 'text-[#757778]' : 'text-[#1A535C]/20'}`} strokeWidth={1.5} />
                   </div>
                 )}
-                
+
                 {/* Botón superior derecho (...) */}
                 <div className="absolute top-3 right-3 w-8 h-8 sm:w-10 sm:h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-sm text-[#1A535C] border border-gray-100 z-10 transition-colors hover:bg-gray-50">
                   <MoreHorizontal size={18} className="sm:w-5 sm:h-5" />
@@ -194,13 +267,40 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
                     </p>
                   )}
                 </div>
-                {product.price ? (
-                  <p className={`font-black text-base sm:text-lg mt-2 ${isDark ? 'text-[#C8A721]' : 'text-[#1A535C]'}`}>
-                    {product.price}
-                  </p>
-                ) : (
-                  <p className="font-bold text-base sm:text-lg text-transparent select-none mt-2">-</p>
-                )}
+                <div className="flex items-end justify-between mt-2">
+                  {product.price ? (
+                    <p className={`font-black text-base sm:text-lg ${isDark ? 'text-[#C8A721]' : 'text-[#1A535C]'}`}>
+                      {product.price}
+                    </p>
+                  ) : (
+                    <p className="font-bold text-base sm:text-lg text-transparent select-none">-</p>
+                  )}
+
+                  {isPremium && (
+                    <div
+                      className="flex items-center gap-2 bg-gray-100 rounded-lg p-1"
+                      onClick={(e) => e.stopPropagation()} // Prevent carousel item click
+                    >
+                      <button
+                        onClick={() => updateCart(product, -1)}
+                        data-testid="remove-from-cart-btn"
+                        className="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:text-red-500"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span data-testid="cart-quantity" className="font-bold text-sm min-w-[1.2rem] text-center text-[#1A535C]">
+                        {cart[product.id]?.quantity || 0}
+                      </span>
+                      <button
+                        onClick={() => updateCart(product, 1)}
+                        data-testid="add-to-cart-btn"
+                        className="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-[#1A535C] hover:text-[#F9842C]"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )

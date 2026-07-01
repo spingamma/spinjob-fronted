@@ -18,11 +18,11 @@ export default function useAuthLogic({ isOpen, onSuccess, onRequireVerification 
 
   const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
-  // Obtener el WhatsApp de soporte de Tarjetoso
+  // Obtener el WhatsApp de soporte desde el perfil de spingamma
   useEffect(() => {
     const fetchSupportWhatsApp = async () => {
       try {
-        const res = await fetch(`${API_URL}/businesses/tarjetoso`);
+        const res = await fetch(`${API_URL}/businesses/spingamma`);
         if (res.ok) {
           const data = await res.json();
           if (data.whatsapp_numbers) {

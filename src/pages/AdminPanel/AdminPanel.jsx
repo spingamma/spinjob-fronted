@@ -157,9 +157,11 @@ export default function AdminPanel() {
       if (!res.ok) throw new Error("Error al procesar la solicitud.");
       
       // Recargar la lista si fue exitoso
-      cargarPendientes();
+      await cargarPendientes();
+      return true;
     } catch (err) {
       alert(err.message);
+      return false;
     }
   };
 
@@ -473,18 +475,22 @@ export default function AdminPanel() {
         actions={
           <>
             <button 
-              onClick={() => {
-                handleAccion(negocioSeleccionado.slug, 'aprobar');
-                setNegocioSeleccionado(null);
+              onClick={async () => {
+                const success = await handleAccion(negocioSeleccionado.slug, 'aprobar');
+                if (success) {
+                  setNegocioSeleccionado(null);
+                }
               }}
               className="flex-1 bg-[#1A535C] hover:bg-[#133d44] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
             >
               <CheckCircle size={18} /> Aprobar Ahora
             </button>
             <button 
-              onClick={() => {
-                handleAccion(negocioSeleccionado.slug, 'rechazar');
-                setNegocioSeleccionado(null);
+              onClick={async () => {
+                const success = await handleAccion(negocioSeleccionado.slug, 'rechazar');
+                if (success) {
+                  setNegocioSeleccionado(null);
+                }
               }}
               className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
             >

@@ -1,6 +1,6 @@
 // Archivo: src/components/Header.jsx
 import React, { useState, useEffect } from 'react';
-import { Search, LogOut, ChevronDown, Download } from 'lucide-react';
+import { Search, LogOut, ChevronDown, Download, ShoppingCart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NavMenu from './NavMenu';
 
@@ -116,7 +116,18 @@ const Header = ({
                 <div className="fixed inset-0 z-40" onClick={() => setIsUserMenuOpen(false)}></div>
               )}
 
-              <div className="relative z-50">
+              <div className="flex items-center gap-2 relative z-50">
+                <button 
+                  onClick={() => navigate('/mis-compras')}
+                  className="flex flex-col items-center justify-center p-2 hover:bg-gray-100 rounded-xl transition-all duration-200 mr-1 sm:mr-2 group min-w-[72px]"
+                  title="Mis Pedidos"
+                >
+                  <div className="group-hover:scale-110 transition-transform mb-1 flex items-center justify-center h-[22px] w-[22px]">
+                    <ShoppingCart size={22} className="text-[#1A535C] group-hover:text-[#F9842C] transition-colors" />
+                  </div>
+                  <span className="text-[10px] font-bold text-[#1A535C] uppercase tracking-tighter group-hover:text-[#F9842C] leading-none relative z-10">PEDIDOS</span>
+                </button>
+
                 <button 
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center gap-1.5 sm:gap-2 bg-white hover:bg-gray-50 border border-gray-200 py-1 sm:py-1.5 px-1.5 sm:px-3 rounded-full shadow-sm transition-all"

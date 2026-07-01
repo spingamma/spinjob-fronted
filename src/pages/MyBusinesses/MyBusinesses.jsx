@@ -5,7 +5,6 @@ import { ArrowLeft, Clock, CheckCircle2, XCircle, PlusCircle, Building, Eye, Fil
 import BottomNavbar from '../../components/BottomNavbar';
 import Header from '../../components/Header';
 import BusinessDetailsModal from '../../components/BusinessDetailsModal';
-import CatalogManager from '../../components/CatalogManager';
 import fetchAuth from '../../utils/fetchAuth';
 
 export default function MisNegocios() {
@@ -16,7 +15,6 @@ export default function MisNegocios() {
 
   // Estado para controlar qué negocio se está viendo en el modal
   const [negocioSeleccionado, setNegocioSeleccionado] = useState(null);
-  const [catalogBusiness, setCatalogBusiness] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
@@ -192,20 +190,10 @@ export default function MisNegocios() {
                     </Link>
                   )}
 
-                  {/* Botón Gestionar Catálogo - Solo para negocios aprobados */}
-                  {neg.status === 'aprobado' && (
-                    <button
-                      onClick={() => setCatalogBusiness(neg)}
-                      className="flex items-center gap-2 text-sm font-bold text-teal-600 hover:text-teal-800 transition-colors"
-                    >
-                      <ShoppingBag size={18} /> Gestionar Catálogo
-                    </button>
-                  )}
-
                   {/* Botón Editar Información - Solo para negocios aprobados */}
                   {neg.status === 'aprobado' && (
                     <Link
-                      to={`/editar-negocio/${neg.slug}`}
+                      to={`/perfil/${neg.slug}`}
                       className="flex items-center gap-2 text-sm font-bold text-amber-600 hover:text-amber-800 transition-colors"
                     >
                       <Edit3 size={18} /> Editar Información
@@ -219,6 +207,16 @@ export default function MisNegocios() {
                       className="flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
                     >
                       <BarChart2 size={18} /> Ver Métricas
+                    </Link>
+                  )}
+
+                  {/* Botón Ver Pedidos - Solo para negocios aprobados */}
+                  {neg.status === 'aprobado' && (
+                    <Link
+                      to={`/mis-pedidos/${neg.slug}`}
+                      className="flex items-center gap-2 text-sm font-bold text-teal-600 hover:text-teal-800 transition-colors"
+                    >
+                      <ShoppingBag size={18} /> Ver Pedidos
                     </Link>
                   )}
 
@@ -257,13 +255,6 @@ export default function MisNegocios() {
               content: `Solicitud rechazada: ${negocioSeleccionado.rejection_reason}`
             } : null
           }
-        />
-
-        {/* MODAL DE GESTIÓN DE CATÁLOGO */}
-        <CatalogManager
-          isOpen={!!catalogBusiness}
-          onClose={() => setCatalogBusiness(null)}
-          business={catalogBusiness}
         />
       </div>
 
