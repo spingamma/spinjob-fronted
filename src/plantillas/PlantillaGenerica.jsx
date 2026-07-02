@@ -106,7 +106,33 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
 
   useEffect(() => {
     if (profesional && !isEditing) {
-      // Al salir de edición, reseteamos el form local (opcional si es necesario)
+      // Al salir de edición, reseteamos el form local
+      let initialWaNumbers = [];
+      try { initialWaNumbers = JSON.parse(profesional.whatsapp_numbers || '[]'); } catch { initialWaNumbers = []; }
+      if (initialWaNumbers.length === 0 && profesional.whatsapp) initialWaNumbers = [profesional.whatsapp];
+
+      setEditFormData({
+        name: profesional.name || '',
+        title: profesional.title || '',
+        description: profesional.description || '',
+        experience_years: profesional.experience_years || '',
+        credentials: profesional.credentials || '',
+        phone: profesional.phone || '',
+        whatsapp_numbers: initialWaNumbers,
+        facebook: profesional.facebook || '',
+        instagram: profesional.instagram || '',
+        linkedin: profesional.linkedin || '',
+        tiktok: profesional.tiktok || '',
+        github: profesional.github || '',
+        website: profesional.website || '',
+        country: profesional.country || 'Bolivia',
+        state: profesional.state || '',
+        home_delivery: profesional.home_delivery || false,
+        ubicacion_url: profesional.ubicacion_url || '',
+        category: profesional.category || '',
+        subcategories: (profesional.subcategories && profesional.subcategories.length > 0) ? profesional.subcategories.split(',') : [],
+        seller_code: ''
+      });
     }
   }, [profesional, isEditing]);
 
@@ -417,7 +443,6 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
                 } else {
                   setIsEditing(false); 
                   setImagePreview(null); 
-                  setEditFormData({}); 
                 }
               }}
               disabled={isSavingEdit}
