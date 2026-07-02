@@ -1,5 +1,5 @@
 import React from 'react';
-import { DoorOpen, LogOut, Share2, QrCode, Edit3, Bookmark, Star, MapPin, Camera } from 'lucide-react';
+import { DoorOpen, LogOut, Share2, QrCode, Edit3, Bookmark, Star, MapPin, Camera, Check } from 'lucide-react';
 
 export default function ProfileHero({
   profesional,
@@ -195,6 +195,42 @@ export default function ProfileHero({
                       </div>
                     )}
                   </div>
+
+                  {/* 🛠️ SUBCATEGORÍAS MÚLTIPLES */}
+                  {isEditing && editFormData?.category && (() => {
+                    const group = specialtiesData?.find(g => g.category === editFormData.category);
+                    const subs = group ? group.subcategories : [];
+                    if (!subs || subs.length === 0) return null;
+                    
+                    return (
+                      <div className="mt-3 flex flex-col bg-white/50 p-3 rounded-xl border border-gray-200 shadow-sm">
+                        <label className="text-xs font-bold text-gray-500 mb-2">Subcategorías (puedes elegir varias) <span className="text-red-500" title="Campo obligatorio">*</span></label>
+                        <div className="flex flex-wrap gap-2">
+                          {subs.map(s => {
+                            const checked = (editFormData.subcategories || []).includes(s.subcategory);
+                            return (
+                              <button
+                                type="button"
+                                key={s.subcategory}
+                                onClick={() => {
+                                  const prev = editFormData.subcategories || [];
+                                  const newSubs = checked ? prev.filter(x => x !== s.subcategory) : [...prev, s.subcategory];
+                                  setEditFormData({ ...editFormData, subcategories: newSubs });
+                                }}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${checked
+                                    ? 'bg-[#F9842C] text-white border-[#F9842C] shadow-sm'
+                                    : 'bg-white text-[#757778] border-gray-200 hover:border-[#F9842C]/50 hover:text-[#F9842C]'
+                                  }`}
+                              >
+                                {checked && <Check size={14} className="inline mr-1 -mt-0.5" />}
+                                {s.subcategory}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
                   
                   {/* Edición de Ubicación */}
                   <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white/50 p-4 rounded-xl border border-gray-200 shadow-sm">

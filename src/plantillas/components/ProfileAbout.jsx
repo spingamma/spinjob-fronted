@@ -84,41 +84,7 @@ export default function ProfileAbout({
         </div>
       )}
 
-      {/* 🛠️ SUBCATEGORÍAS MÚLTIPLES */}
-      {isEditing && editFormData?.category && (() => {
-        const group = specialtiesData?.find(g => g.category === editFormData.category);
-        const subs = group ? group.subcategories : [];
-        if (!subs || subs.length === 0) return null;
-        
-        return (
-          <div className="mt-6 border-t border-dashed border-gray-200 pt-4">
-            <label className="text-sm font-bold text-[#1A535C] block mb-2">Sub-especialidades (puedes elegir varias)</label>
-            <div className="flex flex-wrap gap-2">
-              {subs.map(s => {
-                const checked = (editFormData.subcategories || []).includes(s.subcategory);
-                return (
-                  <button
-                    type="button"
-                    key={s.subcategory}
-                    onClick={() => {
-                      const prev = editFormData.subcategories || [];
-                      const newSubs = checked ? prev.filter(x => x !== s.subcategory) : [...prev, s.subcategory];
-                      setEditFormData({ ...editFormData, subcategories: newSubs });
-                    }}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${checked
-                        ? 'bg-[#F9842C] text-white border-[#F9842C] shadow-sm'
-                        : 'bg-white text-[#757778] border-gray-200 hover:border-[#F9842C]/50 hover:text-[#F9842C]'
-                      }`}
-                  >
-                    {checked && <Check size={14} className="inline mr-1 -mt-0.5" />}
-                    {s.subcategory}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })()}
+
       </div>
     </div>
   );
