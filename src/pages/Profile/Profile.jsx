@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 import SeoMeta from '../../components/SeoMeta';
 import AuthModal from '../../components/AuthModal';
+import fetchAuth from '../../utils/fetchAuth';
 
 // ==========================================
 // 📥 IMPORTACIÓN DE PLANTILLAS
@@ -29,11 +30,7 @@ function Perfil() {
 
     async function obtenerPerfil(intentos = 0) {
       try {
-        const token = localStorage.getItem('spingamma_token');
-        const headers = {};
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-
-        const res = await fetch(`${API_URL}/businesses/${slug}`, { headers });
+        const res = await fetchAuth(`${API_URL}/businesses/${slug}`);
 
         if (res.ok) {
           const data = await res.json();
@@ -50,6 +47,9 @@ function Perfil() {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
       } catch (err) {
+        if (err.message === 'SESSION_EXPIRED') {
+          return;
+        }
         console.warn(`Intento ${intentos + 1} fallido. El servidor backend podría estar despertando...`, err);
 
         if (intentos < 10 && isMounted) {
@@ -75,14 +75,13 @@ function Perfil() {
   // ==========================================
   // 👁️ REGISTRO AUTOMÁTICO DE VISITA
   // ==========================================
-  const registrarVisitaPerfil = async (slug, token) => {
+  const registrarVisitaPerfil = async (slug) => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
-      const response = await fetch(`${API_URL}/businesses/${slug}/interaccion`, {
+      const response = await fetchAuth(`${API_URL}/businesses/${slug}/interaccion`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // Obligatorio para evitar error 401
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ platform: "Visita Perfil" })
       });
@@ -92,15 +91,16 @@ function Perfil() {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Error al registrar interacción en el perfil:", error);
+      if (error.message !== 'SESSION_EXPIRED') {
+        console.error("Error al registrar interacción en el perfil:", error);
+      }
     }
   };
 
   useEffect(() => {
     if (profesional && isLoggedIn) {
-      const token = localStorage.getItem('spingamma_token');
-      if (token && profesional.slug) {
-        registrarVisitaPerfil(profesional.slug, token);
+      if (profesional.slug) {
+        registrarVisitaPerfil(profesional.slug);
       }
     }
   }, [profesional, isLoggedIn]);
@@ -179,16 +179,17 @@ function Perfil() {
   const handleUpdate = () => {
     // Para recargar los datos
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-    const token = localStorage.getItem('spingamma_token');
-    const headers = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    fetch(`${API_URL}/businesses/${slug}`, { headers })
+    fetchAuth(`${API_URL}/businesses/${slug}`)
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data) setProfesional(data);
       })
-      .catch(err => console.error("Error refreshing profile", err));
+      .catch(err => {
+        if (err.message !== 'SESSION_EXPIRED') {
+          console.error("Error refreshing profile", err);
+        }
+      });
   };
 
   return (

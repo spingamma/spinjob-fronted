@@ -1,25 +1,30 @@
 ---
 name: crear-componente
-description: Genera un nuevo componente UI React respetando el branding de Tarjetoso y el límite estricto de 300 líneas.
+description: Genera un nuevo componente UI en el frontend respetando la paleta de branding dinámica y el límite estricto de 300 líneas.
 ---
 
 # Skill: Crear Componente
 
 ## Cuándo usar
-- "Agrega un componente para mostrar X", "Crea una tarjeta de Y", "Haz un modal para Z".
+Utiliza esta habilidad cuando el usuario te pida crear o estructurar componentes visuales o modulares (ej. "Agrega una tarjeta para mostrar X", "Crea un modal interactivo para Y", "Crea un componente de lista de Z").
 
 ## Pasos
 
-### 1. Ubicación y Estructura
-- Crea el archivo en `src/components/` o en una subcarpeta si pertenece a una vista específica (ej. `src/pages/AdminPanel/components/`).
-- **LÍMITE ESTRICTO:** El componente NO debe exceder las 300 líneas. Si parece que lo hará, divídelo en subcomponentes antes de empezar.
+### 1. Inicialización y Carga Estética (Branding)
+- Revisa el archivo de configuración `.agents/branding.json` para obtener los colores primarios, secundarios y el nombre de la marca.
+- Si no existe el archivo, **pregunta activamente al usuario** por el nombre de la marca y los colores, y crea el archivo `.agents/branding.json`.
+- Aplica la paleta cargada dinámicamente en los estilos y textos del componente.
 
-### 2. Diseño y Branding (Tarjetoso)
-- Usa los colores oficiales: `#1E3D51` y `#B95221`.
-- Aplica Tailwind 4: Usa flex/grid responsivos (mobile-first).
-- Glassmorphism: `bg-white/10 backdrop-blur-md` si el diseño lo amerita.
-- Para avatares/imágenes, agrega `onError` de `ui-avatars.com`.
+### 2. Ubicación y Estructura del Componente
+- Crea el archivo dentro del directorio de componentes comunes (ej. `src/components/`) o dentro de una subcarpeta dedicada de una página o sección (ej. `src/pages/Panel/components/`).
+- **LÍMITE ESTRICTO DE 300 LÍNEAS:** El componente nuevo no debe sobrepasar las 300 líneas. Si notas que la complejidad requiere más espacio, sepáralo de inmediato en múltiples subcomponentes pequeños en archivos separados y organízalos de manera modular.
 
-### 3. Código y Testing
-- Asegura que todos los `<button>`, `<a>`, e inputs tengan `data-testid="nombre-del-elemento"`.
-- Protege los renderizados con `?.` o `&&`.
+### 3. Diseño y Estilos Reutilizables
+- Usa las clases de tu motor de estilos (ej. Tailwind CSS).
+- Implementa diseños responsivos enfocados en móviles (mobile-first).
+- Incorpora efectos estéticos modernos si el diseño del proyecto lo requiere (ej. glassmorphism `bg-white/10 backdrop-blur-md`, transiciones suaves de hover `transition-all duration-300`, y gradientes fluidos).
+- Para imágenes y avatares de usuario, añade siempre un fallback mediante el evento `onError` apuntando a placeholders genéricos (ej. `ui-avatars.com`).
+
+### 4. Robustez de Código y Testing
+- **Atributos de Testing:** Es obligatorio agregar `data-testid="identificador-unico"` a todos los elementos con los que el usuario interactúa (botones, enlaces, modales, formularios, inputs).
+- **Programación Defensiva:** Protege el renderizado de datos dinámicos utilizando encadenamiento opcional (`?.`) o evaluaciones lógicas (`&&`) para evitar que campos nulos o no definidos rompan el flujo de la aplicación.

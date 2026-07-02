@@ -1,24 +1,27 @@
 # Clean Code React y Estructura
 
 ## Límites y Arquitectura
-1. **LÍMITE ESTRICTO DE 300 LÍNEAS:** Ningún componente, hook o página debe exceder las 300 líneas. Si se acerca a esto, extrae lógica a un Custom Hook (`hooks/`) o a subcomponentes (`components/`). 1 responsabilidad por archivo.
-2. **DRY + SRP:** Lógica repetida se vuelve Custom Hook. Componentes repetidos van a `src/components/`.
+1. **LÍMITE ESTRICTO DE 300 LÍNEAS:** Ningún componente, hook o página debe exceder las 300 líneas de código. Si se aproxima a esta cantidad, extrae la lógica a un Custom Hook (`hooks/`) o a subcomponentes (`components/`). Mantén una única responsabilidad por archivo.
+2. **DRY + SRP:** La lógica repetida se debe encapsular en Custom Hooks. Los componentes reutilizables deben residir en `src/components/`.
 
 ## Reglas Críticas de Testing e Interacción
-3. **Testing Hooks (OBLIGATORIO EXTREMO):** 🚨 SIEMPRE agrega atributos `data-testid="..."` a TODOS los elementos interactivos (botones, inputs, `<a>`, modales). ES UN ERROR GRAVE olvidar esto.
-4. **Reposición exacta (Oxc/Vite):** Cuidado al borrar JSX. Si borras un div de cierre `</div>` huérfano, romperás el árbol y causarás "Unexpected token". Lee el archivo con `view_file` hacia arriba si dudas.
+3. **Testing Hooks (OBLIGATORIO EXTREMO):** 🚨 SIEMPRE agrega atributos `data-testid="..."` a TODOS los elementos interactivos (botones, inputs, enlaces `<a>`, modales, etc.). Es considerado un error grave no hacerlo.
+4. **Reposición exacta y Balanceo de JSX (Oxc/Vite):** 🚨 Presta extrema atención al editar, envolver o eliminar JSX.
+   - Si borras una etiqueta de cierre `</div>` huérfana, romperás el árbol de renderizado de React.
+   - **NUNCA** envuelvas condicionalmente bloques de código que contengan etiquetas de apertura o cierre desparejadas de contenedores padres (ej: abrir un fragmento `<>` dentro de un condicional, pero cerrar la etiqueta `</div>` del contenedor padre dentro de este fragmento).
+   - Condiciona únicamente las etiquetas hijas específicas (de forma aislada) o asegúrate de que toda la estructura contenedora (apertura y cierre) quede autocontenida y balanceada dentro de la expresión condicional. Utiliza `view_file` si necesitas confirmar el árbol superior de etiquetas.
 
 ## Estado, Hooks y Modales
-5. **Early returns:** NUNCA retornes antes de que TODOS los hooks (useMemo, useEffect, etc.) hayan sido invocados.
-6. **Listas con estado:** Si cada ítem necesita estado propio (ej. "Ver más"), extrae un sub-componente (`ProductCard`). No uses arrays de estado en el padre.
-7. **Modales anidados:** Si un modal abre otro, usa React Fragment `<>...</>` como wrapper y renderiza el hijo FUERA del div backdrop del padre.
-8. **Acciones protegidas:** Click en redes/WhatsApp sin sesión → forzar `AuthModal`.
+5. **Early returns:** NUNCA uses sentencias de retorno anticipado (early returns) antes de que TODOS los hooks (useState, useEffect, useMemo, etc.) del componente hayan sido invocados.
+6. **Listas con estado:** Si los ítems de una lista requieren gestionar estado local individual (ej. "Ver más", "Editar"), extrae cada elemento a un subcomponente dedicado (ej. `ItemCard`). Evita usar colecciones/arrays de estados en el componente padre.
+7. **Modales anidados:** Si un modal despliega un segundo modal encima, usa React Fragment `<>...</>` como contenedor de primer nivel y renderiza el modal secundario FUERA del contenedor de fondo (backdrop) del modal padre.
+8. **Acciones protegidas:** Bloquea y redirige interacciones críticas que requieran sesión activa al flujo de login correspondiente (ej. desplegar un `LoginModal` o redirección de sesión).
 
 ## Lógica de Filtrado con IDs Mixtos (Base de datos vs Temporales)
-9. **Filtros aislados:** Al trabajar con listas de elementos que mezclan registros ya guardados (con `id`) y temporales (con `tempId`), aísla la validación en el `.filter()`. 
+9. **Filtros aislados:** Al trabajar con listas de elementos que mezclan registros ya guardados en BD (con `id`) y elementos locales temporales (con `tempId`), aísla y valida ambas variables por separado en el `.filter()`. 
 **NUNCA USES ESTA FORMA:**
 ```javascript
-// INCORRECTO: p.tempId !== product.tempId evaluará a 'undefined !== undefined' -> 'false'.
+// INCORRECTO: p.tempId !== item.tempId evaluará a 'undefined !== undefined' -> 'false'.
 setItems(prev => prev.filter(p => p.id !== item.id && p.tempId !== item.tempId));
 ```
 **FORMA CORRECTA:**
@@ -30,19 +33,22 @@ setItems(prev => prev.filter(p => {
 ```
 
 ## Manejo de Fechas y Timezones
-10. **Fechas Locales vs UTC:** NUNCA uses `new Date().toISOString().split('T')[0]` para obtener la fecha de "hoy" en el frontend si el backend usa fechas locales. Esto causa bugs de filtrado donde la fecha salta al "día siguiente" en la tarde-noche por la diferencia horaria con UTC. 
-**FORMA CORRECTA:** Usa los métodos locales de `Date` para construir strings de fecha de forma robusta frente al timezone del navegador:
+10. **Fechas Locales vs UTC:** NUNCA uses `new Date().toISOString().split('T')[0]` en el frontend para calcular la fecha actual ("hoy") si tu API backend asume fechas en husos horarios locales. Esto causa desajustes de fecha (el día salta al día siguiente durante la tarde/noche debido a la desviación UTC).
+**FORMA CORRECTA:** Usa los métodos de fecha local del objeto `Date` para construir representaciones robustas en el huso horario local del usuario:
 ```javascript
 const today = new Date();
 const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 ```
 
-## Formularios y Manejo de Errores
-11. **Campos Obligatorios:** Todo campo obligatorio en un formulario debe indicar explícitamente su obligatoriedad usando un asterisco rojo (`<span className="text-red-500">*</span>`) en su label o a su lado.
-12. **Validación Frontend (Prevención 422):** Nunca confíes solo en la validación del backend. Valida en el cliente (frontend) que los campos obligatorios no estén vacíos antes de hacer el fetch. Esto evita errores 422 (Unprocessable Entity).
-13. **Parseo de Errores FastAPI:** NUNCA pases el `errData.detail` crudo a un `Error` o `alert()` sin verificar su tipo. Si FastAPI devuelve un error de validación (array de objetos), al convertirlo a string se verá como `[object Object]`. Parsea el array a un string legible:
+## Formularios y Manejo de Errores de API
+11. **Campos Obligatorios:** Todo campo obligatorio en un formulario debe indicar explícitamente su estatus mediante un asterisco rojo (`<span className="text-red-500">*</span>`) en su etiqueta descriptiva.
+12. **Validación en Cliente (Prevención de 422/BadRequest):** Valida en el cliente que los campos requeridos estén completos y cumplan los tipos esperados antes de realizar la petición HTTP.
+13. **Parseo de Errores de API:** NUNCA pases el string de error crudo devuelto por la API sin verificar su tipo o estructura. Si el backend (FastAPI, Express, etc.) retorna un objeto estructurado o un array de errores de validación, renderízalos amigablemente al usuario en lugar de mostrar `[object Object]`.
+**Ejemplo de parseo para validación estructurada (ej. FastAPI):**
 ```javascript
 if (Array.isArray(errData.detail)) {
   errorMessage = errData.detail.map(e => `${e.loc ? e.loc[e.loc.length-1] : 'Campo'}: ${e.msg}`).join('\n');
+} else {
+  errorMessage = errData.detail || 'Ocurrió un error inesperado';
 }
 ```

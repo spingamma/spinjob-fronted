@@ -50,16 +50,18 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     const token = localStorage.getItem('spingamma_token');
     if (isLoggedIn && token && profesional && profesional.slug) {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      fetch(`${API_URL}/tarjetero/${profesional.slug}/status`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
+      fetchAuth(`${API_URL}/tarjetero/${profesional.slug}/status`)
       .then(res => res.json())
       .then(data => {
         if (data && data.is_saved !== undefined) {
           setIsSaved(data.is_saved);
         }
       })
-      .catch(err => console.error("Error consultando estado del tarjetero", err));
+      .catch(err => {
+        if (err.message !== 'SESSION_EXPIRED') {
+          console.error("Error consultando estado del tarjetero", err);
+        }
+      });
     }
   }, [isLoggedIn, profesional]);
 

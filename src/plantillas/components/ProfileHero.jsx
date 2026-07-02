@@ -1,5 +1,5 @@
 import React from 'react';
-import { DoorOpen, LogOut, Share2, QrCode, Edit3, Bookmark, Star, MapPin, Camera, Check } from 'lucide-react';
+import { DoorOpen, LogOut, Share2, QrCode, Edit3, Bookmark, Star, MapPin, Camera, Check, CheckCircle2 } from 'lucide-react';
 
 export default function ProfileHero({
   profesional,
@@ -296,7 +296,12 @@ export default function ProfileHero({
                 </>
               ) : (
                 <>
-                  <h1 className="text-3xl font-extrabold text-[#1A535C] leading-tight mb-1">{profesional.name}</h1>
+                  <h1 className="text-3xl font-extrabold text-[#1A535C] leading-tight mb-1 flex items-center gap-1.5 flex-wrap">
+                    <span>{profesional.name}</span>
+                    {profesional.premium && (
+                      <CheckCircle2 size={22} className="text-[#F9842C] fill-[#F9842C]/10 shrink-0" title="Negocio Premium Verificado" />
+                    )}
+                  </h1>
                   <p className="text-[#F9842C] text-sm font-bold uppercase tracking-widest mb-1">{profesional.title}</p>
                   {profesional.home_delivery && (
                     <span className="inline-flex items-center gap-1 bg-[#1A535C]/10 text-[#1A535C] text-xs font-bold px-2 py-1 rounded-md">

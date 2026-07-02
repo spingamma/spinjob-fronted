@@ -1,7 +1,7 @@
 // Archivo: src/pages/MetricsDashboard/MetricsDashboard.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BarChart2, Calendar, TrendingUp, Users, MousePointerClick, Filter } from 'lucide-react';
+import { ArrowLeft, BarChart2, Calendar, TrendingUp, Users, MousePointerClick, Filter, Lock, Sparkles } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Header from '../../components/Header';
 import BottomNavbar from '../../components/BottomNavbar';
@@ -34,6 +34,7 @@ export default function MetricsDashboard() {
 
   const [metrics, setMetrics] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isPremium, setIsPremium] = useState(true);
   
   // Filtros
   const [timeFilter, setTimeFilter] = useState('general');
@@ -45,9 +46,13 @@ export default function MetricsDashboard() {
       try {
         const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
         const res = await fetchAuth(`${API_URL}/businesses/${slug}/metrics`);
-        if (res.ok) {
+        if (res.status === 403) {
+          setIsPremium(false);
+          setMetrics([]);
+        } else if (res.ok) {
           const data = await res.json();
           setMetrics(data);
+          setIsPremium(true);
         }
       } catch (err) {
         console.error("Error al cargar métricas:", err);
@@ -175,145 +180,214 @@ export default function MetricsDashboard() {
           <ArrowLeft size={20} className="mr-2 group-hover:-translate-x-1 transition-transform" /> Volver a Mis Negocios
         </button>
 
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-gray-200 pb-5">
           <h1 className="text-3xl font-extrabold text-[#1A535C] flex items-center gap-3">
             <BarChart2 className="text-[#F9842C]" size={32} /> Rendimiento de la Tarjeta
           </h1>
           
-          {/* Controles de Filtro */}
-          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <div className="bg-white px-4 py-2.5 rounded-xl shadow-sm border border-gray-200 flex items-center gap-2 focus-within:ring-2 focus-within:ring-[#1A535C]/20 transition-all">
-              <Calendar size={18} className="text-[#1A535C]" />
-              <select 
-                value={timeFilter} 
-                onChange={(e) => setTimeFilter(e.target.value)}
-                className="bg-transparent text-[#1A535C] font-semibold outline-none cursor-pointer flex-1 text-sm"
-              >
-                <option value="general">General (Todos los tiempos)</option>
-                <option value="1_month">Último mes</option>
-                <option value="3_months">Últimos 3 meses</option>
-                <option value="6_months">Últimos 6 meses</option>
-                <option value="custom">Rango de fechas</option>
-              </select>
+          {/* Controles de Filtro (Solo si es Premium) */}
+          {isPremium && (
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <div className="bg-white px-4 py-2.5 rounded-xl shadow-sm border border-gray-200 flex items-center gap-2 focus-within:ring-2 focus-within:ring-[#1A535C]/20 transition-all">
+                <Calendar size={18} className="text-[#1A535C]" />
+                <select 
+                  value={timeFilter} 
+                  onChange={(e) => setTimeFilter(e.target.value)}
+                  className="bg-transparent text-[#1A535C] font-semibold outline-none cursor-pointer flex-1 text-sm"
+                >
+                  <option value="general">General (Todos los tiempos)</option>
+                  <option value="1_month">Último mes</option>
+                  <option value="3_months">Últimos 3 meses</option>
+                  <option value="6_months">Últimos 6 meses</option>
+                  <option value="custom">Rango de fechas</option>
+                </select>
+              </div>
+              
+              {timeFilter === 'custom' && (
+                <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl shadow-sm border border-gray-200 animate-fade-in">
+                  <input 
+                    type="date" 
+                    value={customStart}
+                    onChange={(e) => setCustomStart(e.target.value)}
+                    className="bg-transparent text-sm text-[#1A535C] font-medium outline-none w-full"
+                  />
+                  <span className="text-gray-300 font-bold">-</span>
+                  <input 
+                    type="date" 
+                    value={customEnd}
+                    onChange={(e) => setCustomEnd(e.target.value)}
+                    className="bg-transparent text-sm text-[#1A535C] font-medium outline-none w-full"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {isPremium ? (
+          <>
+            {/* Tarjetas de Resumen Visual */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 mt-6">
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 flex items-center justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#1A535C]"></div>
+                <div>
+                  <p className="text-[#757778] font-bold mb-1 text-xs uppercase tracking-widest">Aperturas de Tarjeta</p>
+                  <h3 className="text-4xl font-extrabold text-[#1A535C] tracking-tight">{totalVistas}</h3>
+                </div>
+                <div className="bg-[#1A535C]/5 p-4 rounded-xl">
+                  <Users size={32} className="text-[#1A535C]" />
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 flex items-center justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#F9842C]"></div>
+                <div>
+                  <p className="text-[#757778] font-bold mb-1 text-xs uppercase tracking-widest">Interacciones (Clics)</p>
+                  <h3 className="text-4xl font-extrabold text-[#F9842C] tracking-tight">{totalClics}</h3>
+                </div>
+                <div className="bg-[#F9842C]/5 p-4 rounded-xl">
+                  <MousePointerClick size={32} className="text-[#F9842C]" />
+                </div>
+              </div>
+            </div>
+
+            {/* Contenedor de la Gráfica */}
+            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
+                  <div className="bg-[#1A535C]/5 p-3 rounded-xl border border-[#1A535C]/10">
+                    <TrendingUp size={24} className="text-[#1A535C]" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-[#1A535C] tracking-tight">Evolución de Tráfico</h2>
+                    <p className="text-sm text-[#757778] font-medium mt-0.5">Métricas de impacto generadas por tu tarjeta</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="h-[400px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorVistas" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#1A535C" stopOpacity={0.15}/>
+                        <stop offset="95%" stopColor="#1A535C" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorClics" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#F9842C" stopOpacity={0.15}/>
+                        <stop offset="95%" stopColor="#F9842C" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fill: '#6B7280', fontSize: 13, fontWeight: 500 }}
+                      dy={10}
+                      minTickGap={30}
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fill: '#6B7280', fontSize: 13, fontWeight: 500 }}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend 
+                      verticalAlign="top" 
+                      height={36} 
+                      iconType="circle"
+                      wrapperStyle={{ paddingBottom: '20px', fontWeight: 'bold' }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="vistas" 
+                      name="Aperturas de Tarjeta" 
+                      stroke="#1A535C" 
+                      strokeWidth={3}
+                      fillOpacity={1} 
+                      fill="url(#colorVistas)" 
+                      activeDot={{ r: 6, fill: "#1A535C", stroke: "#fff", strokeWidth: 3 }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="clics" 
+                      name="Clics en Redes/Contacto" 
+                      stroke="#F9842C" 
+                      strokeWidth={3}
+                      fillOpacity={1} 
+                      fill="url(#colorClics)" 
+                      activeDot={{ r: 6, fill: "#F9842C", stroke: "#fff", strokeWidth: 3 }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="bg-gradient-to-br from-[#1A535C]/5 via-[#1D565F]/5 to-transparent border border-white/40 backdrop-blur-lg rounded-3xl p-8 md:p-12 text-center shadow-xl max-w-2xl mx-auto mt-10">
+            <div className="w-20 h-20 bg-gradient-to-tr from-[#F9842C] to-[#e06516] text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/20 animate-pulse">
+              <Lock size={36} />
             </div>
             
-            {timeFilter === 'custom' && (
-              <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl shadow-sm border border-gray-200 animate-fade-in">
-                <input 
-                  type="date" 
-                  value={customStart}
-                  onChange={(e) => setCustomStart(e.target.value)}
-                  className="bg-transparent text-sm text-[#1A535C] font-medium outline-none w-full"
-                />
-                <span className="text-gray-300 font-bold">-</span>
-                <input 
-                  type="date" 
-                  value={customEnd}
-                  onChange={(e) => setCustomEnd(e.target.value)}
-                  className="bg-transparent text-sm text-[#1A535C] font-medium outline-none w-full"
-                />
+            <h2 className="text-3xl font-extrabold text-[#1A535C] tracking-tight mb-4 flex items-center justify-center gap-2">
+              <Sparkles className="text-[#F9842C] fill-[#F9842C]/20" /> Panel de Métricas Premium
+            </h2>
+            
+            <p className="text-[#757778] text-base md:text-lg mb-8 leading-relaxed max-w-md mx-auto">
+              Conoce el rendimiento de tu tarjeta digital en tiempo real. Activa el plan **Premium** para obtener acceso completo a las estadísticas de tráfico e interacciones.
+            </p>
+            
+            <div className="bg-white/80 rounded-2xl p-6 border border-gray-200 shadow-sm text-left max-w-md mx-auto mb-8 flex flex-col gap-4">
+              <div className="flex gap-3 items-start">
+                <div className="bg-[#1A535C]/10 text-[#1A535C] p-1.5 rounded-lg mt-0.5 shrink-0">
+                  <TrendingUp size={16} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-[#1A535C] text-sm">Visualizaciones y Clics</h4>
+                  <p className="text-xs text-[#757778]">Sigue el crecimiento del tráfico en tu tarjeta digital día a día.</p>
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Tarjetas de Resumen Visual */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 flex items-center justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#1A535C]"></div>
-            <div>
-              <p className="text-[#757778] font-bold mb-1 text-xs uppercase tracking-widest">Aperturas de Tarjeta</p>
-              <h3 className="text-4xl font-extrabold text-[#1A535C] tracking-tight">{totalVistas}</h3>
-            </div>
-            <div className="bg-[#1A535C]/5 p-4 rounded-xl">
-              <Users size={32} className="text-[#1A535C]" />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 flex items-center justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#F9842C]"></div>
-            <div>
-              <p className="text-[#757778] font-bold mb-1 text-xs uppercase tracking-widest">Interacciones (Clics)</p>
-              <h3 className="text-4xl font-extrabold text-[#F9842C] tracking-tight">{totalClics}</h3>
-            </div>
-            <div className="bg-[#F9842C]/5 p-4 rounded-xl">
-              <MousePointerClick size={32} className="text-[#F9842C]" />
-            </div>
-          </div>
-        </div>
-
-        {/* Contenedor de la Gráfica */}
-        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <div className="bg-[#1A535C]/5 p-3 rounded-xl border border-[#1A535C]/10">
-                <TrendingUp size={24} className="text-[#1A535C]" />
+              
+              <div className="flex gap-3 items-start">
+                <div className="bg-[#1A535C]/10 text-[#1A535C] p-1.5 rounded-lg mt-0.5 shrink-0">
+                  <Calendar size={16} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-[#1A535C] text-sm">Filtros Avanzados</h4>
+                  <p className="text-xs text-[#757778]">Analiza por períodos (último mes, 3 meses) o rangos personalizados.</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-[#1A535C] tracking-tight">Evolución de Tráfico</h2>
-                <p className="text-sm text-[#757778] font-medium mt-0.5">Métricas de impacto generadas por tu tarjeta</p>
+              
+              <div className="flex gap-3 items-start">
+                <div className="bg-[#1A535C]/10 text-[#1A535C] p-1.5 rounded-lg mt-0.5 shrink-0">
+                  <Sparkles size={16} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-[#1A535C] text-sm">Optimización de Ventas</h4>
+                  <p className="text-xs text-[#757778]">Identifica qué redes sociales o productos de tu catálogo atraen más clics.</p>
+                </div>
               </div>
             </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <button 
+                onClick={() => navigate('/mis-negocios')}
+                className="w-full sm:w-auto px-6 py-3.5 bg-gray-100 hover:bg-gray-200 text-[#1A535C] font-bold rounded-xl transition-all text-sm"
+              >
+                Volver
+              </button>
+              <a 
+                href="https://wa.me/59164016676?text=Hola%20SpinGamma,%20quiero%20actualizar%20mi%20negocio%20al%20plan%20Premium%20para%20activar%20las%20M%C3%A9tricas."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-[#F9842C] to-[#e06516] text-white font-extrabold rounded-xl hover:shadow-lg hover:shadow-orange-500/10 hover:-translate-y-0.5 transition-all text-sm flex items-center justify-center gap-2"
+              >
+                <Sparkles size={16} /> Activar Premium (US$5/mes)
+              </a>
+            </div>
           </div>
-          
-          <div className="h-[400px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorVistas" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#1A535C" stopOpacity={0.15}/>
-                    <stop offset="95%" stopColor="#1A535C" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorClics" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#F9842C" stopOpacity={0.15}/>
-                    <stop offset="95%" stopColor="#F9842C" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#6B7280', fontSize: 13, fontWeight: 500 }}
-                  dy={10}
-                  minTickGap={30}
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#6B7280', fontSize: 13, fontWeight: 500 }}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend 
-                  verticalAlign="top" 
-                  height={36} 
-                  iconType="circle"
-                  wrapperStyle={{ paddingBottom: '20px', fontWeight: 'bold' }}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="vistas" 
-                  name="Aperturas de Tarjeta" 
-                  stroke="#1A535C" 
-                  strokeWidth={3}
-                  fillOpacity={1} 
-                  fill="url(#colorVistas)" 
-                  activeDot={{ r: 6, fill: "#1A535C", stroke: "#fff", strokeWidth: 3 }}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="clics" 
-                  name="Clics en Redes/Contacto" 
-                  stroke="#F9842C" 
-                  strokeWidth={3}
-                  fillOpacity={1} 
-                  fill="url(#colorClics)" 
-                  activeDot={{ r: 6, fill: "#F9842C", stroke: "#fff", strokeWidth: 3 }}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        )}
 
       </div>
 

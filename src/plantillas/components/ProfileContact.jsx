@@ -74,12 +74,14 @@ export default function ProfileContact({
                   </button>
                 </div>
               ))}
-              <button 
-                onClick={handleAddWa}
-                className="flex items-center gap-1 text-xs font-bold text-[#F9842C] hover:text-[#e06516] transition-colors mt-1"
-              >
-                <Plus size={14} /> Añadir otro número
-              </button>
+              {(editFormData.whatsapp_numbers || []).length < 2 && (
+                <button 
+                  onClick={handleAddWa}
+                  className="flex items-center gap-1 text-xs font-bold text-[#F9842C] hover:text-[#e06516] transition-colors mt-1"
+                >
+                  <Plus size={14} /> Añadir otro número
+                </button>
+              )}
             </div>
             <div>
               <label className="text-sm font-bold text-[#1A535C] flex items-center gap-2 mb-1">

@@ -1,21 +1,32 @@
-# Estándares de Diseño UI/UX y Branding (Tarjetoso)
+# Estándares de Diseño UI/UX y Branding Dinámico
 
-## Branding y Estética
-1. **Paleta Premium:** Usa la paleta de Tarjetoso: `#1E3D51` (Primario) y `#B95221` (Acento) siempre. Nunca preguntes colores.
-2. **Tailwind 4 & Glassmorphism:** Usa `bg-white/10 backdrop-blur-md border border-white/20`, gradientes (`from-[#1E3D51] to-[#B95221]`) y animaciones (`transition-all duration-300 ease-out hover:scale-[1.02]`).
-3. **Nombre de marca:** Tarjetoso (NUNCA usar "SpinJob" en textos visibles al usuario).
-4. **Imágenes:** SIEMPRE usar `onError` con fallback a `ui-avatars.com`. Toda subida de imagen debe pasar por `CropModal` (`cropShape="rect"` para productos, `"round"` para avatares).
+## Branding y Estética Dinámica
+1. **Detección y Carga de Branding:** Al iniciar un nuevo proyecto, el agente debe verificar si existe el archivo `.agents/branding.json` con la definición de marca y colores.
+   - **Flujo de Inicialización (Si no existe):**
+     - Si el archivo no existe o está vacío, **pregunta activamente al usuario** por el nombre de la marca, el color primario (ej. `#1E3D51`) y el color de acento (ej. `#B95221`).
+     - Guarda el resultado escribiendo o sobrescribiendo el archivo `.agents/branding.json` en este formato:
+       ```json
+       {
+         "brandName": "NombreDeMarca",
+         "primaryColor": "#HEXCOLOR",
+         "accentColor": "#HEXCOLOR"
+       }
+       ```
+     - Una vez creado, utilízalo para todas tus decisiones estéticas sin volver a preguntar.
+2. **Tailwind & Glassmorphism:** Usa la paleta cargada dinámicamente de tu archivo de branding. Diseña con efectos modernos: `bg-white/10 backdrop-blur-md border border-white/20`, gradientes fluidos (`from-[primaryColor] to-[accentColor]`) y animaciones dinámicas (`transition-all duration-300 ease-out hover:scale-[1.02]`).
+3. **Nombre de marca:** Usa consistentemente el `brandName` definido. NUNCA utilices nombres placeholders ni marcas de otros boilerplates (ej. "SpinJob", "Tarjetoso") en textos visibles al usuario a menos que estén explícitamente configurados.
+4. **Imágenes y Fallbacks:** SIEMPRE añade un manejador `onError` con fallback a `ui-avatars.com` u otro proveedor de placeholders dinámicos. Toda subida de imagen que requiera encuadre debe pasar por un componente de recorte/edición (`CropModal` o equivalente) con propiedades de forma correctas (ej. rectangular para banners/productos, redonda para avatares).
 
 ## Mobile-First Responsivo
-5. **NUNCA usar hover para acciones críticas:** En móvil no existe hover. Acciones deben ser siempre visibles.
-6. **Grids en móvil:** Usar `grid-cols-1` en móvil, `sm:grid-cols-2`, `md:grid-cols-3`. NUNCA empezar con 2 en móvil.
-7. **Prevenir Overflow:** Usa `w-full` y `overflow-hidden` o `min-w-0` en contenedores anidados dentro de flex/grid.
-8. **Textareas:** Usar auto-grow con `useRef` + `useEffect` y contador visual.
+5. **NUNCA usar hover para acciones críticas:** En móvil no existe hover. Las acciones principales deben estar siempre visibles de forma directa.
+6. **Grids en móvil:** Usar `grid-cols-1` en móvil, `sm:grid-cols-2`, `md:grid-cols-3` o similares. NUNCA fuerces layouts multidistribución (2 o más columnas) en pantallas pequeñas si rompen la lectura.
+7. **Prevenir Overflow:** Usa `w-full` y `overflow-hidden` o `min-w-0` en contenedores flex/grid anidados para evitar desbordamientos horizontales.
+8. **Textareas:** Usar auto-grow con `useRef` + `useEffect` y contador visual de caracteres.
 
 ## z-index Hierarchy
-9. **Escala obligatoria:**
-    - `z-40` → `BottomNavbar` (navegación inferior móvil)
-    - `z-50` → Dropdowns, tooltips, barras flotantes
-    - `z-[100]` → Modales principales
-    - `z-[999]` → Modales sobre modales (ej. CropModal sobre otro modal)
-    - NUNCA igualar z-index entre BottomNavbar y modales.
+9. **Escala obligatoria de capas (Modificar según arquitectura):**
+    - `z-40` → Barras de navegación global flotantes / fijas (ej. `BottomNavbar`)
+    - `z-50` → Dropdowns, tooltips, notificaciones temporales
+    - `z-[100]` → Modales principales (popups)
+    - `z-[999]` → Modales secundarios sobrepuestos (ej. modales de confirmación o recorte de fotos)
+    - NUNCA asignes el mismo z-index a capas superpuestas para evitar bugs visuales de oclusión.

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Loader2, PackageOpen, ShoppingBag } from 'lucide-react';
 import BottomNavbar from '../../components/BottomNavbar';
+import fetchAuth from '../../utils/fetchAuth';
 
 export default function MyOrders() {
   const navigate = useNavigate();
@@ -31,9 +32,7 @@ export default function MyOrders() {
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
       
       try {
-        const res = await fetch(`${API_URL}/usuarios/mis-pedidos`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const res = await fetchAuth(`${API_URL}/usuarios/mis-pedidos`);
         
         if (res.ok) {
           const data = await res.json();
@@ -42,7 +41,9 @@ export default function MyOrders() {
           setOrders([]);
         }
       } catch (err) {
-        console.error(err);
+        if (err.message !== 'SESSION_EXPIRED') {
+          console.error(err);
+        }
       } finally {
         setLoading(false);
       }

@@ -1,6 +1,6 @@
 // Archivo: src/components/ProfessionalCard.jsx
 import { Link } from 'react-router-dom';
-import { Star, Edit3, DoorOpen } from 'lucide-react';
+import { Star, Edit3, DoorOpen, CheckCircle2 } from 'lucide-react';
 
 export default function ProfessionalCard({ professional, isLoggedIn, isAdmin, onCardClick }) {
   return (
@@ -26,14 +26,12 @@ export default function ProfessionalCard({ professional, isLoggedIn, isAdmin, on
           }}
         />
 
-        {/*
-        {professional.verified && (
+        {professional.premium && (
           <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-white/90 backdrop-blur-sm px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-gray-100">
             <CheckCircle2 size={12} className="text-[#F9842C] sm:w-[16px] sm:h-[16px]" />
             <span className="text-[10px] sm:text-xs font-bold text-[#1A535C] uppercase tracking-wider">Verificado</span>
           </div>
         )}
-        */}
         {professional.reviews_count > 0 && (
           <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/95 backdrop-blur-sm px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-lg flex items-center gap-1 shadow-sm border border-gray-100">
             <Star size={12} className="fill-[#F9842C] text-[#F9842C] sm:w-[14px] sm:h-[14px]" />

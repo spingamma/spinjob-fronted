@@ -7,6 +7,7 @@ import useAccionesPerfil from '../hooks/useAccionesPerfil';
 import ReviewModal from '../components/ReviewModal';
 import ModalVerificacion from '../components/ModalVerificacion';
 import InlineCatalogCarousel from '../components/InlineCatalogCarousel';
+import fetchAuth from '../utils/fetchAuth';
 
 import ProfileHero from './components/ProfileHero';
 import ProfileAbout from './components/ProfileAbout';
@@ -210,15 +211,13 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       
       let res;
       if (isCreateMode) {
-        res = await fetch(`${API_URL}/businesses/`, {
+        res = await fetchAuth(`${API_URL}/businesses/`, {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
           body: formDataObj
         });
       } else {
-        res = await fetch(`${API_URL}/businesses/${profesional.slug}/editar`, {
+        res = await fetchAuth(`${API_URL}/businesses/${profesional.slug}/editar`, {
           method: 'PUT',
-          headers: { 'Authorization': `Bearer ${token}` },
           body: formDataObj
         });
       }
@@ -243,12 +242,13 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       // 1. Eliminar productos
       for (const prodId of deletedProductsIds) {
         try {
-          await fetch(`${API_URL}/businesses/${currentSlug}/products/${prodId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
+          await fetchAuth(`${API_URL}/businesses/${currentSlug}/products/${prodId}`, {
+            method: 'DELETE'
           });
         } catch (e) {
-          console.error("Error eliminando producto:", e);
+          if (e.message !== 'SESSION_EXPIRED') {
+            console.error("Error eliminando producto:", e);
+          }
         }
       }
 
@@ -270,13 +270,14 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             : `${API_URL}/businesses/${currentSlug}/products`;
 
           try {
-            await fetch(url, {
+            await fetchAuth(url, {
               method: prod.id ? 'PUT' : 'POST',
-              headers: { 'Authorization': `Bearer ${token}` },
               body: pForm
             });
           } catch (e) {
-            console.error("Error guardando producto:", e);
+            if (e.message !== 'SESSION_EXPIRED') {
+              console.error("Error guardando producto:", e);
+            }
           }
         }
       }

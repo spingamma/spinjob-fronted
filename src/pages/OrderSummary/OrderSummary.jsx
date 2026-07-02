@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Send, CheckCircle } from 'lucide-react';
+import fetchAuth from '../../utils/fetchAuth';
 
 export default function OrderSummary() {
   const { slug } = useParams();
@@ -76,11 +77,10 @@ export default function OrderSummary() {
     };
 
     try {
-      const res = await fetch(`${API_URL}/businesses/${slug}/orders`, {
+      const res = await fetchAuth(`${API_URL}/businesses/${slug}/orders`, {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(orderData)
       });
@@ -89,8 +89,10 @@ export default function OrderSummary() {
       
       setSuccess(true);
     } catch (err) {
-      console.error(err);
-      alert("Hubo un problema al enviar tu pedido. Intenta nuevamente.");
+      if (err.message !== 'SESSION_EXPIRED') {
+        console.error(err);
+        alert("Hubo un problema al enviar tu pedido. Intenta nuevamente.");
+      }
     } finally {
       setLoading(false);
     }

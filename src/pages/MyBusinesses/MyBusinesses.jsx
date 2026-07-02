@@ -76,11 +76,9 @@ export default function MisNegocios() {
 
     setIsDeleting(slug);
     try {
-      const token = localStorage.getItem('spingamma_token');
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      const res = await fetch(`${API_URL}/businesses/${slug}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const res = await fetchAuth(`${API_URL}/businesses/${slug}`, {
+        method: 'DELETE'
       });
 
       if (!res.ok) {
@@ -204,9 +202,16 @@ export default function MisNegocios() {
                   {neg.status === 'aprobado' && (
                     <Link
                       to={`/metricas/${neg.slug}`}
-                      className="flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                      className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-50/50 hover:bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100"
                     >
-                      <BarChart2 size={18} /> Ver Métricas
+                      <span className="flex items-center gap-1.5">
+                        <BarChart2 size={16} /> Métricas
+                      </span>
+                      {!neg.premium && (
+                        <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md font-extrabold flex items-center gap-0.5" title="Característica Premium">
+                          🔒 Premium
+                        </span>
+                      )}
                     </Link>
                   )}
 
@@ -214,9 +219,16 @@ export default function MisNegocios() {
                   {neg.status === 'aprobado' && (
                     <Link
                       to={`/mis-pedidos/${neg.slug}`}
-                      className="flex items-center gap-2 text-sm font-bold text-teal-600 hover:text-teal-800 transition-colors"
+                      className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-teal-600 hover:text-teal-800 transition-colors bg-teal-50/50 hover:bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-100"
                     >
-                      <ShoppingBag size={18} /> Ver Pedidos
+                      <span className="flex items-center gap-1.5">
+                        <ShoppingBag size={16} /> Pedidos
+                      </span>
+                      {!neg.premium && (
+                        <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md font-extrabold flex items-center gap-0.5" title="Característica Premium">
+                          🔒 Premium
+                        </span>
+                      )}
                     </Link>
                   )}
 

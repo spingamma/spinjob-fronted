@@ -16,7 +16,7 @@ export default function ProfileCatalogEdit({ localProducts, setLocalProducts, de
   const [editingId, setEditingId] = useState(null);
   const textareaRef = useRef(null);
 
-  const limit = isPremium ? 20 : 10;
+  const limit = isPremium ? 15 : 3;
 
   useEffect(() => {
     if (textareaRef.current) {
