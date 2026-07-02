@@ -196,11 +196,9 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
   }, [products]);
 
   const handleProductClick = (product) => {
-    const cleanWa = cleanWhatsappNumber(whatsappNumber, country);
-    if (!cleanWa) return;
-    const msg = `Hola ${businessName}, me interesa este producto: ${product.name}`;
-    window.open(`https://wa.me/${cleanWa}?text=${encodeURIComponent(msg)}`, '_blank');
+    // A pedido del usuario, no redirigir automáticamente a WhatsApp al hacer click en el producto.
   };
+
 
   return (
     <div className="w-full overflow-hidden mb-2">
@@ -249,10 +247,7 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
                   </div>
                 )}
 
-                {/* Botón superior derecho (...) */}
-                <div className="absolute top-3 right-3 w-8 h-8 sm:w-10 sm:h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-sm text-[#1A535C] border border-gray-100 z-10 transition-colors hover:bg-gray-50">
-                  <MoreHorizontal size={18} className="sm:w-5 sm:h-5" />
-                </div>
+
               </div>
 
               {/* Info inferior con fondo blanco/oscuro */}

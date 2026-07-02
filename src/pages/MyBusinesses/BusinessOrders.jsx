@@ -93,17 +93,24 @@ export default function BusinessOrders() {
         {/* Filtros */}
         <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="p-2.5 bg-orange-50 text-[#F9842C] rounded-xl">
+            <div className="relative p-2.5 bg-orange-50 text-[#F9842C] rounded-xl cursor-pointer hover:bg-orange-100 transition-colors flex-shrink-0">
               <Calendar size={20} />
-            </div>
-            <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Fecha</p>
               <input 
                 type="date" 
                 value={filterDate}
                 onChange={(e) => setFilterDate(e.target.value)}
-                className="font-bold text-[#1A535C] outline-none bg-transparent"
+                onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                title="Seleccionar fecha"
               />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Fecha</p>
+              <p className="font-bold text-[#1A535C]">
+                {filterDate 
+                  ? new Date(filterDate + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) 
+                  : 'Todas las fechas'}
+              </p>
             </div>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
