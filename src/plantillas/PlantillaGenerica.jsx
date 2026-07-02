@@ -77,7 +77,13 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       home_delivery: profesional.home_delivery || false,
       ubicacion_url: profesional.ubicacion_url || '',
       category: profesional.category || '',
-      subcategories: (profesional.subcategories && profesional.subcategories.length > 0) ? profesional.subcategories.split(',') : [],
+      subcategories: (() => {
+        try {
+          return typeof profesional.subcategories === 'string' ? JSON.parse(profesional.subcategories) : (profesional.subcategories || []);
+        } catch(e) {
+          return (profesional.subcategories && profesional.subcategories.length > 0) ? profesional.subcategories.split(',') : [];
+        }
+      })(),
       seller_code: ''
     };
   });
@@ -85,6 +91,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
   const [specialtiesData, setSpecialtiesData] = useState([]);
   const [localProducts, setLocalProducts] = useState([]);
   const [deletedProductsIds, setDeletedProductsIds] = useState([]);
+  const [hasUnsavedProduct, setHasUnsavedProduct] = useState(false);
 
   // Fetch specialties & products
   useEffect(() => {
@@ -130,7 +137,13 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         home_delivery: profesional.home_delivery || false,
         ubicacion_url: profesional.ubicacion_url || '',
         category: profesional.category || '',
-        subcategories: (profesional.subcategories && profesional.subcategories.length > 0) ? profesional.subcategories.split(',') : [],
+        subcategories: (() => {
+          try {
+            return typeof profesional.subcategories === 'string' ? JSON.parse(profesional.subcategories) : (profesional.subcategories || []);
+          } catch(e) {
+            return (profesional.subcategories && profesional.subcategories.length > 0) ? profesional.subcategories.split(',') : [];
+          }
+        })(),
         seller_code: ''
       });
     }
@@ -149,6 +162,11 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
   };
 
   const handleSaveEdit = async () => {
+    if (hasUnsavedProduct) {
+      alert("Tienes un producto a medio editar en el catálogo. Por favor completa su nombre y haz clic en 'Añadir' / 'Actualizar', o cancela la edición antes de guardar la tarjeta.");
+      return;
+    }
+
     if (!editFormData.name?.trim() || !editFormData.title?.trim() || !editFormData.description?.trim() || !editFormData.category?.trim() || !editFormData.state?.trim() || !editFormData.subcategories || editFormData.subcategories.length === 0) {
       alert("Faltan campos obligatorios. Por favor completa: Nombre, Título, Descripción, Categoría, Subcategoría y Departamento/Estado.");
       return;
@@ -339,6 +357,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
                 deletedProductsIds={deletedProductsIds}
                 setDeletedProductsIds={setDeletedProductsIds}
                 isPremium={profesional.premium === true}
+                onHasUnsavedProduct={setHasUnsavedProduct}
               />
             </div>
           ) : (

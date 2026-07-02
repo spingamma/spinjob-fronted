@@ -19,7 +19,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
     fetch(`${API_URL}/businesses/${slug}/products`)
       .then(res => res.ok ? res.json() : Promise.reject())
-      .then(data => setProducts(data))
+      .then(data => setProducts(data.filter(p => p.is_visible !== false)))
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
   }, [slug]);
@@ -177,6 +177,8 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
     }
   };
 
+  const productsKey = products.map(p => p.id).join(',');
+
   useEffect(() => {
     if (products.length === 0 || !containerRef.current) return;
 
@@ -193,7 +195,7 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
     }, 100);
 
     return () => clearTimeout(initTimer);
-  }, [products]);
+  }, [productsKey]);
 
   const handleProductClick = (product) => {
     // A pedido del usuario, no redirigir automáticamente a WhatsApp al hacer click en el producto.

@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Package, Trash2, Image as ImageIcon, Save, Pencil } from 'lucide-react';
+import { Plus, Package, Trash2, Image as ImageIcon, Save, Pencil, Eye, EyeOff } from 'lucide-react';
 import CropModal from '../../components/CropModal';
 
-export default function ProfileCatalogEdit({ localProducts, setLocalProducts, deletedProductsIds, setDeletedProductsIds, isPremium }) {
+export default function ProfileCatalogEdit({ localProducts, setLocalProducts, deletedProductsIds, setDeletedProductsIds, isPremium, onHasUnsavedProduct }) {
   const [showForm, setShowForm] = useState(false);
   const [showCropModal, setShowCropModal] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState(null);
@@ -24,6 +24,13 @@ export default function ProfileCatalogEdit({ localProducts, setLocalProducts, de
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 250)}px`;
     }
   }, [formDesc, showForm]);
+
+  useEffect(() => {
+    if (onHasUnsavedProduct) {
+      const isUnsaved = showForm && (formName || formDesc || formPrice || formPreview || formImage);
+      onHasUnsavedProduct(!!isUnsaved);
+    }
+  }, [showForm, formName, formDesc, formPrice, formPreview, formImage, onHasUnsavedProduct]);
 
   const resetForm = () => {
     setFormName('');
@@ -99,6 +106,7 @@ export default function ProfileCatalogEdit({ localProducts, setLocalProducts, de
         carousel_name: formCarousel.trim() || 'Catálogo',
         image_url: formPreview, // local preview
         imageFile: formImage,
+        is_visible: true,
         isModified: true
       };
       setLocalProducts(prev => [...prev, newProduct]);
@@ -118,6 +126,15 @@ export default function ProfileCatalogEdit({ localProducts, setLocalProducts, de
     setLocalProducts(prev => prev.filter(p => {
       if (product.id) return p.id !== product.id;
       return p.tempId !== product.tempId;
+    }));
+  };
+
+  const toggleVisibility = (product) => {
+    setLocalProducts(prev => prev.map(p => {
+      if ((p.id && p.id === product.id) || (p.tempId && p.tempId === product.tempId)) {
+        return { ...p, is_visible: p.is_visible === false ? true : false, isModified: true };
+      }
+      return p;
     }));
   };
 
@@ -227,6 +244,13 @@ export default function ProfileCatalogEdit({ localProducts, setLocalProducts, de
                 <div className="mt-auto pt-3 flex items-center justify-between">
                   <p className="text-teal-600 font-bold text-sm">{product.price || ''}</p>
                   <div className="flex gap-1.5">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleVisibility(product); }}
+                      className={`p-1.5 rounded-lg transition-colors border shadow-sm ${product.is_visible !== false ? 'text-[#F9842C] bg-orange-50 border-orange-100 hover:bg-orange-100' : 'text-gray-400 bg-gray-50 border-gray-100 hover:bg-gray-100'}`}
+                      title={product.is_visible !== false ? "Ocultar elemento" : "Hacer visible"}
+                    >
+                      {product.is_visible !== false ? <Eye size={14} /> : <EyeOff size={14} />}
+                    </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); openEditForm(product); }}
                       className="p-1.5 text-gray-400 hover:text-[#6A431F] bg-gray-50 hover:bg-[#6A431F]/10 rounded-lg transition-colors border border-gray-100 shadow-sm"
