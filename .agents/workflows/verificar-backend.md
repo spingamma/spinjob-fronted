@@ -45,7 +45,10 @@ Revisar endpoints POST/PUT/DELETE en `routers/`:
 - **DRY:** ¿Código repetido? → Extraer a utilidades compartidas.
 - **Validación Estricta:** Las validaciones de esquemas y routers deben REQUERIR campos relacionales obligatorios (ej. categorías, dependencias). NO permitas que modelos críticos se guarden "huérfanos" (ej. un negocio sin categoría) por omisión en el request.
 
-## 7. Servidor arranca
+## 7. Precisión en la Indentación (Python)
+- REVISA visualmente y de forma estricta cualquier modificación de código en archivos `.py` antes de hacer commit o deploy. Los bloques de `try/except` y de control de flujo (`if/else`) deben estar perfectamente alineados. Un error de espacios causará un `IndentationError` y tirará el servidor en producción.
+
+## 8. Servidor arranca
 
 ```bash
 cd c:\Users\jhona\Desktop\spinjob-backend && python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
