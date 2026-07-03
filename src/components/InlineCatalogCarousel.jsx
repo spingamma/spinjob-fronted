@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { cleanWhatsappNumber } from '../utils/phone';
 import miCarrito from '../assets/oso-carrito.png';
 
-export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia', theme = 'light', isPremium = false }) {
+export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia', theme = 'light', isPremium = false, ordersEnabled = true }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState({});
@@ -101,6 +101,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
               businessName={businessName}
               country={country}
               isPremium={isPremium}
+              ordersEnabled={ordersEnabled}
               cart={cart}
               updateCart={updateCart}
             />
@@ -124,7 +125,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
       ) : null}
 
       {/* Floating Order Button */}
-      {isPremium && totalItems > 0 && (
+      {isPremium && ordersEnabled && totalItems > 0 && (
         <div className="fixed bottom-6 left-0 right-0 px-4 z-[90] flex justify-center animate-in slide-in-from-bottom-10">
           <button
             data-testid="order-checkout-btn"
@@ -145,7 +146,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
   );
 }
 
-const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, country, isPremium, cart, updateCart }) => {
+const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, country, isPremium, ordersEnabled, cart, updateCart }) => {
   // Crear un carrusel pseudo-infinito repitiendo los productos 20 veces (nadie hace swipe 50+ veces)
   const displayProducts = products.length > 0 ? Array(20).fill(products).flat() : [];
 
@@ -273,7 +274,7 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
                     <p className="font-bold text-base sm:text-lg text-transparent select-none">-</p>
                   )}
 
-                  {isPremium && (
+                  {isPremium && ordersEnabled && (
                     <div
                       className="flex items-center gap-2 bg-gray-100 rounded-lg p-1"
                       onClick={(e) => e.stopPropagation()} // Prevent carousel item click

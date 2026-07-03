@@ -85,7 +85,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           return (profesional.subcategories && profesional.subcategories.length > 0) ? profesional.subcategories.split(',') : [];
         }
       })(),
-      seller_code: ''
+      seller_code: '',
+      orders_enabled: profesional.orders_enabled !== false
     };
   });
   const [imagePreview, setImagePreview] = useState(null);
@@ -145,7 +146,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             return (profesional.subcategories && profesional.subcategories.length > 0) ? profesional.subcategories.split(',') : [];
           }
         })(),
-        seller_code: ''
+        seller_code: '',
+        orders_enabled: profesional.orders_enabled !== false
       });
     }
   }, [profesional, isEditing]);
@@ -359,6 +361,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
                 setDeletedProductsIds={setDeletedProductsIds}
                 isPremium={profesional.premium === true}
                 onHasUnsavedProduct={setHasUnsavedProduct}
+                ordersEnabled={editFormData.orders_enabled}
+                setOrdersEnabled={(val) => setEditFormData(prev => ({ ...prev, orders_enabled: val }))}
               />
             </div>
           ) : (
@@ -370,6 +374,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               country={profesional.country || 'Bolivia'}
               theme="light"
               isPremium={profesional.premium === true}
+              ordersEnabled={profesional.orders_enabled !== false}
             />
           )}
         </div>

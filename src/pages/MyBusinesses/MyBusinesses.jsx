@@ -94,6 +94,13 @@ export default function MisNegocios() {
     }
   };
 
+  const handleNuevoNegocioClick = (e) => {
+    if (!isAdmin && negocios.length >= 1) {
+      e.preventDefault();
+      alert("Límite alcanzado: Los usuarios estándar solo pueden registrar un negocio como máximo.");
+    }
+  };
+
   if (cargando) return <div className="text-center py-20 text-[#1A535C] font-bold">Cargando tus negocios...</div>;
 
   return (
@@ -121,7 +128,7 @@ export default function MisNegocios() {
           <h1 className="text-3xl font-extrabold text-[#1A535C] flex items-center gap-3">
             <Building className="text-[#F9842C]" /> Mis Negocios
           </h1>
-          <Link to="/crear-negocio" className="bg-[#F9842C] hover:bg-[#e06516] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-transform hover:-translate-y-0.5">
+          <Link to="/crear-negocio" onClick={handleNuevoNegocioClick} className="bg-[#F9842C] hover:bg-[#e06516] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-transform hover:-translate-y-0.5">
             <PlusCircle size={18} /> Nuevo
           </Link>
         </div>

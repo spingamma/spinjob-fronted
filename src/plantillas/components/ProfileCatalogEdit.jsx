@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Plus, Package, Trash2, Image as ImageIcon, Save, Pencil, Eye, EyeOff } from 'lucide-react';
 import CropModal from '../../components/CropModal';
 
-export default function ProfileCatalogEdit({ localProducts, setLocalProducts, deletedProductsIds, setDeletedProductsIds, isPremium, onHasUnsavedProduct }) {
+export default function ProfileCatalogEdit({ localProducts, setLocalProducts, deletedProductsIds, setDeletedProductsIds, isPremium, onHasUnsavedProduct, ordersEnabled = true, setOrdersEnabled }) {
   const [showForm, setShowForm] = useState(false);
   const [showCropModal, setShowCropModal] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState(null);
@@ -145,6 +145,20 @@ export default function ProfileCatalogEdit({ localProducts, setLocalProducts, de
       </h3>
 
       <div className="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm">
+        {isPremium && (
+          <div className="flex items-center gap-2 mb-4 p-3 bg-orange-50/50 rounded-2xl border border-orange-100/50">
+            <input
+              type="checkbox"
+              id="ordersEnabledCheckbox"
+              checked={ordersEnabled}
+              onChange={(e) => setOrdersEnabled(e.target.checked)}
+              className="w-4 h-4 text-[#F9842C] focus:ring-[#F9842C] border-gray-300 rounded"
+            />
+            <label htmlFor="ordersEnabledCheckbox" className="text-sm font-bold text-[#1A535C] cursor-pointer select-none">
+              Habilitar pedidos para este catálogo (carrito de compras)
+            </label>
+          </div>
+        )}
         {showForm && (
           <form onSubmit={handleSubmit} className="mb-6 bg-gray-50 rounded-2xl p-4 border border-gray-200 space-y-3">
             <h4 className="font-bold text-[#1A535C] text-sm">{editingId ? 'Editar Producto' : 'Nuevo Producto'}</h4>
