@@ -1,5 +1,6 @@
 import React from 'react';
-import { DoorOpen, LogOut, Share2, QrCode, Edit3, Bookmark, Star, MapPin, Camera, Check, CheckCircle2 } from 'lucide-react';
+import { DoorOpen, LogOut, Share2, QrCode, Edit3, Bookmark, Star, MapPin, Camera, Check, CheckCircle2, Loader2 } from 'lucide-react';
+import MapSelectorModal from '../../components/MapSelectorModal';
 
 export default function ProfileHero({
   profesional,
@@ -25,6 +26,95 @@ export default function ProfileHero({
   isCreateMode,
   specialtiesData
 }) {
+  const [isMapOpen, setIsMapOpen] = React.useState(false);
+  const [detectedCoords, setDetectedCoords] = React.useState(null);
+  const [resolvingUrl, setResolvingUrl] = React.useState(false);
+
+  const parseGoogleMapsCoords = (url) => {
+    if (!url) return null;
+    // 1. Pin data: !3dLat!4dLng
+    let match = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (match) {
+      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+    }
+    // 2. Query parameter: q=lat,lng
+    match = url.match(/[?&](q|query)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (match) {
+      return { lat: parseFloat(match[2]), lng: parseFloat(match[3]) };
+    }
+    // 3. Path place: /place/lat,lng
+    match = url.match(/\/place\/(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (match) {
+      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+    }
+    // 4. Viewport/Camera fallback: @lat,lng
+    match = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (match) {
+      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+    }
+    // 5. Direct coordinates: "lat,lng"
+    match = url.match(/^\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*$/);
+    if (match) {
+      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+    }
+    return null;
+  };
+
+  React.useEffect(() => {
+    const url = editFormData?.ubicacion_url;
+    if (!url) {
+      setDetectedCoords(null);
+      return;
+    }
+
+    const parsed = parseGoogleMapsCoords(url);
+    if (parsed) {
+      setDetectedCoords(parsed);
+    } else if (url.includes('maps.app.goo.gl') || url.includes('goo.gl/maps')) {
+      const resolveShortUrl = async () => {
+        setResolvingUrl(true);
+        try {
+          const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+          const res = await fetch(`${API_URL}/businesses/resolve-url?url=${encodeURIComponent(url)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.resolved_url) {
+              const parsedResolved = parseGoogleMapsCoords(data.resolved_url);
+              if (parsedResolved) {
+                setDetectedCoords(parsedResolved);
+                setEditFormData(prev => ({
+                  ...prev,
+                  ubicacion_url: `https://www.google.com/maps?q=${parsedResolved.lat},${parsedResolved.lng}`
+                }));
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Error resolving short URL:", err);
+        } finally {
+          setResolvingUrl(false);
+        }
+      };
+
+      const timer = setTimeout(() => {
+        resolveShortUrl();
+      }, 800);
+      return () => clearTimeout(timer);
+    } else {
+      setDetectedCoords(null);
+    }
+  }, [editFormData?.ubicacion_url]);
+
+  const handleMapConfirm = (coords) => {
+    const googleMapsUrl = `https://www.google.com/maps?q=${coords.lat},${coords.lng}`;
+    setEditFormData({
+      ...editFormData,
+      ubicacion_url: googleMapsUrl
+    });
+    setDetectedCoords(coords);
+    setIsMapOpen(false);
+  };
+
   return (
     <>
       {/* 🖼️ BARRA DE NAVEGACIÓN SUPERIOR (FLOTANTE) */}
@@ -147,6 +237,7 @@ export default function ProfileHero({
                       name="name"
                       value={editFormData.name}
                       onChange={handleEditChange}
+                      maxLength={30}
                       className="w-full text-3xl font-extrabold text-[#1A535C] leading-tight bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded px-2 outline-none transition-all pr-6"
                       placeholder="Nombre del Profesional / Negocio"
                     />
@@ -282,15 +373,47 @@ export default function ProfileHero({
                       </select>
                     </div>
 
-                    <div className="flex flex-col sm:col-span-2">
-                      <label className="text-xs font-bold text-gray-500 mb-1">Pega aquí el enlace de Google Maps</label>
-                      <input 
-                        name="ubicacion_url" 
-                        value={editFormData.ubicacion_url || ''} 
-                        onChange={handleEditChange} 
-                        className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" 
-                        placeholder="https://maps.app.goo.gl/..." 
-                      />
+                    <div className="flex flex-col sm:col-span-2 gap-2">
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs font-bold text-gray-500">Enlace de Google Maps</label>
+                        <button
+                          type="button"
+                          onClick={() => setIsMapOpen(true)}
+                          data-testid="open-map-selector-button"
+                          className="text-xs font-bold text-[#F9842C] hover:text-[#e06516] flex items-center gap-1.5 bg-[#F9842C]/5 px-3 py-1.5 rounded-xl border border-[#F9842C]/20 hover:bg-[#F9842C]/10 transition-all active:scale-95 cursor-pointer shadow-sm"
+                        >
+                          <MapPin size={14} className="text-[#F9842C]" />
+                          <span>Elegir en el Mapa</span>
+                        </button>
+                      </div>
+                      
+                      <div className="relative flex items-center">
+                        <input 
+                          name="ubicacion_url" 
+                          value={editFormData.ubicacion_url || ''} 
+                          onChange={handleEditChange} 
+                          className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded-xl p-2.5 pr-10 outline-none transition-all" 
+                          placeholder="https://maps.app.goo.gl/..." 
+                        />
+                        {resolvingUrl && (
+                          <div className="absolute right-3 flex items-center justify-center">
+                            <Loader2 size={16} className="animate-spin text-[#F9842C]" />
+                          </div>
+                        )}
+                      </div>
+
+                      {detectedCoords && (
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200/50 p-2 rounded-xl mt-1 animate-in fade-in duration-200">
+                          <Check size={12} className="bg-emerald-600 text-white rounded-full p-0.5" />
+                          <span>Ubicación detectada correctamente</span>
+                        </div>
+                      )}
+
+                      {!detectedCoords && editFormData.ubicacion_url && !resolvingUrl && (
+                        <div className="text-[10px] font-medium text-amber-600 bg-amber-50/50 border border-amber-200/30 p-2 rounded-xl mt-1 italic">
+                          No pudimos extraer coordenadas del enlace. El mapa usará el centrado de departamento, o puedes elegir con un pin haciendo clic en "Elegir en el Mapa".
+                        </div>
+                      )}
                     </div>
                   </div>
                 </>
@@ -311,7 +434,7 @@ export default function ProfileHero({
                 </>
               )}
             </div>
-            {links.ubicacion && (
+            {!isEditing && links.ubicacion && (
               <button 
                 onClick={(e) => handleLinkClick(e, 'Ubicación', links.ubicacion)}
                 className="flex items-center justify-center gap-2 px-5 py-2.5 mt-1 rounded-xl bg-white text-[#1A535C] font-bold hover:bg-gray-50 transition-all border border-gray-200 shadow-sm text-sm active:scale-[0.98] shrink-0"
@@ -323,6 +446,14 @@ export default function ProfileHero({
           </div>
         </div>
       </div>
+
+      <MapSelectorModal 
+        isOpen={isMapOpen}
+        onClose={() => setIsMapOpen(false)}
+        onConfirm={handleMapConfirm}
+        initialCoords={detectedCoords}
+        selectedState={editFormData?.state}
+      />
     </>
   );
 }

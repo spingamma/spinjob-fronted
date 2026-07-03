@@ -44,6 +44,34 @@ export default function Directory() {
   const [pendingSlug, setPendingSlug] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
+  // Geolocation cache for calculating distances to businesses
+  const [userCoords, setUserCoords] = useState(() => {
+    const stored = localStorage.getItem('spingamma_user_coords');
+    if (stored) {
+      try { return JSON.parse(stored); } catch { return null; }
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (navigator.geolocation && !userCoords) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          setUserCoords(coords);
+          localStorage.setItem('spingamma_user_coords', JSON.stringify(coords));
+        },
+        (error) => {
+          console.log("No se pudo obtener la geolocalización:", error);
+        },
+        { enableHighAccuracy: false, timeout: 8000 }
+      );
+    }
+  }, [userCoords]);
+
   // --- Infinite Scroll State ---
   const observer = useRef(null);
 
@@ -55,7 +83,7 @@ export default function Directory() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const filterHook = useDirectoryFilters(profesionales, metadata);
+  const filterHook = useDirectoryFilters(profesionales, metadata, userCoords);
   const { activeCategory, activeState, searchTerm, activeNeighborhood, activeRating, activeSubcategory } = filterHook.states;
   const [searchParams, setSearchParams] = useSearchParams();
   const verTodos = searchParams.get('ver') === 'todos';
@@ -244,6 +272,7 @@ export default function Directory() {
         setters={filterHook.setters}
         computed={filterHook.computed}
         actions={filterHook.actions}
+        userCoords={userCoords}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
@@ -251,14 +280,27 @@ export default function Directory() {
         {/* HOME STATE: Category Grid */}
         {showCategoryGrid ? (
           <>
-            {/* Welcome Section */}
-            {isLoggedIn && userName && (
-              <div className="mb-6">
-                <h2 className="text-xl md:text-2xl font-bold text-[#1A535C]">
-                  ¡Hola, {userName}! 👋
-                </h2>
-              </div>
-            )}
+            {/* Welcome Section / Header */}
+            <div className="flex justify-between items-center mb-6 w-full gap-4">
+              <h2 className="text-base md:text-lg font-bold text-[#6A431F] leading-tight">
+                {isLoggedIn && userName ? (
+                  <>
+                    <span className="text-[#1A535C]">{userName}</span> qué visitaremos hoy?
+                  </>
+                ) : (
+                  "Qué visitaremos hoy?"
+                )}
+              </h2>
+              {metadata && (
+                <button
+                  onClick={() => setSearchParams({ ver: 'todos' })}
+                  data-testid="dir-view-all-button"
+                  className="px-2.5 py-1 bg-[#F9842C] hover:bg-[#e06516] text-white font-bold text-[10px] uppercase tracking-wider rounded-lg transition-all shadow-sm active:scale-95 cursor-pointer shrink-0"
+                >
+                  Ver todos
+                </button>
+              )}
+            </div>
 
             {!metadata ? (
               <div className="text-center py-20 flex flex-col items-center">
@@ -269,7 +311,6 @@ export default function Directory() {
               <CategoryGrid
                 categories={metadata.groupedCategories}
                 onSelectCategory={handleSelectCategory}
-                onVerTodos={() => setSearchParams({ ver: 'todos' })}
               />
             )}
           </>
@@ -312,6 +353,8 @@ export default function Directory() {
                           isLoggedIn={isLoggedIn}
                           isAdmin={isAdmin}
                           onCardClick={handleCardClick}
+                          userCoords={userCoords}
+                          isMobile={isMobile}
                         />
                       </div>
                     );

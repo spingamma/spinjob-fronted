@@ -72,25 +72,11 @@ function getCategoryConfig(categoryName, index) {
   return { IconComponent, colors };
 }
 
-export default function CategoryGrid({ categories, onSelectCategory, onVerTodos }) {
+export default function CategoryGrid({ categories, onSelectCategory }) {
   if (!categories || categories.length === 0) return null;
 
   return (
-    <section data-testid="category-grid" className="mb-8">
-      <div className="flex justify-between items-end mb-5">
-        <h3 className="text-lg font-bold text-[#6A431F]">
-          Qué visitaremos hoy?
-        </h3>
-        {onVerTodos && (
-          <button
-            onClick={onVerTodos}
-            className="text-sm font-bold text-[#F9842C] hover:text-[#e06516] transition-colors flex items-center gap-1 focus:outline-none cursor-pointer"
-          >
-            Ver todos
-          </button>
-        )}
-      </div>
-
+    <section id="categories-section" data-testid="category-grid" className="mb-8">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
         {categories.map((cat, index) => {
           const { IconComponent, colors } = getCategoryConfig(cat.category, index);

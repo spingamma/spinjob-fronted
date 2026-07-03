@@ -1,8 +1,60 @@
 // Archivo: src/components/ProfessionalCard.jsx
 import { Link } from 'react-router-dom';
-import { Star, Edit3, DoorOpen, CheckCircle2 } from 'lucide-react';
+import { Star, Edit3, DoorOpen, CheckCircle2, Truck } from 'lucide-react';
 
-export default function ProfessionalCard({ professional, isLoggedIn, isAdmin, onCardClick }) {
+export default function ProfessionalCard({ professional, isLoggedIn, isAdmin, onCardClick, userCoords, isMobile }) {
+  // Parsers coordinates from business URL
+  const parseGoogleMapsCoords = (url) => {
+    if (!url) return null;
+    let match = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+    match = url.match(/[?&](q|query)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (match) return { lat: parseFloat(match[2]), lng: parseFloat(match[3]) };
+    match = url.match(/\/place\/(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+    match = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+    match = url.match(/^\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*$/);
+    if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+    return null;
+  };
+
+  // Calculates distance in km using the Haversine formula
+  const getDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  // Determines the travel time category based on distance brackets
+  const getTravelTimeMessage = () => {
+    const isTabletOrMobile = typeof window !== 'undefined' && 
+      (window.innerWidth < 1025 && ('ontouchstart' in window || navigator.maxTouchPoints > 0));
+    if (!isTabletOrMobile || !userCoords) return null;
+    const bizCoords = parseGoogleMapsCoords(professional.ubicacion_url);
+    if (!bizCoords) return null;
+
+    const dist = getDistance(userCoords.lat, userCoords.lng, bizCoords.lat, bizCoords.lng);
+    
+    if (dist < 6) {
+      return "Minutos";
+    } else if (dist >= 6 && dist < 24) {
+      return "Pocas horas";
+    } else if (dist >= 24 && dist < 150) {
+      return "Horas";
+    } else {
+      return "Viajes";
+    }
+  };
+
+  const travelMessage = getTravelTimeMessage();
+
   return (
     <Link
       data-testid="professional-card"
@@ -27,9 +79,8 @@ export default function ProfessionalCard({ professional, isLoggedIn, isAdmin, on
         />
 
         {professional.premium && (
-          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-white/90 backdrop-blur-sm px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-gray-100">
-            <CheckCircle2 size={12} className="text-[#F9842C] sm:w-[16px] sm:h-[16px]" />
-            <span className="text-[10px] sm:text-xs font-bold text-[#1A535C] uppercase tracking-wider">Verificado</span>
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-white/95 backdrop-blur-sm p-1 sm:p-1.5 rounded-full flex items-center justify-center shadow-sm border border-gray-100" title="Verificado">
+            <CheckCircle2 size={13} className="text-[#F9842C] sm:w-[16px] sm:h-[16px]" />
           </div>
         )}
         {professional.reviews_count > 0 && (
@@ -41,13 +92,41 @@ export default function ProfessionalCard({ professional, isLoggedIn, isAdmin, on
       </div>
       <div className="flex flex-col flex-1 p-3 sm:p-4">
         <div className="flex flex-col flex-1">
-          <h3 className="font-bold text-[#1A535C] text-base sm:text-xl leading-tight line-clamp-1 pr-1 sm:pr-2">
+          <h3 className="font-bold text-[#1A535C] text-base sm:text-lg leading-tight pr-1 sm:pr-2 break-words">
             {professional.name}
           </h3>
-          <p className="text-[#F9842C] font-semibold text-xs sm:text-sm mb-3 line-clamp-2 leading-snug">
+          <p className="text-[#6A431F] font-semibold text-xs sm:text-sm mb-1.5 line-clamp-1 leading-snug">
             {professional.title}
           </p>
         </div>
+
+        {/* 🚗 Travel Distance & Delivery Row */}
+        {(travelMessage || professional.home_delivery) && (
+          <div 
+            data-testid="card-location-row"
+            className="flex items-center justify-between mt-1 mb-2.5 text-[10px] sm:text-xs border-t border-gray-100 pt-2 w-full"
+          >
+            <div className="text-gray-500 font-medium flex items-center gap-1">
+              {travelMessage && (
+                <span className="text-[#6A431F] font-semibold flex items-center gap-1">
+                  🚗 {travelMessage}
+                </span>
+              )}
+            </div>
+            
+            {professional.home_delivery && (
+              <div className="shrink-0">
+                <div 
+                  data-testid="card-delivery-badge"
+                  className="px-1.5 py-0.5 rounded bg-[#F9842C]/10 text-[#F9842C] flex items-center gap-1 font-bold text-[9px] sm:text-[11px]"
+                >
+                  <Truck size={11} className="fill-[#F9842C]/5 sm:w-[13px] sm:h-[13px]" />
+                  <span>Delivery</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="mt-auto pt-2 w-full">
           <div className="w-full flex items-center justify-center gap-1.5 border-2 border-[#6A431F] text-[#6A431F] group-hover:bg-[#6A431F] group-hover:text-white font-bold py-1.5 sm:py-2 px-3 rounded-full transition-colors text-xs sm:text-sm">

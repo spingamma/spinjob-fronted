@@ -175,6 +175,50 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       return;
     }
 
+    if (editFormData.name.trim().length > 30) {
+      alert("El nombre del negocio no puede tener más de 30 caracteres.");
+      return;
+    }
+
+    if (editFormData.ubicacion_url && editFormData.ubicacion_url.trim() !== '') {
+      const parseGoogleMapsCoords = (url) => {
+        if (!url) return null;
+        // 1. Pin data: !3dLat!4dLng
+        let match = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+        if (match) {
+          return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+        }
+        // 2. Query parameter: q=lat,lng
+        match = url.match(/[?&](q|query)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+        if (match) {
+          return { lat: parseFloat(match[2]), lng: parseFloat(match[3]) };
+        }
+        // 3. Path place: /place/lat,lng
+        match = url.match(/\/place\/(-?\d+\.\d+),(-?\d+\.\d+)/);
+        if (match) {
+          return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+        }
+        // 4. Viewport/Camera fallback: @lat,lng
+        match = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+        if (match) {
+          return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+        }
+        // 5. Direct coordinates: "lat,lng"
+        match = url.match(/^\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*$/);
+        if (match) {
+          return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+        }
+        return null;
+      };
+      
+      const parsed = parseGoogleMapsCoords(editFormData.ubicacion_url);
+      if (!parsed) {
+        alert("No se han detectado coordenadas válidas en la ubicación. Por favor, pega un enlace válido o utiliza el botón 'Elegir en el Mapa'.");
+        return;
+      }
+    }
+
+
     if (isCreateMode) {
       const isVerifiedStrict = userObj?.is_verified === true || userObj?.is_verified === "true" || userObj?.is_verified === 1;
       if (!isVerifiedStrict) {

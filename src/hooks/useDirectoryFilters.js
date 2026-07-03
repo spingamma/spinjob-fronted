@@ -14,7 +14,7 @@ const isValidValue = (val) => {
   return !['n/a', 'na', 'null', 'undefined', 'ninguno', 'ninguna', '-', 'none'].includes(normalized);
 };
 
-export function useDirectoryFilters(professionals = [], metadataOverride = null) {
+export function useDirectoryFilters(professionals = [], metadataOverride = null, userCoords = null) {
   const { categoria, estado } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -68,6 +68,7 @@ export function useDirectoryFilters(professionals = [], metadataOverride = null)
   const activeNeighborhood = searchParams.get('barrio') || 'Todas';
   const activeRating = searchParams.get('rating') || 'Todos';
   const activeSubcategory = searchParams.get('subcategoria') || 'Todas';
+  const activeDistance = searchParams.get('distancia') || 'Todos';
 
   // State update helpers
   const updateSearchParams = useCallback((newParams) => {
@@ -78,6 +79,7 @@ export function useDirectoryFilters(professionals = [], metadataOverride = null)
     if (!merged.barrio || merged.barrio === 'Todas') delete merged.barrio;
     if (!merged.rating || merged.rating === 'Todos') delete merged.rating;
     if (!merged.subcategoria || merged.subcategoria === 'Todas') delete merged.subcategoria;
+    if (!merged.distancia || merged.distancia === 'Todos') delete merged.distancia;
 
     setSearchParams(merged);
   }, [searchParams, setSearchParams]);
@@ -141,10 +143,55 @@ export function useDirectoryFilters(professionals = [], metadataOverride = null)
         else if (activeRating === '4+ Estrellas') matchRating = (p.rating || 0) >= 4;
         else if (activeRating === '3+ Estrellas') matchRating = (p.rating || 0) >= 3;
 
-        return matchCategory && matchSearch && matchState && matchNeighborhood && matchRating && matchSubcategory;
+        let matchDistance = true;
+        if (activeDistance !== 'Todos' && userCoords) {
+          if (p.home_delivery) {
+            matchDistance = true;
+          } else {
+            const parseGoogleMapsCoords = (url) => {
+              if (!url) return null;
+              let match = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+              if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+              match = url.match(/[?&](q|query)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+              if (match) return { lat: parseFloat(match[2]), lng: parseFloat(match[3]) };
+              match = url.match(/\/place\/(-?\d+\.\d+),(-?\d+\.\d+)/);
+              if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+              match = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+              if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+              match = url.match(/^\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*$/);
+              if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+              return null;
+            };
+
+            const getDistance = (lat1, lon1, lat2, lon2) => {
+              const R = 6371; // km
+              const dLat = (lat2 - lat1) * Math.PI / 180;
+              const dLon = (lon2 - lon1) * Math.PI / 180;
+              const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              return R * c;
+            };
+
+            const bizCoords = parseGoogleMapsCoords(p.ubicacion_url);
+            if (!bizCoords) {
+              matchDistance = false;
+            } else {
+              const dist = getDistance(userCoords.lat, userCoords.lng, bizCoords.lat, bizCoords.lng);
+              if (activeDistance === 'Minutos') matchDistance = dist < 6;
+              else if (activeDistance === 'Pocas horas') matchDistance = dist >= 6 && dist < 24;
+              else if (activeDistance === 'Horas') matchDistance = dist >= 24 && dist < 150;
+              else if (activeDistance === 'Viajes') matchDistance = dist >= 150;
+            }
+          }
+        }
+
+        return matchCategory && matchSearch && matchState && matchNeighborhood && matchRating && matchSubcategory && matchDistance;
       })
       .sort((a, b) => (b.rating || 0) - (a.rating || 0));
-  }, [professionals, activeCategory, searchTerm, activeState, activeNeighborhood, activeSubcategory, activeRating]);
+  }, [professionals, activeCategory, searchTerm, activeState, activeNeighborhood, activeSubcategory, activeRating, activeDistance, userCoords]);
 
   // Interactions
   useEffect(() => {
@@ -221,6 +268,11 @@ export function useDirectoryFilters(professionals = [], metadataOverride = null)
       const newSearch = new URLSearchParams(currentParams).toString();
       setSearchParams(newSearch);
     }
+    else if (type === 'distance') {
+      currentParams.distancia = value;
+      const newSearch = new URLSearchParams(currentParams).toString();
+      setSearchParams(newSearch);
+    }
     
     setOpenDropdown(null);
     setCatSearch('');
@@ -248,6 +300,7 @@ export function useDirectoryFilters(professionals = [], metadataOverride = null)
       activeNeighborhood,
       activeRating,
       activeSubcategory,
+      activeDistance,
       openDropdown,
       catSearch,
       locSearch,
