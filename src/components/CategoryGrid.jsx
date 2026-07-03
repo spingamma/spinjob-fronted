@@ -100,7 +100,7 @@ export default function CategoryGrid({ categories, onSelectCategory }) {
               </div>
 
               {/* Category Name */}
-              <h4 className="text-xs sm:text-sm font-bold text-[#1A535C] mb-1 leading-tight min-w-0 w-full truncate">
+              <h4 className="text-xs sm:text-sm font-bold text-[#1A535C] mb-1 leading-tight min-w-0 w-full whitespace-normal">
                 {cat.category}
               </h4>
 
