@@ -157,7 +157,7 @@ export default function ProfileHero({
                       name="title"
                       value={editFormData.title}
                       onChange={handleEditChange}
-                      className="w-full text-[#F9842C] text-sm font-bold uppercase tracking-widest bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded px-2 outline-none transition-all pr-6"
+                      className="w-full text-[#6A431F] text-sm font-bold uppercase tracking-widest bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded px-2 outline-none transition-all pr-6"
                       placeholder="Título o Especialidad"
                     />
                     <span className="absolute right-2 text-red-500 font-bold text-lg" title="Campo obligatorio">*</span>
@@ -302,7 +302,7 @@ export default function ProfileHero({
                       <CheckCircle2 size={22} className="text-[#F9842C] fill-[#F9842C]/10 shrink-0" title="Negocio Premium Verificado" />
                     )}
                   </h1>
-                  <p className="text-[#F9842C] text-sm font-bold uppercase tracking-widest mb-1">{profesional.title}</p>
+                  <p className="text-[#6A431F] text-sm font-bold uppercase tracking-widest mb-1">{profesional.title}</p>
                   {profesional.home_delivery && (
                     <span className="inline-flex items-center gap-1 bg-[#1A535C]/10 text-[#1A535C] text-xs font-bold px-2 py-1 rounded-md">
                       📦 Entrega a Domicilio

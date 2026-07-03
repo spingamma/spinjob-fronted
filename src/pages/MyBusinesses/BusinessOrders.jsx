@@ -12,9 +12,10 @@ export default function BusinessOrders() {
   
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-  const [filterDate, setFilterDate] = useState(todayStr);
+  const [startDate, setStartDate] = useState(todayStr);
+  const [endDate, setEndDate] = useState(todayStr);
 
-  const fetchOrders = async (date) => {
+  const fetchOrders = async (sDate, eDate) => {
     setLoading(true);
     const token = localStorage.getItem('spingamma_token');
     if (!token) {
@@ -24,8 +25,11 @@ export default function BusinessOrders() {
     
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
     let url = `${API_URL}/businesses/${slug}/orders`;
-    if (date) {
-      url += `?date=${date}`;
+    const params = [];
+    if (sDate) params.push(`start_date=${sDate}`);
+    if (eDate) params.push(`end_date=${eDate}`);
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
     }
 
     try {
@@ -60,8 +64,8 @@ export default function BusinessOrders() {
   };
 
   useEffect(() => {
-    fetchOrders(filterDate);
-  }, [slug, filterDate]);
+    fetchOrders(startDate, endDate);
+  }, [slug, startDate, endDate]);
 
   const handleStatusChange = async (orderId, newStatus) => {
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
@@ -103,31 +107,34 @@ export default function BusinessOrders() {
         {isPremium ? (
           <>
             {/* Filtros */}
-            <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <div className="relative p-2.5 bg-orange-50 text-[#F9842C] rounded-xl cursor-pointer hover:bg-orange-100 transition-colors flex-shrink-0">
-                  <Calendar size={20} />
+            <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+              <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Desde:</span>
                   <input 
                     type="date" 
-                    value={filterDate}
-                    onChange={(e) => setFilterDate(e.target.value)}
-                    onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    title="Seleccionar fecha"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
                   />
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Fecha</p>
-                  <p className="font-bold text-[#1A535C]">
-                    {filterDate 
-                      ? new Date(filterDate + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) 
-                      : 'Todas las fechas'}
-                  </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Hasta:</span>
+                  <input 
+                    type="date" 
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
+                  />
                 </div>
               </div>
-              <div className="flex gap-2 w-full sm:w-auto">
-                 <button onClick={() => setFilterDate('')} className="flex-1 sm:flex-none px-4 py-2 bg-gray-100 hover:bg-gray-200 text-xs font-bold rounded-xl transition-colors">Todos</button>
-                 <button onClick={() => setFilterDate(todayStr)} className="flex-1 sm:flex-none px-4 py-2 bg-[#F9842C]/10 text-[#F9842C] hover:bg-[#F9842C]/20 text-xs font-bold rounded-xl transition-colors">Hoy</button>
+              <div className="flex gap-2 w-full md:w-auto">
+                 <button 
+                   onClick={() => { setStartDate(todayStr); setEndDate(todayStr); }} 
+                   className="flex-1 md:flex-none px-4 py-2.5 bg-[#F9842C]/10 text-[#F9842C] hover:bg-[#F9842C]/20 text-xs font-bold rounded-xl transition-colors"
+                 >
+                   Hoy
+                 </button>
               </div>
             </div>
 

@@ -265,6 +265,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           if (prod.description) pForm.append('description', prod.description.trim());
           if (prod.price) pForm.append('price', prod.price.trim());
           if (prod.carousel_name) pForm.append('carousel_name', prod.carousel_name.trim());
+          pForm.append('is_visible', prod.is_visible !== false ? 'true' : 'false');
           if (prod.imageFile) pForm.append('image', prod.imageFile);
 
           const url = prod.id 

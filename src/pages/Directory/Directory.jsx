@@ -1,6 +1,6 @@
 // Archivo: src/pages/Directory/Directory.jsx
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Header from '../../components/Header';
 import AuthModal from '../../components/AuthModal';
 import BottomNavbar from '../../components/BottomNavbar';
@@ -57,9 +57,11 @@ export default function Directory() {
 
   const filterHook = useDirectoryFilters(profesionales, metadata);
   const { activeCategory, activeState, searchTerm, activeNeighborhood, activeRating, activeSubcategory } = filterHook.states;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const verTodos = searchParams.get('ver') === 'todos';
 
   // Determine if we should show the category grid (home state)
-  const showCategoryGrid = activeCategory === 'Todos' && !searchTerm;
+  const showCategoryGrid = activeCategory === 'Todos' && !searchTerm && !verTodos;
 
   // 1. Fetch Metadata (Dropdown options)
   useEffect(() => {
@@ -267,12 +269,30 @@ export default function Directory() {
               <CategoryGrid
                 categories={metadata.groupedCategories}
                 onSelectCategory={handleSelectCategory}
+                onVerTodos={() => setSearchParams({ ver: 'todos' })}
               />
             )}
           </>
         ) : (
           /* FILTERED STATE: Professional Cards */
           <>
+            {(verTodos || searchTerm) && (
+              <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                <h3 className="text-base sm:text-lg font-bold text-[#1A535C]">
+                  {searchTerm ? (
+                    <span>Resultados para &quot;<span className="text-[#F9842C]">{searchTerm}</span>&quot;</span>
+                  ) : (
+                    'Todos los profesionales'
+                  )}
+                </h3>
+                <button
+                  onClick={filterHook.actions.handleCleanFilters}
+                  className="text-xs sm:text-sm font-bold text-[#F9842C] hover:text-[#e06516] transition-colors flex items-center gap-1 focus:outline-none"
+                >
+                  ← Volver a categorías
+                </button>
+              </div>
+            )}
 
 
             {cargandoLista && profesionales.length === 0 ? (

@@ -72,7 +72,7 @@ function getCategoryConfig(categoryName, index) {
   return { IconComponent, colors };
 }
 
-export default function CategoryGrid({ categories, onSelectCategory }) {
+export default function CategoryGrid({ categories, onSelectCategory, onVerTodos }) {
   if (!categories || categories.length === 0) return null;
 
   return (
@@ -81,6 +81,14 @@ export default function CategoryGrid({ categories, onSelectCategory }) {
         <h3 className="text-lg font-bold text-[#6A431F]">
           Qué visitaremos hoy?
         </h3>
+        {onVerTodos && (
+          <button
+            onClick={onVerTodos}
+            className="text-sm font-bold text-[#F9842C] hover:text-[#e06516] transition-colors flex items-center gap-1 focus:outline-none cursor-pointer"
+          >
+            Ver todos
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">

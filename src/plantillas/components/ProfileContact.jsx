@@ -168,7 +168,7 @@ export default function ProfileContact({
             </div>
           </div>
         ) : (
-          <div className="flex flex-wrap justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-200/60 gap-2">
+          <div className="flex flex-wrap justify-center items-center bg-gray-50 p-4 rounded-2xl border border-gray-200/60 gap-4">
             <SocialButton icon={Globe} label="Sitio Web" url={links.website} colorClass="text-purple-500 hover:bg-purple-500" onLinkClick={handleLinkClick} />
             <SocialButton icon={Facebook} label="Facebook" url={links.facebook} colorClass="text-blue-600 hover:bg-blue-600" onLinkClick={handleLinkClick} />
             <SocialButton icon={Instagram} label="Instagram" url={links.instagram} colorClass="text-pink-600 hover:bg-pink-600" onLinkClick={handleLinkClick} />

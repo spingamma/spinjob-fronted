@@ -11,6 +11,8 @@ export default function ProfileCatalogEdit({ localProducts, setLocalProducts, de
   const [formDesc, setFormDesc] = useState('');
   const [formPrice, setFormPrice] = useState('');
   const [formCarousel, setFormCarousel] = useState('Catálogo');
+  const [selectedCarouselOption, setSelectedCarouselOption] = useState('Catálogo');
+  const [newCarouselName, setNewCarouselName] = useState('');
   const [formImage, setFormImage] = useState(null);
   const [formPreview, setFormPreview] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -27,16 +29,18 @@ export default function ProfileCatalogEdit({ localProducts, setLocalProducts, de
 
   useEffect(() => {
     if (onHasUnsavedProduct) {
-      const isUnsaved = showForm && (formName || formDesc || formPrice || formPreview || formImage);
+      const isUnsaved = showForm && (formName || formDesc || formPrice || formPreview || formImage || newCarouselName);
       onHasUnsavedProduct(!!isUnsaved);
     }
-  }, [showForm, formName, formDesc, formPrice, formPreview, formImage, onHasUnsavedProduct]);
+  }, [showForm, formName, formDesc, formPrice, formPreview, formImage, newCarouselName, onHasUnsavedProduct]);
 
   const resetForm = () => {
     setFormName('');
     setFormDesc('');
     setFormPrice('');
     setFormCarousel('Catálogo');
+    setSelectedCarouselOption('Catálogo');
+    setNewCarouselName('');
     setFormImage(null);
     setFormPreview(null);
     setEditingId(null);
@@ -68,7 +72,22 @@ export default function ProfileCatalogEdit({ localProducts, setLocalProducts, de
     setFormName(product.name);
     setFormDesc(product.description || '');
     setFormPrice(product.price || '');
-    setFormCarousel(product.carousel_name || 'Catálogo');
+    
+    const cName = product.carousel_name || 'Catálogo';
+    setFormCarousel(cName);
+    
+    const existing = Array.from(new Set(
+      localProducts.map(p => p.carousel_name || 'Catálogo')
+    )).filter(Boolean);
+    
+    if (existing.includes(cName)) {
+      setSelectedCarouselOption(cName);
+      setNewCarouselName('');
+    } else {
+      setSelectedCarouselOption('__NEW__');
+      setNewCarouselName(cName);
+    }
+    
     setFormPreview(product.image_url || null);
     setFormImage(null); // Local image to upload
     setEditingId(product.id || product.tempId); // Use id or tempId for local
@@ -79,6 +98,8 @@ export default function ProfileCatalogEdit({ localProducts, setLocalProducts, de
     e.preventDefault();
     if (!formName.trim()) return;
 
+    const finalCarousel = (selectedCarouselOption === '__NEW__' ? newCarouselName : selectedCarouselOption).trim() || 'Catálogo';
+
     if (editingId) {
       // Edit existing in localProducts
       setLocalProducts(prev => prev.map(p => {
@@ -88,7 +109,7 @@ export default function ProfileCatalogEdit({ localProducts, setLocalProducts, de
             name: formName.trim(),
             description: formDesc.trim(),
             price: formPrice.trim(),
-            carousel_name: formCarousel.trim() || 'Catálogo',
+            carousel_name: finalCarousel,
             image_url: formPreview || p.image_url,
             imageFile: formImage || p.imageFile,
             isModified: true
@@ -103,7 +124,7 @@ export default function ProfileCatalogEdit({ localProducts, setLocalProducts, de
         name: formName.trim(),
         description: formDesc.trim(),
         price: formPrice.trim(),
-        carousel_name: formCarousel.trim() || 'Catálogo',
+        carousel_name: finalCarousel,
         image_url: formPreview, // local preview
         imageFile: formImage,
         is_visible: true,
@@ -193,11 +214,38 @@ export default function ProfileCatalogEdit({ localProducts, setLocalProducts, de
                   className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all"
                 />
                 {isPremium && (
-                  <input
-                    type="text" value={formCarousel} onChange={(e) => setFormCarousel(e.target.value)}
-                    placeholder="Nombre del carrusel (ej. Promos)"
-                    className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all"
-                  />
+                  <div className="space-y-1 text-left">
+                    <label className="text-[11px] font-bold text-[#1A535C]/80 block">Catálogo / Sección del menú:</label>
+                    <select
+                      value={selectedCarouselOption}
+                      onChange={(e) => {
+                        setSelectedCarouselOption(e.target.value);
+                        if (e.target.value !== '__NEW__') {
+                          setNewCarouselName('');
+                        }
+                      }}
+                      className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all cursor-pointer"
+                    >
+                      {Array.from(new Set(['Catálogo', ...localProducts.map(p => p.carousel_name || 'Catálogo')]))
+                        .filter(Boolean)
+                        .map(name => (
+                          <option key={name} value={name}>{name}</option>
+                        ))
+                      }
+                      <option value="__NEW__">+ Crear nuevo catálogo/carrusel...</option>
+                    </select>
+                    
+                    {selectedCarouselOption === '__NEW__' && (
+                      <input
+                        type="text"
+                        value={newCarouselName}
+                        onChange={(e) => setNewCarouselName(e.target.value)}
+                        placeholder="Nombre del nuevo catálogo (ej. Bebidas)"
+                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all mt-1.5"
+                        required
+                      />
+                    )}
+                  </div>
                 )}
               </div>
             </div>

@@ -9,6 +9,11 @@ export default function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const [startDate, setStartDate] = useState(todayStr);
+  const [endDate, setEndDate] = useState(todayStr);
+
   const isLoggedIn = localStorage.getItem('spingamma_user') !== null;
   const isAdmin = (() => {
     const stored = localStorage.getItem('spingamma_user');
@@ -21,36 +26,44 @@ export default function MyOrders() {
     return false;
   })();
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      const token = localStorage.getItem('spingamma_token');
-      if (!token) {
-        navigate('/');
-        return;
-      }
+  const fetchOrders = async () => {
+    setLoading(true);
+    const token = localStorage.getItem('spingamma_token');
+    if (!token) {
+      navigate('/');
+      return;
+    }
+    
+    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+    let url = `${API_URL}/usuarios/mis-pedidos`;
+    const params = [];
+    if (startDate) params.push(`start_date=${startDate}`);
+    if (endDate) params.push(`end_date=${endDate}`);
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
+    }
+    
+    try {
+      const res = await fetchAuth(url);
       
-      const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      
-      try {
-        const res = await fetchAuth(`${API_URL}/usuarios/mis-pedidos`);
-        
-        if (res.ok) {
-          const data = await res.json();
-          setOrders(data);
-        } else {
-          setOrders([]);
-        }
-      } catch (err) {
-        if (err.message !== 'SESSION_EXPIRED') {
-          console.error(err);
-        }
-      } finally {
-        setLoading(false);
+      if (res.ok) {
+        const data = await res.json();
+        setOrders(data);
+      } else {
+        setOrders([]);
       }
-    };
+    } catch (err) {
+      if (err.message !== 'SESSION_EXPIRED') {
+        console.error(err);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchOrders();
-  }, [navigate]);
+  }, [navigate, startDate, endDate]);
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] pb-24 font-sans text-[#1A535C]">
@@ -68,6 +81,38 @@ export default function MyOrders() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 mt-6">
+        {/* Filtros */}
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Desde:</span>
+              <input 
+                type="date" 
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Hasta:</span>
+              <input 
+                type="date" 
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto">
+             <button 
+               onClick={() => { setStartDate(todayStr); setEndDate(todayStr); }} 
+               className="flex-1 sm:flex-none px-4 py-2.5 bg-[#F9842C]/10 text-[#F9842C] hover:bg-[#F9842C]/20 text-xs font-bold rounded-xl transition-colors"
+             >
+               Hoy
+             </button>
+          </div>
+        </div>
+
         {loading ? (
           <div className="flex flex-col items-center py-12">
             <Loader2 className="animate-spin text-[#F9842C] mb-4" size={32} />
@@ -78,8 +123,8 @@ export default function MyOrders() {
             <div className="mb-4">
               <img src="/oso-carrito.png" alt="Aún no tienes pedidos" className="w-24 h-24 object-contain mix-blend-multiply opacity-80" />
             </div>
-            <h3 className="font-bold text-xl mb-2 text-[#1A535C]">Aún no tienes pedidos</h3>
-            <p className="text-gray-400 text-sm max-w-xs mx-auto mb-6">Explora el directorio y encuentra los mejores productos y servicios cerca de ti.</p>
+            <h3 className="font-bold text-xl mb-2 text-[#1A535C]">No se encontraron pedidos</h3>
+            <p className="text-gray-400 text-sm max-w-xs mx-auto mb-6">No hay pedidos registrados en el rango de fechas seleccionado.</p>
             <button 
               onClick={() => navigate('/')}
               className="px-6 py-3 bg-[#F9842C] text-white font-bold rounded-xl shadow-md hover:bg-[#e06516] transition-colors"

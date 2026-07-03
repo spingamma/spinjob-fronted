@@ -4,7 +4,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Clock, CheckCircle2, XCircle, PlusCircle, Building, Eye, FileText, X, Trash2, Loader2, ShoppingBag, Edit3, BarChart2 } from 'lucide-react';
 import BottomNavbar from '../../components/BottomNavbar';
 import Header from '../../components/Header';
-import BusinessDetailsModal from '../../components/BusinessDetailsModal';
 import fetchAuth from '../../utils/fetchAuth';
 
 export default function MisNegocios() {
@@ -13,8 +12,7 @@ export default function MisNegocios() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Estado para controlar qué negocio se está viendo en el modal
-  const [negocioSeleccionado, setNegocioSeleccionado] = useState(null);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
@@ -178,30 +176,12 @@ export default function MisNegocios() {
                 {/* BOTONES DE ACCIÓN */}
                 <div className="pt-4 border-t border-gray-100 flex flex-wrap justify-end gap-4">
 
-                  {/* Este botón abre el modal de solo lectura, SIEMPRE visible */}
-                  <button
-                    onClick={() => setNegocioSeleccionado(neg)}
-                    className="flex items-center gap-2 text-sm font-bold text-[#757778] hover:text-[#1A535C] transition-colors"
-                  >
-                    <FileText size={18} /> Ver Datos Enviados
-                  </button>
-
                   {neg.status === 'aprobado' && (
                     <Link
                       to={`/perfil/${neg.slug}`}
                       className="flex items-center gap-2 text-sm font-bold text-[#32698F] hover:text-[#F9842C] transition-colors"
                     >
                       <Eye size={18} /> Ver Tarjeta Pública
-                    </Link>
-                  )}
-
-                  {/* Botón Editar Información - Solo para negocios aprobados */}
-                  {neg.status === 'aprobado' && (
-                    <Link
-                      to={`/perfil/${neg.slug}`}
-                      className="flex items-center gap-2 text-sm font-bold text-amber-600 hover:text-amber-800 transition-colors"
-                    >
-                      <Edit3 size={18} /> Editar Información
                     </Link>
                   )}
 
@@ -261,20 +241,7 @@ export default function MisNegocios() {
           </div>
         )}
 
-        {/* MODAL DE DETALLES REFACTORIZADO */}
-        <BusinessDetailsModal
-          business={negocioSeleccionado}
-          onClose={() => setNegocioSeleccionado(null)}
-          banner={
-            negocioSeleccionado?.status === 'pendiente' ? {
-              type: 'warning',
-              content: 'Información en revisión: Estos datos fueron enviados a los administradores. Una vez aprobados, se generará tu tarjeta digital pública.'
-            } : negocioSeleccionado?.status === 'rechazado' ? {
-              type: 'error',
-              content: `Solicitud rechazada: ${negocioSeleccionado.rejection_reason}`
-            } : null
-          }
-        />
+
       </div>
 
       {/* Spacer explícito para el BottomNavbar en móviles */}
