@@ -181,17 +181,17 @@ export default function ProfileHero({
             <div className="absolute top-4 left-4 sm:top-6 sm:left-6 md:left-10 flex gap-2 z-30">
               <button 
                 onClick={handleShare}
-                className="w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-[#1A535C] hover:bg-white hover:text-[#6A431F]"
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-[#1A535C] hover:bg-white hover:text-[#6A431F]"
                 title="Compartir"
               >
-                <Share2 size={24} />
+                <Share2 size={20} />
               </button>
               <button 
                 onClick={toggleQR}
-                className="w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-[#1A535C] hover:bg-white hover:text-[#6A431F]"
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-[#1A535C] hover:bg-white hover:text-[#6A431F]"
                 title="Mostrar QR"
               >
-                <QrCode size={24} />
+                <QrCode size={20} />
               </button>
             </div>
             
@@ -200,19 +200,19 @@ export default function ProfileHero({
               {isOwner && !isEditing && (
                 <button 
                   onClick={() => setIsEditing(true)}
-                  className="w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-md border border-white/50 active:scale-95 bg-[#F9842C] text-white hover:bg-[#e06516] mr-2 animate-bounce-short"
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-md border border-white/50 active:scale-95 bg-[#F9842C] text-white hover:bg-[#e06516] mr-2 animate-bounce-short"
                   title="Editar Perfil"
                 >
-                  <Edit3 size={22} />
+                  <Edit3 size={18} />
                 </button>
               )}
               <button 
                 onClick={toggleSaveCard}
                 disabled={isSaving}
-                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 ${isSaved ? 'bg-[#6A431F] border-[#6A431F] text-white hover:bg-[#523317]' : 'bg-white/80 border-white/50 text-[#1A535C] hover:bg-white hover:text-[#6A431F]'}`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 ${isSaved ? 'bg-[#6A431F] border-[#6A431F] text-white hover:bg-[#523317]' : 'bg-white/80 border-white/50 text-[#1A535C] hover:bg-white hover:text-[#6A431F]'}`}
                 title={isSaved ? "Quitar del tarjetero" : "Guardar en mi tarjetero"}
               >
-                <Bookmark size={24} className={isSaved ? 'fill-white' : ''} />
+                <Bookmark size={20} className={isSaved ? 'fill-white' : ''} />
               </button>
             </div>
 
@@ -439,7 +439,7 @@ export default function ProfileHero({
                 onClick={(e) => handleLinkClick(e, 'Ubicación', links.ubicacion)}
                 className="flex items-center justify-center gap-2 px-5 py-2.5 mt-1 rounded-xl bg-white text-[#1A535C] font-bold hover:bg-gray-50 transition-all border border-gray-200 shadow-sm text-sm active:scale-[0.98] shrink-0"
               >
-                <MapPin size={18} className="text-[#F9842C]" />
+                <MapPin size={15} className="text-[#F9842C]" />
                 <span>Ubicación</span>
               </button>
             )}

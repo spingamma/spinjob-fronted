@@ -27,11 +27,11 @@ export default function ProfileAbout({
       {(profesional.experience_years || profesional.credentials || isEditing) && (
         <div className="flex flex-wrap gap-3 mb-4">
           {(profesional.experience_years || isEditing) && (
-            <div className="flex items-center gap-1.5 bg-[#1A535C]/5 text-[#1A535C] px-3 py-1.5 rounded-lg text-sm font-medium border border-[#1A535C]/20">
+            <div className="flex flex-wrap items-center gap-1.5 bg-[#1A535C]/5 text-[#1A535C] px-3 py-1.5 rounded-lg text-sm font-medium border border-[#1A535C]/20">
               {isEditing ? (
                 <>
                   <input name="experience_years" value={editFormData.experience_years} onChange={handleEditChange} type="number" className="w-12 text-center font-bold bg-white border border-dashed border-gray-400 rounded outline-none focus:border-[#F9842C]" placeholder="0" />
-                  Años de Experiencia
+                  <span>Años de Experiencia</span>
                 </>
               ) : (
                 <><span className="font-bold">{profesional.experience_years}</span> Años de Experiencia</>
@@ -39,10 +39,10 @@ export default function ProfileAbout({
             </div>
           )}
           {(profesional.credentials || isEditing) && (
-            <div className="flex items-center gap-1.5 bg-[#1A535C]/5 text-[#1A535C] px-3 py-1.5 rounded-lg text-sm font-medium border border-[#1A535C]/20">
-              Matrícula/Credencial: 
+            <div className="flex flex-wrap items-center gap-1.5 bg-[#1A535C]/5 text-[#1A535C] px-3 py-1.5 rounded-lg text-sm font-medium border border-[#1A535C]/20">
+              <span>Matrícula/Credencial:</span>
               {isEditing ? (
-                <input name="credentials" value={editFormData.credentials} onChange={handleEditChange} className="w-32 font-bold bg-white border border-dashed border-gray-400 rounded px-1 outline-none focus:border-[#F9842C]" placeholder="Ej. 12345" />
+                <input name="credentials" value={editFormData.credentials} onChange={handleEditChange} className="w-24 font-bold bg-white border border-dashed border-gray-400 rounded px-1.5 py-0.5 outline-none focus:border-[#F9842C]" placeholder="Ej. 12345" />
               ) : (
                 <span className="font-bold">{profesional.credentials}</span>
               )}

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { cleanWhatsappNumber } from '../utils/phone';
 import miCarrito from '../assets/oso-carrito.png';
 
-export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia', theme = 'light', isPremium = false, ordersEnabled = true }) {
+export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia', theme = 'light', isPremium = false, ordersEnabled = true, carouselOrder }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState({});
@@ -53,7 +53,24 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
 
   // Tomar hasta 3 carruseles si es premium, si no 1
   const maxCarousels = isPremium ? 3 : 1;
-  const carouselKeys = Object.keys(grouped).slice(0, maxCarousels);
+  let carouselKeys = Object.keys(grouped);
+  if (isPremium && carouselOrder) {
+    try {
+      const orderList = JSON.parse(carouselOrder);
+      if (Array.isArray(orderList) && orderList.length > 0) {
+        carouselKeys.sort((a, b) => {
+          const indexA = orderList.indexOf(a);
+          const indexB = orderList.indexOf(b);
+          const posA = indexA === -1 ? Infinity : indexA;
+          const posB = indexB === -1 ? Infinity : indexB;
+          return posA - posB;
+        });
+      }
+    } catch (e) {
+      console.error("Error parsing carouselOrder in InlineCatalogCarousel:", e);
+    }
+  }
+  carouselKeys = carouselKeys.slice(0, maxCarousels);
 
   const updateCart = (product, delta) => {
     setCart(prev => {

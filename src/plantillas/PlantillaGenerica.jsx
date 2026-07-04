@@ -86,7 +86,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         }
       })(),
       seller_code: '',
-      orders_enabled: profesional.orders_enabled !== false
+      orders_enabled: profesional.orders_enabled !== false,
+      carousel_order: profesional.carousel_order || ''
     };
   });
   const [imagePreview, setImagePreview] = useState(null);
@@ -147,7 +148,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           }
         })(),
         seller_code: '',
-        orders_enabled: profesional.orders_enabled !== false
+        orders_enabled: profesional.orders_enabled !== false,
+        carousel_order: profesional.carousel_order || ''
       });
     }
   }, [profesional, isEditing]);
@@ -236,6 +238,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       Object.keys(payload).forEach(key => {
         if (key === 'new_image') {
           if (payload[key]) formDataObj.append('image', payload[key]);
+        } else if (key === 'carousel_order') {
+          formDataObj.append('carousel_order', payload[key] || '');
         } else if (key === 'whatsapp_numbers') {
           const validNumbers = payload.whatsapp_numbers.filter(n => n.trim() !== '');
           formDataObj.append('whatsapp_numbers', JSON.stringify(validNumbers));
@@ -408,6 +412,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
                 onHasUnsavedProduct={setHasUnsavedProduct}
                 ordersEnabled={editFormData.orders_enabled}
                 setOrdersEnabled={(val) => setEditFormData(prev => ({ ...prev, orders_enabled: val }))}
+                carouselOrder={editFormData.carousel_order}
+                setCarouselOrder={(val) => setEditFormData(prev => ({ ...prev, carousel_order: val }))}
               />
             </div>
           ) : (
@@ -420,6 +426,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               theme="light"
               isPremium={profesional.premium === true}
               ordersEnabled={profesional.orders_enabled !== false}
+              carouselOrder={profesional.carousel_order}
             />
           )}
         </div>
