@@ -20,7 +20,7 @@
 ## Mobile-First Responsivo
 5. **NUNCA usar hover para acciones críticas:** En móvil no existe hover. Las acciones principales deben estar siempre visibles de forma directa.
 6. **Grids en móvil:** Usar `grid-cols-1` en móvil, `sm:grid-cols-2`, `md:grid-cols-3` o similares. NUNCA fuerces layouts multidistribución (2 o más columnas) en pantallas pequeñas si rompen la lectura.
-7. **Prevenir Overflow:** Usa `w-full` y `overflow-hidden` o `min-w-0` en contenedores flex/grid anidados para evitar desbordamientos horizontales.
+7. **Prevenir Overflow (Responsive Robusto)**: Usa `w-full`, `overflow-hidden` o `min-w-0` en contenedores anidados. Además, en componentes que contengan etiquetas de texto fijas y entradas de usuario (como pills, badges o campos de formulario alineados horizontalmente), **usa siempre `flex flex-wrap` o `flex-col sm:flex-row`** y anchos máximos controlados (ej. `w-full sm:flex-1`, `w-24`, o `w-full sm:w-auto` para botones) en lugar de anchos fijos anchos (como `w-32`), para evitar que las etiquetas y campos empujen el diseño hacia afuera del viewport en pantallas móviles.
 8. **Textareas:** Usar auto-grow con `useRef` + `useEffect` y contador visual de caracteres.
 
 ## z-index Hierarchy

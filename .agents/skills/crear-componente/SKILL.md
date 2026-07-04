@@ -22,6 +22,7 @@ Utiliza esta habilidad cuando el usuario te pida crear o estructurar componentes
 ### 3. Diseño y Estilos Reutilizables
 - Usa las clases de tu motor de estilos (ej. Tailwind CSS).
 - Implementa diseños responsivos enfocados en móviles (mobile-first).
+- Evita anchos fijos amplios (ej. `w-32` o botones con ancho fijo) en etiquetas o inputs alineados horizontalmente. Usa `flex-wrap` o `flex-col` en móvil, con anchos adaptables (`w-full sm:flex-1`, `w-full sm:w-auto` para botones) para evitar que los elementos se desborden de los márgenes en pantallas pequeñas.
 - Incorpora efectos estéticos modernos si el diseño del proyecto lo requiere (ej. glassmorphism `bg-white/10 backdrop-blur-md`, transiciones suaves de hover `transition-all duration-300`, y gradientes fluidos).
 - Para imágenes y avatares de usuario, añade siempre un fallback mediante el evento `onError` apuntando a placeholders genéricos (ej. `ui-avatars.com`).
 

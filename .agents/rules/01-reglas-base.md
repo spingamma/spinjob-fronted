@@ -12,3 +12,6 @@
 
 ## Confirmación Obligatoria de Decisiones (Alineación Preventiva)
 7. **Confirmar Dudas y Planes:** Antes de realizar cualquier cambio en archivos fuente del proyecto, el agente debe presentar su propuesta/plan de cambios y formular preguntas aclaratorias detalladas si existe alguna duda o ambigüedad sobre la implementación, el diseño, la lógica o el alcance. Esto asegura una alineación absoluta con el usuario antes de alterar el código.
+
+## Limpieza de Archivos Temporales y Scripts
+8. **Limpieza de Archivos Temporales y Scripts**: Todos los archivos temporales de ejecución única (como scripts de migración manual, scripts de prueba rápidos, inserts temporales, etc.) creados en la raíz del proyecto **deben ser eliminados** inmediatamente después de haber sido ejecutados con éxito. No se deben dejar archivos huérfanos que ensucien la estructura del proyecto a menos que formen parte de una carpeta estructurada y permanente (como herramientas de migración automatizadas tipo *Alembic*).

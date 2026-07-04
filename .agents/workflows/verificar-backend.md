@@ -32,7 +32,9 @@ Si realizaste modificaciones en los modelos de base de datos:
 - **Relaciones limpias:** Valida que no se guarden datos redundantes. Utiliza llaves foráneas (`Foreign Keys`) correspondientes.
 - **Transacciones Seguras:** Asegúrate de que todas las escrituras se ejecuten dentro de bloques try/catch/except, llamando a la reversión transaccional (`rollback`) antes de levantar el error.
 
-## 5. Legibilidad del Código y Sintaxis
+## 5. Legibilidad del Código, Sintaxis y Limpieza
+- **Limpieza de Archivos Residuales**: Si creaste scripts manuales temporales de ejecución única (como scripts de migración manual de tablas o inserciones de prueba):
+  - Asegúrate de **eliminar por completo** estos scripts de la raíz del proyecto antes de finalizar el trabajo, previniendo subir archivos residuales al repositorio.
 - Revisa visualmente y con analizadores de código (linters) que la identación y los bloques de control de flujo estén bien formateados (especialmente crítico en lenguajes dependientes de indentación como Python).
 - Asegúrate de que no haya código de desarrollo (como `print()` innecesarios, tokens hardcodeados o credenciales) expuesto en los commits.
 

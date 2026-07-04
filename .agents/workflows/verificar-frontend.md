@@ -49,8 +49,10 @@ Arranca el servidor de desarrollo y valida que inicie correctamente sin adverten
 npm run dev
 ```
 
-## 8. Preservación e Integridad de Módulos
+## 8. Preservación, Integridad de Módulos y Limpieza
 Al realizar inserciones, refactorizaciones o imports de librerías:
+- **Limpieza de Archivos Residuales**: Elimina de la raíz cualquier archivo temporal o script de ejecución única que hayas creado durante el desarrollo antes de marcar el trabajo como completado.
+- **Robustez de Layout (Evitar Desbordamiento)**: Verifica visualmente y en simuladores móviles que las etiquetas horizontales, entradas (inputs) y botones de formularios usen `flex-wrap` o `flex-col` en móvil, garantizando que no se desborden de los límites del contenedor o el viewport.
 - Evita duplicar importaciones en la parte superior del archivo.
 - Mantener los módulos en inglés para consistencia técnica, y los textos para el usuario en español.
 - En la terminal de Windows, no uses caracteres Unicode especiales (emojis complejos) al imprimir salidas o ejecutar scripts en la consola para prevenir problemas de codificación.

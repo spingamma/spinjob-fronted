@@ -237,20 +237,20 @@ export default function ProfileCatalogEdit({
             </div>
 
             {/* Add Section Form */}
-            <form onSubmit={handleAddSection} className="flex gap-2">
+            <form onSubmit={handleAddSection} className="flex flex-col sm:flex-row gap-2">
               <input
                 data-testid="input-new-section-name"
                 type="text"
                 value={newSectionName}
                 onChange={(e) => setNewSectionName(e.target.value)}
                 placeholder="Nuevo Catalogo"
-                className="flex-1 bg-white border border-gray-200 rounded-xl px-3.5 py-2 text-xs text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
+                className="w-full sm:flex-1 bg-white border border-gray-200 rounded-xl px-3.5 py-2 text-xs text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
                 required
               />
               <button
                 data-testid="btn-add-section"
                 type="submit"
-                className="bg-[#F9842C] hover:bg-[#e06516] text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1 shrink-0"
+                className="bg-[#F9842C] hover:bg-[#e06516] text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1 shrink-0 w-full sm:w-auto"
               > Guardar
               </button>
             </form>
