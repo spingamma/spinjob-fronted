@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Plus, Package, Trash2, Pencil, Eye, EyeOff } from 'lucide-react';
 import ProductFormModal from './ProductFormModal';
 
@@ -20,29 +20,28 @@ export default function ProfileCatalogEdit({
 
   const limit = isPremium ? 15 : 3;
 
-  // 1. Parse savedList from carouselOrder
-  let savedList = [];
-  if (isPremium && carouselOrder) {
-    try {
-      const parsed = JSON.parse(carouselOrder);
-      if (Array.isArray(parsed)) {
-        savedList = parsed.filter(Boolean);
+  // 1. Parse and merge sections to get orderedCarousels list
+  const orderedCarousels = useMemo(() => {
+    let savedList = [];
+    if (isPremium && carouselOrder) {
+      try {
+        const parsed = JSON.parse(carouselOrder);
+        if (Array.isArray(parsed)) {
+          savedList = parsed.filter(Boolean);
+        }
+      } catch (e) {
+        console.error("Error parsing carouselOrder:", e);
       }
-    } catch (e) {
-      console.error("Error parsing carouselOrder:", e);
     }
-  }
 
-  // 2. Get unique carousel names from current local products list
-  const productCarousels = Array.from(new Set(
-    localProducts.map(p => p.carousel_name || 'Catálogo')
-  )).filter(Boolean);
+    const productCarousels = Array.from(new Set(
+      localProducts.map(p => p.carousel_name || 'Catálogo')
+    )).filter(Boolean);
 
-  // 3. Merge them keeping order and uniqueness
-  const mergedCarousels = Array.from(new Set([...savedList, ...productCarousels])).filter(Boolean);
+    const mergedCarousels = Array.from(new Set([...savedList, ...productCarousels])).filter(Boolean);
 
-  // Ensure "Catálogo" is always in the list if no other section is present
-  const orderedCarousels = mergedCarousels.length > 0 ? mergedCarousels : ['Catálogo'];
+    return mergedCarousels.length > 0 ? mergedCarousels : ['Catálogo'];
+  }, [isPremium, carouselOrder, localProducts]);
 
   const moveCarousel = (index, direction) => {
     const targetIndex = index + direction;

@@ -46,7 +46,8 @@ export default function ProductFormModal({
         setFormPreview(null);
       }
     }
-  }, [isOpen, product, availableCarousels]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, product]);
 
   // Adjust description textarea height dynamically
   useEffect(() => {
