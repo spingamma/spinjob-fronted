@@ -142,3 +142,17 @@ Para que el proyecto funcione, necesitas instalar **Node.js**:
 
 ### 🛑 Detener la Aplicación
 Presiona `Ctrl + C` en la terminal para detener el servidor de desarrollo.
+
+---
+
+## 9. Almacenamiento y Estructura de Medios (Cloudinary)
+Las imágenes asociadas a cada negocio (foto de perfil y catálogo de productos) se almacenan de forma organizada en carpetas a nivel de raíz dentro de Cloudinary usando el identificador único (`id`) del negocio. Esto optimiza el consumo y mantiene la consistencia visual:
+
+- **Estructura de Directorios:**
+  - **Directorio Raíz del Negocio:** `business_{business_id}/`
+  - **Foto de Perfil:** Almacenada como `business_{business_id}/profile` (utiliza el metadato `asset_folder` asignado a `business_{business_id}`).
+  - **Catálogo de Productos:** Almacenada como `business_{business_id}/products/product_{product_id}` (utiliza el metadato `asset_folder` asignado a `business_{business_id}/products`).
+
+- **Funcionamiento y Sincronización:**
+  - **Creación/Edición:** El backend genera el ID del negocio y sube el archivo a Cloudinary aplicando el `public_id` estructurado y el parámetro `asset_folder` respectivo. Esto asegura que el archivo se coloque visualmente dentro de la carpeta correspondiente en el panel de Cloudinary (Dynamic Folder Mode).
+  - **Eliminación:** Al eliminar un producto o negocio, el sistema extrae el `public_id` de la URL guardada en la base de datos y envía una solicitud de destrucción a Cloudinary, garantizando la eliminación limpia del almacenamiento.
