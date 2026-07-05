@@ -281,7 +281,7 @@ export default function ProfileHero({
                           value={editFormData.seller_code || ''} 
                           onChange={handleEditChange} 
                           className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded p-2 outline-none transition-all"
-                          placeholder="Ej. maria"
+                          placeholder="Ej. ma567"
                         />
                       </div>
                     )}
