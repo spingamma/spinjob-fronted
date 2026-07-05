@@ -168,7 +168,16 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
   const displayProducts = products.length > 0 ? Array(20).fill(products).flat() : [];
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const [expandedProducts, setExpandedProducts] = useState({});
   const containerRef = useRef(null);
+
+  const toggleExpand = (idx, e) => {
+    e.stopPropagation();
+    setExpandedProducts(prev => ({
+      ...prev,
+      [idx]: !prev[idx]
+    }));
+  };
 
   const handleScroll = () => {
     if (!containerRef.current) return;
@@ -277,9 +286,19 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
                     {product.name}
                   </h4>
                   {product.description && (
-                    <p className={`text-[11px] sm:text-xs line-clamp-2 mb-3 ${isDark ? 'text-gray-400' : 'text-[#757778]'}`}>
-                      {product.description}
-                    </p>
+                    <div className="mb-3">
+                      <p className={`text-[11px] sm:text-xs whitespace-pre-wrap ${expandedProducts[idx] ? '' : 'line-clamp-2'} ${isDark ? 'text-gray-400' : 'text-[#757778]'}`}>
+                        {product.description}
+                      </p>
+                      {product.description.length > 60 && (
+                        <button
+                          onClick={(e) => toggleExpand(idx, e)}
+                          className={`text-[10px] font-bold mt-1 cursor-pointer hover:underline block ${isDark ? 'text-[#C8A721]' : 'text-[#F9842C]'}`}
+                        >
+                          {expandedProducts[idx] ? 'Ver menos' : 'Ver más'}
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
                 <div className="flex items-end justify-between mt-2">
