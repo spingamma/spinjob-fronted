@@ -112,16 +112,17 @@ export default function ProductFormModal({
   };
 
   return (
-    <div 
-      data-testid="product-modal-backdrop"
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#1A535C]/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
-      onClick={onClose}
-    >
+    <>
       <div 
-        data-testid="product-modal-content"
-        className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh] animate-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
+        data-testid="product-modal-backdrop"
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-[#1A535C]/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+        onClick={onClose}
       >
+        <div 
+          data-testid="product-modal-content"
+          className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh] animate-in zoom-in-95 duration-200"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header */}
         <div className="bg-gradient-to-br from-[#1A535C] to-[#32698F] p-5 relative shrink-0 flex items-center justify-between">
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay"></div>
@@ -264,14 +265,15 @@ export default function ProductFormModal({
           </div>
         </form>
       </div>
-
-      <CropModal
-        isOpen={showCropModal}
-        imageSrc={cropImageSrc}
-        onClose={() => { setShowCropModal(false); setCropImageSrc(null); }}
-        onCropDone={handleCropDone}
-        cropShape="rect"
-      />
     </div>
-  );
+
+    <CropModal
+      isOpen={showCropModal}
+      imageSrc={cropImageSrc}
+      onClose={() => { setShowCropModal(false); setCropImageSrc(null); }}
+      onCropDone={handleCropDone}
+      cropShape="rect"
+    />
+  </>
+);
 }

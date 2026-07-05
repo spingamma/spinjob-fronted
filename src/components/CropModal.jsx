@@ -25,7 +25,10 @@ export default function CropModal({ isOpen, imageSrc, onClose, onCropDone, cropS
   if (!isOpen || !imageSrc) return null;
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 p-4">
+    <div 
+      className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 p-4"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col h-[80vh] max-h-[600px]">
         <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50">
           <h3 className="font-bold text-[#1A535C] text-lg">Recortar Imagen</h3>
