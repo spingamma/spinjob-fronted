@@ -292,12 +292,17 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       // 1. Eliminar productos
       for (const prodId of deletedProductsIds) {
         try {
-          await fetchAuth(`${API_URL}/businesses/${currentSlug}/products/${prodId}`, {
+          const delRes = await fetchAuth(`${API_URL}/businesses/${currentSlug}/products/${prodId}`, {
             method: 'DELETE'
           });
+          if (!delRes.ok) {
+            const errData = await delRes.json().catch(() => ({}));
+            throw new Error(errData.detail || `Error al eliminar producto`);
+          }
         } catch (e) {
           if (e.message !== 'SESSION_EXPIRED') {
             console.error("Error eliminando producto:", e);
+            throw e;
           }
         }
       }
@@ -321,13 +326,26 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             : `${API_URL}/businesses/${currentSlug}/products`;
 
           try {
-            await fetchAuth(url, {
+            const prodRes = await fetchAuth(url, {
               method: prod.id ? 'PUT' : 'POST',
               body: pForm
             });
+            if (!prodRes.ok) {
+              const errData = await prodRes.json().catch(() => ({}));
+              let errMsg = `Error al guardar el producto "${prod.name}"`;
+              if (errData.detail) {
+                if (Array.isArray(errData.detail)) {
+                  errMsg = errData.detail.map(e => `${e.loc ? e.loc[e.loc.length-1] : 'Campo'}: ${e.msg}`).join('\n');
+                } else {
+                  errMsg = errData.detail;
+                }
+              }
+              throw new Error(errMsg);
+            }
           } catch (e) {
             if (e.message !== 'SESSION_EXPIRED') {
               console.error("Error guardando producto:", e);
+              throw e;
             }
           }
         }
