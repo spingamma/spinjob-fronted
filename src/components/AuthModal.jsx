@@ -24,6 +24,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
 
   // ── Render Google Button ──
   useEffect(() => {
+    console.log("DEBUG: VITE_GOOGLE_CLIENT_ID loaded in app:", GOOGLE_CLIENT_ID);
+    console.log("DEBUG: Current window origin:", window.location.origin);
     if (!isOpen || isCompletingPhone) return;
 
     const timeoutId = setTimeout(() => {
