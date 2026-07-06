@@ -60,7 +60,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
           type: 'standard',
           text: 'continue_with',
           locale: 'es',
-          width: 320,
+          width: 280,
         });
       }
     }, 150);

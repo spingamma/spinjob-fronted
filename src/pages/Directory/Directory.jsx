@@ -206,7 +206,7 @@ export default function Directory() {
   }, [selectedCountry, metadata, activeCategory, activeState, searchTerm, activeNeighborhood, activeRating, activeSubcategory, categoria, estado, showCategoryGrid]);
 
   const cargarMas = async () => {
-    if (!selectedCountry) return;
+    if (!selectedCountry || cargandoMas) return;
     setCargandoMas(true);
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
     try {
@@ -222,7 +222,11 @@ export default function Directory() {
       const res = await fetch(url);
       const data = await res.json();
 
-      setProfesionales(prev => [...prev, ...data]);
+      setProfesionales(prev => {
+        const existingSlugs = new Set(prev.map(p => p.slug));
+        const newItems = data.filter(p => !existingSlugs.has(p.slug));
+        return [...prev, ...newItems];
+      });
       setHayMas(data.length === 10);
     } catch (err) {
       console.error(err);
