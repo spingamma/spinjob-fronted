@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Header from '../../components/Header';
+import CountryModal from '../../components/CountryModal';
 import AuthModal from '../../components/AuthModal';
 import BottomNavbar from '../../components/BottomNavbar';
 import DirectoryFilterBar from '../../components/DirectoryFilterBar';
@@ -43,6 +44,38 @@ export default function Directory() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingSlug, setPendingSlug] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const getCountryFromCoords = (lat, lng) => {
+    if (lat >= -56 && lat <= -21 && lng >= -74 && lng <= -53) return 'Argentina';
+    if (lat >= -23 && lat <= -9 && lng >= -70 && lng <= -57) return 'Bolivia';
+    if (lat >= -19 && lat <= 0 && lng >= -82 && lng <= -68) return 'Perú';
+    if (lat >= -4.5 && lat <= 13 && lng >= -79 && lng <= -66) return 'Colombia';
+    return null;
+  };
+
+  const [selectedCountry, setSelectedCountry] = useState(() => {
+    const userStr = localStorage.getItem('spingamma_user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.country) return user.country;
+      } catch (e) {}
+    }
+    const saved = localStorage.getItem('spingamma_selected_country');
+    if (saved) return saved;
+
+    // Detect country by timezone
+    let detected = 'Bolivia';
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (tz.includes('La_Paz')) detected = 'Bolivia';
+      else if (tz.includes('Bogota')) detected = 'Colombia';
+      else if (tz.includes('Lima')) detected = 'Perú';
+      else if (tz.includes('Argentina') || tz.includes('Buenos_Aires') || tz.includes('Cordoba') || tz.includes('Mendoza')) detected = 'Argentina';
+    } catch (e) {}
+
+    localStorage.setItem('spingamma_selected_country', detected);
+    return detected;
+  });
 
   // Geolocation cache for calculating distances to businesses
   const [userCoords, setUserCoords] = useState(() => {
@@ -63,9 +96,19 @@ export default function Directory() {
           };
           setUserCoords(coords);
           localStorage.setItem('spingamma_user_coords', JSON.stringify(coords));
+
+          // Detect country from coords if not manually selected yet
+          const hasSaved = localStorage.getItem('spingamma_selected_country');
+          if (!hasSaved) {
+            const detected = getCountryFromCoords(coords.lat, coords.lng);
+            if (detected) {
+              setSelectedCountry(detected);
+              localStorage.setItem('spingamma_selected_country', detected);
+            }
+          }
         },
         (error) => {
-          console.log("No se pudo obtener la geolocalización:", error);
+          // Geolocalización opcional o denegada
         },
         { enableHighAccuracy: false, timeout: 8000 }
       );
@@ -93,12 +136,13 @@ export default function Directory() {
 
   // 1. Fetch Metadata (Dropdown options)
   useEffect(() => {
+    if (!selectedCountry) return;
     let isMounted = true;
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
     async function cargarMetadata() {
       try {
-        const res = await fetch(`${API_URL}/businesses/metadata`);
+        const res = await fetch(`${API_URL}/businesses/metadata?country=${encodeURIComponent(selectedCountry)}`);
         if (!res.ok) throw new Error("Error en red");
         const data = await res.json();
         if (isMounted) setMetadata(data);
@@ -108,11 +152,12 @@ export default function Directory() {
     }
     cargarMetadata();
     return () => { isMounted = false; };
-  }, []);
+  }, [selectedCountry]);
 
   // 2. Fetch Directory List based on Backend Filtering
   // Skip fetch when showing the category grid (no category selected & no search)
   useEffect(() => {
+    if (!selectedCountry) return;
     // If showing category grid, clear professionals and skip fetch
     if (showCategoryGrid) {
       setProfesionales([]);
@@ -126,7 +171,7 @@ export default function Directory() {
     async function cargarDirectorio() {
       setCargandoLista(true);
       try {
-        let url = `${API_URL}/businesses/?skip=0&limit=10`;
+        let url = `${API_URL}/businesses/?skip=0&limit=10&country=${encodeURIComponent(selectedCountry)}`;
         if (activeCategory && activeCategory !== 'Todos') url += `&category=${encodeURIComponent(activeCategory)}`;
         if (activeState && activeState !== 'Todas') url += `&state=${encodeURIComponent(activeState)}`;
         if (activeNeighborhood && activeNeighborhood !== 'Todas') url += `&neighborhood=${encodeURIComponent(activeNeighborhood)}`;
@@ -158,14 +203,15 @@ export default function Directory() {
     }
 
     return () => { isMounted = false; };
-  }, [metadata, activeCategory, activeState, searchTerm, activeNeighborhood, activeRating, activeSubcategory, categoria, estado, showCategoryGrid]);
+  }, [selectedCountry, metadata, activeCategory, activeState, searchTerm, activeNeighborhood, activeRating, activeSubcategory, categoria, estado, showCategoryGrid]);
 
   const cargarMas = async () => {
+    if (!selectedCountry) return;
     setCargandoMas(true);
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
     try {
       const currentSkip = profesionales.length;
-      let url = `${API_URL}/businesses/?skip=${currentSkip}&limit=10`;
+      let url = `${API_URL}/businesses/?skip=${currentSkip}&limit=10&country=${encodeURIComponent(selectedCountry)}`;
       if (activeCategory && activeCategory !== 'Todos') url += `&category=${encodeURIComponent(activeCategory)}`;
       if (activeState && activeState !== 'Todas') url += `&state=${encodeURIComponent(activeState)}`;
       if (activeNeighborhood && activeNeighborhood !== 'Todas') url += `&neighborhood=${encodeURIComponent(activeNeighborhood)}`;
@@ -209,6 +255,12 @@ export default function Directory() {
     setUserName(formData.nombre);
     setIsAdmin(formData.is_admin === true || formData.is_vendedor === true);
     setAuthModalOpen(false);
+    
+    if (formData.country) {
+      setSelectedCountry(formData.country);
+      localStorage.setItem('spingamma_selected_country', formData.country);
+    }
+    
     if (pendingSlug) {
       navigate(`/perfil/${pendingSlug}`);
       setPendingSlug(null);
@@ -263,6 +315,7 @@ export default function Directory() {
         setAuthModalOpen={setAuthModalOpen}
         onHomeClick={filterHook.actions.handleCleanFilters}
         isMobile={isMobile}
+        onLocationChange={(c) => setSelectedCountry(c)}
       />
 
       {/* FILTER BAR (only shows when category is selected) */}
@@ -393,6 +446,8 @@ export default function Directory() {
         onClose={() => setAuthModalOpen(false)}
         onSuccess={handleRegisterSuccess}
       />
+
+
 
       {/* BARRA DE NAVEGACIÓN MOBILE */}
       <BottomNavbar

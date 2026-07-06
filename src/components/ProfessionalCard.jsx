@@ -1,6 +1,6 @@
 // Archivo: src/components/ProfessionalCard.jsx
 import { Link } from 'react-router-dom';
-import { Star, Edit3, DoorOpen, CheckCircle2, Truck } from 'lucide-react';
+import { Star, Edit3, DoorOpen, CheckCircle2, Truck, Plane } from 'lucide-react';
 
 export default function ProfessionalCard({ professional, isLoggedIn, isAdmin, onCardClick, userCoords, isMobile }) {
   // Parsers coordinates from business URL
@@ -95,36 +95,46 @@ export default function ProfessionalCard({ professional, isLoggedIn, isAdmin, on
           <h3 className="font-bold text-[#1A535C] text-base sm:text-lg leading-tight pr-1 sm:pr-2 break-words">
             {professional.name}
           </h3>
-          <p className="text-[#6A431F] font-semibold text-xs sm:text-sm mb-1.5 line-clamp-1 leading-snug">
+          <p className="text-[#6A431F] font-semibold text-xs sm:text-sm mb-1.5 break-words leading-snug">
             {professional.title}
           </p>
         </div>
 
         {/* 🚗 Travel Distance & Delivery Row */}
-        {(travelMessage || professional.home_delivery) && (
+        {(travelMessage || professional.home_delivery || professional.national_delivery) && (
           <div 
             data-testid="card-location-row"
-            className="flex items-center justify-between mt-1 mb-2.5 text-[10px] sm:text-xs border-t border-gray-100 pt-2 w-full"
+            className="grid grid-cols-2 gap-2 mt-1 mb-2.5 text-[10px] sm:text-xs border-t border-gray-100 pt-2 w-full"
           >
-            <div className="text-gray-500 font-medium flex items-center gap-1">
+            <div className="text-gray-500 font-medium flex items-center gap-1 text-left min-w-0">
               {travelMessage && (
-                <span className="text-[#6A431F] font-semibold flex items-center gap-1">
-                  🚗 {travelMessage}
+                <span className="text-[#6A431F] font-semibold flex items-center gap-1.5 break-words leading-tight w-full" title={travelMessage}>
+                  <span className="shrink-0">🚗</span>
+                  <span>{travelMessage}</span>
                 </span>
               )}
             </div>
             
-            {professional.home_delivery && (
-              <div className="shrink-0">
+            <div className="flex flex-col items-end gap-1 min-w-0">
+              {professional.home_delivery && (
                 <div 
                   data-testid="card-delivery-badge"
-                  className="px-1.5 py-0.5 rounded bg-[#F9842C]/10 text-[#F9842C] flex items-center gap-1 font-bold text-[9px] sm:text-[11px]"
+                  className="px-1.5 py-0.5 rounded-lg bg-[#1A535C]/5 text-[#1A535C] border border-[#1A535C]/10 flex items-start gap-1 font-bold text-[9px] sm:text-[10px] w-[65px] sm:w-[75px] leading-tight text-left"
                 >
-                  <Truck size={11} className="fill-[#F9842C]/5 sm:w-[13px] sm:h-[13px]" />
+                  <span className="shrink-0">📦</span>
                   <span>Delivery</span>
                 </div>
-              </div>
-            )}
+              )}
+              {professional.national_delivery && (
+                <div 
+                  data-testid="card-national-delivery-badge"
+                  className="px-1.5 py-0.5 rounded-lg bg-[#1A535C]/5 text-[#1A535C] border border-[#1A535C]/10 flex items-start gap-1 font-bold text-[9px] sm:text-[10px] w-[65px] sm:w-[75px] leading-tight text-left"
+                >
+                  <span className="shrink-0">✈️</span>
+                  <span className="break-words">Delivery Nacional</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

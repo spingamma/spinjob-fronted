@@ -145,7 +145,7 @@ export function useDirectoryFilters(professionals = [], metadataOverride = null,
 
         let matchDistance = true;
         if (activeDistance !== 'Todos' && userCoords) {
-          if (p.home_delivery) {
+          if (p.home_delivery || p.national_delivery) {
             matchDistance = true;
           } else {
             const parseGoogleMapsCoords = (url) => {

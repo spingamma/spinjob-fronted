@@ -267,9 +267,9 @@ export default function DirectoryFilterBar({
                 <MapPin size={14} className={`mr-1.5 flex-shrink-0 transition-colors ${openDropdown === 'distance' ? 'text-[#F9842C]' : 'text-[#32698F]'}`} />
                 <span className="text-xs sm:text-sm text-[#1A535C] font-bold truncate">
                   {activeDistance === 'Todos' ? 'Distancia' : (
-                    activeDistance === 'Minutos' ? 'Minutos (< 6 km)' :
-                    activeDistance === 'Pocas horas' ? 'Pocas horas (6-24 km)' :
-                    activeDistance === 'Horas' ? 'Horas (24-150 km)' : 'Viajes (> 150 km)'
+                    activeDistance === 'Minutos' ? 'Minutos' :
+                    activeDistance === 'Pocas horas' ? 'Pocas horas' :
+                    activeDistance === 'Horas' ? 'Horas' : 'Viajes'
                   )}
                 </span>
                 {activeDistance !== 'Todos' && (
@@ -291,10 +291,10 @@ export default function DirectoryFilterBar({
                 <div className="absolute top-full left-0 mt-2 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-2xl shadow-2xl z-50 py-2 w-[220px] animate-in fade-in zoom-in-95 duration-200">
                   {[
                     { label: 'Cualquier distancia', value: 'Todos' },
-                    { label: 'A minutos (< 6 km)', value: 'Minutos' },
-                    { label: 'A pocas horas (6-24 km)', value: 'Pocas horas' },
-                    { label: 'A horas (24-150 km)', value: 'Horas' },
-                    { label: 'Viajes (> 150 km)', value: 'Viajes' }
+                    { label: 'A minutos', value: 'Minutos' },
+                    { label: 'A pocas horas', value: 'Pocas horas' },
+                    { label: 'A horas', value: 'Horas' },
+                    { label: 'Viajes', value: 'Viajes' }
                   ].map(opt => (
                     <button
                       key={opt.value}

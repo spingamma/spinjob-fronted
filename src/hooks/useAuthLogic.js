@@ -13,7 +13,7 @@ export default function useAuthLogic({ isOpen, onSuccess, onRequireVerification 
   const [tempToken, setTempToken] = useState(null);
   const [tempUserData, setTempUserData] = useState(null);
 
-  const [formData, setFormData] = useState({ celular: '' });
+  const [formData, setFormData] = useState({ celular: '', country: '' });
   const [errores, setErrores] = useState({});
 
   const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
@@ -45,7 +45,20 @@ export default function useAuthLogic({ isOpen, onSuccess, onRequireVerification 
 
   useEffect(() => {
     if (isOpen) {
-      setFormData({ celular: '' });
+      let defaultCountry = localStorage.getItem('spingamma_selected_country');
+      if (!defaultCountry) {
+        try {
+          const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          if (tz.includes('La_Paz')) defaultCountry = 'Bolivia';
+          else if (tz.includes('Bogota')) defaultCountry = 'Colombia';
+          else if (tz.includes('Lima')) defaultCountry = 'Perú';
+          else if (tz.includes('Argentina') || tz.includes('Buenos_Aires') || tz.includes('Cordoba') || tz.includes('Mendoza')) defaultCountry = 'Argentina';
+        } catch (e) {}
+      }
+      if (!defaultCountry) {
+        defaultCountry = 'Bolivia';
+      }
+      setFormData({ celular: '', country: defaultCountry });
       setErrores({});
       setApiError('');
       setIsCompletingPhone(false);
@@ -119,12 +132,19 @@ export default function useAuthLogic({ isOpen, onSuccess, onRequireVerification 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${tempToken}`
         },
-        body: JSON.stringify({ phone: formData.celular })
+        body: JSON.stringify({ phone: formData.celular, country: formData.country })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Error al completar tu celular.');
 
-      _completeSession({ nombre: tempUserData.nombre, celular: formData.celular, is_admin: tempUserData.is_admin, is_vendedor: tempUserData.is_vendedor, is_verified: tempUserData.is_verified || false }, true);
+      _completeSession({ 
+        nombre: tempUserData.nombre, 
+        celular: formData.celular, 
+        country: formData.country || tempUserData.country,
+        is_admin: tempUserData.is_admin, 
+        is_vendedor: tempUserData.is_vendedor, 
+        is_verified: tempUserData.is_verified || false 
+      }, true);
     } catch (error) {
       setApiError(error.message);
     } finally {

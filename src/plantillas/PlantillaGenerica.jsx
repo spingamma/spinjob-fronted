@@ -76,6 +76,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       country: profesional.country || 'Bolivia',
       state: profesional.state || '',
       home_delivery: profesional.home_delivery || false,
+      national_delivery: profesional.national_delivery || false,
       ubicacion_url: profesional.ubicacion_url || '',
       category: profesional.category || '',
       subcategories: (() => {
@@ -138,6 +139,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         country: profesional.country || 'Bolivia',
         state: profesional.state || '',
         home_delivery: profesional.home_delivery || false,
+        national_delivery: profesional.national_delivery || false,
         ubicacion_url: profesional.ubicacion_url || '',
         category: profesional.category || '',
         subcategories: (() => {

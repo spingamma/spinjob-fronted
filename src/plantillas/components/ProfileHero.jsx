@@ -1,5 +1,5 @@
 import React from 'react';
-import { DoorOpen, LogOut, Share2, QrCode, Edit3, Bookmark, Star, MapPin, Camera, Check, CheckCircle2, Loader2 } from 'lucide-react';
+import { DoorOpen, LogOut, Share2, QrCode, Edit3, Bookmark, Star, MapPin, Camera, Check, CheckCircle2, Loader2, PlaneTakeoff } from 'lucide-react';
 import MapSelectorModal from '../../components/MapSelectorModal';
 
 export default function ProfileHero({
@@ -29,6 +29,23 @@ export default function ProfileHero({
   const [isMapOpen, setIsMapOpen] = React.useState(false);
   const [detectedCoords, setDetectedCoords] = React.useState(null);
   const [resolvingUrl, setResolvingUrl] = React.useState(false);
+  const [countriesList, setCountriesList] = React.useState([]);
+
+  React.useEffect(() => {
+    async function loadCountries() {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+        const res = await fetch(`${API_URL}/countries/`);
+        if (res.ok) {
+          const data = await res.json();
+          setCountriesList(data);
+        }
+      } catch (err) {
+        console.error("Error loading countries list:", err);
+      }
+    }
+    loadCountries();
+  }, []);
 
   const parseGoogleMapsCoords = (url) => {
     if (!url) return null;
@@ -158,7 +175,7 @@ export default function ProfileHero({
       <div className="relative overflow-hidden mb-6 pt-16 bg-[#F8F9FA] sm:bg-transparent">
         <div className="relative z-10 flex flex-col">
           {/* Hero Banner Image */}
-          <div className="relative w-full max-w-4xl mx-auto mb-4 md:px-4 lg:px-6">
+          <div className="relative w-full max-w-5xl mx-auto mb-4 md:px-4 lg:px-6">
             <div className="relative aspect-video overflow-hidden md:rounded-[2.5rem] bg-[#F8F9FA]">
               <img 
                 src={imagePreview || profesional.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name)}&background=F8F9FA&color=1E3D51&size=512`} 
@@ -173,12 +190,46 @@ export default function ProfileHero({
                   <input type="file" accept="image/*" name="image" onChange={handleEditChange} className="hidden" />
                 </label>
               )}
+              {/* BADGES OVERLAY (Bottom Right del Logo) */}
+              <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 flex flex-col gap-1.5 items-end z-30">
+                {profesional.reviews_count > 0 && (
+                  <div className="bg-white/95 backdrop-blur-sm px-1.5 py-1 rounded-lg border border-gray-100 shadow-sm flex items-center gap-1">
+                    <Star size={12} className="text-[#F9842C] fill-[#F9842C] sm:w-[14px] sm:h-[14px]" />
+                    <span className="font-bold text-[#1A535C] text-[10px] sm:text-xs">{profesional.rating}</span>
+                  </div>
+                )}
+                {profesional.home_delivery && (
+                  <span className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-[#1A535C] text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left">
+                    <span className="shrink-0">📦</span>
+                    <span>Entrega Domicilio</span>
+                  </span>
+                )}
+                {profesional.national_delivery && (
+                  <span className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-[#1A535C] text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left">
+                    <span className="shrink-0">✈️</span>
+                    <span>Delivery Nacional</span>
+                  </span>
+                )}
+              </div>
             </div>
             {/* Difuminado por FUERA del overflow-hidden para borrar completamente el borde de la imagen */}
             <div className="absolute bottom-[-5px] left-[-5px] right-[-5px] h-20 sm:h-24 bg-gradient-to-t from-[#F8F9FA] via-[#F8F9FA]/80 to-[#F8F9FA]/0 pointer-events-none z-10"></div>
             
+            {/* BOTÓN EDITAR (Bottom Left del Logo) */}
+            {isOwner && !isEditing && (
+              <div className="absolute bottom-2.5 left-2.5 sm:bottom-4 sm:left-4 z-30">
+                <button 
+                  onClick={() => setIsEditing(true)}
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-md border border-white/50 active:scale-95 bg-[#F9842C] text-white hover:bg-[#e06516] animate-bounce-short"
+                  title="Editar Perfil"
+                >
+                  <Edit3 size={18} />
+                </button>
+              </div>
+            )}
+
             {/* BOTONES COMPARTIR Y QR (Top Left del Logo) */}
-            <div className="absolute top-4 left-4 sm:top-6 sm:left-6 md:left-10 flex gap-2 z-30">
+            <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 flex gap-2 z-30">
               <button 
                 onClick={handleShare}
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-[#1A535C] hover:bg-white hover:text-[#6A431F]"
@@ -195,15 +246,15 @@ export default function ProfileHero({
               </button>
             </div>
             
-            {/* BOTÓN GUARDAR (Top Right del Logo) */}
-            <div className="absolute top-4 right-4 sm:top-6 sm:right-6 md:right-10 flex gap-2 z-30">
-              {isOwner && !isEditing && (
+            {/* BOTONES UBICACIÓN Y GUARDAR (Top Right del Logo) */}
+            <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 flex gap-2 z-30">
+              {!isEditing && links.ubicacion && (
                 <button 
-                  onClick={() => setIsEditing(true)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-md border border-white/50 active:scale-95 bg-[#F9842C] text-white hover:bg-[#e06516] mr-2 animate-bounce-short"
-                  title="Editar Perfil"
+                  onClick={(e) => handleLinkClick(e, 'Ubicación', links.ubicacion)}
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-[#F9842C] hover:bg-white hover:text-[#e06516]"
+                  title="Ver ubicación"
                 >
-                  <Edit3 size={18} />
+                  <MapPin size={18} />
                 </button>
               )}
               <button 
@@ -214,16 +265,6 @@ export default function ProfileHero({
               >
                 <Bookmark size={20} className={isSaved ? 'fill-white' : ''} />
               </button>
-            </div>
-
-            {/* BADGES OVERLAY */}
-            <div className="absolute bottom-6 right-6 flex gap-2 z-20">
-              {profesional.reviews_count > 0 && (
-                <div className="bg-white px-2 py-1.5 rounded-lg border border-gray-100 shadow-lg flex items-center gap-1 z-30">
-                  <Star size={16} className="text-[#F9842C] fill-[#F9842C]" />
-                  <span className="font-bold text-[#1A535C] text-sm">{profesional.rating}</span>
-                </div>
-              )}
             </div>
           </div>
 
@@ -330,13 +371,23 @@ export default function ProfileHero({
                     </p>
                     
                     <div className="flex flex-col">
-                      <label className="text-xs font-bold text-gray-500 mb-1">País</label>
-                      <input 
-                        name="country" 
-                        value="Bolivia" 
-                        disabled 
-                        className="w-full text-sm bg-gray-100 border border-gray-200 text-gray-500 rounded p-2 outline-none cursor-not-allowed" 
-                      />
+                      <label className="text-xs font-bold text-gray-500 mb-1">País <span className="text-red-500" title="Campo obligatorio">*</span></label>
+                      <select
+                        name="country"
+                        value={editFormData.country || 'Bolivia'}
+                        onChange={(e) => {
+                          setEditFormData(prev => ({ ...prev, country: e.target.value, state: '' }));
+                        }}
+                        className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none cursor-pointer"
+                      >
+                        {countriesList.length === 0 ? (
+                          <option value="Bolivia">Bolivia</option>
+                        ) : (
+                          countriesList.map(c => (
+                            <option key={c.country} value={c.country}>{c.country}</option>
+                          ))
+                        )}
+                      </select>
                     </div>
 
                     <div className="flex flex-col">
@@ -348,28 +399,41 @@ export default function ProfileHero({
                         className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none cursor-pointer"
                       >
                         <option value="">Selecciona un departamento...</option>
-                        <option value="La Paz">La Paz</option>
-                        <option value="Santa Cruz">Santa Cruz</option>
-                        <option value="Cochabamba">Cochabamba</option>
-                        <option value="Oruro">Oruro</option>
-                        <option value="Potosí">Potosí</option>
-                        <option value="Chuquisaca">Chuquisaca</option>
-                        <option value="Tarija">Tarija</option>
-                        <option value="Beni">Beni</option>
-                        <option value="Pando">Pando</option>
+                        {countriesList.find(c => c.country === (editFormData.country || 'Bolivia'))?.departments?.map(d => (
+                          <option key={d.id} value={d.name}>{d.name}</option>
+                        )) || (
+                          <>
+                            <option value="La Paz">La Paz</option>
+                            <option value="Santa Cruz">Santa Cruz</option>
+                            <option value="Cochabamba">Cochabamba</option>
+                            <option value="Oruro">Oruro</option>
+                            <option value="Potosí">Potosí</option>
+                            <option value="Chuquisaca">Chuquisaca</option>
+                            <option value="Tarija">Tarija</option>
+                            <option value="Beni">Beni</option>
+                            <option value="Pando">Pando</option>
+                          </>
+                        )}
                       </select>
                     </div>
 
                     <div className="flex flex-col sm:col-span-2">
                       <label className="text-xs font-bold text-gray-500 mb-1">¿Realiza entregas a domicilio?</label>
                       <select 
-                        name="home_delivery" 
-                        value={editFormData.home_delivery ? "true" : "false"} 
-                        onChange={(e) => handleEditChange({ target: { name: 'home_delivery', value: e.target.value === 'true' } })} 
+                        value={editFormData.national_delivery ? "national" : (editFormData.home_delivery ? "local" : "no")} 
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setEditFormData(prev => ({
+                            ...prev,
+                            home_delivery: val === 'local',
+                            national_delivery: val === 'national'
+                          }));
+                        }} 
                         className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none cursor-pointer"
                       >
-                        <option value="false">No, no hago entregas a domicilio</option>
-                        <option value="true">Sí, entrego a domicilio</option>
+                        <option value="no">No realizo envíos / entregas</option>
+                        <option value="local">Sí, realizo entregas a domicilio (Local)</option>
+                        <option value="national">Sí, realizo envíos nacionales ✈️</option>
                       </select>
                     </div>
 
@@ -426,23 +490,9 @@ export default function ProfileHero({
                     )}
                   </h1>
                   <p className="text-[#6A431F] text-sm font-bold uppercase tracking-widest mb-1">{profesional.title}</p>
-                  {profesional.home_delivery && (
-                    <span className="inline-flex items-center gap-1 bg-[#1A535C]/10 text-[#1A535C] text-xs font-bold px-2 py-1 rounded-md">
-                      📦 Entrega a Domicilio
-                    </span>
-                  )}
                 </>
               )}
             </div>
-            {!isEditing && links.ubicacion && (
-              <button 
-                onClick={(e) => handleLinkClick(e, 'Ubicación', links.ubicacion)}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 mt-1 rounded-xl bg-white text-[#1A535C] font-bold hover:bg-gray-50 transition-all border border-gray-200 shadow-sm text-sm active:scale-[0.98] shrink-0"
-              >
-                <MapPin size={15} className="text-[#F9842C]" />
-                <span>Ubicación</span>
-              </button>
-            )}
           </div>
         </div>
       </div>

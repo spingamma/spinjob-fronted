@@ -505,31 +505,35 @@ export default function AdminAnalyticsTab({ API_URL }) {
               placeholder="Selecciona o busca negocios para graficar..." 
               value={searchTerm}
               onFocus={() => setShowDropdown(true)}
+              onClick={() => setShowDropdown(true)}
               onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setShowDropdown(true);
+              }}
               className="w-full bg-white border border-gray-200 py-3.5 pl-12 pr-10 rounded-2xl outline-none focus:border-[#F9842C] focus:ring-4 focus:ring-[#F9842C]/10 transition-all font-medium text-[#1A535C] shadow-sm"
             />
             {isSearching && <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#F9842C] animate-spin" />}
-          </div>
 
-          {/* Resultados flotantes */}
-          {showDropdown && searchResults.length > 0 && (
-            <div className="absolute left-6 right-6 top-[130px] bg-white border border-gray-100 rounded-2xl shadow-2xl overflow-hidden z-[100] max-h-72 overflow-y-auto">
-              {searchResults.map(b => (
-                <button 
-                  key={b.slug}
-                  onMouseDown={(e) => { e.preventDefault(); handleAddBusiness(b); }}
-                  className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-50 last:border-0"
-                >
-                  <div>
-                    <p className="font-bold text-[#1A535C]">{b.name}</p>
-                    <p className="text-xs text-[#757778]">{b.category}</p>
-                  </div>
-                  <Plus size={18} className="text-[#F9842C]" />
-                </button>
-              ))}
-            </div>
-          )}
+            {/* Resultados flotantes — posicionados relativos al input */}
+            {showDropdown && searchResults.length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl overflow-hidden z-[100] max-h-72 overflow-y-auto">
+                {searchResults.map(b => (
+                  <button 
+                    key={b.slug}
+                    onMouseDown={(e) => { e.preventDefault(); handleAddBusiness(b); }}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-50 last:border-0"
+                  >
+                    <div>
+                      <p className="font-bold text-[#1A535C]">{b.name}</p>
+                      <p className="text-xs text-[#757778]">{b.category}</p>
+                    </div>
+                    <Plus size={18} className="text-[#F9842C]" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Chips de negocios seleccionados */}
           {selectedBusinesses.length > 0 && (

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, CheckCircle, XCircle, ShieldAlert, 
   Users, Building, Search, Clock, ShieldCheck, Loader2,
-  FileText, X, Eye, BarChart2, Bookmark, Store
+  FileText, X, Eye, BarChart2, Bookmark, Store, Globe
 } from 'lucide-react';
 import BottomNavbar from '../../components/BottomNavbar';
 import BusinessDetailsModal from '../../components/BusinessDetailsModal';
@@ -11,6 +11,7 @@ import fetchAuth from '../../utils/fetchAuth';
 import AdminAnalyticsTab from './components/AdminAnalyticsTab';
 import AdminSpecialtiesTab from './components/AdminSpecialtiesTab';
 import AdminVendedorTab from './components/AdminVendedorTab';
+import AdminCountriesTab from './components/AdminCountriesTab';
 
 export default function AdminPanel() {
   const [pendientes, setPendientes] = useState([]);
@@ -262,6 +263,17 @@ export default function AdminPanel() {
                 <Users size={18} />
                 Usuarios
               </button>
+              <button
+                onClick={() => setActiveTab('paises')}
+                className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
+                  ${activeTab === 'paises' 
+                    ? 'bg-white shadow-sm text-[#F9842C] ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-[#757778] hover:bg-gray-100/50'}
+                `}
+              >
+                <Globe size={18} />
+                Países y Dptos.
+              </button>
             </div>
           )}
         </div>
@@ -456,6 +468,9 @@ export default function AdminPanel() {
 
         {/* CONTENIDO DE PESTAÑA: VENDEDORES */}
         {activeTab === 'vendedor' && <AdminVendedorTab API_URL={API_URL} />}
+
+        {/* CONTENIDO DE PESTAÑA: PAÍSES Y DEPARTAMENTOS */}
+        {activeTab === 'paises' && <AdminCountriesTab />}
       </div>
       
       <BottomNavbar 

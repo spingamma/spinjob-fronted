@@ -43,3 +43,7 @@
      ```
 9. **Validación con Esquemas / DTOs:** Toda petición entrante y saliente del servidor debe estar validada mediante esquemas estrictos (ej. Pydantic en FastAPI, Zod/Joi en Node.js). Utiliza mapeos automáticos eficientes (ej. `from_attributes = True` o `orm_mode` en Pydantic).
 10. **Límites de Búsqueda y Paginación:** Toda consulta de listados para la interfaz de usuario debe incorporar límites razonables de datos por defecto (`limit(50)` o paginación explícita) para prevenir sobrecarga de memoria o fallos en componentes de visualización.
+11. **Validación Robusta de Variables de Entorno de Terceros (OAuth / SMTP):** Toda funcionalidad que dependa de credenciales o configuraciones externas en el `.env` (como `GOOGLE_CLIENT_ID`, `SMTP_PASSWORD`, etc.) debe verificar su existencia y validez de forma segura:
+    * **NUNCA** lances excepciones no controladas de Python (como `ValueError` o `KeyError`) fuera de bloques `try/except` o fuera del flujo de excepciones HTTP de FastAPI.
+    * Captura estas faltas de configuración y eleva excepciones HTTP estructuradas (ej: `HTTPException(status_code=500, detail="Configuración de autenticación faltante en servidor")`). Esto garantiza que el middleware de CORS pueda adjuntar los headers de respuesta correctos en la respuesta de error en lugar de generar un bloqueo silencioso en el navegador con un error `500 / net::ERR_FAILED`.
+

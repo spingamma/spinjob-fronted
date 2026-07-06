@@ -1,8 +1,9 @@
 // Archivo: src/components/Header.jsx
 import React, { useState, useEffect } from 'react';
-import { Search, LogOut, ChevronDown, Download, ShoppingCart } from 'lucide-react';
+import { Search, LogOut, ChevronDown, Download, ShoppingCart, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NavMenu from './NavMenu';
+import CountryModal from './CountryModal';
 
 const Header = ({ 
   searchTerm, 
@@ -15,12 +16,47 @@ const Header = ({
   handleLogout, 
   setAuthModalOpen,
   onHomeClick,
-  isMobile
+  isMobile,
+  onLocationChange
 }) => {
   const navigate = useNavigate();
   const [deferredPrompt, setDeferredPrompt] = useState(window.deferredPromptEvent || null);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [isCountryModalOpen, setIsCountryModalOpen] = useState(false);
+
+  const handleSaveCountry = async (selectedCountry) => {
+    localStorage.setItem('spingamma_selected_country', selectedCountry);
+    
+    if (isLoggedIn) {
+      try {
+        const token = localStorage.getItem('spingamma_token');
+        const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+        const res = await fetch(`${API_URL}/usuarios/actualizar-localizacion`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ country: selectedCountry })
+        });
+        if (res.ok) {
+          const userStr = localStorage.getItem('spingamma_user');
+          if (userStr) {
+            const user = JSON.parse(userStr);
+            user.country = selectedCountry;
+            localStorage.setItem('spingamma_user', JSON.stringify(user));
+          }
+        }
+      } catch (err) {
+        console.error("Error saving country to profile:", err);
+      }
+    }
+
+    if (onLocationChange) {
+      onLocationChange(selectedCountry);
+    }
+  };
 
   useEffect(() => {
     if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
@@ -145,10 +181,16 @@ const Header = ({
 
                 {isUserMenuOpen && (
                   <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
-                    <div className="p-2">
+                    <div className="p-2 space-y-1">
+                      <button 
+                        onClick={() => { setIsCountryModalOpen(true); setIsUserMenuOpen(false); }} 
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-[#1A535C] hover:bg-gray-50 rounded-xl transition-colors"
+                      >
+                        <Globe size={18} /> País
+                      </button>
                       <button 
                         onClick={() => { handleLogout(); setIsUserMenuOpen(false); }} 
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-[#757778] hover:bg-gray-50 hover:text-[#757778] rounded-xl transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-[#757778] hover:bg-gray-50 hover:text-red-600 rounded-xl transition-colors"
                       >
                         <LogOut size={18} /> Cerrar sesión
                       </button>
@@ -167,6 +209,14 @@ const Header = ({
           )}
         </div>
       </div>
+
+      <CountryModal
+        isOpen={isCountryModalOpen}
+        isDismissable={true}
+        onClose={() => setIsCountryModalOpen(false)}
+        onSave={handleSaveCountry}
+        initialCountry={localStorage.getItem('spingamma_selected_country') || 'Bolivia'}
+      />
     </header>
   );
 };

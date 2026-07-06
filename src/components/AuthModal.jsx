@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { UserPlus, X, Loader2, Phone, MessageCircleQuestion } from 'lucide-react';
+import { UserPlus, X, Loader2, Phone, MessageCircleQuestion, ChevronDown } from 'lucide-react';
 import PhoneInputWithCountry from './PhoneInputWithCountry';
 import useAuthLogic from '../hooks/useAuthLogic';
 import ModalVerificacion from './ModalVerificacion';
@@ -7,6 +7,24 @@ import ModalVerificacion from './ModalVerificacion';
 export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = false }) {
   const [showVerify, setShowVerify] = useState(false);
   const [userDataForVerify, setUserDataForVerify] = useState(null);
+  const [countriesList, setCountriesList] = useState([]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+    async function loadCountries() {
+      try {
+        const res = await fetch(`${API_URL}/countries/`);
+        if (res.ok) {
+          const data = await res.json();
+          setCountriesList(data);
+        }
+      } catch (err) {
+        console.error("Error fetching countries in AuthModal:", err);
+      }
+    }
+    loadCountries();
+  }, [isOpen]);
 
   const handleRequireVerification = (userData) => {
     setUserDataForVerify(userData);
@@ -24,8 +42,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
 
   // ── Render Google Button ──
   useEffect(() => {
-    console.log("DEBUG: VITE_GOOGLE_CLIENT_ID loaded in app:", GOOGLE_CLIENT_ID);
-    console.log("DEBUG: Current window origin:", window.location.origin);
     if (!isOpen || isCompletingPhone) return;
 
     const timeoutId = setTimeout(() => {
@@ -44,7 +60,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
           type: 'standard',
           text: 'continue_with',
           locale: 'es',
-          width: '100%',
+          width: 320,
         });
       }
     }, 150);
@@ -143,6 +159,35 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
                  className={errores.celular ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-500' : ''}
                />
                {errores.celular && <p className="text-red-500 text-xs mt-1.5 font-medium">{errores.celular}</p>}
+             </div>
+
+             <div>
+               <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>
+                 País de Residencia <span className="text-red-500">*</span>
+               </label>
+               <div className="relative">
+                 <select
+                   value={formData.country || ''}
+                   onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                   disabled={isLoading}
+                   className={`w-full text-sm rounded-xl py-3 pl-3 pr-10 border outline-none cursor-pointer appearance-none focus:ring-1 transition-all ${
+                     isDarkTheme 
+                       ? 'bg-[#32698F] border-[#32698F] text-white focus:border-[#F9842C] focus:ring-[#F9842C]/30' 
+                       : 'bg-gray-100 border-gray-200 text-[#1A535C] focus:border-[#F9842C] focus:ring-[#F9842C]/30'
+                   }`}
+                   required
+                 >
+                   <option value="" disabled>Selecciona tu país...</option>
+                   {countriesList.map(c => (
+                     <option key={c.country} value={c.country} className={isDarkTheme ? 'bg-[#1A535C]' : 'bg-white'}>
+                       {c.country}
+                     </option>
+                   ))}
+                 </select>
+                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                   <ChevronDown size={16} className={isDarkTheme ? 'text-white/60' : 'text-[#1A535C]/60'} />
+                 </div>
+               </div>
              </div>
              {renderError()}
              <button data-testid="auth-submit-btn-phone" type="submit" disabled={isLoading} className={submitBtnClass}>

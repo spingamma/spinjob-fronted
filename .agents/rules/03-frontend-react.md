@@ -52,3 +52,8 @@ if (Array.isArray(errData.detail)) {
   errorMessage = errData.detail || 'Ocurrió un error inesperado';
 }
 ```
+
+14. **Sincronización de Estado en Autocompletados (Dropdowns):** Al diseñar buscadores con menús desplegables (dropdowns) donde la selección de un ítem limpia el texto y oculta la lista (`showDropdown = false`) pero mantiene el elemento enfocado (mediante `e.preventDefault()` en el `onMouseDown` del botón para evitar el blur):
+    * Asegura siempre que los eventos `onClick` y `onChange` en el input restablezcan `showDropdown = true`.
+    * De lo contrario, dado que el input ya está enfocado, hacer clic o escribir de nuevo no disparará el evento `onFocus`, dejando la lista de autocompletado permanentemente oculta.
+
