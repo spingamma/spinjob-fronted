@@ -1,24 +1,32 @@
 # Documentación Técnica y Arquitectura del Proyecto "Tarjetoso"
 
+> **Convención de rutas:** Ambos repositorios (`spinjob-fronted/` y `spinjob-backend/`) deben estar como carpetas hermanas dentro de un mismo directorio padre.
+> ```
+> <carpeta-padre>/
+> ├── spinjob-fronted/    ← Este repositorio (Frontend)
+> └── spinjob-backend/    ← Repositorio Backend
+> ```
+
 ## 1. Resumen del Proyecto
 Tarjetoso es una plataforma web (PWA) de directorio de servicios y profesionales enfocada en Bolivia. Permite a profesionales y negocios crear "tarjetas digitales" públicas, recibir reseñas, mostrar sus enlaces (redes sociales, WhatsApp, ubicación) y ser descubiertos mediante un buscador con filtros avanzados.
 
-El proyecto incorpora un panel de administración para moderación de contenido, una **plantilla premium unificada** ([PlantillaGenerica.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/plantillas/PlantillaGenerica.jsx)) con soporte de **Modo Edición Inline** (para editar datos, redes, especialidades y catálogo en tiempo real sin salir de la tarjeta), una funcionalidad de **Catálogo de Productos** integrado, un **Dashboard de Métricas** avanzado y un **Sistema de Pedidos (Shopping Cart y Checkout)** completo que permite a los clientes realizar compras directamente a través de la tarjeta del profesional.
+El proyecto incorpora un panel de administración para moderación de contenido, una **plantilla premium unificada** (`src/plantillas/PlantillaGenerica.jsx`) con soporte de **Modo Edición Inline** (para editar datos, redes, especialidades y catálogo en tiempo real sin salir de la tarjeta), una funcionalidad de **Catálogo de Productos** integrado, un **Dashboard de Métricas** avanzado y un **Sistema de Pedidos (Shopping Cart y Checkout)** completo que permite a los clientes realizar compras directamente a través de la tarjeta del profesional.
 
 ---
 
 ## 2. Stack Tecnológico
 - **Backend:** Python 3.8+, FastAPI, SQLAlchemy (ORM), psycopg2 (PostgreSQL).
-- **Frontend:** React 19 (Vite), Tailwind CSS 4, React Router DOM 7, Lucide React (Iconos), Recharts (Visualización de datos).
+- **Frontend:** React 19 (Vite 8), Tailwind CSS 4, React Router DOM 7, Lucide React (Iconos), Recharts (Visualización de datos), react-helmet-async (SEO dinámico), react-easy-crop (Recorte de imágenes), qrcode.react (Generación de QR), jsPDF + jspdf-autotable (Exportación PDF).
 - **Base de Datos:** PostgreSQL alojada en Neon DB.
 - **Almacenamiento de Medios:** Cloudinary (imágenes de perfil, reseñas y catálogo de productos).
-- **Autenticación:** JWT (JSON Web Tokens), Google OAuth2 con flujo nativo Google Identity Services (GSI), verificación SMTP (Gmail).
+- **Autenticación:** JWT (JSON Web Tokens), Google OAuth2 con flujo nativo Google Identity Services (GSI) vía `@react-oauth/google`, verificación SMTP (Gmail).
+- **Despliegue:** Frontend en Vercel (SPA con rewrites), Backend en servidor Oracle Cloud (IP: `129.80.108.184`).
 - **Infraestructura Adicional:** Script de backups automáticos hacia Google Drive (`pg_dump`).
 
 ---
 
 ## 3. Arquitectura de la Base de Datos (Modelos SQLAlchemy)
-El sistema relacional se basa en 10 tablas principales ([models.py](file:///c:/Users/jhona/Desktop/spinjob-backend/models.py)):
+El sistema relacional se basa en 10 tablas principales (`spinjob-backend/models.py`):
 
 - **Users (`users`):** Almacena la información de usuarios del sistema. Campos: `id` (UUID), `email`, `phone` (celular), `name`, `verification_code`, `is_verified` (booleano crucial para permisos), `is_admin`, y `is_vendedor`.
 - **Businesses (`businesses`):** Contiene la información del profesional o negocio. Campos clave:
@@ -44,58 +52,180 @@ El sistema relacional se basa en 10 tablas principales ([models.py](file:///c:/U
 ---
 
 ## 4. Lógica de Negocio y Flujos del Backend (FastAPI)
-- **Autenticación y Seguridad ([auth.py](file:///c:/Users/jhona/Desktop/spinjob-backend/auth.py) & [routers/auth.py](file:///c:/Users/jhona/Desktop/spinjob-backend/routers/auth.py)):**
+- **Autenticación y Seguridad** (`spinjob-backend/auth.py`, `spinjob-backend/routers/auth.py`):
   - Autenticación simplificada mediante Google OAuth2. Al autenticarse exitosamente con Google, el usuario se crea de forma automática en la base de datos y se le marca como verificado (`is_verified = True`).
-  - Si el usuario requiere completar sus datos de contacto, el backend expone el flujo `/usuarios/completar-celular` ([routers/users.py](file:///c:/Users/jhona/Desktop/spinjob-backend/routers/users.py)), requiriendo un número telefónico único de 8 dígitos (Bolivia) antes de continuar a ciertas acciones restringidas.
+  - Si el usuario requiere completar sus datos de contacto, el backend expone el flujo `/usuarios/completar-celular` (`spinjob-backend/routers/users.py`), requiriendo un número telefónico único (validado por país) antes de continuar a ciertas acciones restringidas.
   - Soporte SMTP para envío de códigos de verificación de 6 dígitos.
-- **Moderación de Negocios ([routers/admin.py](file:///c:/Users/jhona/Desktop/spinjob-backend/routers/admin.py)):** Los negocios creados se registran inicialmente en estado `pendiente`. Los administradores pueden cambiar el estado a `aprobado` (para publicarlos en el directorio) o `rechazado` (especificando un motivo `rejection_reason`).
-- **Gestión de Catálogos ([routers/products.py](file:///c:/Users/jhona/Desktop/spinjob-backend/routers/products.py)):** Rutas CRUD completas. Lógica de cuotas integrada: límite estricto de **3 productos** para negocios estándar (Gratis) y de **15 productos** para negocios Premium.
-- **Sistema de Pedidos / Orders ([routers/orders.py](file:///c:/Users/jhona/Desktop/spinjob-backend/routers/orders.py)):**
+- **Moderación de Negocios** (`spinjob-backend/routers/admin.py`): Los negocios creados se registran inicialmente en estado `pendiente`. Los administradores pueden cambiar el estado a `aprobado` (para publicarlos en el directorio) o `rechazado` (especificando un motivo `rejection_reason`).
+- **Gestión de Catálogos** (`spinjob-backend/routers/products.py`): Rutas CRUD completas. Lógica de cuotas integrada: límite estricto de **3 productos** para negocios estándar (Gratis) y de **15 productos** para negocios Premium.
+- **Sistema de Pedidos / Orders** (`spinjob-backend/routers/orders.py`):
   - Permite a los clientes autenticados crear un pedido con múltiples productos del catálogo mediante `POST /businesses/{slug}/orders`.
   - Permite a los dueños de negocios listar los pedidos de su comercio mediante `GET /businesses/{slug}/orders`, con soporte para filtros de fecha específicos.
   - Permite actualizar el estado del pedido mediante `PUT /businesses/{slug}/orders/{order_id}/status` (pendiente/entregado).
-- **Métricas e Interacciones ([routers/businesses.py](file:///c:/Users/jhona/Desktop/spinjob-backend/routers/businesses.py)):** Registra clics en enlaces digitales y visitas de perfiles mediante la ruta `/businesses/{slug}/interaccion`.
-- **SEO y Sitemaps Dinámicos ([routers/seo.py](file:///c:/Users/jhona/Desktop/spinjob-backend/routers/seo.py)):** Endpoint `/sitemap.xml` dinámico para indexación en Google de categorías y departamentos, y el generador de Open Graph en `/og/{slug}`.
+- **Métricas e Interacciones** (`spinjob-backend/routers/businesses.py`): Registra clics en enlaces digitales y visitas de perfiles mediante la ruta `/businesses/{slug}/interaccion`.
+- **SEO y Sitemaps Dinámicos** (`spinjob-backend/routers/seo.py`): Endpoint `/sitemap.xml` dinámico para indexación en Google de categorías y departamentos, y el generador de Open Graph en `/og/{slug}`.
 
 ---
 
 ## 5. Arquitectura del Frontend (React)
 
-### 5.1. Componentes y Vistas Principales ([src/App.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/App.jsx))
-- **[Directory.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/pages/Directory/Directory.jsx):** Landing page y buscador principal con filtros. Mapea categorías y departamentos directamente en la URL (`/directorio/:categoria/:estado`) para maximizar el SEO.
-- **[Profile.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/pages/Profile/Profile.jsx):** Ruta dinámica (`/perfil/:slug`) que inyecta los datos JSON-LD estructurados para buscadores de internet. Carga la plantilla unificada de visualización.
-- **[PlantillaGenerica.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/plantillas/PlantillaGenerica.jsx):** Plantilla Premium Unificada. Si el usuario actual es el dueño del negocio o un administrador, se habilita el **Modo Edición Inline** que permite modificar directamente títulos, descripciones, redes sociales, ubicación, especialidades y catálogo de productos sin recargar la página. Divide la visualización en los siguientes componentes modulares de [src/plantillas/components/](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/plantillas/components):
-  - **[ProfileHero.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/plantillas/components/ProfileHero.jsx):** Contiene la sección superior, foto de avatar con soporte de recorte, título principal, años de experiencia y matrícula/credencial.
-  - **[ProfileAbout.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/plantillas/components/ProfileAbout.jsx):** Muestra la descripción/biografía y gestiona la visualización de especialidades/subcategorías.
-  - **[ProfileContact.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/plantillas/components/ProfileContact.jsx):** Administra los enlaces a redes sociales, sitio web y ubicación.
-  - **[ProfileCatalogEdit.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/plantillas/components/ProfileCatalogEdit.jsx):** Panel CRUD interactivo para añadir, modificar y eliminar productos del catálogo directamente en el perfil.
-  - **[ProfileQRModal.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/plantillas/components/ProfileQRModal.jsx):** Modal de código QR para escanear o descargar la tarjeta digital en alta resolución.
-- **[OrderSummary.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/pages/OrderSummary/OrderSummary.jsx) (`/perfil/:slug/orden`):** Resumen del pedido y checkout. El cliente revisa los productos y cantidades agregadas, completa su nombre de contacto y procesa la compra.
-- **[MyOrders.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/pages/MyOrders/MyOrders.jsx) (`/mis-compras`):** Panel para compradores. Muestra la lista de compras del usuario autenticado y el estado de entrega en tiempo real.
-- **[BusinessOrders.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/pages/MyBusinesses/BusinessOrders.jsx) (`/mis-pedidos/:slug`):** Panel para vendedores. Permite al comerciante supervisar los pedidos entrantes, filtrarlos por fecha (Hoy, Todos, Calendario) y marcarlos como "Entregado" o "Pendiente".
-- **[CreateBusiness.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/pages/CreateBusiness/CreateBusiness.jsx):** Formulario de creación inicial para nuevos profesionales, vinculando geolocalización.
-- **[AdminPanel.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/pages/AdminPanel/AdminPanel.jsx):** Panel administrativo para la aprobación, rechazo y auditoría de negocios creados.
-- **[MyBusinesses.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/pages/MyBusinesses/MyBusinesses.jsx) & [BusinessCardHolder.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/pages/BusinessCardHolder/BusinessCardHolder.jsx):** Paneles para administrar los comercios propios del usuario y su tarjetero de favoritos.
-- **[MetricsDashboard.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/pages/MetricsDashboard/MetricsDashboard.jsx):** Dashboard de analítica estilo SaaS corporativo con gráficos de Recharts.
+### 5.1. Estructura de Archivos
+```
+spinjob-fronted/src/
+├── App.jsx                  # Router principal (React Router v7, lazy loading)
+├── App.css                  # Estilos globales de la aplicación
+├── main.jsx                 # Entry point (BrowserRouter, GoogleOAuthProvider, HelmetProvider)
+├── index.css                # Importación de Tailwind CSS
+├── assets/
+│   └── oso-carrito.png      # Asset del carrito de compras (mascota)
+├── components/              # Componentes globales reutilizables
+│   ├── AuthModal.jsx
+│   ├── BottomNavbar.jsx
+│   ├── BusinessDetailsModal.jsx
+│   ├── CatalogModal.jsx
+│   ├── CategoryGrid.jsx
+│   ├── CountryModal.jsx
+│   ├── CropModal.jsx
+│   ├── DirectoryFilterBar.jsx
+│   ├── Header.jsx
+│   ├── InlineCatalogCarousel.jsx
+│   ├── InstallPrompt.jsx
+│   ├── MapSelectorModal.jsx
+│   ├── ModalVerificacion.jsx
+│   ├── NavMenu.jsx
+│   ├── PhoneInputWithCountry.jsx
+│   ├── ProfessionalCard.jsx
+│   ├── ReloadPrompt.jsx
+│   ├── ReviewModal.jsx
+│   └── SeoMeta.jsx
+├── hooks/                   # Custom Hooks
+│   ├── useAccionesPerfil.jsx
+│   ├── useAuthLogic.js
+│   ├── useDirectoryFilters.js
+│   └── useSEO.js
+├── pages/                   # Vistas de ruta (lazy-loaded)
+│   ├── AdminPanel/
+│   ├── BusinessCardHolder/
+│   ├── CreateBusiness/
+│   ├── Directory/
+│   ├── MetricsDashboard/
+│   ├── MyBusinesses/        # Incluye BusinessOrders.jsx
+│   ├── MyOrders/
+│   ├── OrderSummary/
+│   └── Profile/
+├── plantillas/              # Sistema de plantillas de perfil
+│   ├── PlantillaGenerica.jsx
+│   └── components/
+│       ├── ProductFormModal.jsx
+│       ├── ProfileAbout.jsx
+│       ├── ProfileCatalogEdit.jsx
+│       ├── ProfileContact.jsx
+│       ├── ProfileHero.jsx
+│       ├── ProfileIcons.jsx
+│       └── ProfileQRModal.jsx
+└── utils/                   # Utilidades puras
+    ├── cropImage.js
+    ├── fetchAuth.js
+    ├── phone.js
+    └── slugs.js
+```
 
-### 5.2. Modales del Sistema
-- **[AuthModal.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/components/AuthModal.jsx):** Modal multifase adaptativo para gestionar el inicio de sesión e integración de Google.
-- **[ModalVerificacion.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/components/ModalVerificacion.jsx):** Maneja el flujo OTP de verificación de cuenta de 6 dígitos.
-- **[ReviewModal.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/components/ReviewModal.jsx):** Modal interactivo para dejar opiniones con estrellas e imágenes.
-- **[CropModal.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/components/CropModal.jsx):** Aísla la lógica de recorte fotográfico (`react-easy-crop`) en forma rectangular para catálogo o circular para avatar.
+### 5.2. Punto de Entrada (`src/main.jsx`)
+Envuelve la aplicación en los siguientes Providers:
+- `React.StrictMode` — Detección de problemas en desarrollo.
+- `HelmetProvider` — SEO dinámico con `react-helmet-async`.
+- `GoogleOAuthProvider` — Autenticación Google vía `@react-oauth/google` (Client ID desde `VITE_GOOGLE_CLIENT_ID`).
+- `BrowserRouter` — Enrutamiento SPA con React Router v7.
 
-### 5.3. Custom Hooks
-- **[useDirectoryFilters.js](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/hooks/useDirectoryFilters.js):** Sincroniza la barra de búsqueda y filtros avanzados en la URL mediante Query Params.
-- **[useAccionesPerfil.jsx](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/hooks/useAccionesPerfil.jsx):** Centraliza acciones recurrentes de perfiles (compartir, guardar, calificar y clicks analíticos).
-- **[useSEO.js](file:///c:/Users/jhona/Desktop/spinjob-fronted/src/hooks/useSEO.js):** Inyecta meta-tags Open Graph, Twitter y Schema.org en el `<head>`.
+Además, captura el evento `beforeinstallprompt` de forma temprana en `window.deferredPromptEvent` para garantizar la disponibilidad del prompt PWA.
+
+### 5.3. Rutas y Vistas Principales (`src/App.jsx`)
+Todas las vistas se cargan con `React.lazy` + `Suspense` (con splash screen animado de marca durante la carga):
+
+| Ruta | Componente | Descripción |
+|------|-----------|-------------|
+| `/` | `pages/Directory/Directory.jsx` | Landing page y buscador principal con filtros avanzados |
+| `/directorio/:categoria` | Directory.jsx | Filtro por categoría (SEO-friendly) |
+| `/directorio/:categoria/:estado` | Directory.jsx | Filtro por categoría + departamento |
+| `/perfil/:slug` | `pages/Profile/Profile.jsx` | Tarjeta digital pública con JSON-LD |
+| `/crear-negocio` | `pages/CreateBusiness/CreateBusiness.jsx` | Formulario de creación de negocio |
+| `/editar-negocio/:slug` | CreateBusiness.jsx | Reutiliza el formulario en modo edición |
+| `/mis-negocios` | `pages/MyBusinesses/MyBusinesses.jsx` | Panel de negocios propios del usuario |
+| `/admin` | `pages/AdminPanel/AdminPanel.jsx` | Panel de moderación (admin/vendedor) |
+| `/tarjetero` | `pages/BusinessCardHolder/BusinessCardHolder.jsx` | Tarjetero de favoritos del usuario |
+| `/metricas/:slug` | `pages/MetricsDashboard/MetricsDashboard.jsx` | Dashboard de analítica (solo Premium) |
+| `/perfil/:slug/orden` | `pages/OrderSummary/OrderSummary.jsx` | Resumen de pedido y checkout |
+| `/mis-pedidos/:slug` | `pages/MyBusinesses/BusinessOrders.jsx` | Panel de pedidos entrantes (vendedor) |
+| `/mis-compras` | `pages/MyOrders/MyOrders.jsx` | Historial de compras del cliente |
+
+### 5.4. Componentes Globales (`src/components/`)
+
+#### Navegación y Layout
+- **Header.jsx:** Barra superior responsiva con búsqueda, menú de usuario (login/logout), selector de país, acceso al carrito y botón de descarga PWA. Integra `NavMenu` y `CountryModal`.
+- **NavMenu.jsx:** Menú de navegación reutilizable (Home, Tarjetero, Mis Negocios, Admin/Ventas). Se adapta entre modo desktop (horizontal) y móvil (barra inferior). El label del botón Admin cambia dinámicamente a "Ventas" para usuarios vendedores.
+- **BottomNavbar.jsx:** Barra de navegación fija inferior (solo móvil, `md:hidden`) con efecto glassmorphism (`backdrop-blur`). Envuelve a `NavMenu` en modo `isMobile`.
+
+#### Directorio y Búsqueda
+- **DirectoryFilterBar.jsx:** Barra de filtros avanzados del directorio: categoría, subcategoría, departamento, barrio/zona, calificación mínima, distancia. Con dropdowns interactivos y búsqueda interna.
+- **CategoryGrid.jsx:** Grid visual de categorías con iconos Lucide mapeados por keywords y navegación SEO-friendly mediante slugs.
+- **ProfessionalCard.jsx:** Tarjeta compacta de profesional en el directorio. Muestra avatar, nombre, categoría, rating, insignia verificado, delivery y distancia calculada (con geolocalización del usuario).
+
+#### Autenticación
+- **AuthModal.jsx:** Modal multifase adaptativo para inicio de sesión vía Google e ingreso de número de celular. Usa el hook `useAuthLogic` para toda la lógica.
+- **ModalVerificacion.jsx:** Flujo OTP de verificación de cuenta con código de 6 dígitos enviado por SMTP.
+
+#### Catálogo y Pedidos
+- **InlineCatalogCarousel.jsx:** Carrusel de catálogo embebido directamente en el perfil. Incluye sistema de carrito de compras interactivo (agregar/quitar ítems, contador, botón flotante para ir a la orden). Soporta secciones por `carousel_name` y ordenamiento configurable.
+- **CatalogModal.jsx:** Modal alternativo para visualizar el catálogo completo en una ventana superpuesta (usado en contextos distintos al perfil inline).
+
+#### Interacción con el Perfil
+- **ReviewModal.jsx:** Modal interactivo para dejar opiniones con estrellas (1-5) y opcionalmente adjuntar una imagen.
+- **CropModal.jsx:** Modal de recorte fotográfico (`react-easy-crop`) con soporte para modo rectangular (catálogo) y circular (avatar).
+- **BusinessDetailsModal.jsx:** Modal de vista detallada en solo lectura de un negocio para el panel de Admin. Incluye el mini-componente `CampoLectura` para campos formateados.
+
+#### Geolocalización y País
+- **MapSelectorModal.jsx:** Selector de ubicación con mapa interactivo Leaflet (carga dinámica). Permite buscar direcciones por nombre, usar la ubicación actual del dispositivo y seleccionar un punto en el mapa con marcador arrastrable.
+- **CountryModal.jsx:** Modal de selección de país para filtrar el directorio por contexto geográfico. Carga la lista de países disponibles desde la API del backend.
+- **PhoneInputWithCountry.jsx:** Input especializado de teléfono que muestra el código de país (+591, etc.) basado en la configuración de `utils/phone.js`. Separa visualmente prefijo y número local.
+
+#### SEO y PWA
+- **SeoMeta.jsx:** Componente wrapper de `react-helmet-async` que inyecta meta-tags Open Graph, Twitter Card y JSON-LD dinámicos en el `<head>` de cada página.
+- **InstallPrompt.jsx:** Banner de instalación PWA personalizado. Intercepta `beforeinstallprompt`, detecta iOS/Android y modo standalone. Incluye un switch maestro `IS_PWA_ENABLED` para activar/desactivar.
+- **ReloadPrompt.jsx:** Notificación de nueva versión disponible del Service Worker. Permite al usuario actualizar la app o descartar. Verifica actualizaciones automáticamente cada hora.
+
+### 5.5. Componentes de Plantilla (`src/plantillas/`)
+- **PlantillaGenerica.jsx:** Plantilla Premium Unificada. Si el usuario actual es el dueño del negocio o un administrador, se habilita el **Modo Edición Inline** que permite modificar directamente títulos, descripciones, redes sociales, ubicación, especialidades y catálogo de productos sin recargar la página. Se descompone en los siguientes módulos:
+  - **ProfileHero.jsx:** Sección superior con foto de avatar (recorte circular), título principal, años de experiencia, matrícula/credencial e insignia de verificado. Soporta edición inline del nombre, título y foto.
+  - **ProfileAbout.jsx:** Descripción/biografía del negocio y gestión de especialidades/subcategorías con chips interactivos.
+  - **ProfileContact.jsx:** Administra los enlaces a redes sociales (WhatsApp, Facebook, Instagram, TikTok, LinkedIn, GitHub), sitio web y ubicación con tracking de clics analíticos.
+  - **ProfileCatalogEdit.jsx:** Panel CRUD interactivo para añadir, modificar, eliminar y reordenar productos del catálogo directamente en el perfil. Gestiona secciones por `carousel_name`.
+  - **ProductFormModal.jsx:** Modal de formulario para crear/editar productos individuales del catálogo. Incluye nombre, descripción, precio, sección (carousel), imagen con recorte y detección de cambios no guardados.
+  - **ProfileQRModal.jsx:** Modal de código QR con opción de escanear o descargar la tarjeta digital en alta resolución.
+  - **ProfileIcons.jsx:** Iconos SVG personalizados (TikTok, WhatsApp) para redes sociales no incluidas en Lucide React.
+
+### 5.6. Custom Hooks (`src/hooks/`)
+- **useDirectoryFilters.js:** Sincroniza la barra de búsqueda y filtros avanzados (categoría, subcategoría, departamento, barrio, rating, distancia) en la URL mediante Query Params y parámetros de ruta para SEO.
+- **useAccionesPerfil.jsx:** Centraliza acciones recurrentes de perfiles (compartir, guardar en tarjetero, calificar y registrar clicks analíticos en la API de interacciones).
+- **useAuthLogic.js:** Encapsula la lógica completa de autenticación: flujo Google OAuth, completar celular por país, validación de formato telefónico, manejo de token temporal y sesión. Detecta el país por timezone del navegador (La_Paz → Bolivia, Bogota → Colombia, Lima → Perú, Buenos_Aires → Argentina). También obtiene el WhatsApp de soporte desde el perfil de `spingamma`.
+- **useSEO.js:** Inyecta meta-tags Open Graph, Twitter y Schema.org en el `<head>` del documento de forma imperativa.
+
+### 5.7. Utilidades (`src/utils/`)
+- **fetchAuth.js:** Wrapper de `fetch` nativo que inyecta automáticamente el header `Authorization: Bearer <token>` desde `localStorage`. Detecta respuestas `401` (token expirado) y auto-desloguea al usuario con redirección al home.
+- **phone.js:** Mapa centralizado de países admitidos (`COUNTRIES`) con código de país, bandera emoji, y longitud de número. Funciones: `getCountryByName`, `cleanWhatsappNumber` (limpia para wa.me) y `parsePhoneNumber` (separa prefijo del número local).
+- **slugs.js:** Funciones de normalización de texto a slug SEO-friendly (`slugify`: normaliza acentos, minúsculas, reemplaza espacios por guiones) y `matchSlugToName` (resuelve un slug de vuelta a su nombre legible desde una lista de opciones).
+- **cropImage.js:** Utilidades de recorte de imágenes en canvas: `createImage` (carga una imagen de URL), `getCroppedImg` (recorta con soporte de rotación y flip, retorna blob URL) y `getCroppedImgFile` (convierte el resultado a un objeto `File` listo para subir al servidor).
 
 ---
 
 ## 6. Características Especiales
 - **Modo Edición Inline Unificado:** Los profesionales administran, editan, reordenan especialidades y cargan catálogos directamente desde la interfaz visual de su propia tarjeta, sin necesidad de redirigir a complicados formularios externos.
 - **Shopping Cart y Checkout Nativo:** Los clientes pueden añadir múltiples ítems de un catálogo al carrito y formalizar un pedido directamente desde la tarjeta del profesional. Los pedidos se registran en la base de datos y notifican al vendedor.
-- **PWA (Progressive Web App):** Instalación con banner personalizado interceptando `beforeinstallprompt` y cacheado inteligente de activos para rendimiento offline.
+- **PWA (Progressive Web App):** Instalación con banner personalizado interceptando `beforeinstallprompt` y cacheado inteligente de activos para rendimiento offline. Incluye Service Worker con estrategias `NetworkFirst` para la API y `CacheFirst` para imágenes externas (Cloudinary, UI Avatars).
 - **Deferred Actions (Acciones Diferidas):** Guarda la acción de un usuario no logueado (como dar clic a WhatsApp, calificar o hacer un pedido) en `localStorage`, levanta el modal de autenticación y ejecuta la acción automáticamente tras un inicio de sesión exitoso.
+- **Splash Screen Nativo:** Pantalla de carga HTML puro (visible antes de que React monte) con animación de marca Tarjetoso y transición fade-out suave, garantizando una experiencia sin parpadeos.
+- **Auto-logout por Token Expirado:** El wrapper `fetchAuth` detecta automáticamente respuestas `401` del backend y cierra la sesión del usuario de forma transparente.
+- **Geolocalización con Leaflet:** Mapa interactivo para selección de ubicación sin dependencias de Google Maps (usa OpenStreetMap vía Leaflet cargado dinámicamente).
+- **Internacionalización de País:** Sistema multi-país con selector de país persistente en `localStorage`, detección automática por timezone del navegador y validación de formato telefónico por país.
 
 ---
  
@@ -119,8 +249,40 @@ El sistema diferencia el acceso a las funciones comerciales y de analítica seg�
   - **Insignia 'Verificado':** Incluida y visible en perfil y tarjetas profesionales.
 
 ---
+
+## 8. Infraestructura de Despliegue
+
+### 8.1. Frontend (Vercel)
+El frontend se despliega como SPA estática en Vercel. La configuración de `vercel.json` define tres rewrites:
+1. `/sitemap.xml` → Proxy al backend para el sitemap dinámico.
+2. `/api/(.*)` → Proxy de todas las llamadas API al backend (`http://129.80.108.184:8000`).
+3. `/(.*)`→ Fallback SPA a `index.html` para que React Router maneje todas las rutas.
+
+### 8.2. Configuración de Desarrollo
+- **Variables de entorno** (`.env.development`):
+  - `VITE_GOOGLE_CLIENT_ID` — Client ID de Google OAuth2.
+  - `VITE_API_URL` — URL base del backend (default: `http://127.0.0.1:8000`).
+- **Proxy de desarrollo** (`vite.config.js`): En modo dev, Vite proxea `/api/*` a `http://127.0.0.1:8000` reescribiendo el prefijo `/api`.
+
+### 8.3. Configuración PWA (`vite.config.js`)
+Mediante `vite-plugin-pwa` con `registerType: 'prompt'`:
+- **Cacheado Workbox:**
+  - Assets estáticos: `**/*.{js,css,html,ico,png,svg,webp}`.
+  - API profesionales: `NetworkFirst` con caché de 7 días y máximo 50 entradas.
+  - Imágenes externas (Cloudinary, UI Avatars): `CacheFirst` con caché de 30 días y máximo 100 entradas.
+- **Manifest:** `name: "Tarjetoso Directorio"`, `short_name: "Tarjetoso"`, `display: "standalone"`, `theme_color: "#1E3D51"`, `background_color: "#1D565F"`.
+
+### 8.4. SEO Estático (`index.html`)
+El `index.html` incluye meta-tags de SEO pre-renderizados para crawlers que no ejecutan JavaScript:
+- Open Graph completo (og:type, og:url, og:title, og:description, og:image, og:locale `es_BO`).
+- Twitter Card (`summary_large_image`).
+- Geo-tags para Bolivia.
+- Canonical URL a `https://tarjetoso.com/`.
+- Archivo `robots.txt` y verificación de Google Search Console (`googled4e7301ca3100293.html`).
+
+---
  
-## 8. Guía de Inicio Rápido
+## 9. Guía de Inicio Rápido
 
 ¡Hola! Bienvenido al proyecto **Tarjetoso**. Esta guía te ayudará a instalar y ejecutar el proyecto en tu computadora de la forma más sencilla posible.
 
@@ -143,24 +305,14 @@ El sistema diferencia el acceso a las funciones comerciales y de analítica seg�
 ### 🚀 Pasos para Ejecutar
 
 1. **Instalar dependencias:** Abre una terminal en la carpeta del proyecto y ejecuta:
-   - **En Windows (CMD / PowerShell):**
-     ```cmd
-     npm install
-     ```
-   - **En Fedora / Linux:**
-     ```bash
-     npm install
-     ```
+   ```bash
+   npm install
+   ```
 
 2. **Arrancar la aplicación:** Una vez instaladas las dependencias, ejecuta:
-   - **En Windows (CMD / PowerShell):**
-     ```cmd
-     npm run dev
-     ```
-   - **En Fedora / Linux:**
-     ```bash
-     npm run dev
-     ```
+   ```bash
+   npm run dev
+   ```
 
 3. **Ver en el navegador:** Abre [http://localhost:5173/](http://localhost:5173/) en tu navegador.
 
@@ -169,7 +321,7 @@ Presiona `Ctrl + C` en la terminal para detener el servidor de desarrollo.
 
 ---
 
-## 9. Almacenamiento y Estructura de Medios (Cloudinary)
+## 10. Almacenamiento y Estructura de Medios (Cloudinary)
 Las imágenes asociadas a cada negocio (foto de perfil y catálogo de productos) se almacenan de forma organizada en carpetas a nivel de raíz dentro de Cloudinary usando el identificador único (`id`) del negocio. Esto optimiza el consumo y mantiene la consistencia visual:
 
 - **Estructura de Directorios:**

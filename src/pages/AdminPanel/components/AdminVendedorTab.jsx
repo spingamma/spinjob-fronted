@@ -1,6 +1,6 @@
 // Archivo: src/pages/AdminPanel/components/AdminVendedorTab.jsx
 import { useState, useEffect } from 'react';
-import { Search, Loader2, Store, CheckCircle, AlertCircle, XCircle, ArrowRightLeft } from 'lucide-react';
+import { Search, Loader2, Store, CheckCircle, AlertCircle, XCircle, ArrowRightLeft, Copy, Check } from 'lucide-react';
 import fetchAuth from '../../../utils/fetchAuth';
 
 export default function AdminVendedorTab({ API_URL }) {
@@ -13,6 +13,11 @@ export default function AdminVendedorTab({ API_URL }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [internalTab, setInternalTab] = useState('mis_ventas'); // mis_ventas, general
 
+  // Estado para código de vendedor
+  const [sellerCode, setSellerCode] = useState('');
+  const [sellerName, setSellerName] = useState('');
+  const [codeCopied, setCodeCopied] = useState(false);
+
   useEffect(() => {
     const stored = localStorage.getItem('spingamma_user');
     if (stored) {
@@ -22,6 +27,42 @@ export default function AdminVendedorTab({ API_URL }) {
       } catch (e) {}
     }
   }, []);
+
+  // Obtener código de vendedor al montar
+  useEffect(() => {
+    const fetchSellerCode = async () => {
+      try {
+        const res = await fetchAuth(`${API_URL}/admin/vendedor/my-code`);
+        if (res.ok) {
+          const data = await res.json();
+          setSellerCode(data.seller_code || '');
+          setSellerName(data.seller_name || '');
+        }
+      } catch (err) {
+        console.error("Error fetching seller code:", err);
+      }
+    };
+    fetchSellerCode();
+  }, [API_URL]);
+
+  const handleCopyCode = async () => {
+    if (!sellerCode) return;
+    try {
+      await navigator.clipboard.writeText(sellerCode);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    } catch (err) {
+      // Fallback para navegadores que no soportan clipboard API
+      const textArea = document.createElement('textarea');
+      textArea.value = sellerCode;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    }
+  };
 
   // Estados para búsqueda manual
   const [manualModalOpen, setManualModalOpen] = useState(false);
@@ -163,6 +204,27 @@ export default function AdminVendedorTab({ API_URL }) {
               <Store size={24} className="text-[#F9842C]" />
               Gestión de Ventas
             </h2>
+            {/* Código de Vendedor */}
+            {sellerCode && (
+              <div className="mt-3 flex items-center gap-3 bg-gradient-to-r from-[#1A535C]/5 to-[#F9842C]/5 border border-[#1A535C]/15 rounded-2xl px-4 py-2.5 w-fit">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-[#757778] uppercase tracking-wider">Tu Código de Vendedor</span>
+                  <span className="text-lg font-black text-[#1A535C] tracking-widest font-mono">{sellerCode}</span>
+                </div>
+                <button
+                  onClick={handleCopyCode}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 ${
+                    codeCopied 
+                      ? 'bg-green-100 text-green-700 border border-green-200' 
+                      : 'bg-white hover:bg-[#F9842C] hover:text-white text-[#F9842C] border border-[#F9842C]/30 hover:border-transparent shadow-sm'
+                  }`}
+                  title="Copiar código"
+                >
+                  {codeCopied ? <Check size={14} /> : <Copy size={14} />}
+                  {codeCopied ? '¡Copiado!' : 'Copiar'}
+                </button>
+              </div>
+            )}
             {isAdmin && (
               <div className="flex bg-gray-100 rounded-xl p-1 mt-3 w-fit">
                 <button
