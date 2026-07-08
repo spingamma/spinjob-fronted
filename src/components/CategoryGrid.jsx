@@ -8,19 +8,27 @@ import {
 } from 'lucide-react';
 import { slugify } from '../utils/slugs';
 
-// --- Icon Mapping (keyword → Lucide icon) ---
+// Import SVG assets
+import CafeteriaComidaIcon from '../assets/CAFETERIA_Y_COMIDA.svg';
+import CulturaIcon from '../assets/CULTURA.svg';
+import InmueblesIcon from '../assets/INMUEBLES.svg';
+import ModaIcon from '../assets/MODA.svg';
+import SaludIcon from '../assets/SALUD.svg';
+import TransporteIcon from '../assets/TRANSPORTE.svg';
+
+// --- Icon Mapping (keyword → Lucide icon or SVG asset URL) ---
 const ICON_MAP = [
   { keywords: ['comercio', 'retail', 'tienda', 'venta'], icon: ShoppingBag },
-  { keywords: ['salud', 'medicina', 'medic', 'doctor', 'clinic', 'farma'], icon: HeartPulse },
+  { keywords: ['salud', 'medicina', 'medic', 'doctor', 'clinic', 'farma'], icon: SaludIcon },
   { keywords: ['mantenimiento', 'reparacion', 'plomero', 'electric'], icon: Wrench },
-  { keywords: ['inmobiliaria', 'bienes raices', 'propiedad'], icon: Building2 },
-  { keywords: ['gastronomia', 'cafeteria', 'restaurante', 'comida', 'alimento'], icon: UtensilsCrossed },
+  { keywords: ['inmobiliaria', 'bienes raices', 'propiedad', 'inmueble', 'inmuebles'], icon: InmueblesIcon },
+  { keywords: ['gastronomia', 'cafeteria', 'restaurante', 'comida', 'alimento'], icon: CafeteriaComidaIcon },
   { keywords: ['hogar', 'casa', 'mueble', 'decoracion'], icon: Sofa },
   { keywords: ['data', 'ciencia de datos', 'analisis'], icon: BarChart3 },
   { keywords: ['servicios profesionales', 'consultoria', 'asesoria'], icon: Briefcase },
-  { keywords: ['cultural', 'familiar', 'arte', 'evento'], icon: Palette },
+  { keywords: ['cultural', 'familiar', 'arte', 'evento', 'cultura'], icon: CulturaIcon },
   { keywords: ['tecnologia', 'digital', 'software', 'programacion', 'ti ', 'sistemas'], icon: Monitor },
-  { keywords: ['transporte', 'movilidad', 'logistica', 'envio'], icon: Car },
+  { keywords: ['transporte', 'movilidad', 'logistica', 'envio'], icon: TransporteIcon },
   { keywords: ['educacion', 'capacitacion', 'formacion', 'academia', 'colegio'], icon: GraduationCap },
   { keywords: ['legal', 'abogado', 'juridico', 'derecho'], icon: Scale },
   { keywords: ['fotografia', 'video', 'audiovisual', 'produccion'], icon: Camera },
@@ -30,7 +38,7 @@ const ICON_MAP = [
   { keywords: ['ecologia', 'ambiente', 'natural', 'organico', 'agro'], icon: Leaf },
   { keywords: ['mascota', 'veterinaria', 'animal', 'pet'], icon: PawPrint },
   { keywords: ['turismo', 'viaje', 'tour', 'hotel', 'hospedaje'], icon: Plane },
-  { keywords: ['moda', 'ropa', 'textil', 'confeccion'], icon: Shirt },
+  { keywords: ['moda', 'ropa', 'textil', 'confeccion'], icon: ModaIcon },
   { keywords: ['construccion', 'arquitectura', 'ingenier', 'obra'], icon: Hammer },
   { keywords: ['diseño', 'creativo', 'publicidad', 'marketing'], icon: Paintbrush },
 ];
@@ -89,14 +97,22 @@ export default function CategoryGrid({ categories, onSelectCategory }) {
             >
               {/* Colored Icon Circle */}
               <div
-                className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110"
+                className="w-[64px] h-[64px] md:w-[74px] md:h-[74px] rounded-full flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110 overflow-hidden"
                 style={{ backgroundColor: colors.bg }}
               >
-                <IconComponent
-                  size={28}
-                  style={{ color: colors.icon }}
-                  strokeWidth={1.8}
-                />
+                {typeof IconComponent === 'string' ? (
+                  <img
+                    src={IconComponent}
+                    alt={cat.category}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <IconComponent
+                    size={32}
+                    style={{ color: colors.icon }}
+                    strokeWidth={1.8}
+                  />
+                )}
               </div>
 
               {/* Category Name */}
