@@ -12,6 +12,7 @@ export default defineConfig({
       registerType: 'prompt',
       injectRegister: 'script-defer', // 🚀 ¡LÍNEA MÁGICA PARA LIGHTHOUSE! (Antes estaba en 'auto')
       workbox: {
+        maximumFileSizeToCacheInBytes: 5000000, // 🚀 Aumentamos el límite a 5MB para soportar SVGs grandes
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
         runtimeCaching: [
           {
