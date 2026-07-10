@@ -8,19 +8,19 @@ import {
 } from 'lucide-react';
 import { slugify } from '../utils/slugs';
 
-// Import SVG assets
-import BellezaIcon from '../assets/BELLEZA.svg';
-import ComidaIcon from '../assets/COMIDA.svg';
-import ComunidadIcon from '../assets/COMUNIDAD.svg';
-import ConstruccionIcon from '../assets/CONSTRUCCION.svg';
-import DisenoIcon from '../assets/DISEÑO.svg';
-import EntretenimientoIcon from '../assets/ENTRETENIMIENTO.svg';
-import InmuebleIcon from '../assets/INMUEBLE.svg';
-import ModaIcon from '../assets/MODA.svg';
-import MueblesIcon from '../assets/MUEBLES.svg';
-import ProfesionalesIcon from '../assets/PROFESIONALES.svg';
-import SaludIcon from '../assets/SALUD.svg';
-import TransporteIcon from '../assets/TRANSPORTE.svg';
+// Import WebP assets
+import BellezaIcon from '../assets/BELLEZA.webp';
+import ComidaIcon from '../assets/COMIDA.webp';
+import ComunidadIcon from '../assets/COMUNIDAD.webp';
+import ConstruccionIcon from '../assets/CONSTRUCCION.webp';
+import DisenoIcon from '../assets/DISEÑO.webp';
+import EntretenimientoIcon from '../assets/ENTRETENIMIENTO.webp';
+import InmuebleIcon from '../assets/INMUEBLE.webp';
+import ModaIcon from '../assets/MODA.webp';
+import MueblesIcon from '../assets/MUEBLES.webp';
+import ProfesionalesIcon from '../assets/PROFESIONALES.webp';
+import SaludIcon from '../assets/SALUD.webp';
+import TransporteIcon from '../assets/TRANSPORTE.webp';
 
 // --- Icon Mapping (keyword → Lucide icon or SVG asset URL) ---
 const ICON_MAP = [
