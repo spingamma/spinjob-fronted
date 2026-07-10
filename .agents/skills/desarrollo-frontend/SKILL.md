@@ -60,3 +60,14 @@ Esta habilidad es **obligatoria** y debe activarse automáticamente cada vez que
 
 ### 8. Jerarquía de Capas (Z-Index) y Sincronización Visual
 - 🚨 **CRÍTICO:** Al abrir modales de pantalla completa o sub-flujos intensivos, cualquier barra de acción global o persistente (floating action bars) debe ocultarse dinámicamente sincronizando su estado (renderizado condicional) con la apertura del modal. Depender exclusivamente de una jerarquía de `z-index` es insuficiente y propenso a inducir clics accidentales.
+
+### 9. Sincronización Automática con Repositorio de Pruebas (E2E) y Protocolo de Comunicación
+- 🚨 **CRÍTICO:** Cada vez que finalices cambios en el frontend, debes aplicar la skill `sync-ui-changes` del repositorio `tarjetoso-tests` para mantener la consistencia de las pruebas.
+- **Protocolo de Envío de Cambios (Handoff a QA):**
+  1. Redacta un reporte consolidando las modificaciones del flujo de negocio realizadas.
+  2. **Obligatoriamente**, detén tu ejecución y pide aprobación explícita al usuario en el chat antes de transmitir esta información al agente QA.
+  3. Tras la aprobación, procede a enviar la información (o delegar la validación) al agente QA.
+- **Regla de Granularidad E2E (El Filtro de Flujos Largos):**
+  - Está estrictamente prohibido crear pruebas unitarias visuales o tests redundantes para pequeños cambios cosméticos (color de botón, tamaño, textos estáticos). Los escenarios BDD (`.feature`) solo deben representar flujos de negocio completos y largos de extremo a extremo.
+  - Si un cambio cosmético rompe un localizador de un flujo largo existente, se debe actualizar el localizador en el Page Object Model (POM), pero sin añadir nuevos escenarios.
+
