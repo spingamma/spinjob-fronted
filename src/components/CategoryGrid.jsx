@@ -101,9 +101,9 @@ export default function CategoryGrid({ categories, onSelectCategory }) {
               onClick={() => onSelectCategory(cat.category)}
               className="group flex flex-col items-center text-center bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 p-4 py-6 hover:scale-[1.02] hover:border-[#6A431F]/30 focus:outline-none focus:ring-2 focus:ring-[#6A431F]/20 active:scale-[0.98] cursor-pointer"
             >
-              {/* Colored Icon Circle */}
+              {/* Colored Icon Container */}
               <div
-                className="w-[64px] h-[64px] md:w-[74px] md:h-[74px] rounded-full flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110 overflow-hidden"
+                className="w-[64px] h-[64px] md:w-[74px] md:h-[74px] rounded-2xl flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110 overflow-hidden"
                 style={{ backgroundColor: colors.bg }}
               >
                 {typeof IconComponent === 'string' ? (
