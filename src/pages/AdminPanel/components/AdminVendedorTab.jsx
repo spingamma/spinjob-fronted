@@ -209,9 +209,10 @@ export default function AdminVendedorTab({ API_URL }) {
               <div className="mt-3 flex items-center gap-3 bg-gradient-to-r from-[#1A535C]/5 to-[#F9842C]/5 border border-[#1A535C]/15 rounded-2xl px-4 py-2.5 w-fit">
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold text-[#757778] uppercase tracking-wider">Tu Código de Vendedor</span>
-                  <span className="text-lg font-black text-[#1A535C] tracking-widest font-mono">{sellerCode}</span>
+                  <span data-testid="seller-code-display" className="text-lg font-black text-[#1A535C] tracking-widest font-mono">{sellerCode}</span>
                 </div>
                 <button
+                  data-testid="copy-seller-code-btn"
                   onClick={handleCopyCode}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 ${
                     codeCopied 

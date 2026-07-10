@@ -1,14 +1,14 @@
 ---
 name: generalizar-agente-base
-description: Analiza la conversación actual para generalizar y documentar aprendizajes, adaptando reglas (.agents/rules/), skills y workflows para que sirvan de base reutilizable en otros proyectos, obligando siempre a confirmar dudas con el usuario antes de editar.
+description: Analiza el historial de la conversación o los errores recientes para extraer, generalizar y refactorizar reglas, habilidades y flujos de trabajo. Úsala de forma OBLIGATORIA (como Filtro Meta-Cognitivo silencioso) siempre que debas crear o corregir una regla/skill tras cometer un error, para garantizar que la nueva instrucción sea agnóstica a la tecnología y reutilizable en otros proyectos.
 ---
 
-# Skill: Generalizar Agente Base y Documentar Aprendizajes
+# Skill: Generalizar Agente Base y Documentar Aprendizajes (Filtro Meta-Cognitivo)
 
-Este skill se activa cuando el usuario solicita inmortalizar, generalizar o estructurar las lecciones, decisiones de diseño y lógicas críticas de la conversación actual para su reutilización como plantilla base en futuros proyectos.
-
-## Objetivo
-Analizar la trayectoria de la conversación, abstraer las soluciones particulares (colores específicos de marca, textos de saludos, cálculos de geolocalización) hacia reglas, skills o workflows genéricos, y actualizar la configuración de personalización del agente (`.agents/rules/`, `.agents/skills/`, `.agents/workflows/`).
+## Propósito
+Esta habilidad tiene dos objetivos principales:
+1. **Filtro Meta-Cognitivo (Trigger Automático)**: Actuar como un paso obligatorio *antes* de que el agente escriba o modifique cualquier regla (en `AGENTS.md`) o habilidad (en `SKILL.md`) tras cometer un error. Su función es asegurar que la nueva regla pase por un filtro de generalización y no quede acoplada a una tecnología específica.
+2. **Refactorización Global**: Analizar la trayectoria de la conversación, abstraer las soluciones particulares hacia reglas, skills o workflows genéricos, y actualizar la configuración de personalización del agente.
 
 ---
 
@@ -50,8 +50,13 @@ Cuando ejecutes este skill, debes seguir estrictamente los siguientes pasos:
   * Lógicas condicionales implementadas (ej. el cálculo de Haversine y el bypass de delivery).
   * Validaciones críticas.
 
-### Paso 2: Diseño de la Propuesta de Generalización
-* Diseña los textos o las estructuras de carpetas a modificar.
+### Paso 2: Diseño de la Propuesta de Generalización (Agnosticismo de Framework)
+* Diseña los textos o las estructuras de carpetas a modificar aplicando el filtro meta-cognitivo de abstracción de arquitectura pura:
+  * **Sustituye términos acoplados**:
+    * ❌ `main.py` o `app.js` → ✅ `entry point` o `archivo principal de configuración`.
+    * ❌ `APIRouter` o `Express router` → ✅ `mecanismo de enrutamiento` o `route config files`.
+    * ❌ `useEffect`, `initState`, etc. → ✅ `ciclo de vida del componente`.
+  * **Referencias a Repositorios**: Reemplazarlas por referencias genéricas como `[repositorio_de_pruebas]` o parametrizarlas con `.env`.
 * Redacta las propuestas de forma genérica (sin mencionar nombres del proyecto actual).
 
 ### Paso 3: Confirmación Interactiva Obligatoria ⚠️

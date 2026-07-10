@@ -318,6 +318,7 @@ export default function ProfileHero({
                       <div className="flex-1 flex flex-col">
                         <label className="text-xs font-bold text-gray-500 mb-1">Cód. Referido (Opcional)</label>
                         <input 
+                          data-testid="input-seller-code"
                           name="seller_code" 
                           value={editFormData.seller_code || ''} 
                           onChange={handleEditChange} 
