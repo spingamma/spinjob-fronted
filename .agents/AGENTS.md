@@ -13,3 +13,7 @@ Antes de dar por finalizada la tarea, debes verificar:
 1. **Base de Datos:** Los modelos, entidades o esquemas de la base de datos se actualizaron para incluir la nueva columna/campo. Y se previó el script de migración necesario si la base de datos ya está en producción.
 2. **Capa de Lógica / API:** Los DTOs, esquemas de validación y los Controladores/Rutas se actualizaron para recibir, procesar y devolver el nuevo dato.
 3. **Capa de Cliente (Frontend):** Las peticiones de red (JSON o FormData) envían efectivamente el nuevo valor a la API.
+
+## 3. Transparencia de Skills Utilizadas
+🚨 **CRÍTICO:** Cada vez que ejecutes una acción o des una respuesta al usuario, es **OBLIGATORIO** que declares explícitamente qué skills utilizaste (ej. `Para esto usé la skill desarrollo-frontend` o `generalizar-agente-base`). Esto le permite al usuario auditar el origen de tu comportamiento.
+

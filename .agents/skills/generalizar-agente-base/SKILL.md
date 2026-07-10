@@ -50,13 +50,16 @@ Cuando ejecutes este skill, debes seguir estrictamente los siguientes pasos:
   * Lógicas condicionales implementadas (ej. el cálculo de Haversine y el bypass de delivery).
   * Validaciones críticas.
 
-### Paso 2: Diseño de la Propuesta de Generalización (Agnosticismo de Framework)
+### Paso 2: Diseño de la Propuesta de Generalización y Distribución Contextual
 * Diseña los textos o las estructuras de carpetas a modificar aplicando el filtro meta-cognitivo de abstracción de arquitectura pura:
   * **Sustituye términos acoplados**:
     * ❌ `main.py` o `app.js` → ✅ `entry point` o `archivo principal de configuración`.
     * ❌ `APIRouter` o `Express router` → ✅ `mecanismo de enrutamiento` o `route config files`.
     * ❌ `useEffect`, `initState`, etc. → ✅ `ciclo de vida del componente`.
   * **Referencias a Repositorios**: Reemplazarlas por referencias genéricas como `[repositorio_de_pruebas]` o parametrizarlas con `.env`.
+* **Mapeo Contextual (Skills vs Global)**: NUNCA acumules reglas específicas de framework, UI o infraestructura en el archivo global `AGENTS.md`. 
+  * Las reglas específicas deben depositarse exclusivamente en los archivos de las skills correspondientes (ej. `.agents/skills/desarrollo-frontend/SKILL.md` o `crear-modulo-api/SKILL.md`).
+  * Solo las reglas absolutas, filosóficas o conductuales universales (que apliquen a cualquier petición, sin importar el código) deben ir a `.agents/AGENTS.md`.
 * Redacta las propuestas de forma genérica (sin mencionar nombres del proyecto actual).
 
 ### Paso 3: Confirmación Interactiva Obligatoria ⚠️

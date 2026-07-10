@@ -93,18 +93,14 @@ const ProductCard = ({ product, whatsappNumber, businessName, country }) => {
   const waUrl = cleanWa ? `https://wa.me/${cleanWa}?text=${waMessage}` : null;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-200 group flex flex-col">
-      <div className="relative overflow-hidden bg-gray-50">
-        {product.image_url ? (
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-200 group flex flex-col h-fit">
+      {product.image_url && (
+        <div className="relative overflow-hidden bg-gray-50">
           <img src={product.image_url} alt={product.name} className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(product.name)}&background=F0FDFA&color=0D9488&size=400&font-size=0.33`; }}
           />
-        ) : (
-          <div className="w-full aspect-square flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-            <Package size={36} className="text-gray-300" />
-          </div>
-        )}
-      </div>
+        </div>
+      )}
       <div className="p-3 flex-1 flex flex-col">
         <h4 className="font-semibold text-gray-800 text-sm truncate">{product.name}</h4>
 

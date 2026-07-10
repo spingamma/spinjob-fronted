@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Plus, Package, Trash2, Pencil, Eye, EyeOff, Layers, Settings2, X, Archive, ChevronDown, ChevronRight, ChevronUp } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Plus, Package, Trash2, Pencil, Eye, EyeOff, Layers, Settings2, X, Archive, ChevronDown, ChevronRight, ChevronUp, Check } from 'lucide-react';
 import ProductFormModal from './ProductFormModal';
 import PremiumModal from '../../components/PremiumModal';
 
@@ -13,7 +13,10 @@ export default function ProfileCatalogEdit({
   ordersEnabled = true,
   setOrdersEnabled,
   carouselOrder,
-  setCarouselOrder
+  setCarouselOrder,
+  deliveryMethods = [],
+  setDeliveryMethods,
+  onModalOpenChange
 }) {
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,6 +24,18 @@ export default function ProfileCatalogEdit({
   const [newSectionName, setNewSectionName] = useState('');
   const [premiumModalData, setPremiumModalData] = useState({ isOpen: false, featureName: '' });
   const [expandedCatalogs, setExpandedCatalogs] = useState({});
+
+  const [isDeliveryOpen, setIsDeliveryOpen] = useState(false);
+  const [newDeliveryMethod, setNewDeliveryMethod] = useState('');
+  const [editingDeliveryIndex, setEditingDeliveryIndex] = useState(null);
+  const [editingDeliveryText, setEditingDeliveryText] = useState('');
+  const [sectionError, setSectionError] = useState('');
+
+  useEffect(() => {
+    if (onModalOpenChange) {
+      onModalOpenChange(isInventoryOpen || isModalOpen || premiumModalData.isOpen);
+    }
+  }, [isInventoryOpen, isModalOpen, premiumModalData.isOpen, onModalOpenChange]);
 
   const toggleCatalog = (catalogName) => {
     setExpandedCatalogs(prev => ({
@@ -70,11 +85,12 @@ export default function ProfileCatalogEdit({
 
   const handleAddSection = (e) => {
     e.preventDefault();
+    setSectionError('');
     const cleanName = newSectionName.trim();
     if (!cleanName) return;
 
     if (orderedCarousels.some(c => c.toLowerCase() === cleanName.toLowerCase())) {
-      alert("Ya existe una sección con este nombre.");
+      setSectionError("Ya existe una sección con este nombre.");
       return;
     }
 
@@ -88,7 +104,6 @@ export default function ProfileCatalogEdit({
   const handleRemoveSection = (name) => {
     const hasProducts = localProducts.some(p => (p.carousel_name || 'Catálogo') === name);
     if (hasProducts) {
-      alert("No puedes eliminar una sección que contiene productos. Mueve o elimina los productos primero.");
       return;
     }
 
@@ -136,7 +151,6 @@ export default function ProfileCatalogEdit({
 
       if (isVisible && visibleCount >= limitVisible) {
         isVisible = false;
-        alert(`Has alcanzado el límite de ${limitVisible} productos visibles. El nuevo producto se creará oculto.`);
       }
 
       const newProduct = { ...productData, tempId: Date.now().toString(), is_visible: isVisible };
@@ -162,7 +176,6 @@ export default function ProfileCatalogEdit({
     if (product.is_visible === false) {
       const visibleCount = localProducts.filter(p => p.is_visible !== false).length;
       if (visibleCount >= limitVisible) {
-        alert(`No puedes tener más de ${limitVisible} productos visibles al mismo tiempo.`);
         return;
       }
     }
@@ -182,6 +195,50 @@ export default function ProfileCatalogEdit({
       }
       return p;
     }));
+  };
+
+  const handleOrdersEnabledChange = (e) => {
+    const isChecked = e.target.checked;
+    setOrdersEnabled(isChecked);
+    if (isChecked && (!deliveryMethods || deliveryMethods.length === 0)) {
+      if (setDeliveryMethods) {
+        setDeliveryMethods(["Entrega en el local"]);
+      }
+    }
+  };
+
+  const handleAddDeliveryMethod = (e) => {
+    e.preventDefault();
+    if (!newDeliveryMethod.trim() || !setDeliveryMethods) return;
+    setDeliveryMethods([...deliveryMethods, newDeliveryMethod.trim()]);
+    setNewDeliveryMethod('');
+  };
+
+  const handleRemoveDeliveryMethod = (index) => {
+    if (!setDeliveryMethods) return;
+    setDeliveryMethods(deliveryMethods.filter((_, idx) => idx !== index));
+  };
+
+  const handleStartEditDelivery = (index, text) => {
+    setEditingDeliveryIndex(index);
+    setEditingDeliveryText(text);
+  };
+
+  const handleSaveEditDelivery = (index) => {
+    if (!setDeliveryMethods || !editingDeliveryText.trim()) return;
+    const newMethods = [...deliveryMethods];
+    newMethods[index] = editingDeliveryText.trim();
+    setDeliveryMethods(newMethods);
+    setEditingDeliveryIndex(null);
+    setEditingDeliveryText('');
+  };
+
+  const handleCloseInventory = () => {
+    if (ordersEnabled && (!deliveryMethods || deliveryMethods.length === 0)) {
+      alert("Debes agregar al menos un método de entrega antes de salir, o desmarcar la casilla de pedidos.");
+      return;
+    }
+    setIsInventoryOpen(false);
   };
 
   const availableCarousels = orderedCarousels.length > 0 ? orderedCarousels : ['Catálogo'];
@@ -209,10 +266,11 @@ export default function ProfileCatalogEdit({
       {isInventoryOpen && (
         <div
           className="fixed inset-0 z-[90] flex items-center justify-center bg-[#1A535C]/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
-          onClick={() => setIsInventoryOpen(false)}
+          onMouseDown={handleCloseInventory}
         >
           <div
             className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[85vh] animate-in zoom-in-95 duration-200"
+            onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-br from-[#1A535C] to-[#32698F] p-5 relative shrink-0 flex items-center justify-between rounded-t-3xl">
@@ -228,7 +286,7 @@ export default function ProfileCatalogEdit({
               </div>
               <button
                 data-testid="close-inventory-btn"
-                onClick={() => setIsInventoryOpen(false)}
+                onClick={handleCloseInventory}
                 className="relative z-10 text-white/80 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm"
               >
                 <X size={20} />
@@ -246,18 +304,112 @@ export default function ProfileCatalogEdit({
                 </h4>
 
                 {isPremium && (
-                  <div className="flex items-center gap-2 mb-2 p-3 bg-white rounded-2xl border border-gray-200 shadow-sm">
-                    <input
-                      data-testid="ordersEnabledCheckbox"
-                      type="checkbox"
-                      id="ordersEnabledCheckbox"
-                      checked={ordersEnabled}
-                      onChange={(e) => setOrdersEnabled(e.target.checked)}
-                      className="w-4 h-4 text-[#F9842C] focus:ring-[#F9842C] border-gray-300 rounded cursor-pointer"
-                    />
-                    <label htmlFor="ordersEnabledCheckbox" className="text-xs font-bold text-[#1A535C] cursor-pointer select-none">
-                      Habilitar "Mis pedidos" (Carrito de compras)
-                    </label>
+                  <div className="mb-2 p-3 bg-white rounded-2xl border border-gray-200 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <input
+                        data-testid="ordersEnabledCheckbox"
+                        type="checkbox"
+                        id="ordersEnabledCheckbox"
+                        checked={ordersEnabled}
+                        onChange={handleOrdersEnabledChange}
+                        className="w-4 h-4 text-[#F9842C] focus:ring-[#F9842C] border-gray-300 rounded cursor-pointer"
+                      />
+                      <label htmlFor="ordersEnabledCheckbox" className="text-xs font-bold text-[#1A535C] cursor-pointer select-none">
+                        Habilitar "Mis pedidos" (Carrito de compras)
+                      </label>
+                    </div>
+
+                    {ordersEnabled && (
+                      <div className="mt-4 border-t border-gray-100 pt-4">
+                        <div 
+                          className="flex justify-between items-center cursor-pointer mb-2"
+                          onClick={() => setIsDeliveryOpen(!isDeliveryOpen)}
+                        >
+                          <label className="text-xs font-bold text-[#1A535C] cursor-pointer">Métodos de entrega</label>
+                          <div className="text-gray-400">
+                            {isDeliveryOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                          </div>
+                        </div>
+
+                        {isDeliveryOpen && (
+                          <div className="space-y-3 mt-3 animate-in fade-in zoom-in-95 duration-200">
+                            <form onSubmit={handleAddDeliveryMethod} className="flex gap-2">
+                              <input
+                                data-testid="delivery-method-input"
+                                type="text"
+                                value={newDeliveryMethod}
+                                onChange={(e) => setNewDeliveryMethod(e.target.value)}
+                                placeholder="Añadir opción (ej. Envío a domicilio)"
+                                className="flex-1 text-xs border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#F9842C]"
+                              />
+                              <button
+                                data-testid="add-delivery-btn"
+                                type="submit"
+                                disabled={!newDeliveryMethod.trim()}
+                                className="bg-[#F9842C] hover:bg-[#e06516] text-white px-3 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                              >
+                                Añadir
+                              </button>
+                            </form>
+
+                            <div className="space-y-2">
+                              {deliveryMethods.map((method, idx) => (
+                                <div key={idx} className="flex justify-between items-center bg-gray-50 border border-gray-100 rounded-lg p-2 px-3">
+                                  {editingDeliveryIndex === idx ? (
+                                    <div className="flex flex-1 gap-2">
+                                      <input
+                                        type="text"
+                                        value={editingDeliveryText}
+                                        onChange={(e) => setEditingDeliveryText(e.target.value)}
+                                        className="flex-1 text-xs border border-gray-200 rounded px-2 py-1 outline-none focus:border-[#F9842C]"
+                                        autoFocus
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() => handleSaveEditDelivery(idx)}
+                                        className="text-green-600 bg-green-50 p-1 rounded hover:bg-green-100 transition-colors"
+                                      >
+                                        <Check size={14} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditingDeliveryIndex(null)}
+                                        className="text-gray-400 bg-gray-100 p-1 rounded hover:bg-gray-200 transition-colors"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <span className="text-xs font-semibold text-gray-700">{method}</span>
+                                      <div className="flex gap-2 ml-2">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleStartEditDelivery(idx, method)}
+                                          className="text-gray-400 hover:text-[#6A431F] transition-colors"
+                                        >
+                                          <Pencil size={14} />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemoveDeliveryMethod(idx)}
+                                          className="text-gray-400 hover:text-red-500 transition-colors"
+                                        >
+                                          <Trash2 size={14} />
+                                        </button>
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                              ))}
+                              {deliveryMethods.length === 0 && (
+                                <p className="text-[10px] text-red-500 font-bold bg-red-50 p-2 rounded-lg text-center">Debes agregar al menos una opción de entrega</p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -386,16 +538,22 @@ export default function ProfileCatalogEdit({
                                             value={product.stock !== undefined && product.stock !== null ? product.stock : ''}
                                             onChange={(e) => handleStockChange(product, e.target.value)}
                                             placeholder="∞"
-                                            disabled={product.stock === undefined || product.stock === '' || product.stock === null}
-                                            className={`w-12 text-xs bg-white border border-gray-200 rounded px-1.5 py-0.5 text-center font-semibold text-[#1A535C] outline-none focus:border-[#F9842C] ${product.stock === undefined || product.stock === '' || product.stock === null ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            disabled={product.stock === undefined || product.stock === null}
+                                            className={`w-12 text-xs bg-white border rounded px-1.5 py-0.5 text-center font-semibold outline-none transition-colors ${
+                                              product.stock === undefined || product.stock === null 
+                                                ? 'opacity-50 cursor-not-allowed border-gray-200 text-[#1A535C]' 
+                                                : product.stock === '' 
+                                                  ? 'border-red-500 text-red-500 bg-red-50 focus:border-red-600' 
+                                                  : 'border-gray-200 text-[#1A535C] focus:border-[#F9842C]'
+                                            }`}
                                           />
                                           <label className="flex items-center gap-1 ml-1 cursor-pointer" title="Stock infinito">
                                             <input
                                               data-testid={`stock-infinite-check-${product.id || product.tempId}`}
                                               type="checkbox"
                                               className="w-3.5 h-3.5 accent-[#F9842C] cursor-pointer"
-                                              checked={product.stock === undefined || product.stock === '' || product.stock === null}
-                                              onChange={(e) => handleStockChange(product, e.target.checked ? '' : '0')}
+                                              checked={product.stock === undefined || product.stock === null}
+                                              onChange={(e) => handleStockChange(product, e.target.checked ? null : '0')}
                                             />
                                             <span className="text-[12px] font-bold text-gray-500 leading-none pb-0.5">∞</span>
                                           </label>
@@ -412,14 +570,19 @@ export default function ProfileCatalogEdit({
                                           <Pencil size={14} />
                                         </button>
                                         {isPremium && (
-                                          <button
-                                            data-testid={`visibility-btn-${product.id || product.tempId}`}
-                                            onClick={() => toggleVisibility(product)}
-                                            className={`p-1.5 rounded-lg transition-colors border ${product.is_visible !== false ? 'text-[#F9842C] bg-orange-50 border-orange-100 hover:bg-orange-100' : 'text-gray-400 bg-gray-50 border-gray-100 hover:bg-gray-100'}`}
-                                            title={product.is_visible !== false ? "Ocultar elemento" : "Hacer visible"}
-                                          >
-                                            {product.is_visible !== false ? <Eye size={14} /> : <EyeOff size={14} />}
-                                          </button>
+                                          <div className="flex items-center gap-1">
+                                            <button
+                                              data-testid={`visibility-btn-${product.id || product.tempId}`}
+                                              onClick={() => toggleVisibility(product)}
+                                              className={`p-1.5 rounded-lg transition-colors border ${product.is_visible !== false ? 'text-[#F9842C] bg-orange-50 border-orange-100 hover:bg-orange-100' : 'text-gray-400 bg-gray-50 border-gray-100 hover:bg-gray-100'}`}
+                                              title={product.is_visible !== false ? "Ocultar elemento" : (localProducts.filter(p => p.is_visible !== false).length >= limitVisible ? "Límite alcanzado" : "Hacer visible")}
+                                            >
+                                              {product.is_visible !== false ? <Eye size={14} /> : <EyeOff size={14} />}
+                                            </button>
+                                            <span className="text-[10px] font-bold text-gray-400 w-7 text-center" title="Productos visibles / Límite">
+                                              {localProducts.filter(p => p.is_visible !== false).length}/{limitVisible}
+                                            </span>
+                                          </div>
                                         )}
                                         <button
                                           data-testid={`delete-btn-${product.id || product.tempId}`}
@@ -441,8 +604,10 @@ export default function ProfileCatalogEdit({
                       
                       {/* Formulario de nueva sección integrado */}
                       {isPremium ? (
-                        <form onSubmit={handleAddSection} className="flex flex-col sm:flex-row gap-2 mt-6 p-4 bg-white border border-gray-100 rounded-xl shadow-sm transition-all duration-300">
-                          <input
+                        <div className="flex flex-col mt-6">
+                          {sectionError && <span className="text-red-500 text-xs font-bold px-4 mb-1">{sectionError}</span>}
+                          <form onSubmit={handleAddSection} className="flex flex-col sm:flex-row gap-2 p-4 bg-white border border-gray-100 rounded-xl shadow-sm transition-all duration-300">
+                            <input
                             data-testid="input-new-section-name"
                             type="text"
                             value={newSectionName}
@@ -460,7 +625,8 @@ export default function ProfileCatalogEdit({
                               Guardar
                             </button>
                           )}
-                        </form>
+                          </form>
+                        </div>
                       ) : (
                         <div className="mt-6 p-4 bg-orange-50/50 border border-orange-100 rounded-xl flex flex-col items-center justify-center relative overflow-hidden">
                           <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center p-4">

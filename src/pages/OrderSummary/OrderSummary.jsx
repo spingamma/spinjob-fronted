@@ -7,13 +7,24 @@ export default function OrderSummary() {
   const { slug } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { cart, businessName } = location.state || {};
+  const { cart, businessName, deliveryMethods } = location.state || {};
 
   const userStr = localStorage.getItem('spingamma_user');
   const user = userStr ? JSON.parse(userStr) : null;
   const token = localStorage.getItem('spingamma_token');
 
+  const parsedDeliveryMethods = (() => {
+    if (!deliveryMethods) return ["Entrega en el local"];
+    try {
+      const parsed = typeof deliveryMethods === 'string' ? JSON.parse(deliveryMethods) : deliveryMethods;
+      return (Array.isArray(parsed) && parsed.length > 0) ? parsed : ["Entrega en el local"];
+    } catch(e) {
+      return ["Entrega en el local"];
+    }
+  })();
+
   const [customerName, setCustomerName] = useState(user?.nombre || '');
+  const [selectedDeliveryMethod, setSelectedDeliveryMethod] = useState(parsedDeliveryMethods[0]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -50,8 +61,10 @@ export default function OrderSummary() {
   const itemsList = Object.values(cart);
   
   const totalPrice = itemsList.reduce((sum, item) => {
-    const priceNum = parseFloat((item.product.price || "0").replace(/[^\d.-]/g, ''));
-    return sum + (priceNum || 0) * item.quantity;
+    const rawMatch = (item.product.price || "0").replace(/[^\d.-]/g, '');
+    const priceNum = parseFloat(rawMatch);
+    const validPrice = isNaN(priceNum) ? 0 : priceNum;
+    return sum + validPrice * item.quantity;
   }, 0);
 
   const handleSubmit = async (e) => {
@@ -63,15 +76,18 @@ export default function OrderSummary() {
 
     const orderData = {
       customer_name: customerName,
+      delivery_method: selectedDeliveryMethod,
       total_price: totalPrice,
       items: itemsList.map(item => {
-        const priceNum = parseFloat((item.product.price || "0").replace(/[^\d.-]/g, ''));
+        const rawMatch = (item.product.price || "0").replace(/[^\d.-]/g, '');
+        const priceNum = parseFloat(rawMatch);
+        const validPrice = isNaN(priceNum) ? 0 : priceNum;
         return {
           product_id: item.product.id || null,
           product_name: item.product.name,
           quantity: item.quantity,
-          price_at_time: priceNum || 0,
-          subtotal: (priceNum || 0) * item.quantity
+          price_at_time: validPrice,
+          subtotal: validPrice * item.quantity
         };
       })
     };
@@ -132,14 +148,16 @@ export default function OrderSummary() {
           
           <div className="space-y-4">
             {itemsList.map((item, idx) => {
-              const priceNum = parseFloat((item.product.price || "0").replace(/[^\d.-]/g, ''));
+              const rawMatch = (item.product.price || "0").replace(/[^\d.-]/g, '');
+              const priceNum = parseFloat(rawMatch);
+              const validPrice = isNaN(priceNum) ? 0 : priceNum;
               return (
                 <div key={idx} className="flex justify-between items-center">
                   <div className="flex-1 pr-4">
                     <p className="font-bold text-sm">{item.product.name}</p>
-                    <p className="text-xs text-[#757778]">{item.quantity} x Bs. {priceNum.toFixed(2)}</p>
+                    <p className="text-xs text-[#757778]">{item.quantity} x Bs. {validPrice.toFixed(2)}</p>
                   </div>
-                  <p className="font-black">Bs. {(item.quantity * priceNum).toFixed(2)}</p>
+                  <p className="font-black">Bs. {(item.quantity * validPrice).toFixed(2)}</p>
                 </div>
               );
             })}
@@ -164,6 +182,21 @@ export default function OrderSummary() {
               required
               className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all"
             />
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-bold text-[#757778] mb-2">Método de entrega *</label>
+            <select 
+              value={selectedDeliveryMethod}
+              onChange={(e) => setSelectedDeliveryMethod(e.target.value)}
+              required
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all cursor-pointer"
+            >
+              <option value="" disabled>Seleccione un método</option>
+              {parsedDeliveryMethods.map((m, i) => (
+                <option key={i} value={m}>{m}</option>
+              ))}
+            </select>
           </div>
 
           <button 

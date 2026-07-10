@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { cleanWhatsappNumber } from '../utils/phone';
 import miCarrito from '../assets/oso-carrito.png';
 
-export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia', theme = 'light', isPremium = false, ordersEnabled = true, carouselOrder }) {
+export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia', theme = 'light', isPremium = false, ordersEnabled = true, carouselOrder, deliveryMethods }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState({});
+  const [limitMsg, setLimitMsg] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -73,9 +74,18 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
   carouselKeys = carouselKeys.slice(0, maxCarousels);
 
   const updateCart = (product, delta) => {
+    let limitReached = false;
     setCart(prev => {
       const current = prev[product.id]?.quantity || 0;
       const newQuantity = current + delta;
+
+      if (delta > 0 && product.stock !== undefined && product.stock !== null && product.stock !== '') {
+        if (newQuantity > product.stock) {
+          limitReached = true;
+          return prev;
+        }
+      }
+
       if (newQuantity <= 0) {
         const newCart = { ...prev };
         delete newCart[product.id];
@@ -86,6 +96,11 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
         [product.id]: { product, quantity: newQuantity }
       };
     });
+
+    if (limitReached) {
+      setLimitMsg(product.id);
+      setTimeout(() => setLimitMsg(null), 2000);
+    }
   };
 
   const totalItems = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
@@ -101,7 +116,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
       alert("Para realizar un pedido necesitas iniciar sesión. Por favor ve a la página principal e ingresa a tu cuenta.");
       return;
     }
-    navigate(`/perfil/${slug}/orden`, { state: { cart, businessName, slug } });
+    navigate(`/perfil/${slug}/orden`, { state: { cart, businessName, slug, deliveryMethods } });
   };
 
   return (
@@ -121,6 +136,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
               ordersEnabled={ordersEnabled}
               cart={cart}
               updateCart={updateCart}
+              limitMsg={limitMsg}
             />
           ))}
 
@@ -163,7 +179,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
   );
 }
 
-const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, country, isPremium, ordersEnabled, cart, updateCart }) => {
+const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, country, isPremium, ordersEnabled, cart, updateCart, limitMsg }) => {
   // Crear un carrusel pseudo-infinito repitiendo los productos 20 veces (nadie hace swipe 50+ veces)
   const displayProducts = products.length > 0 ? Array(20).fill(products).flat() : [];
 
@@ -239,7 +255,7 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="flex overflow-x-auto snap-x snap-mandatory hide-scroll px-[calc(50%-97.5px)] sm:px-[calc(50%-117.5px)] md:px-[calc(50%-135px)] gap-4 sm:gap-6 pb-4 pt-2 -mb-2"
+        className="flex items-center overflow-x-auto snap-x snap-mandatory hide-scroll px-[calc(50%-97.5px)] sm:px-[calc(50%-117.5px)] md:px-[calc(50%-135px)] gap-4 sm:gap-6 pb-4 pt-2 -mb-2"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         <style>{`.hide-scroll::-webkit-scrollbar { display: none; }`}</style>
@@ -251,7 +267,7 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
             <div
               key={`${product.id}-${idx}`}
               data-product-idx={idx}
-              className={`snap-center shrink-0 w-[195px] sm:w-[235px] md:w-[270px] transition-all duration-300 ease-out flex flex-col rounded-[1.25rem] overflow-hidden border cursor-pointer ${isActive
+              className={`snap-center shrink-0 h-fit w-[195px] sm:w-[235px] md:w-[270px] transition-all duration-300 ease-out flex flex-col rounded-[1.25rem] overflow-hidden border cursor-pointer ${isActive
                 ? (isDark ? 'bg-[#1e1e1e] border-white/10 shadow-[0_15px_30px_-10px_rgba(0,0,0,0.5)] scale-100 z-10' : 'bg-white border-transparent shadow-[0_15px_30px_-10px_rgba(30,61,81,0.15)] scale-100 z-10')
                 : (isDark ? 'bg-[#1e1e1e]/50 border-white/5 scale-90 opacity-100 z-0' : 'bg-white border-gray-200 scale-90 opacity-100 z-0 hover:bg-gray-50')
                 }`}
@@ -267,17 +283,11 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
               }}
             >
               {/* Imagen/Icono en la parte superior */}
-              <div className="relative w-full flex flex-col justify-start">
-                {product.image_url ? (
+              {product.image_url && (
+                <div className="relative w-full flex flex-col justify-start">
                   <img src={product.image_url} alt={product.name} className="w-full h-auto max-h-[240px] sm:max-h-[280px] md:max-h-[320px] object-contain transition-transform duration-500 hover:scale-105 drop-shadow-sm" />
-                ) : (
-                  <div className="w-full h-[180px] sm:h-[220px] flex items-center justify-center">
-                    <Package size={48} className={`sm:w-16 sm:h-16 ${isDark ? 'text-[#757778]' : 'text-[#1A535C]/20'}`} strokeWidth={1.5} />
-                  </div>
-                )}
-
-
-              </div>
+                </div>
+              )}
 
               {/* Info inferior con fondo blanco/oscuro */}
               <div className="flex flex-col p-4 sm:p-5 pt-3 sm:pt-4 w-full text-left flex-1 justify-between">
@@ -286,7 +296,7 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
                     {product.name}
                   </h4>
                   {product.description && (
-                    <div className="mb-3">
+                    <div className="mb-1">
                       <p className={`text-[11px] sm:text-xs whitespace-pre-wrap ${expandedProducts[idx] ? '' : 'line-clamp-2'} ${isDark ? 'text-gray-400' : 'text-[#757778]'}`}>
                         {product.description}
                       </p>
@@ -301,7 +311,7 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
                     </div>
                   )}
                 </div>
-                <div className="flex items-end justify-between mt-2">
+                <div className="flex items-end justify-between mt-1">
                   {product.price ? (
                     <p className={`font-black text-base sm:text-lg ${isDark ? 'text-[#C8A721]' : 'text-[#1A535C]'}`}>
                       {product.price}
@@ -311,28 +321,45 @@ const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, 
                   )}
 
                   {isPremium && ordersEnabled && (
-                    <div
-                      className="flex items-center gap-2 bg-gray-100 rounded-lg p-1"
-                      onClick={(e) => e.stopPropagation()} // Prevent carousel item click
-                    >
-                      <button
-                        onClick={() => updateCart(product, -1)}
-                        data-testid="remove-from-cart-btn"
-                        className="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:text-red-500"
+                    product.stock === 0 ? (
+                      <div className="flex items-center gap-2 bg-red-50 text-red-600 rounded-lg p-1.5 px-3">
+                        <span className="font-bold text-xs uppercase tracking-wider">Agotado</span>
+                      </div>
+                    ) : (
+                      <div
+                        className="flex items-center gap-2 bg-gray-100 rounded-lg p-1"
+                        onClick={(e) => e.stopPropagation()} // Prevent carousel item click
                       >
-                        <Minus size={14} />
-                      </button>
-                      <span data-testid="cart-quantity" className="font-bold text-sm min-w-[1.2rem] text-center text-[#1A535C]">
-                        {cart[product.id]?.quantity || 0}
-                      </span>
-                      <button
-                        onClick={() => updateCart(product, 1)}
-                        data-testid="add-to-cart-btn"
-                        className="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-[#1A535C] hover:text-[#F9842C]"
-                      >
-                        <Plus size={14} />
-                      </button>
-                    </div>
+                        <button
+                          onClick={() => updateCart(product, -1)}
+                          data-testid={`remove-from-cart-btn-${product.id}`}
+                          className="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:text-red-500"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span data-testid={`cart-quantity-${product.id}`} className="font-bold text-sm min-w-[1.2rem] text-center text-[#1A535C]">
+                          {cart[product.id]?.quantity || 0}
+                        </span>
+                        <div className="relative">
+                          <button
+                            onClick={() => updateCart(product, 1)}
+                            data-testid={`add-to-cart-btn-${product.id}`}
+                            className={`w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm transition-colors ${
+                              product.stock !== undefined && product.stock !== null && product.stock !== '' && (cart[product.id]?.quantity || 0) >= product.stock
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'text-[#1A535C] hover:text-[#F9842C]'
+                            }`}
+                          >
+                            <Plus size={14} />
+                          </button>
+                          {limitMsg === product.id && (
+                            <div className="absolute bottom-full right-0 mb-1 px-2 py-1 bg-gray-800 text-white text-[10px] font-bold rounded shadow-md whitespace-nowrap z-50">
+                              Stock máximo
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
                   )}
                 </div>
               </div>

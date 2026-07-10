@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, Calendar, PackageCheck, PackageOpen, Lock, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Calendar, PackageCheck, PackageOpen, Lock, Sparkles, CheckCircle2, XCircle } from 'lucide-react';
 import fetchAuth from '../../utils/fetchAuth';
 
 export default function BusinessOrders() {
@@ -48,7 +48,16 @@ export default function BusinessOrders() {
       }
       if (res.ok) {
         const data = await res.json();
-        setOrders(data);
+        const sortedData = data.sort((a, b) => {
+          const getScore = (status) => {
+            if (status === "pendiente") return 0;
+            if (status === "entregado") return 1;
+            if (status === "cancelado") return 2;
+            return 3;
+          };
+          return getScore(a.status) - getScore(b.status);
+        });
+        setOrders(sortedData);
         setIsPremium(true);
       } else {
         setOrders([]);
@@ -80,7 +89,18 @@ export default function BusinessOrders() {
       });
 
       if (res.ok) {
-        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+        setOrders(prev => {
+          const updated = prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o);
+          return updated.sort((a, b) => {
+            const getScore = (status) => {
+              if (status === "pendiente") return 0;
+              if (status === "entregado") return 1;
+              if (status === "cancelado") return 2;
+              return 3;
+            };
+            return getScore(a.status) - getScore(b.status);
+          });
+        });
       }
     } catch (err) {
       if (err.message !== 'SESSION_EXPIRED') {
@@ -161,12 +181,15 @@ export default function BusinessOrders() {
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-extrabold text-[#1A535C] text-sm">Pedido #{order.id.slice(-6)}</span>
-                          <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${isEntregado ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                          <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${order.status === 'cancelado' ? 'bg-red-100 text-red-700' : isEntregado ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
                             {order.status}
                           </span>
                         </div>
                         <p className="text-xs text-gray-400 font-medium">Cliente: <span className="text-[#1A535C] font-bold">{order.customer_name}</span></p>
                         <p className="text-xs text-gray-400 font-medium">Fecha: <span className="font-semibold text-gray-600">{new Date(order.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></p>
+                        {order.delivered_at && (
+                          <p className="text-xs text-green-600 font-medium mt-0.5">Fecha de Entrega: <span className="font-semibold">{new Date(order.delivered_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></p>
+                        )}
                       </div>
                       
                       {/* Items Details */}
@@ -186,20 +209,32 @@ export default function BusinessOrders() {
                           <p className="font-black text-lg text-[#1A535C]">Bs. {order.total_price.toFixed(2)}</p>
                         </div>
                         
-                        {!isEntregado ? (
-                          <button 
-                            onClick={() => handleStatusChange(order.id, 'entregado')}
-                            className="flex items-center gap-1.5 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors"
-                          >
-                            <PackageCheck size={14} /> Entregado
-                          </button>
-                        ) : (
-                          <button 
-                            onClick={() => handleStatusChange(order.id, 'pendiente')}
-                            className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold rounded-xl transition-colors"
-                          >
-                            <PackageOpen size={14} /> Reabrir
-                          </button>
+                        {order.status === "cancelado" ? null : (
+                          <div className="flex gap-2">
+                            {!isEntregado ? (
+                              <>
+                                <button 
+                                  onClick={() => handleStatusChange(order.id, 'cancelado')}
+                                  className="flex items-center gap-1.5 px-3 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-xl shadow-sm transition-colors"
+                                >
+                                  <XCircle size={14} /> Rechazar
+                                </button>
+                                <button 
+                                  onClick={() => handleStatusChange(order.id, 'entregado')}
+                                  className="flex items-center gap-1.5 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors"
+                                >
+                                  <PackageCheck size={14} /> Entregado
+                                </button>
+                              </>
+                            ) : (
+                              <button 
+                                onClick={() => handleStatusChange(order.id, 'pendiente')}
+                                className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold rounded-xl transition-colors"
+                              >
+                                <PackageOpen size={14} /> Reabrir
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>

@@ -88,14 +88,23 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       })(),
       seller_code: '',
       orders_enabled: profesional.orders_enabled !== false,
-      carousel_order: profesional.carousel_order || ''
+      carousel_order: profesional.carousel_order || '',
+      delivery_methods: (() => {
+        try {
+          return typeof profesional.delivery_methods === 'string' ? JSON.parse(profesional.delivery_methods) : (profesional.delivery_methods || []);
+        } catch(e) {
+          return [];
+        }
+      })()
     };
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [specialtiesData, setSpecialtiesData] = useState([]);
   const [localProducts, setLocalProducts] = useState([]);
+  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
   const [deletedProductsIds, setDeletedProductsIds] = useState([]);
   const [hasUnsavedProduct, setHasUnsavedProduct] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   // Fetch specialties & products
   useEffect(() => {
@@ -151,7 +160,14 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         })(),
         seller_code: '',
         orders_enabled: profesional.orders_enabled !== false,
-        carousel_order: profesional.carousel_order || ''
+        carousel_order: profesional.carousel_order || '',
+        delivery_methods: (() => {
+          try {
+            return typeof profesional.delivery_methods === 'string' ? JSON.parse(profesional.delivery_methods) : (profesional.delivery_methods || []);
+          } catch(e) {
+            return [];
+          }
+        })()
       });
     }
   }, [profesional, isEditing]);
@@ -169,57 +185,20 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
   };
 
   const handleSaveEdit = async () => {
+    setSaveError('');
     if (hasUnsavedProduct) {
-      alert("Tienes un producto a medio editar en el catálogo. Por favor completa su nombre y haz clic en 'Añadir' / 'Actualizar', o cancela la edición antes de guardar la tarjeta.");
+      setSaveError("Tienes un producto a medio editar en el catálogo. Por favor completa su nombre y haz clic en 'Añadir' / 'Actualizar', o cancela la edición antes de guardar la tarjeta.");
       return;
     }
 
     if (!editFormData.name?.trim() || !editFormData.title?.trim() || !editFormData.description?.trim() || !editFormData.category?.trim() || !editFormData.state?.trim() || !editFormData.subcategories || editFormData.subcategories.length === 0) {
-      alert("Faltan campos obligatorios. Por favor completa: Nombre, Título, Descripción, Categoría, Subcategoría y Departamento/Estado.");
+      setSaveError("Faltan campos obligatorios. Por favor completa: Nombre, Título, Descripción, Categoría, Subcategoría y Departamento/Estado.");
       return;
     }
 
-    if (editFormData.name.trim().length > 30) {
-      alert("El nombre del negocio no puede tener más de 30 caracteres.");
+    if (editFormData.orders_enabled && (!editFormData.delivery_methods || editFormData.delivery_methods.length === 0)) {
+      alert("Debes agregar al menos un método de entrega si habilitas los pedidos.");
       return;
-    }
-
-    if (editFormData.ubicacion_url && editFormData.ubicacion_url.trim() !== '') {
-      const parseGoogleMapsCoords = (url) => {
-        if (!url) return null;
-        // 1. Pin data: !3dLat!4dLng
-        let match = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-        if (match) {
-          return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
-        }
-        // 2. Query parameter: q=lat,lng
-        match = url.match(/[?&](q|query)=(-?\d+\.\d+),(-?\d+\.\d+)/);
-        if (match) {
-          return { lat: parseFloat(match[2]), lng: parseFloat(match[3]) };
-        }
-        // 3. Path place: /place/lat,lng
-        match = url.match(/\/place\/(-?\d+\.\d+),(-?\d+\.\d+)/);
-        if (match) {
-          return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
-        }
-        // 4. Viewport/Camera fallback: @lat,lng
-        match = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-        if (match) {
-          return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
-        }
-        // 5. Direct coordinates: "lat,lng"
-        match = url.match(/^\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*$/);
-        if (match) {
-          return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
-        }
-        return null;
-      };
-      
-      const parsed = parseGoogleMapsCoords(editFormData.ubicacion_url);
-      if (!parsed) {
-        alert("No se han detectado coordenadas válidas en la ubicación. Por favor, pega un enlace válido o utiliza el botón 'Elegir en el Mapa'.");
-        return;
-      }
     }
 
 
@@ -250,9 +229,9 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           } else {
              formDataObj.append('whatsapp', '');
           }
-        } else if (key === 'subcategories') {
+        } else if (key === 'subcategories' || key === 'delivery_methods') {
           if (payload[key].length > 0) {
-             formDataObj.append('subcategories', JSON.stringify(payload[key]));
+             formDataObj.append(key, JSON.stringify(payload[key]));
           }
         } else if (payload[key] !== null && payload[key] !== '') {
           formDataObj.append(key, payload[key]);
@@ -435,6 +414,9 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
                 setOrdersEnabled={(val) => setEditFormData(prev => ({ ...prev, orders_enabled: val }))}
                 carouselOrder={editFormData.carousel_order}
                 setCarouselOrder={(val) => setEditFormData(prev => ({ ...prev, carousel_order: val }))}
+                deliveryMethods={editFormData.delivery_methods}
+                setDeliveryMethods={(val) => setEditFormData(prev => ({ ...prev, delivery_methods: val }))}
+                onModalOpenChange={setIsSubModalOpen}
               />
             </div>
           ) : (
@@ -448,6 +430,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               isPremium={profesional.premium === true}
               ordersEnabled={profesional.orders_enabled !== false}
               carouselOrder={profesional.carousel_order}
+              deliveryMethods={profesional.delivery_methods}
             />
           )}
         </div>
@@ -531,8 +514,13 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       {/* ==========================================
           BARRA DE ACCIONES FLOTANTE (MODO EDICIÓN)
           ========================================== */}
-      {isEditing && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 bg-white border-t border-gray-200 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-[100] animate-in slide-in-from-bottom-10 flex justify-center items-center gap-4">
+      {isEditing && !isSubModalOpen && (
+        <div className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 bg-white border-t border-gray-200 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-[80] animate-in slide-in-from-bottom-10 flex flex-col justify-center items-center gap-2">
+          {saveError && (
+            <div className="text-red-500 text-xs font-bold text-center animate-in fade-in slide-in-from-bottom-2">
+              {saveError}
+            </div>
+          )}
           <div className="w-full max-w-4xl mx-auto flex justify-end items-center gap-3">
             <button 
               onClick={() => { 

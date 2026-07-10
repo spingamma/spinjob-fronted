@@ -129,3 +129,11 @@ export async function createEntidad(req: Request, res: Response) {
 - **Límite de Líneas:** Ningún archivo nuevo o modificado para la API debe exceder las 300 líneas. Si la lógica de negocio se complejiza, sepárala e impleméntala en un directorio de servicios/controladores independientes (`services/`).
 - **Zero Orphans:** Si actualizas o remueves columnas en los modelos, genera los scripts de migración correspondientes.
 - **Validaciones en cliente:** Al finalizar el backend, actualiza o crea las integraciones HTTP en el frontend sincronizando los campos validados.
+
+## Errores Críticos Comunes (Filtro Meta-Cognitivo)
+
+### 1. Sincronización de Esquemas de Base de Datos (ORM)
+- 🚨 **CRÍTICO:** Siempre que modifiques un modelo de datos lógico añadiendo o alterando columnas, es obligatorio generar o ejecutar un script de migración estructural en la base de datos subyacente (ej. `ALTER TABLE` o usar la herramienta de migraciones del ORM). No asumas que el ORM actualizará esquemas existentes en caliente.
+
+### 2. Firmas Explícitas de Parámetros (Multipart/Form-Data)
+- 🚨 **CRÍTICO:** Cuando modifiques un envío de datos que utiliza `multipart/form-data`, es absolutamente crítico que actualices explícitamente la firma de la función del controlador o mecanismo de enrutamiento del backend para aceptar el nuevo parámetro. Los frameworks de backend (ej. FastAPI usando `Form(...)`) ignorarán silenciosamente cualquier parámetro nuevo que no esté declarado en la firma de la ruta.
