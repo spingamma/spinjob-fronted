@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Package, Trash2, Pencil, Eye, EyeOff } from 'lucide-react';
+import { Plus, Package, Trash2, Pencil, Eye, EyeOff, Layers, Settings2, X, Archive, ChevronDown, ChevronRight, ChevronUp } from 'lucide-react';
 import ProductFormModal from './ProductFormModal';
+import PremiumModal from '../../components/PremiumModal';
 
 export default function ProfileCatalogEdit({
   localProducts,
@@ -14,13 +15,23 @@ export default function ProfileCatalogEdit({
   carouselOrder,
   setCarouselOrder
 }) {
+  const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [newSectionName, setNewSectionName] = useState('');
+  const [premiumModalData, setPremiumModalData] = useState({ isOpen: false, featureName: '' });
+  const [expandedCatalogs, setExpandedCatalogs] = useState({});
 
-  const limit = isPremium ? 15 : 3;
+  const toggleCatalog = (catalogName) => {
+    setExpandedCatalogs(prev => ({
+      ...prev,
+      [catalogName]: prev[catalogName] === undefined ? true : !prev[catalogName]
+    }));
+  };
 
-  // 1. Parse and merge sections to get orderedCarousels list
+  const limitRegistered = isPremium ? 50 : 3;
+  const limitVisible = isPremium ? 15 : 3;
+
   const orderedCarousels = useMemo(() => {
     let savedList = [];
     if (isPremium && carouselOrder) {
@@ -62,7 +73,6 @@ export default function ProfileCatalogEdit({
     const cleanName = newSectionName.trim();
     if (!cleanName) return;
 
-    // Check if already exists case-insensitively
     if (orderedCarousels.some(c => c.toLowerCase() === cleanName.toLowerCase())) {
       alert("Ya existe una sección con este nombre.");
       return;
@@ -76,7 +86,6 @@ export default function ProfileCatalogEdit({
   };
 
   const handleRemoveSection = (name) => {
-    // Cannot remove if it has products
     const hasProducts = localProducts.some(p => (p.carousel_name || 'Catálogo') === name);
     if (hasProducts) {
       alert("No puedes eliminar una sección que contiene productos. Mueve o elimina los productos primero.");
@@ -115,22 +124,22 @@ export default function ProfileCatalogEdit({
 
   const handleSubmitProduct = (productData) => {
     if (productData.id || productData.tempId) {
-      // Edit existing product
       setLocalProducts(prev => prev.map(p => {
         if ((productData.id && p.id === productData.id) || (productData.tempId && p.tempId === productData.tempId)) {
-          return {
-            ...p,
-            ...productData
-          };
+          return { ...p, ...productData };
         }
         return p;
       }));
     } else {
-      // Create new product
-      const newProduct = {
-        ...productData,
-        tempId: Date.now().toString()
-      };
+      const visibleCount = localProducts.filter(p => p.is_visible !== false).length;
+      let isVisible = productData.is_visible;
+
+      if (isVisible && visibleCount >= limitVisible) {
+        isVisible = false;
+        alert(`Has alcanzado el límite de ${limitVisible} productos visibles. El nuevo producto se creará oculto.`);
+      }
+
+      const newProduct = { ...productData, tempId: Date.now().toString(), is_visible: isVisible };
       setLocalProducts(prev => [...prev, newProduct]);
     }
     handleCloseModal();
@@ -150,9 +159,26 @@ export default function ProfileCatalogEdit({
   };
 
   const toggleVisibility = (product) => {
+    if (product.is_visible === false) {
+      const visibleCount = localProducts.filter(p => p.is_visible !== false).length;
+      if (visibleCount >= limitVisible) {
+        alert(`No puedes tener más de ${limitVisible} productos visibles al mismo tiempo.`);
+        return;
+      }
+    }
+
     setLocalProducts(prev => prev.map(p => {
       if ((p.id && p.id === product.id) || (p.tempId && p.tempId === product.tempId)) {
         return { ...p, is_visible: p.is_visible === false ? true : false, isModified: true };
+      }
+      return p;
+    }));
+  };
+
+  const handleStockChange = (product, newStock) => {
+    setLocalProducts(prev => prev.map(p => {
+      if ((p.id && p.id === product.id) || (p.tempId && p.tempId === product.tempId)) {
+        return { ...p, stock: newStock, isModified: true };
       }
       return p;
     }));
@@ -166,162 +192,312 @@ export default function ProfileCatalogEdit({
         <span className="w-1.5 h-6 bg-[#6A431F] rounded-full"></span> Catálogo de Productos
       </h3>
 
-      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm">
-        {isPremium && (
-          <div className="flex items-center gap-2 mb-4 p-3 bg-orange-50/50 rounded-2xl border border-orange-100/50">
-            <input
-              data-testid="ordersEnabledCheckbox"
-              type="checkbox"
-              id="ordersEnabledCheckbox"
-              checked={ordersEnabled}
-              onChange={(e) => setOrdersEnabled(e.target.checked)}
-              className="w-4 h-4 text-[#F9842C] focus:ring-[#F9842C] border-gray-300 rounded cursor-pointer"
-            />
-            <label htmlFor="ordersEnabledCheckbox" className="text-sm font-bold text-[#1A535C] cursor-pointer select-none">
-              Habilitar pedidos para este catálogo (carrito de compras)
-            </label>
-          </div>
-        )}
+      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm flex flex-col items-center justify-center py-10">
+        <p className="text-sm text-gray-500 mb-6 text-center max-w-md">
+          Gestiona todos tus productos, opciones de inventario y categorías desde un solo lugar.
+        </p>
+        <button
+          data-testid="open-inventory-btn"
+          onClick={() => setIsInventoryOpen(true)}
+          className="bg-[#F9842C] hover:bg-[#e06516] text-white px-6 py-3 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-md hover:shadow-lg active:scale-95"
+        >
+          <Layers size={20} />
+          Catálogo e Inventario
+        </button>
+      </div>
 
-        {/* Section Reordering & Adding UI */}
-        {isPremium && (
-          <div className="mb-6 p-4 bg-orange-50/30 border border-orange-100 rounded-2xl text-left">
-            <h4 className="text-xs font-bold text-[#1A535C] mb-3 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#F9842C]"></span> Gestionar Secciones del Catálogo
-            </h4>
+      {isInventoryOpen && (
+        <div
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-[#1A535C]/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          onClick={() => setIsInventoryOpen(false)}
+        >
+          <div
+            className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[85vh] animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-gradient-to-br from-[#1A535C] to-[#32698F] p-5 relative shrink-0 flex items-center justify-between rounded-t-3xl">
+              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay rounded-t-3xl"></div>
+              <div className="relative z-10 flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                  <Archive size={20} className="text-white" />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-lg font-extrabold text-white">Catálogo e Inventario</h3>
+                  <p className="text-white/70 text-xs">Gestiona tus productos y secciones</p>
+                </div>
+              </div>
+              <button
+                data-testid="close-inventory-btn"
+                onClick={() => setIsInventoryOpen(false)}
+                className="relative z-10 text-white/80 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm"
+              >
+                <X size={20} />
+              </button>
+            </div>
 
-            {/* List and Order */}
-            <div className="space-y-1.5 mb-3.5">
-              {orderedCarousels.map((name, idx) => {
-                const empty = !hasProducts(name);
-                return (
-                  <div key={name} className="flex items-center justify-between bg-white px-3.5 py-2 rounded-xl border border-gray-100 shadow-sm">
-                    <span className="text-xs font-bold text-[#1A535C]">{name}</span>
-                    <div className="flex items-center gap-1">
-                      <button
-                        data-testid={`btn-move-up-${idx}`}
-                        type="button"
-                        disabled={idx === 0}
-                        onClick={() => moveCarousel(idx, -1)}
-                        className="p-1 rounded hover:bg-gray-100 text-gray-500 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-                        title="Subir"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6" /></svg>
-                      </button>
-                      <button
-                        data-testid={`btn-move-down-${idx}`}
-                        type="button"
-                        disabled={idx === orderedCarousels.length - 1}
-                        onClick={() => moveCarousel(idx, 1)}
-                        className="p-1 rounded hover:bg-gray-100 text-gray-500 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-                        title="Bajar"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
-                      </button>
-                      {empty && name !== 'Catálogo' && (
+            <div className="p-6 overflow-y-auto space-y-6 text-left flex-1 bg-gray-50/50">
+
+              {/* El bloque antiguo de Gestionar Secciones fue movido a Productos Registrados */}
+
+              {/* 2. Configuración de Catálogo */}
+              <div className="pt-2">
+                <h4 className="text-sm font-bold text-[#1A535C] flex items-center gap-2 mb-4">
+                  <Settings2 size={16} className="text-[#F9842C]" /> Configuración de Catálogo
+                </h4>
+
+                {isPremium && (
+                  <div className="flex items-center gap-2 mb-2 p-3 bg-white rounded-2xl border border-gray-200 shadow-sm">
+                    <input
+                      data-testid="ordersEnabledCheckbox"
+                      type="checkbox"
+                      id="ordersEnabledCheckbox"
+                      checked={ordersEnabled}
+                      onChange={(e) => setOrdersEnabled(e.target.checked)}
+                      className="w-4 h-4 text-[#F9842C] focus:ring-[#F9842C] border-gray-300 rounded cursor-pointer"
+                    />
+                    <label htmlFor="ordersEnabledCheckbox" className="text-xs font-bold text-[#1A535C] cursor-pointer select-none">
+                      Habilitar "Mis pedidos" (Carrito de compras)
+                    </label>
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Botón Añadir Producto y Listado */}
+              <div className="pt-2 border-t border-gray-200">
+                {localProducts.length < limitRegistered && (
+                  <button
+                    data-testid="add-product-btn"
+                    onClick={handleOpenCreate}
+                    className="w-full bg-[#1A535C] hover:bg-[#133d44] text-white px-4 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm mb-6 mt-4"
+                  >
+                    <Plus size={18} />
+                    Añadir Producto
+                  </button>
+                )}
+
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-bold text-[#1A535C] flex items-center gap-2">
+                      <Package size={16} className="text-[#F9842C]" /> Productos Registrados
+                    </h4>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-lg">
+                        {localProducts.length}/{limitRegistered}
+                      </span>
+                      {!isPremium && (
                         <button
-                          data-testid={`btn-remove-section-${name}`}
-                          type="button"
-                          onClick={() => handleRemoveSection(name)}
-                          className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors ml-1 border border-transparent hover:border-red-100"
-                          title="Eliminar sección vacía"
+                          data-testid="upload-limit-premium-btn"
+                          onClick={() => setPremiumModalData({ isOpen: true, featureName: 'Límite de Productos' })}
+                          className="flex items-center justify-center px-2.5 py-1 bg-orange-100 rounded-lg text-xs font-bold w-full sm:w-auto text-orange-600 hover:text-orange-700 hover:bg-orange-200 transition-colors gap-1 shadow-sm"
+                          title="Mejora a Premium para subir hasta 50 productos"
                         >
-                          <Trash2 size={14} />
+                          🔒 {localProducts.length}/50
                         </button>
                       )}
                     </div>
                   </div>
-                );
-              })}
-            </div>
 
-            {/* Add Section Form */}
-            <form onSubmit={handleAddSection} className="flex flex-col sm:flex-row gap-2">
-              <input
-                data-testid="input-new-section-name"
-                type="text"
-                value={newSectionName}
-                onChange={(e) => setNewSectionName(e.target.value)}
-                placeholder="Nuevo Catalogo"
-                className="w-full sm:flex-1 bg-white border border-gray-200 rounded-xl px-3.5 py-2 text-xs text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
-                required
-              />
-              <button
-                data-testid="btn-add-section"
-                type="submit"
-                className="bg-[#F9842C] hover:bg-[#e06516] text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1 shrink-0 w-full sm:w-auto"
-              > Guardar
-              </button>
-            </form>
-          </div>
-        )}
+                  {localProducts.length === 0 ? (
+                    <div className="text-center py-8 bg-white border border-gray-100 rounded-2xl">
+                      <p className="text-sm text-gray-500">No hay productos en tu catálogo.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {orderedCarousels.map((catalogName, idx) => {
+                        const catalogProducts = localProducts.filter(p => (p.carousel_name || 'Catálogo') === catalogName);
+                        const empty = catalogProducts.length === 0;
+                        if (empty && catalogName === 'Catálogo') return null; // Don't show default Catálogo if empty, but maybe show other custom empty sections?
+                        // Actually let's show all sections so they can delete them if empty, just like before.
+                        
+                        const isExpanded = !!expandedCatalogs[catalogName];
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-3">
-          {localProducts.length < limit && (
-            <button
-              data-testid="add-product-btn"
-              onClick={handleOpenCreate}
-              className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center hover:border-[#F9842C] hover:bg-orange-50 transition-all group h-20"
-            >
-              <Plus size={20} className="text-gray-300 group-hover:text-[#F9842C] transition-colors mb-0.5" />
-              <span className="text-[10px] font-bold text-gray-400 group-hover:text-[#F9842C] transition-colors">Añadir Producto</span>
-            </button>
-          )}
+                        return (
+                          <div key={catalogName} className="border border-gray-100 rounded-xl overflow-hidden bg-white shadow-sm">
+                            <div
+                              data-testid={`toggle-catalog-${catalogName}`}
+                              onClick={() => toggleCatalog(catalogName)}
+                              className="w-full bg-gray-50 hover:bg-gray-100 px-4 py-3 flex items-center justify-between transition-colors border-b border-gray-100 cursor-pointer"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-[#1A535C] text-sm">{catalogName}</span>
+                                <span className="text-xs bg-white px-2 py-0.5 rounded-md border border-gray-200 text-gray-500 font-semibold">
+                                  {catalogProducts.length}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                {isPremium && (
+                                  <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-200 p-0.5 shadow-sm" onClick={(e) => e.stopPropagation()}>
+                                    <button
+                                      data-testid={`btn-move-up-${idx}`}
+                                      type="button"
+                                      disabled={idx === 0}
+                                      onClick={(e) => { e.stopPropagation(); moveCarousel(idx, -1); }}
+                                      className="p-1 rounded hover:bg-gray-100 text-gray-500 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                                    >
+                                      <ChevronUp size={16} />
+                                    </button>
+                                    <button
+                                      data-testid={`btn-move-down-${idx}`}
+                                      type="button"
+                                      disabled={idx === orderedCarousels.length - 1}
+                                      onClick={(e) => { e.stopPropagation(); moveCarousel(idx, 1); }}
+                                      className="p-1 rounded hover:bg-gray-100 text-gray-500 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                                    >
+                                      <ChevronDown size={16} />
+                                    </button>
+                                    {empty && catalogName !== 'Catálogo' && (
+                                      <button
+                                        data-testid={`btn-remove-section-${catalogName}`}
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); handleRemoveSection(catalogName); }}
+                                        className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
+                                <div className="text-gray-400">
+                                  {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {isExpanded && (
+                              <div className="p-2 space-y-2 bg-gray-50/50">
+                                {catalogProducts.map((product) => (
+                                  <div key={product.id || product.tempId} className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-hover hover:border-gray-200">
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                      <div className="flex-1 min-w-0 flex items-center justify-between gap-2 pr-2">
+                                        <h4 className="font-bold text-gray-800 text-sm truncate" title={product.name}>{product.name}</h4>
+                                        <span className="text-xs text-teal-600 font-semibold flex-shrink-0 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100">{product.price || 'Sin precio'}</span>
+                                      </div>
+                                    </div>
 
-          {localProducts.map((product) => (
-            <div key={product.id || product.tempId} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 relative group flex flex-col min-h-[160px]">
-              <div className="relative overflow-hidden bg-gray-50 flex-shrink-0">
-                {product.image_url ? (
-                  <img src={product.image_url} alt={product.name} className="w-full h-32 object-cover" />
-                ) : (
-                  <div className="w-full h-32 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-                    <Package size={36} className="text-gray-300" />
-                  </div>
-                )}
-              </div>
-              <div className="p-3 flex-1 flex flex-col">
-                <h4 className="font-semibold text-gray-800 text-sm truncate">{product.name}</h4>
-                {product.description && (
-                  <p className="text-xs text-[#757778] line-clamp-2 mt-0.5">{product.description}</p>
-                )}
-                <div className="mt-auto pt-3 flex items-center justify-between">
-                  <p className="text-teal-600 font-bold text-sm">{product.price || ''}</p>
-                  <div className="flex gap-1.5">
-                    <button
-                      data-testid={`visibility-btn-${product.id || product.tempId}`}
-                      onClick={(e) => { e.stopPropagation(); toggleVisibility(product); }}
-                      className={`p-1.5 rounded-lg transition-colors border shadow-sm ${product.is_visible !== false ? 'text-[#F9842C] bg-orange-50 border-orange-100 hover:bg-orange-100' : 'text-gray-400 bg-gray-50 border-gray-100 hover:bg-gray-100'}`}
-                      title={product.is_visible !== false ? "Ocultar elemento" : "Hacer visible"}
-                    >
-                      {product.is_visible !== false ? <Eye size={14} /> : <EyeOff size={14} />}
-                    </button>
-                    <button
-                      data-testid={`edit-btn-${product.id || product.tempId}`}
-                      onClick={(e) => { e.stopPropagation(); handleOpenEdit(product); }}
-                      className="p-1.5 text-gray-400 hover:text-[#6A431F] bg-gray-50 hover:bg-[#6A431F]/10 rounded-lg transition-colors border border-gray-100 shadow-sm"
-                      title="Editar"
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      data-testid={`delete-btn-${product.id || product.tempId}`}
-                      onClick={(e) => { e.stopPropagation(); handleDelete(product); }}
-                      className="p-1.5 text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-lg transition-colors border border-gray-100 shadow-sm"
-                      title="Eliminar"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
+                                    {/* Actions */}
+                                    <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 flex-shrink-0 mt-2 sm:mt-0">
+                                      {isPremium && (
+                                        <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-200">
+                                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Stock</span>
+                                          <input
+                                            data-testid={`stock-input-${product.id || product.tempId}`}
+                                            type="number"
+                                            min="0"
+                                            value={product.stock !== undefined && product.stock !== null ? product.stock : ''}
+                                            onChange={(e) => handleStockChange(product, e.target.value)}
+                                            placeholder="∞"
+                                            disabled={product.stock === undefined || product.stock === '' || product.stock === null}
+                                            className={`w-12 text-xs bg-white border border-gray-200 rounded px-1.5 py-0.5 text-center font-semibold text-[#1A535C] outline-none focus:border-[#F9842C] ${product.stock === undefined || product.stock === '' || product.stock === null ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                          />
+                                          <label className="flex items-center gap-1 ml-1 cursor-pointer" title="Stock infinito">
+                                            <input
+                                              data-testid={`stock-infinite-check-${product.id || product.tempId}`}
+                                              type="checkbox"
+                                              className="w-3.5 h-3.5 accent-[#F9842C] cursor-pointer"
+                                              checked={product.stock === undefined || product.stock === '' || product.stock === null}
+                                              onChange={(e) => handleStockChange(product, e.target.checked ? '' : '0')}
+                                            />
+                                            <span className="text-[12px] font-bold text-gray-500 leading-none pb-0.5">∞</span>
+                                          </label>
+                                        </div>
+                                      )}
+
+                                      <div className="flex gap-1.5">
+                                        <button
+                                          data-testid={`edit-btn-${product.id || product.tempId}`}
+                                          onClick={() => handleOpenEdit(product)}
+                                          className="p-1.5 text-gray-400 hover:text-[#6A431F] bg-gray-50 hover:bg-[#6A431F]/10 rounded-lg transition-colors border border-gray-100"
+                                          title="Editar"
+                                        >
+                                          <Pencil size={14} />
+                                        </button>
+                                        {isPremium && (
+                                          <button
+                                            data-testid={`visibility-btn-${product.id || product.tempId}`}
+                                            onClick={() => toggleVisibility(product)}
+                                            className={`p-1.5 rounded-lg transition-colors border ${product.is_visible !== false ? 'text-[#F9842C] bg-orange-50 border-orange-100 hover:bg-orange-100' : 'text-gray-400 bg-gray-50 border-gray-100 hover:bg-gray-100'}`}
+                                            title={product.is_visible !== false ? "Ocultar elemento" : "Hacer visible"}
+                                          >
+                                            {product.is_visible !== false ? <Eye size={14} /> : <EyeOff size={14} />}
+                                          </button>
+                                        )}
+                                        <button
+                                          data-testid={`delete-btn-${product.id || product.tempId}`}
+                                          onClick={() => handleDelete(product)}
+                                          className="p-1.5 text-gray-400 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-lg transition-colors border border-gray-100"
+                                          title="Eliminar"
+                                        >
+                                          <Trash2 size={14} />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                      
+                      {/* Formulario de nueva sección integrado */}
+                      {isPremium ? (
+                        <form onSubmit={handleAddSection} className="flex flex-col sm:flex-row gap-2 mt-6 p-4 bg-white border border-gray-100 rounded-xl shadow-sm transition-all duration-300">
+                          <input
+                            data-testid="input-new-section-name"
+                            type="text"
+                            value={newSectionName}
+                            onChange={(e) => setNewSectionName(e.target.value)}
+                            placeholder="Nueva Sección"
+                            className="w-full sm:flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
+                            required
+                          />
+                          {newSectionName.trim().length > 0 && (
+                            <button
+                              data-testid="btn-add-section"
+                              type="submit"
+                              className="bg-[#F9842C] hover:bg-[#e06516] text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all shrink-0 animate-in fade-in zoom-in-95 duration-200"
+                            >
+                              Guardar
+                            </button>
+                          )}
+                        </form>
+                      ) : (
+                        <div className="mt-6 p-4 bg-orange-50/50 border border-orange-100 rounded-xl flex flex-col items-center justify-center relative overflow-hidden">
+                          <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center p-4">
+                            <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-1 rounded-md font-extrabold mb-2 shadow-sm border border-amber-200">
+                              🔒 Función Premium
+                            </span>
+                            <p className="text-xs text-gray-600 font-bold text-center">Mejora a Premium para crear nuevas secciones y ordenarlas</p>
+                            <button
+                              data-testid="premium-info-btn-sections"
+                              onClick={() => setPremiumModalData({ isOpen: true, featureName: 'Secciones del Catálogo' })}
+                              className="mt-2 text-xs font-bold text-[#F9842C] hover:text-[#e06516] underline"
+                            >
+                              Más información
+                            </button>
+                          </div>
+                          <div className="flex flex-col sm:flex-row gap-2 w-full opacity-30 pointer-events-none">
+                            <input
+                              type="text"
+                              placeholder="Nueva Sección"
+                              className="w-full sm:flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm"
+                              disabled
+                            />
+                            <button className="bg-gray-300 text-white px-6 py-2.5 rounded-xl text-sm font-bold shrink-0" disabled>
+                              Guardar
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
 
-        <div className="mt-4 text-center">
-          <p className="text-xs font-bold text-[#757778]">{localProducts.length}/{limit} productos añadidos</p>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       <ProductFormModal
         isOpen={isModalOpen}
@@ -331,6 +507,12 @@ export default function ProfileCatalogEdit({
         isPremium={isPremium}
         availableCarousels={availableCarousels}
         onHasUnsavedProduct={onHasUnsavedProduct}
+      />
+
+      <PremiumModal 
+        isOpen={premiumModalData.isOpen} 
+        onClose={() => setPremiumModalData({ isOpen: false, featureName: '' })} 
+        featureName={premiumModalData.featureName} 
       />
     </div>
   );

@@ -366,8 +366,8 @@ export default function ProfileHero({
                   })()}
                   
                   {/* Edición de Ubicación */}
-                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white/50 p-4 rounded-xl border border-gray-200 shadow-sm">
-                    <p className="col-span-1 sm:col-span-2 text-sm font-extrabold text-[#1A535C] flex items-center gap-2">
+                  <div className="mt-4 grid grid-cols-2 gap-3 bg-white/50 p-4 rounded-xl border border-gray-200 shadow-sm">
+                    <p className="col-span-2 text-sm font-extrabold text-[#1A535C] flex items-center gap-2">
                       <MapPin size={16} className="text-[#F9842C]" /> Ubicación Geográfica
                     </p>
                     
@@ -418,7 +418,7 @@ export default function ProfileHero({
                       </select>
                     </div>
 
-                    <div className="flex flex-col sm:col-span-2">
+                    <div className="flex flex-col col-span-2">
                       <label className="text-xs font-bold text-gray-500 mb-1">¿Realiza entregas a domicilio?</label>
                       <select 
                         value={editFormData.national_delivery ? "national" : (editFormData.home_delivery ? "local" : "no")} 
@@ -438,7 +438,7 @@ export default function ProfileHero({
                       </select>
                     </div>
 
-                    <div className="flex flex-col sm:col-span-2 gap-2">
+                    <div className="flex flex-col col-span-2 gap-2">
                       <div className="flex justify-between items-center">
                         <label className="text-xs font-bold text-gray-500">Enlace de Google Maps</label>
                         <button

@@ -207,21 +207,19 @@ export default function ProductFormModal({
               />
             </div>
 
-            {isPremium && (
-              <div>
-                <label className="text-xs font-bold text-[#1A535C] block mb-1">Catálogo / Sección del menú</label>
-                <select
-                  data-testid="product-carousel-select"
-                  value={formCarousel}
-                  onChange={(e) => setFormCarousel(e.target.value)}
-                  className="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all cursor-pointer"
-                >
-                  {availableCarousels.map(name => (
-                    <option key={name} value={name}>{name}</option>
-                  ))}
-                </select>
-              </div>
-            )}
+            <div>
+              <label className="text-xs font-bold text-[#1A535C] block mb-1">Catálogo / Sección del menú</label>
+              <select
+                data-testid="product-carousel-select"
+                value={formCarousel}
+                onChange={(e) => setFormCarousel(e.target.value)}
+                className="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all cursor-pointer"
+              >
+                {availableCarousels.map(name => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div>

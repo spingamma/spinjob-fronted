@@ -1,7 +1,7 @@
 // Archivo: src/pages/MetricsDashboard/MetricsDashboard.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BarChart2, Calendar, TrendingUp, Users, MousePointerClick, Filter, Lock, Sparkles } from 'lucide-react';
+import { ArrowLeft, BarChart2, Calendar, TrendingUp, Users, MousePointerClick, Filter, Lock, Sparkles, CheckCircle2 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Header from '../../components/Header';
 import BottomNavbar from '../../components/BottomNavbar';
@@ -334,39 +334,43 @@ export default function MetricsDashboard() {
               <Sparkles className="text-[#F9842C] fill-[#F9842C]/20" /> Panel de Métricas Premium
             </h2>
             
-            <p className="text-[#757778] text-base md:text-lg mb-8 leading-relaxed max-w-md mx-auto">
-              Conoce el rendimiento de tu tarjeta digital en tiempo real. Activa el plan **Premium** para obtener acceso completo a las estadísticas de tráfico e interacciones.
+            <p className="text-[#757778] text-sm mb-6 leading-relaxed max-w-sm mx-auto">
+              Actualiza al plan Premium para desbloquear esta y muchas más herramientas para tu negocio.
             </p>
             
-            <div className="bg-white/80 rounded-2xl p-6 border border-gray-200 shadow-sm text-left max-w-md mx-auto mb-8 flex flex-col gap-4">
+            <div className="bg-white/80 rounded-2xl p-6 border border-gray-200 shadow-sm text-left max-w-sm mx-auto mb-8 flex flex-col gap-3">
+              <p className="text-[#1A535C] font-bold mb-2 flex items-center gap-2 border-b border-gray-100 pb-3">
+                Incluye todo lo del plan Básico, más:
+              </p>
               <div className="flex gap-3 items-start">
-                <div className="bg-[#1A535C]/10 text-[#1A535C] p-1.5 rounded-lg mt-0.5 shrink-0">
-                  <TrendingUp size={16} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-[#1A535C] text-sm">Visualizaciones y Clics</h4>
-                  <p className="text-xs text-[#757778]">Sigue el crecimiento del tráfico en tu tarjeta digital día a día.</p>
-                </div>
+                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-700">
+                  <strong className="text-[#1A535C]">Vitrina y catálogo ampliados</strong> (15 visibles, 50 en inventario)
+                </p>
               </div>
-              
               <div className="flex gap-3 items-start">
-                <div className="bg-[#1A535C]/10 text-[#1A535C] p-1.5 rounded-lg mt-0.5 shrink-0">
-                  <Calendar size={16} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-[#1A535C] text-sm">Filtros Avanzados</h4>
-                  <p className="text-xs text-[#757778]">Analiza por períodos (último mes, 3 meses) o rangos personalizados.</p>
-                </div>
+                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-700">
+                  <strong className="text-[#1A535C]">Gestión de pedidos ilimitada</strong> (Notificaciones, estados y carrito activo)
+                </p>
               </div>
-              
               <div className="flex gap-3 items-start">
-                <div className="bg-[#1A535C]/10 text-[#1A535C] p-1.5 rounded-lg mt-0.5 shrink-0">
-                  <Sparkles size={16} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-[#1A535C] text-sm">Optimización de Ventas</h4>
-                  <p className="text-xs text-[#757778]">Identifica qué redes sociales o productos de tu catálogo atraen más clics.</p>
-                </div>
+                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-700">
+                  <strong className="text-[#1A535C]">Dashboard de métricas completo</strong> (Analítica para ventas)
+                </p>
+              </div>
+              <div className="flex gap-3 items-start">
+                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-700">
+                  <strong className="text-[#1A535C]">Insignia de Cuenta Verificada</strong> (Más confianza)
+                </p>
+              </div>
+              <div className="flex gap-3 items-start">
+                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-700">
+                  <strong className="text-[#1A535C]">Soporte prioritario</strong> (Vía WhatsApp directo)
+                </p>
               </div>
             </div>
 

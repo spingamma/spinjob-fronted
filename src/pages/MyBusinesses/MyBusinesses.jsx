@@ -5,12 +5,14 @@ import { ArrowLeft, Clock, CheckCircle2, XCircle, PlusCircle, Building, Eye, Fil
 import BottomNavbar from '../../components/BottomNavbar';
 import Header from '../../components/Header';
 import fetchAuth from '../../utils/fetchAuth';
+import PremiumModal from '../../components/PremiumModal';
 
 export default function MisNegocios() {
   const [negocios, setNegocios] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const [premiumModalData, setPremiumModalData] = useState({ isOpen: false, featureName: '' });
 
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -187,36 +189,54 @@ export default function MisNegocios() {
 
                   {/* Botón Ver Métricas - Solo para negocios aprobados */}
                   {neg.status === 'aprobado' && (
-                    <Link
-                      to={`/metricas/${neg.slug}`}
-                      className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-50/50 hover:bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100"
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <BarChart2 size={16} /> Métricas
-                      </span>
-                      {!neg.premium && (
+                    neg.premium ? (
+                      <Link
+                        to={`/metricas/${neg.slug}`}
+                        className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-50/50 hover:bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <BarChart2 size={16} /> Métricas
+                        </span>
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => setPremiumModalData({ isOpen: true, featureName: 'Métricas' })}
+                        className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-50/50 hover:bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100 text-left"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <BarChart2 size={16} /> Métricas
+                        </span>
                         <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md font-extrabold flex items-center gap-0.5" title="Característica Premium">
                           🔒 Premium
                         </span>
-                      )}
-                    </Link>
+                      </button>
+                    )
                   )}
 
                   {/* Botón Ver Pedidos - Solo para negocios aprobados */}
                   {neg.status === 'aprobado' && (
-                    <Link
-                      to={`/mis-pedidos/${neg.slug}`}
-                      className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-teal-600 hover:text-teal-800 transition-colors bg-teal-50/50 hover:bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-100"
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <ShoppingBag size={16} /> Pedidos
-                      </span>
-                      {!neg.premium && (
+                    neg.premium ? (
+                      <Link
+                        to={`/mis-pedidos/${neg.slug}`}
+                        className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-teal-600 hover:text-teal-800 transition-colors bg-teal-50/50 hover:bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-100"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <ShoppingBag size={16} /> Pedidos
+                        </span>
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => setPremiumModalData({ isOpen: true, featureName: 'Pedidos' })}
+                        className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-teal-600 hover:text-teal-800 transition-colors bg-teal-50/50 hover:bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-100 text-left"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <ShoppingBag size={16} /> Pedidos
+                        </span>
                         <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md font-extrabold flex items-center gap-0.5" title="Característica Premium">
                           🔒 Premium
                         </span>
-                      )}
-                    </Link>
+                      </button>
+                    )
                   )}
 
                   {/* Botón de eliminar (para pendientes, rechazados o admin) */}
@@ -251,6 +271,12 @@ export default function MisNegocios() {
         isLoggedIn={isLoggedIn}
         isAdmin={isAdmin}
         onHomeClick={() => navigate('/')}
+      />
+
+      <PremiumModal
+        isOpen={premiumModalData.isOpen}
+        onClose={() => setPremiumModalData({ isOpen: false, featureName: '' })}
+        featureName={premiumModalData.featureName}
       />
     </div>
   );

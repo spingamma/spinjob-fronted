@@ -29,7 +29,7 @@ export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsa
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-[#1A535C]/60 backdrop-blur-md" onClick={onClose}>
-      <div 
+      <div
         className="bg-white w-full sm:max-w-2xl sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[80vh] animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
@@ -107,14 +107,14 @@ const ProductCard = ({ product, whatsappNumber, businessName, country }) => {
       </div>
       <div className="p-3 flex-1 flex flex-col">
         <h4 className="font-semibold text-gray-800 text-sm truncate">{product.name}</h4>
-        
+
         {product.description && (
           <div className="mt-0.5">
             <p className={`text-xs text-[#757778] whitespace-pre-wrap ${!expanded ? 'line-clamp-2' : ''}`}>
               {product.description}
             </p>
             {isLong && (
-              <button 
+              <button
                 data-testid="catalog-ver-mas-btn"
                 onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
                 className="text-[#F9842C] font-bold text-[10px] mt-1 hover:underline uppercase"
@@ -124,7 +124,7 @@ const ProductCard = ({ product, whatsappNumber, businessName, country }) => {
             )}
           </div>
         )}
-        
+
         <div className="mt-auto pt-2">
           {product.price && <p className="text-teal-600 font-bold text-sm">{product.price}</p>}
         </div>

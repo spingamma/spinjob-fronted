@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, Calendar, PackageCheck, PackageOpen, Lock, Sparkles } from 'lucide-react';
+import { ArrowLeft, Loader2, Calendar, PackageCheck, PackageOpen, Lock, Sparkles, CheckCircle2 } from 'lucide-react';
 import fetchAuth from '../../utils/fetchAuth';
 
 export default function BusinessOrders() {
@@ -218,22 +218,43 @@ export default function BusinessOrders() {
               <Sparkles className="text-[#F9842C] fill-[#F9842C]/20" /> Gestión de Pedidos Premium
             </h2>
             
-            <p className="text-[#757778] text-base mb-8 leading-relaxed max-w-sm mx-auto">
-              Recibe, organiza y procesa los pedidos de tus clientes de manera eficiente. Esta función requiere el plan **Premium**.
+            <p className="text-[#757778] text-sm mb-6 leading-relaxed max-w-sm mx-auto">
+              Actualiza al plan Premium para desbloquear esta y muchas más herramientas para tu negocio.
             </p>
             
-            <div className="bg-white/80 rounded-2xl p-5 border border-gray-200 shadow-sm text-left max-w-sm mx-auto mb-8 flex flex-col gap-3">
-              <div className="flex gap-2.5 items-center">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#F9842C]"></span>
-                <p className="text-sm font-bold text-[#1A535C]">Carrito de compras activo en tu tarjeta</p>
+            <div className="bg-white/80 rounded-2xl p-6 border border-gray-200 shadow-sm text-left max-w-sm mx-auto mb-8 flex flex-col gap-3">
+              <p className="text-[#1A535C] font-bold mb-2 flex items-center gap-2 border-b border-gray-100 pb-3">
+                Incluye todo lo del plan Básico, más:
+              </p>
+              <div className="flex gap-3 items-start">
+                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-700">
+                  <strong className="text-[#1A535C]">Vitrina y catálogo ampliados</strong> (15 visibles, 50 en inventario)
+                </p>
               </div>
-              <div className="flex gap-2.5 items-center">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#F9842C]"></span>
-                <p className="text-sm font-bold text-[#1A535C]">Hasta 150 pedidos al mes</p>
+              <div className="flex gap-3 items-start">
+                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-700">
+                  <strong className="text-[#1A535C]">Gestión de pedidos ilimitada</strong> (Notificaciones, estados y carrito activo)
+                </p>
               </div>
-              <div className="flex gap-2.5 items-center">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#F9842C]"></span>
-                <p className="text-sm font-bold text-[#1A535C]">Filtrado y gestión por estado/fecha</p>
+              <div className="flex gap-3 items-start">
+                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-700">
+                  <strong className="text-[#1A535C]">Dashboard de métricas completo</strong> (Analítica para ventas)
+                </p>
+              </div>
+              <div className="flex gap-3 items-start">
+                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-700">
+                  <strong className="text-[#1A535C]">Insignia de Cuenta Verificada</strong> (Más confianza)
+                </p>
+              </div>
+              <div className="flex gap-3 items-start">
+                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-700">
+                  <strong className="text-[#1A535C]">Soporte prioritario</strong> (Vía WhatsApp directo)
+                </p>
               </div>
             </div>
 
