@@ -17,3 +17,9 @@ Antes de dar por finalizada la tarea, debes verificar:
 ## 3. Transparencia de Skills Utilizadas
 🚨 **CRÍTICO:** Cada vez que ejecutes una acción o des una respuesta al usuario, es **OBLIGATORIO** que declares explícitamente qué skills utilizaste (ej. `Para esto usé la skill desarrollo-frontend` o `generalizar-agente-base`). Esto le permite al usuario auditar el origen de tu comportamiento.
 
+## 4. Prohibición de `git push` Autónomo
+🚨 **CRÍTICO:** Está estrictamente **prohibido** que el agente ejecute el comando `git push` de forma autónoma o automática.
+- El agente solo debe limitar su actividad a crear ramas, staging (`git add`), commits locales (`git commit`) y validaciones del build.
+- La acción de subir los cambios al repositorio remoto (`git push`) debe ser siempre delegada al usuario, o bien solicitar aprobación explícita previa en el chat antes de ejecutarla.
+
+
