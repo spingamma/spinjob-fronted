@@ -196,7 +196,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       return;
     }
 
-    if (editFormData.orders_enabled && (!editFormData.delivery_methods || editFormData.delivery_methods.length === 0)) {
+    const isPremium = profesional?.premium === true;
+    if (isPremium && editFormData.orders_enabled && (!editFormData.delivery_methods || editFormData.delivery_methods.length === 0)) {
       alert("Debes agregar al menos un método de entrega si habilitas los pedidos.");
       return;
     }

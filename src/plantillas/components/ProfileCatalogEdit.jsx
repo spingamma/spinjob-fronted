@@ -234,7 +234,7 @@ export default function ProfileCatalogEdit({
   };
 
   const handleCloseInventory = () => {
-    if (ordersEnabled && (!deliveryMethods || deliveryMethods.length === 0)) {
+    if (isPremium && ordersEnabled && (!deliveryMethods || deliveryMethods.length === 0)) {
       alert("Debes agregar al menos un método de entrega antes de salir, o desmarcar la casilla de pedidos.");
       return;
     }
