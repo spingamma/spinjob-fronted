@@ -26,7 +26,7 @@ El proyecto incorpora un panel de administración para moderación de contenido,
 ---
 
 ## 3. Arquitectura de la Base de Datos (Modelos SQLAlchemy)
-El sistema relacional se basa en 10 tablas principales (`spinjob-backend/models.py`):
+El sistema relacional se basa en 11 tablas principales (`spinjob-backend/models.py`):
 
 - **Users (`users`):** Almacena la información de usuarios del sistema. Campos: `id` (UUID), `email`, `phone` (celular), `name`, `verification_code`, `is_verified` (booleano crucial para permisos), `is_admin`, y `is_vendedor`.
 - **Businesses (`businesses`):** Contiene la información del profesional o negocio. Campos clave:
@@ -42,7 +42,8 @@ El sistema relacional se basa en 10 tablas principales (`spinjob-backend/models.
   - Configuración: `genero` y `creation_date`.
 - **Specialties (`specialties`):** Catálogo central de categorías y subcategorías del directorio. Campos: `id`, `category` (Categoría), `subcategory` (Subcategoría), y `source` ("system" o "user_other").
 - **business_specialties (`business_specialties`):** Tabla de asociación para la relación Muchos a Muchos entre negocios y especialidades.
-- **Products (`products`):** Mapea los productos de los catálogos. Guarda `id`, `name`, `description`, `price`, `image_url`, `is_visible` (booleano), `carousel_name` (sección del catálogo) y tiene relación directa con `business_id` (FK a Businesses).
+- **Locations (`locations`):** Tabla de configuración geográfica para estructurar la jerarquía de países y departamentos/estados activos. Campos: `id` (String), `country` (String), `state` (String).
+- **Products (`products`):** Mapea los productos de los catálogos. Guarda `id`, `name`, `description`, `price`, `image_url`, `is_visible` (booleano), `carousel_name` (sección del catálogo), `stock` (Integer, nullable, representando la cantidad de inventario disponible; si es nulo, significa stock infinito) y tiene relación directa con `business_id` (FK a Businesses).
 - **Resenas (`resenas`):** Relaciona valoraciones a un negocio. Guarda `id`, `user_id` (FK a Users), `rating` (1-5 estrellas), `descripcion`, `image_url` y `business_id` (FK a Businesses). Cuenta con la restricción de unicidad `_userid_business_resena_uc` para evitar calificaciones duplicadas por el mismo usuario.
 - **Interactions (`interactions`):** Registro de métricas reales (Visitas al perfil, clics en WhatsApp/Redes, etc.). Relaciona `id`, `platform` (tipo de interacción/clic), `date`, `user_id` (FK a Users) y `business_id` (FK a Businesses).
 - **SavedCards (`saved_cards`):** Tarjetas guardadas en "Mi Tarjetero" de un usuario. Relaciona `user_id` con `business_id` (FK a Businesses), incluyendo la fecha `saved_date` y restricción de unicidad `_user_business_saved_uc`.
@@ -57,6 +58,13 @@ El sistema relacional se basa en 10 tablas principales (`spinjob-backend/models.
   - Si el usuario requiere completar sus datos de contacto, el backend expone el flujo `/usuarios/completar-celular` (`spinjob-backend/routers/users.py`), requiriendo un número telefónico único (validado por país) antes de continuar a ciertas acciones restringidas.
   - Soporte SMTP para envío de códigos de verificación de 6 dígitos.
 - **Moderación de Negocios** (`spinjob-backend/routers/admin.py`): Los negocios creados se registran inicialmente en estado `pendiente`. Los administradores pueden cambiar el estado a `aprobado` (para publicarlos en el directorio) o `rechazado` (especificando un motivo `rejection_reason`).
+- **Flujo de Vendedores y Códigos de Afiliación** (`spinjob-backend/routers/admin.py`, `spinjob-backend/routers/businesses.py`):
+  - **Límite de Creación:** Un usuario normal sin privilegios (no administrador y no vendedor) está restringido a crear **como máximo 1 negocio** en el sistema. Los usuarios marcados como vendedores (`is_vendedor = True`) o administradores pueden crear múltiples comercios sin restricciones.
+  - **Generación de Código:** El sistema calcula dinámicamente un código de vendedor para los afiliados a partir de las `2 primeras letras del email + 3 últimos dígitos del celular` del vendedor (ej: `jh345`).
+  - **Prueba Temporal Referida:** Al crear un negocio, el dueño puede introducir el código de un vendedor. Si posee un referente válido, al aprobarse el negocio por administración se le asignan automáticamente **3 meses de plan Premium de prueba** (`premium = True`). Si se aprueba sin referente, inicia con **12 meses de plan Gratis estándar**.
+  - **CRUD de Vendedor:** Rutas bajo `/vendedor/` que permiten a un afiliado obtener su código (`/vendedor/my-code`), listar los negocios que ha registrado (`/vendedor/businesses`) y transferir la propiedad del negocio al dueño final (`/vendedor/businesses/{slug}/transfer`) una vez configurado.
+- **Gestión Geográfica de Países y Departamentos** (`spinjob-backend/routers/countries.py`):
+  - Expone el endpoint `/countries/` para obtener de forma estructurada los países y sus respectivos departamentos/estados activos configurados por la administración en la tabla `locations`.
 - **Gestión de Catálogos** (`spinjob-backend/routers/products.py`): Rutas CRUD completas. Lógica de cuotas integrada: límite estricto de **3 productos** para negocios estándar (Gratis) y de **15 productos** para negocios Premium.
 - **Sistema de Pedidos / Orders** (`spinjob-backend/routers/orders.py`):
   - Permite a los clientes autenticados crear un pedido con múltiples productos del catálogo mediante `POST /businesses/{slug}/orders`.
@@ -77,7 +85,7 @@ spinjob-fronted/src/
 ├── main.jsx                 # Entry point (BrowserRouter, GoogleOAuthProvider, HelmetProvider)
 ├── index.css                # Importación de Tailwind CSS
 ├── assets/
-│   └── oso-carrito.png      # Asset del carrito de compras (mascota)
+│   └── oso-carrito.webp      # Asset del carrito de compras (mascota)
 ├── components/              # Componentes globales reutilizables
 │   ├── AuthModal.jsx
 │   ├── BottomNavbar.jsx
@@ -248,6 +256,12 @@ El sistema diferencia el acceso a las funciones comerciales y de analítica seg�
   - **WhatsApp:** Registro de máximo **2 números** (igual al plan Gratis).
   - **Insignia 'Verificado':** Incluida y visible en perfil y tarjetas profesionales.
 
+- **Control de Inventario y Stock:**
+  - Tanto en los planes Gratis como Premium se incorpora soporte de control de inventario (`stock`) a nivel de producto.
+  - La edición del stock se maneja directamente desde el catálogo inline en la sección de edición, permitiendo fijar un número entero positivo o activar la opción de **"Stock infinito"** (que guarda el campo como `null` en la base de datos).
+  - En la interfaz del cliente, si la cantidad agregada al carrito intenta sobrepasar el stock del producto, se arroja una alerta flotante de **"Stock máximo"** impidiendo el exceso.
+  - Si el stock de un artículo llega a **0**, se despliega automáticamente una insignia de **"Agotado"** y se inhabilitan los botones de adición en el carrusel de catálogo.
+
 ---
 
 ## 8. Infraestructura de Despliegue
@@ -264,13 +278,17 @@ El frontend se despliega como SPA estática en Vercel. La configuración de `ver
   - `VITE_API_URL` — URL base del backend (default: `http://127.0.0.1:8000`).
 - **Proxy de desarrollo** (`vite.config.js`): En modo dev, Vite proxea `/api/*` a `http://127.0.0.1:8000` reescribiendo el prefijo `/api`.
 
-### 8.3. Configuración PWA (`vite.config.js`)
+### 8.3. Configuración PWA y Optimización de Rendimiento (`vite.config.js`)
 Mediante `vite-plugin-pwa` con `registerType: 'prompt'`:
 - **Cacheado Workbox:**
   - Assets estáticos: `**/*.{js,css,html,ico,png,svg,webp}`.
   - API profesionales: `NetworkFirst` con caché de 7 días y máximo 50 entradas.
   - Imágenes externas (Cloudinary, UI Avatars): `CacheFirst` con caché de 30 días y máximo 100 entradas.
 - **Manifest:** `name: "Tarjetoso Directorio"`, `short_name: "Tarjetoso"`, `display: "standalone"`, `theme_color: "#1E3D51"`, `background_color: "#1D565F"`.
+- **Optimización de Recursos (Carga Crítica):**
+  - **Conversión a WebP de Imágenes:** Se convirtieron todos los assets estáticos pesados a formato WebP (`icon-192.webp`, `icon-512.webp`, `paw.webp`, `oso-carrito.webp`), logrando reducir un **95%** el peso de la pantalla de carga inicial y eliminando cuellos de botella de renderizado.
+  - **Assets de Categorías:** Se migraron los iconos vectoriales SVG pesados a imágenes `.webp` ultraligeras en `src/assets/`, acelerando la carga inicial del directorio principal.
+  - **Diseño del Grid de Categorías:** Se modernizó el diseño del contenedor de iconos de categoría en la landing page, pasando de círculos clásicos (`rounded-full`) a un aspecto de tarjetas cuadradas de esquinas suavizadas (`rounded-2xl`).
 
 ### 8.4. SEO Estático (`index.html`)
 El `index.html` incluye meta-tags de SEO pre-renderizados para crawlers que no ejecutan JavaScript:

@@ -69,7 +69,7 @@ export default function MyOrders() {
     <div className="min-h-screen bg-[#F8F9FA] pb-24 font-sans text-[#1A535C]">
       {/* Header */}
       <div className="bg-white px-4 py-5 sticky top-0 z-50 shadow-sm border-b border-gray-100 flex items-center gap-4">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-[#1A535C]">
+        <button onClick={() => navigate(-1)} data-testid="my-orders-back-btn" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-[#1A535C]">
           <ArrowLeft size={20} />
         </button>
         <div className="flex items-center gap-3">
@@ -90,6 +90,7 @@ export default function MyOrders() {
                 type="date" 
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
+                data-testid="my-orders-start-date-input"
                 className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
               />
             </div>
@@ -99,6 +100,7 @@ export default function MyOrders() {
                 type="date" 
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
+                data-testid="my-orders-end-date-input"
                 className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
               />
             </div>
@@ -106,6 +108,7 @@ export default function MyOrders() {
           <div className="flex gap-2 w-full sm:w-auto">
              <button 
                onClick={() => { setStartDate(todayStr); setEndDate(todayStr); }} 
+               data-testid="my-orders-today-filter-btn"
                className="flex-1 sm:flex-none px-4 py-2.5 bg-[#F9842C]/10 text-[#F9842C] hover:bg-[#F9842C]/20 text-xs font-bold rounded-xl transition-colors"
              >
                Hoy
@@ -121,12 +124,13 @@ export default function MyOrders() {
         ) : orders.length === 0 ? (
           <div className="bg-white rounded-3xl p-12 text-center shadow-sm border border-gray-100 flex flex-col items-center mt-8">
             <div className="mb-4">
-              <img src="/oso-carrito.png" alt="Aún no tienes pedidos" className="w-24 h-24 object-contain mix-blend-multiply opacity-80" />
+              <img src="/oso-carrito.webp" alt="Aún no tienes pedidos" className="w-24 h-24 object-contain mix-blend-multiply opacity-80" />
             </div>
             <h3 className="font-bold text-xl mb-2 text-[#1A535C]">No se encontraron pedidos</h3>
             <p className="text-gray-400 text-sm max-w-xs mx-auto mb-6">No hay pedidos registrados en el rango de fechas seleccionado.</p>
             <button 
               onClick={() => navigate('/')}
+              data-testid="my-orders-goto-directory-btn"
               className="px-6 py-3 bg-[#F9842C] text-white font-bold rounded-xl shadow-md hover:bg-[#e06516] transition-colors"
             >
               Ir al Directorio

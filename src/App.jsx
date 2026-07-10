@@ -34,7 +34,7 @@ function App() {
         aria-label="Cargando aplicación..."
       >
         <img
-          src="/icon-512.png"
+          src="/icon-512.webp"
           alt="Tarjetoso"
           className="w-[120px] h-[120px] rounded-3xl animate-pulse"
         />

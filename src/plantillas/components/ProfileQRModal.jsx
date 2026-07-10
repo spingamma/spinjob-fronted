@@ -17,6 +17,7 @@ export default function ProfileQRModal({
         <button 
           onClick={onClose}
           aria-label="Cerrar modal de código QR"
+          data-testid="profile-qr-close-btn"
           className="absolute top-4 right-4 text-gray-400 hover:text-[#1A535C] transition-colors p-2 bg-gray-100 rounded-full hover:bg-gray-200"
         >
           <X size={20} />
@@ -39,7 +40,7 @@ export default function ProfileQRModal({
             level={"H"}
             includeMargin={true}
             imageSettings={{
-              src: "/paw.png",
+              src: "/paw.webp",
               height: 256,
               width: 256,
               excavate: true,
@@ -51,6 +52,7 @@ export default function ProfileQRModal({
           <button 
             onClick={() => handleDownloadQR('1D565F')}
             aria-label="Descargar código QR"
+            data-testid="profile-qr-download-btn"
             className="w-full bg-[#1A535C] hover:bg-[#2A5A6E] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
           >
             <Download size={18} /> Descargar QR
@@ -58,6 +60,7 @@ export default function ProfileQRModal({
           <button 
             onClick={handleShare}
             aria-label="Compartir enlace de perfil"
+            data-testid="profile-qr-share-btn"
             className="w-full bg-[#F9842C] hover:bg-[#e06516] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
           >
             <Share2 size={18} /> Enviar enlace

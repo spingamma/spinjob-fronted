@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Package, ExternalLink, Loader2, MoreHorizontal, Plus, Minus, ShoppingCart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cleanWhatsappNumber } from '../utils/phone';
-import miCarrito from '../assets/oso-carrito.png';
+import miCarrito from '../assets/oso-carrito.webp';
 
 export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia', theme = 'light', isPremium = false, ordersEnabled = true, carouselOrder, deliveryMethods }) {
   const [products, setProducts] = useState([]);

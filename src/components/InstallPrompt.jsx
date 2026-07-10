@@ -92,6 +92,7 @@ export default function InstallPrompt() {
         
         <button 
           onClick={handleClose}
+          data-testid="install-prompt-close-btn"
           className="absolute top-3 right-3 p-1.5 text-[#E6E2DF] hover:text-white bg-[#32698F]/50 hover:bg-[#32698F] rounded-full transition-colors"
           aria-label="Cerrar"
         >
@@ -101,7 +102,7 @@ export default function InstallPrompt() {
         <div className="flex items-start gap-4 mt-1">
           <div className="w-12 h-12 bg-white rounded-xl shadow-inner flex items-center justify-center shrink-0 border-2 border-[#F9842C]/20">
             <img 
-              src="/icon-192.png" 
+              src="/icon-192.webp" 
               alt="SpinGamma Logo" 
               className="w-8 h-8 object-contain rounded-md"
               onError={(e) => { 
@@ -127,6 +128,7 @@ export default function InstallPrompt() {
                 </p>
                 <button 
                   onClick={handleInstallClick}
+                  data-testid="install-prompt-btn"
                   className="w-full bg-[#F9842C] hover:bg-[#e06516] text-white text-sm font-bold py-2.5 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
                 >
                   <Download size={16} />

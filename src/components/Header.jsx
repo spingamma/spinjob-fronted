@@ -100,9 +100,9 @@ const Header = ({
         
         {/* LOGO E INSTALAR */}
         <div className="flex-shrink-0 flex items-center">
-          <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+          <div className="flex items-center cursor-pointer" data-testid="header-logo-link" onClick={() => navigate('/')}>
             <div className="w-10 h-10 bg-[#1D565D] rounded-xl flex items-center justify-center shadow-md overflow-hidden p-1.5 border border-[#1D565D]">
-              <img src="/icon-192.png" alt="Tarjetoso Logo" className="w-full h-full object-contain" />
+              <img src="/icon-192.webp" alt="Tarjetoso Logo" className="w-full h-full object-contain" />
             </div>
             <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-[#1A535C] uppercase hidden md:block ml-3">TARJETOSO</span>
           </div>
@@ -110,6 +110,7 @@ const Header = ({
           {(!isStandalone && (deferredPrompt || isIOS)) && (
             <button
               onClick={handleInstallClick}
+              data-testid="header-install-btn"
               className="flex items-center justify-center bg-[#F9842C] hover:bg-[#e06516] text-white rounded-xl shadow-sm transition-all w-10 h-10 shrink-0 ml-2"
               title="Descargar App"
             >
