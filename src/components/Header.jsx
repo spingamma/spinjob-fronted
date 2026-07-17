@@ -5,15 +5,15 @@ import { useNavigate } from 'react-router-dom';
 import NavMenu from './NavMenu';
 import CountryModal from './CountryModal';
 
-const Header = ({ 
-  searchTerm, 
-  setSearchTerm, 
-  isLoggedIn, 
-  isAdmin, 
-  userName, 
-  isUserMenuOpen, 
-  setIsUserMenuOpen, 
-  handleLogout, 
+const Header = ({
+  searchTerm,
+  setSearchTerm,
+  isLoggedIn,
+  isAdmin,
+  userName,
+  isUserMenuOpen,
+  setIsUserMenuOpen,
+  handleLogout,
   setAuthModalOpen,
   onHomeClick,
   isMobile,
@@ -25,9 +25,15 @@ const Header = ({
   const [isStandalone, setIsStandalone] = useState(false);
   const [isCountryModalOpen, setIsCountryModalOpen] = useState(false);
 
+  const [localSearch, setLocalSearch] = useState(searchTerm || '');
+
+  useEffect(() => {
+    setLocalSearch(searchTerm || '');
+  }, [searchTerm]);
+
   const handleSaveCountry = async (selectedCountry) => {
     localStorage.setItem('spingamma_selected_country', selectedCountry);
-    
+
     if (isLoggedIn) {
       try {
         const token = localStorage.getItem('spingamma_token');
@@ -97,7 +103,7 @@ const Header = ({
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm h-16 md:h-20 flex items-center">
       <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
-        
+
         {/* LOGO E INSTALAR */}
         <div className="flex-shrink-0 flex items-center">
           <div className="flex items-center cursor-pointer" data-testid="header-logo-link" onClick={() => navigate('/')}>
@@ -118,28 +124,44 @@ const Header = ({
             </button>
           )}
         </div>
-        
+
         {/* BUSCADOR Y NAV */}
-        <div className="flex-1 max-w-4xl px-1 sm:px-0 flex items-center justify-end md:justify-center gap-3 md:gap-8">
-          <div className="flex-1 max-w-2xl flex items-center bg-gray-50 border border-gray-200 rounded-full shadow-inner py-1.5 px-4 focus-within:ring-2 focus-within:ring-[#F9842C] transition-all gap-1 sm:gap-2">
-            <Search size={16} className="text-[#32698F] flex-shrink-0" />
-            <input 
+        <div className="flex-1 max-w-5xl px-1 sm:px-0 flex items-center justify-end md:justify-center gap-3 md:gap-8">
+          <div className="flex-1 max-w-3xl flex items-center bg-gray-50 border border-gray-200 rounded-full shadow-inner py-1.5 pl-4 pr-1.5 focus-within:ring-2 focus-within:ring-[#F9842C] transition-all gap-1 sm:gap-2">
+            <input
               data-testid="search-input"
-              type="text" 
-              aria-label="Buscar profesional" 
-              placeholder="Buscar profesional..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} 
-              className="w-full bg-transparent text-[#1A535C] placeholder-gray-400 outline-none text-sm sm:text-base" 
+              type="text"
+              aria-label="Productos y negocios"
+              placeholder="Productos y negocios..."
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setSearchTerm(localSearch);
+                }
+              }}
+              className="w-full bg-transparent text-[#1A535C] placeholder-gray-400 outline-none text-sm sm:text-base mr-1"
             />
+            <button
+              onClick={() => setSearchTerm(localSearch)}
+              data-testid="search-button"
+              className={`w-8 h-8 rounded-full transition-all duration-200 focus:outline-none shrink-0 shadow-sm flex items-center justify-center ${
+                localSearch.trim()
+                  ? 'bg-[#F9842C] hover:bg-[#e06516] text-white'
+                  : 'bg-gray-200 text-gray-400 hover:bg-gray-300'
+              }`}
+              title="Buscar"
+            >
+              <Search size={16} />
+            </button>
           </div>
 
           {!isMobile && (
             <div className="flex-shrink-0">
-              <NavMenu 
-                isLoggedIn={isLoggedIn} 
-                isAdmin={isAdmin} 
-                onHomeClick={onHomeClick} 
+              <NavMenu
+                isLoggedIn={isLoggedIn}
+                isAdmin={isAdmin}
+                onHomeClick={onHomeClick}
               />
             </div>
           )}
@@ -153,10 +175,10 @@ const Header = ({
                 <div className="fixed inset-0 z-40" onClick={() => setIsUserMenuOpen(false)}></div>
               )}
 
-              <div className="flex items-center gap-2 relative z-50">
-                <button 
+              <div className="flex items-center gap-1 relative z-50">
+                <button
                   onClick={() => navigate('/mis-compras')}
-                  className="flex flex-col items-center justify-center p-2 hover:bg-gray-100 rounded-xl transition-all duration-200 mr-1 sm:mr-2 group min-w-[72px]"
+                  className="flex flex-col items-center justify-center p-1.5 hover:bg-gray-100 rounded-xl transition-all duration-200 group min-w-[60px]"
                   title="Mis Pedidos"
                 >
                   <div className="group-hover:scale-110 transition-transform mb-1 flex items-center justify-center h-[22px] w-[22px]">
@@ -165,7 +187,7 @@ const Header = ({
                   <span className="text-[10px] font-bold text-[#1A535C] uppercase tracking-tighter group-hover:text-[#F9842C] leading-none relative z-10">PEDIDOS</span>
                 </button>
 
-                <button 
+                <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center gap-1.5 sm:gap-2 bg-white hover:bg-gray-50 border border-gray-200 py-1 sm:py-1.5 px-1.5 sm:px-3 rounded-full shadow-sm transition-all"
                 >
@@ -183,14 +205,14 @@ const Header = ({
                 {isUserMenuOpen && (
                   <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
                     <div className="p-2 space-y-1">
-                      <button 
-                        onClick={() => { setIsCountryModalOpen(true); setIsUserMenuOpen(false); }} 
+                      <button
+                        onClick={() => { setIsCountryModalOpen(true); setIsUserMenuOpen(false); }}
                         className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-[#1A535C] hover:bg-gray-50 rounded-xl transition-colors"
                       >
                         <Globe size={18} /> País
                       </button>
-                      <button 
-                        onClick={() => { handleLogout(); setIsUserMenuOpen(false); }} 
+                      <button
+                        onClick={() => { handleLogout(); setIsUserMenuOpen(false); }}
                         className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-[#757778] hover:bg-gray-50 hover:text-red-600 rounded-xl transition-colors"
                       >
                         <LogOut size={18} /> Cerrar sesión
@@ -201,8 +223,8 @@ const Header = ({
               </div>
             </>
           ) : (
-            <button 
-              onClick={() => setAuthModalOpen(true)} 
+            <button
+              onClick={() => setAuthModalOpen(true)}
               className="flex items-center justify-center bg-[#1D565D] hover:bg-[#154045] text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-full transition-colors shadow-sm"
             >
               <span className="text-xs sm:text-sm font-semibold tracking-wide">Ingresar</span>

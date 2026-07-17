@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, CheckCircle, XCircle, ShieldAlert, 
   Users, Building, Search, Clock, ShieldCheck, Loader2,
-  FileText, X, Eye, BarChart2, Bookmark, Store, Globe
+  FileText, X, Eye, BarChart2, Bookmark, Store, Globe, Trash2
 } from 'lucide-react';
 import BottomNavbar from '../../components/BottomNavbar';
 import BusinessDetailsModal from '../../components/BusinessDetailsModal';
@@ -41,9 +41,11 @@ export default function AdminPanel() {
   });
   const [users, setUsers] = useState([]);
   const [userSearchTerm, setUserSearchTerm] = useState('');
-  const [userStatusFilter, setUserStatusFilter] = useState('pendientes');
+  const [userStatusFilter, setUserStatusFilter] = useState('todos');
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isVerifyingUser, setIsVerifyingUser] = useState(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(null);
+  const [deleteConfirmUser, setDeleteConfirmUser] = useState(null);
 
   // Estado para ver detalles de un negocio
   const [negocioSeleccionado, setNegocioSeleccionado] = useState(null);
@@ -174,20 +176,23 @@ export default function AdminPanel() {
     }
   };
 
-  const verifyUserManually = async (phone) => {
-    if (!window.confirm("¿Estás seguro de que deseas verificar este usuario manualmente?")) return;
-    setIsVerifyingUser(phone);
+  const deleteUser = async (user) => {
+    const identifier = user.phone || user.id;
+    setIsDeletingUser(user.id);
     try {
-      const token = localStorage.getItem('spingamma_token');
-      const res = await fetchAuth(`${API_URL}/users/${phone}/verificar`, {
-        method: 'PUT'
+      const res = await fetchAuth(`${API_URL}/users/${encodeURIComponent(identifier)}`, {
+        method: 'DELETE'
       });
-      if (!res.ok) throw new Error("Error al verificar al usuario.");
-      setUsers(users.map(u => u.phone === phone ? { ...u, is_verified: true } : u));
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Error al eliminar al usuario.");
+      }
+      setUsers(users.filter(u => u.id !== user.id));
+      setDeleteConfirmUser(null);
     } catch (err) {
       alert(err.message);
     } finally {
-      setIsVerifyingUser(null);
+      setIsDeletingUser(null);
     }
   };
 
@@ -561,20 +566,9 @@ export default function AdminPanel() {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-6 border-b border-gray-50 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                <h2 className="text-xl font-extrabold text-[#1A535C]">Gestión de Verificaciones</h2>
+                <h2 className="text-xl font-extrabold text-[#1A535C]">Gestión de Usuarios</h2>
                 
                 <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3">
-                  {/* Select Filtro */}
-                  <select 
-                    value={userStatusFilter}
-                    onChange={(e) => setUserStatusFilter(e.target.value)}
-                    className="bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 text-sm font-bold text-[#1A535C]"
-                  >
-                    <option value="todos">Todos los Estados</option>
-                    <option value="pendientes">Pendientes</option>
-                    <option value="verificados">Verificados</option>
-                  </select>
-
                   {/* Input Búsqueda */}
                   <div className="relative w-full sm:w-64">
                     <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -595,47 +589,62 @@ export default function AdminPanel() {
                     <Loader2 size={40} className="animate-spin text-[#F9842C] mb-2" />
                     <p className="text-gray-400 font-bold">Buscando...</p>
                   </div>
-                ) : users.filter(u => userStatusFilter === 'todos' ? true : (userStatusFilter === 'verificados' ? u.is_verified : !u.is_verified)).length === 0 ? (
+                ) : users.length === 0 ? (
                   <div className="text-center py-16">
                     <CheckCircle size={48} className="mx-auto mb-4 text-[#1A535C] opacity-20" />
                     <p className="text-gray-400 font-bold">No se encontraron usuarios.</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {users.filter(u => userStatusFilter === 'todos' ? true : (userStatusFilter === 'verificados' ? u.is_verified : !u.is_verified)).map(user => (
+                    {users.map(user => (
                       <div key={user.id} className="group bg-gray-50/50 rounded-2xl border border-gray-100 p-5 hover:border-[#F9842C]/30 transition-all hover:bg-white hover:shadow-md flex flex-col h-full">
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex-1 min-w-0">
                             <h3 className="font-bold text-[#1A535C] leading-tight truncate" title={user.name}>{user.name}</h3>
                             <p className="text-xs text-[#757778] truncate mt-0.5">{user.email || 'Sin correo'}</p>
-                            <p className="text-[10px] bg-gray-100 inline-block px-1.5 py-0.5 rounded mt-1 font-mono text-[#757778]">{user.phone}</p>
+                            {user.phone ? (
+                              <p className="text-[10px] bg-gray-100 inline-block px-1.5 py-0.5 rounded mt-1 font-mono text-[#757778]">{user.phone}</p>
+                            ) : (
+                              <p className="text-[10px] bg-gray-100 inline-block px-1.5 py-0.5 rounded mt-1 font-sans italic text-gray-400">Sin teléfono</p>
+                            )}
+
+                            {/* Actividad */}
+                            <div className="mt-2.5 flex items-center gap-1.5">
+                              {user.months_inactive === null ? (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                                  Sin actividad registrada
+                                </span>
+                              ) : user.months_inactive === 0 ? (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                  Activo este mes
+                                </span>
+                              ) : (
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                                  user.months_inactive >= 3 
+                                    ? 'bg-red-50 text-red-600 border-red-100' 
+                                    : 'bg-orange-50 text-orange-600 border-orange-100'
+                                }`}>
+                                  Inactivo hace {user.months_inactive} {user.months_inactive === 1 ? 'mes' : 'meses'}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          {user.is_verified ? (
-                            <div className="bg-[#1A535C]/10 text-[#1A535C] p-1.5 rounded-full" title="Verificado">
-                              <CheckCircle size={18} />
-                            </div>
-                          ) : (
-                            <div className="bg-orange-100 text-[#F9842C] p-1.5 rounded-full" title="Pendiente">
-                              <Clock size={18} />
-                            </div>
-                          )}
                         </div>
                         
                         <div className="mt-auto pt-4 border-t border-gray-100">
-                          {!user.is_verified ? (
-                            <button 
-                              onClick={() => verifyUserManually(user.phone)}
-                              disabled={isVerifyingUser === user.phone}
-                              className="w-full font-bold py-2 rounded-xl bg-[#F9842C] hover:bg-[#e06516] text-white text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-                            >
-                              {isVerifyingUser === user.phone ? <Loader2 size={14} className="animate-spin"/> : <ShieldCheck size={14} />}
-                              Verificar Ahora
-                            </button>
-                          ) : (
-                            <div className="w-full font-bold py-2 rounded-xl bg-gray-200/50 text-gray-400 text-xs flex items-center justify-center gap-2 cursor-default">
-                              <CheckCircle size={14} /> Listo
-                            </div>
-                          )}
+                          <button 
+                            onClick={() => setDeleteConfirmUser(user)}
+                            disabled={isDeletingUser === user.id}
+                            data-testid="delete-user-button"
+                            className="w-full font-bold py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50 border border-red-100/50"
+                          >
+                            {isDeletingUser === user.id ? (
+                              <Loader2 size={14} className="animate-spin"/>
+                            ) : (
+                              <Trash2 size={14} />
+                            )}
+                            Eliminar Usuario
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -704,6 +713,67 @@ export default function AdminPanel() {
           ) : null
         }
       />
+
+      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN TOTAL */}
+      {deleteConfirmUser && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-gray-100 animate-in zoom-in-95 duration-200">
+            <div className="bg-red-50 p-6 flex items-center gap-4 border-b border-red-100/50">
+              <div className="bg-red-100 text-red-600 p-2.5 rounded-2xl">
+                <ShieldAlert size={28} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-red-700">¿Eliminar completamente?</h3>
+                <p className="text-xs text-red-600 font-semibold mt-0.5">Esta acción es destructiva e irreversible.</p>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Usuario a eliminar</p>
+                <h4 className="font-extrabold text-[#1A535C] mt-1 text-base">{deleteConfirmUser.name}</h4>
+                <p className="text-xs text-[#757778] mt-0.5">{deleteConfirmUser.email || 'Sin correo'}</p>
+                <p className="text-xs font-mono text-[#757778] mt-0.5">{deleteConfirmUser.phone || 'Sin teléfono'}</p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm font-bold text-[#1A535C]">Se eliminará definitivamente de la base de datos:</p>
+                <ul className="text-xs text-gray-600 space-y-1.5 list-disc pl-5 font-medium">
+                  <li>Todos los <strong>negocios y tarjetas digitales</strong> propiedad del usuario.</li>
+                  <li>Todos los <strong>productos e inventario</strong> de dichos negocios.</li>
+                  <li>Todos los <strong>pedidos y compras</strong> recibidas o realizadas por el usuario.</li>
+                  <li>Todas las <strong>reseñas y calificaciones</strong> hechas a o por el usuario.</li>
+                  <li>Historial de <strong>interacciones y métricas</strong> de clics.</li>
+                  <li>Tarjetas guardadas en su tarjetero.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
+              <button
+                onClick={() => setDeleteConfirmUser(null)}
+                data-testid="cancel-delete-button"
+                className="flex-1 font-bold py-3 rounded-xl bg-white hover:bg-gray-100 text-[#757778] border border-gray-200 text-sm transition-all focus:outline-none"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => deleteUser(deleteConfirmUser)}
+                disabled={isDeletingUser === deleteConfirmUser.id}
+                data-testid="confirm-delete-button"
+                className="flex-1 font-bold py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-md shadow-red-200"
+              >
+                {isDeletingUser === deleteConfirmUser.id ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Trash2 size={16} />
+                )}
+                Sí, eliminar todo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

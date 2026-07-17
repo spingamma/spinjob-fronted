@@ -459,14 +459,17 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         {/* ==========================================
             BOTÓN CALIFICAR EN LA PARTE INFERIOR
             ========================================== */}
-        <div className="mt-8 flex justify-center w-full z-10 relative px-4">
-          <button
-              onClick={handleCalificarClick}
-              className="px-8 py-4 rounded-xl bg-[#F9842C] hover:bg-[#e07323] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 w-full max-w-sm border border-gray-200"
-          >
-              <Star size={18} className="fill-white text-white" /> Danos tu opinión
-          </button>
-        </div>
+        {!isEditing && !isCreateMode && (
+          <div className="mt-8 flex justify-center w-full z-10 relative px-4">
+            <button
+                onClick={handleCalificarClick}
+                data-testid="danos-tu-opinion-btn"
+                className="px-8 py-4 rounded-xl bg-[#F9842C] hover:bg-[#e07323] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 w-full max-w-sm border border-gray-200"
+            >
+                <Star size={18} className="fill-white text-white" /> Danos tu opinión
+            </button>
+          </div>
+        )}
 
         {/* 🚀 FOOTER SPINGAMMA */}
         <div className="mt-12 mb-8 text-center flex flex-col items-center justify-center">
@@ -533,6 +536,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
                 }
               }}
               disabled={isSavingEdit}
+              data-testid="cancel-edit-btn"
               className="px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-[#757778] font-bold text-sm transition-all shadow-sm"
             >
               Cancelar
@@ -540,6 +544,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             <button 
               onClick={handleSaveEdit}
               disabled={isSavingEdit}
+              data-testid="save-edit-btn"
               className="px-8 py-3 rounded-xl bg-[#F9842C] hover:bg-[#e06516] text-white font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 min-w-[160px]"
             >
               {isSavingEdit ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}

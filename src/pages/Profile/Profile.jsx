@@ -20,6 +20,14 @@ function Perfil() {
   // 🔒 ESTADO DE AUTENTICACIÓN Y MODAL
   // ==========================================
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
+  const userObj = (() => {
+    const stored = localStorage.getItem('spingamma_user');
+    if (stored) {
+      try { return JSON.parse(stored); } catch (e) { return null; }
+    }
+    return null;
+  })();
+  const isAdmin = userObj?.is_admin === true;
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingUrl, setPendingUrl] = useState(null);
 
@@ -98,12 +106,12 @@ function Perfil() {
   };
 
   useEffect(() => {
-    if (profesional && isLoggedIn) {
+    if (profesional && isLoggedIn && !isAdmin) {
       if (profesional.slug) {
         registrarVisitaPerfil(profesional.slug);
       }
     }
-  }, [profesional, isLoggedIn]);
+  }, [profesional, isLoggedIn, isAdmin]);
 
   // ==========================================
   // 🔍 SEO DINÁMICO Y STRUCTURED DATA (JSON-LD)

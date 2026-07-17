@@ -14,7 +14,8 @@ const isValidValue = (val) => {
   return !['n/a', 'na', 'null', 'undefined', 'ninguno', 'ninguna', '-', 'none'].includes(normalized);
 };
 
-export function useDirectoryFilters(professionals = [], metadataOverride = null, userCoords = null) {
+export function useDirectoryFilters(professionals = [], metadataOverride = null, userCoords = null, options = {}) {
+  const { serverFiltered = false } = options;
   const { categoria, estado } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -126,7 +127,9 @@ export function useDirectoryFilters(professionals = [], metadataOverride = null,
       .filter(p => {
         const matchCategory = activeCategory === 'Todos' || p.category === activeCategory;
         const searchNormalized = normalizeText(searchTerm);
-        const matchSearch = normalizeText(p.name).includes(searchNormalized) || 
+        const matchSearch = serverFiltered ||
+                            !searchTerm ||
+                            normalizeText(p.name).includes(searchNormalized) || 
                             normalizeText(p.title).includes(searchNormalized);
         const matchState = activeState === 'Todas' || p.state === activeState;
         const matchNeighborhood = activeNeighborhood === 'Todas' || p.neighborhood === activeNeighborhood;

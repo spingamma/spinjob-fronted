@@ -29,7 +29,7 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
   const isLoggedIn = userObj !== null;
   const userName = userObj?.nombre || '';
   const isVerified = userObj?.is_verified === true;
-  const isAdmin = userObj?.is_admin === true || userObj?.is_vendedor === true;
+  const isAdmin = userObj?.is_admin === true;
 
   useEffect(() => {
     const userStr = localStorage.getItem('spingamma_user');
@@ -38,7 +38,7 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
     if (userStr && pendingPlatform) {
       // Si es admin, limpiar pero no registrar
       const parsed = JSON.parse(userStr);
-      if (!parsed.is_admin && !parsed.is_vendedor) {
+      if (!parsed.is_admin) {
         registrarInteraccionBackend(pendingPlatform);
       }
       localStorage.removeItem(pendingInteractionKey);
@@ -151,7 +151,7 @@ export default function useAccionesPerfil(profesional, onProtectedAction) {
 
     try {
       const freshUser = JSON.parse(freshUserStr);
-      if (freshUser.is_admin || freshUser.is_vendedor) return;
+      if (freshUser.is_admin) return;
 
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 

@@ -30,7 +30,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
     setUserDataForVerify(userData);
     setShowVerify(true);
   };
-  
+
   const {
     isCompletingPhone,
     isLoading, apiError, supportWhatsApp,
@@ -52,7 +52,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
           callback: (response) => handleGoogleSuccess({ credential: response.credential }),
           ux_mode: 'popup',
         });
-        
+
         btnContainer.innerHTML = '';
         window.google.accounts.id.renderButton(btnContainer, {
           theme: isDarkTheme ? 'filled_black' : 'outline',
@@ -72,12 +72,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
 
   if (showVerify) {
     return (
-      <ModalVerificacion 
-        isOpen={true} 
+      <ModalVerificacion
+        isOpen={true}
         onClose={() => {
           setShowVerify(false);
           onSuccess(userDataForVerify); // Continuar con la sesión no verificada si cierran
-        }} 
+        }}
         onSuccess={() => {
           setShowVerify(false);
           const updatedUser = { ...userDataForVerify, is_verified: true };
@@ -120,7 +120,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
   return (
     <div className={`fixed inset-0 z-[200] flex items-center justify-center p-4 ${bgOverlay} backdrop-blur-sm transition-opacity`}>
       <div className={`${bgModal} border rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 relative animate-in fade-in zoom-in duration-300`}>
-        
+
         <button data-testid="auth-close-btn" onClick={onClose} className={`absolute top-5 right-5 p-2 rounded-full transition-colors ${btnCloseBg}`} disabled={isLoading}>
           <X size={20} />
         </button>
@@ -134,68 +134,67 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
             {isCompletingPhone ? 'Falta un paso más' : 'Ingresa a Tarjetoso'}
           </h2>
           <p className={`text-sm px-2 ${textSub}`}>
-            {isCompletingPhone 
-              ? 'Hola, vincula tu número de WhatsApp para activar la opción de calificación en Tarjetoso.' 
-              : 'Inicia sesión o crea tu cuenta gratis de forma segura y en segundos.'}
+            {isCompletingPhone
+              ? 'Hola, vincula tu número de WhatsApp para activar la opción de calificación en Tarjetoso.'
+              : 'de forma segura y en segundos.'}
           </p>
         </div>
 
         {/* VISTA: Completar Celular (Google) */}
         {isCompletingPhone ? (
-           <form onSubmit={handleCompletarCelular} className="space-y-4">
-             <div>
-               <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>
-                 Celular / WhatsApp <span className="text-red-500">*</span>
-               </label>
-               <PhoneInputWithCountry
-                 id="celular"
-                 value={formData.celular}
-                 onChange={(val) => {
-                   setFormData({...formData, celular: val});
-                   if (errores.celular) setErrores({...errores, celular: ''});
-                 }}
-                 disabled={isLoading}
-                 isDarkTheme={isDarkTheme}
-                 className={errores.celular ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-500' : ''}
-               />
-               {errores.celular && <p className="text-red-500 text-xs mt-1.5 font-medium">{errores.celular}</p>}
-             </div>
+          <form onSubmit={handleCompletarCelular} className="space-y-4">
+            <div>
+              <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>
+                Celular / WhatsApp <span className="text-red-500">*</span>
+              </label>
+              <PhoneInputWithCountry
+                id="celular"
+                value={formData.celular}
+                onChange={(val) => {
+                  setFormData({ ...formData, celular: val });
+                  if (errores.celular) setErrores({ ...errores, celular: '' });
+                }}
+                disabled={isLoading}
+                isDarkTheme={isDarkTheme}
+                className={errores.celular ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-500' : ''}
+              />
+              {errores.celular && <p className="text-red-500 text-xs mt-1.5 font-medium">{errores.celular}</p>}
+            </div>
 
-             <div>
-               <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>
-                 País de Residencia <span className="text-red-500">*</span>
-               </label>
-               <div className="relative">
-                 <select
-                   value={formData.country || ''}
-                   onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                   disabled={isLoading}
-                   className={`w-full text-sm rounded-xl py-3 pl-3 pr-10 border outline-none cursor-pointer appearance-none focus:ring-1 transition-all ${
-                     isDarkTheme 
-                       ? 'bg-[#32698F] border-[#32698F] text-white focus:border-[#F9842C] focus:ring-[#F9842C]/30' 
-                       : 'bg-gray-100 border-gray-200 text-[#1A535C] focus:border-[#F9842C] focus:ring-[#F9842C]/30'
-                   }`}
-                   required
-                 >
-                   <option value="" disabled>Selecciona tu país...</option>
-                   {countriesList.map(c => (
-                     <option key={c.country} value={c.country} className={isDarkTheme ? 'bg-[#1A535C]' : 'bg-white'}>
-                       {c.country}
-                     </option>
-                   ))}
-                 </select>
-                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                   <ChevronDown size={16} className={isDarkTheme ? 'text-white/60' : 'text-[#1A535C]/60'} />
-                 </div>
-               </div>
-             </div>
-             {renderError()}
-             <button data-testid="auth-submit-btn-phone" type="submit" disabled={isLoading} className={submitBtnClass}>
-               {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Completar Registro'}
-             </button>
-           </form>
+            <div>
+              <label className={`block text-xs font-bold uppercase tracking-wide mb-1 ${labelColor}`}>
+                País de Residencia <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  value={formData.country || ''}
+                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                  disabled={isLoading}
+                  className={`w-full text-sm rounded-xl py-3 pl-3 pr-10 border outline-none cursor-pointer appearance-none focus:ring-1 transition-all ${isDarkTheme
+                    ? 'bg-[#32698F] border-[#32698F] text-white focus:border-[#F9842C] focus:ring-[#F9842C]/30'
+                    : 'bg-gray-100 border-gray-200 text-[#1A535C] focus:border-[#F9842C] focus:ring-[#F9842C]/30'
+                    }`}
+                  required
+                >
+                  <option value="" disabled>Selecciona tu país...</option>
+                  {countriesList.map(c => (
+                    <option key={c.country} value={c.country} className={isDarkTheme ? 'bg-[#1A535C]' : 'bg-white'}>
+                      {c.country}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                  <ChevronDown size={16} className={isDarkTheme ? 'text-white/60' : 'text-[#1A535C]/60'} />
+                </div>
+              </div>
+            </div>
+            {renderError()}
+            <button data-testid="auth-submit-btn-phone" type="submit" disabled={isLoading} className={submitBtnClass}>
+              {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Completar Registro'}
+            </button>
+          </form>
 
-        /* VISTA: Google Login */
+          /* VISTA: Google Login */
         ) : (
           <div className="space-y-6">
             <div className="flex justify-center w-full min-h-[44px]">
@@ -205,9 +204,9 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
             {renderError()}
 
             <div className="text-center mt-6">
-              <a 
-                href={whatsappLink} 
-                target="_blank" 
+              <a
+                href={whatsappLink}
+                target="_blank"
                 rel="noopener noreferrer"
                 className={`inline-flex items-center justify-center gap-2 text-sm font-semibold transition-colors ${isDarkTheme ? 'text-[#E6E2DF]/70 hover:text-[#F9842C]' : 'text-gray-500 hover:text-[#F9842C]'}`}
               >

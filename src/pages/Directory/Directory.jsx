@@ -126,7 +126,7 @@ export default function Directory() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const filterHook = useDirectoryFilters(profesionales, metadata, userCoords);
+  const filterHook = useDirectoryFilters(profesionales, metadata, userCoords, { serverFiltered: true });
   const { activeCategory, activeState, searchTerm, activeNeighborhood, activeRating, activeSubcategory } = filterHook.states;
   const [searchParams, setSearchParams] = useSearchParams();
   const verTodos = searchParams.get('ver') === 'todos';

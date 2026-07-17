@@ -7,7 +7,7 @@ export default function AdminVendedorTab({ API_URL }) {
   const [businesses, setBusinesses] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState('todos'); // todos, assigned, possible, none
+  const [filter, setFilter] = useState('none'); // todos, assigned, possible, none
   const [transfering, setTransfering] = useState(null); // { slug, userId }
 
   const [isAdmin, setIsAdmin] = useState(false);

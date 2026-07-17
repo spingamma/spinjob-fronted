@@ -22,4 +22,9 @@ Antes de dar por finalizada la tarea, debes verificar:
 - El agente solo debe limitar su actividad a crear ramas, staging (`git add`), commits locales (`git commit`) y validaciones del build.
 - La acción de subir los cambios al repositorio remoto (`git push`) debe ser siempre delegada al usuario, o bien solicitar aprobación explícita previa en el chat antes de ejecutarla.
 
+## 5. Prevención de Duplicidad Funcional y de Efectos
+🚨 **CRÍTICO:** Antes de escribir una nueva función, endpoint, `useEffect`, hook, manejador de eventos o cualquier lógica de procesamiento tanto en el frontend como en el backend, **DEBES** escanear exhaustivamente la estructura de archivos relacionados para verificar si un mecanismo similar ya está implementado en componentes superiores, controladores adyacentes o archivos de utilidad.
+- Está estrictamente prohibido duplicar lógica funcional o disparadores de efectos que puedan inducir comportamientos redundantes, peticiones repetidas a APIs o inconsistencias en los datos.
+- En su lugar, debes **reutilizar, extender o centralizar** el código en el módulo o componente de jerarquía correspondiente.
+
 
