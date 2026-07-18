@@ -53,7 +53,7 @@ export default function PremiumModal({ isOpen, onClose, featureName }) {
             <div className="flex gap-3 items-start">
               <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
               <p className="text-sm text-gray-700">
-                <strong className="text-[#1A535C]">Gestión de pedidos ilimitada</strong> (Notificaciones, estados y carrito activo)
+                <strong className="text-[#1A535C]">Hasta 600 pedidos mensuales</strong> (Notificaciones, estados y carrito activo)
               </p>
             </div>
             <div className="flex gap-3 items-start">
@@ -89,6 +89,7 @@ export default function PremiumModal({ isOpen, onClose, featureName }) {
             <button 
               onClick={onClose}
               className="w-full py-3.5 bg-gray-50 hover:bg-gray-100 text-[#1A535C] font-bold rounded-xl transition-all text-sm"
+              data-testid="close-premium-modal-bottom-btn"
             >
               Cerrar
             </button>

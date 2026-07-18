@@ -28,7 +28,7 @@ El proyecto incorpora un panel de administración para moderación de contenido,
 ## 3. Arquitectura de la Base de Datos (Modelos SQLAlchemy)
 El sistema relacional se basa en 11 tablas principales (`spinjob-backend/models.py`):
 
-- **Users (`users`):** Almacena la información de usuarios del sistema. Campos: `id` (UUID), `email`, `phone` (celular), `name`, `verification_code`, `is_verified` (booleano crucial para permisos), `is_admin`, y `is_vendedor`.
+- **Users (`users`):** Almacena la información de usuarios del sistema. Campos: `id` (UUID), `email`, `phone` (celular), `name`, `verification_code`, `is_verified` (booleano crucial para permisos), `is_admin`, `is_vendedor`, `country` (país seleccionado, por defecto "Bolivia") y `state` (departamento/estado, nullable).
 - **Businesses (`businesses`):** Contiene la información del profesional o negocio. Campos clave:
   - `slug` (identificador único para URLs).
   - `status` ("pendiente", "aprobado", "rechazado").
@@ -36,10 +36,10 @@ El sistema relacional se basa en 11 tablas principales (`spinjob-backend/models.
   - `referred_by` (FK a Users, ID del vendedor que refirió el negocio).
   - `premium` (booleano) y `plan_months` / `expiration_date` para vigencia.
   - `rating` (promedio) y `reviews_count`.
-  - Campos de ubicación: `country` (por defecto "Bolivia"), `state` (departamento), `home_delivery` (booleano) y `ubicacion_url` (Google Maps).
+  - Campos de ubicación: `country` (por defecto "Bolivia"), `state` (departamento), `home_delivery` (booleano), `national_delivery` (booleano, indica si realiza envíos a nivel nacional) y `ubicacion_url` (Google Maps).
   - Contacto y redes: `phone`, `whatsapp_numbers` (array JSON que permite múltiples números de WhatsApp), `facebook`, `instagram`, `linkedin`, `website`, `tiktok`, `github` y `catalog_url` externo.
   - E-E-A-T SEO Fields: `experience_years` (años de experiencia) y `credentials` (matrícula/credencial).
-  - Configuración: `genero` y `creation_date`.
+  - Configuración y pedidos: `genero`, `creation_date`, `orders_enabled` (booleano que indica si el negocio tiene habilitada la recepción de pedidos), `carousel_order` (orden de visualización de secciones en formato texto/JSON) y `delivery_methods` (métodos de envío/entrega disponibles del negocio en formato array JSON).
 - **Specialties (`specialties`):** Catálogo central de categorías y subcategorías del directorio. Campos: `id`, `category` (Categoría), `subcategory` (Subcategoría), y `source` ("system" o "user_other").
 - **business_specialties (`business_specialties`):** Tabla de asociación para la relación Muchos a Muchos entre negocios y especialidades.
 - **Locations (`locations`):** Tabla de configuración geográfica para estructurar la jerarquía de países y departamentos/estados activos. Campos: `id` (String), `country` (String), `state` (String).
@@ -47,7 +47,7 @@ El sistema relacional se basa en 11 tablas principales (`spinjob-backend/models.
 - **Resenas (`resenas`):** Relaciona valoraciones a un negocio. Guarda `id`, `user_id` (FK a Users), `rating` (1-5 estrellas), `descripcion`, `image_url` y `business_id` (FK a Businesses). Cuenta con la restricción de unicidad `_userid_business_resena_uc` para evitar calificaciones duplicadas por el mismo usuario.
 - **Interactions (`interactions`):** Registro de métricas reales (Visitas al perfil, clics en WhatsApp/Redes, etc.). Relaciona `id`, `platform` (tipo de interacción/clic), `date`, `user_id` (FK a Users) y `business_id` (FK a Businesses).
 - **SavedCards (`saved_cards`):** Tarjetas guardadas en "Mi Tarjetero" de un usuario. Relaciona `user_id` con `business_id` (FK a Businesses), incluyendo la fecha `saved_date` y restricción de unicidad `_user_business_saved_uc`.
-- **Orders (`orders`):** Registra los pedidos generados por clientes. Campos: `id`, `user_id` (FK a Users), `business_id` (FK a Businesses), `customer_name` (nombre ingresado al hacer checkout), `status` ("pendiente", "entregado", "cancelado"), `total_price` y `created_at` (timestamp con huso horario de Bolivia).
+- **Orders (`orders`):** Registra los pedidos generados por clientes. Campos: `id`, `user_id` (FK a Users), `business_id` (FK a Businesses), `customer_name` (nombre ingresado al hacer checkout), `status` ("pendiente", "entregado", "cancelado"), `delivery_method` (método de envío seleccionado), `total_price`, `created_at` (timestamp de creación del pedido) y `delivered_at` (timestamp en el que el pedido cambió a estado "entregado").
 - **OrderItems (`order_items`):** Detalle de productos solicitados en un pedido. Campos: `id`, `order_id` (FK a Orders), `product_id` (FK a Products, nullable), `product_name` (nombre del producto en el momento de la compra), `quantity` (cantidad), `price_at_time` (precio unitario histórico) y `subtotal`.
 
 ---
@@ -68,8 +68,16 @@ El sistema relacional se basa en 11 tablas principales (`spinjob-backend/models.
 - **Gestión de Catálogos** (`spinjob-backend/routers/products.py`): Rutas CRUD completas. Lógica de cuotas integrada: límite estricto de **3 productos** para negocios estándar (Gratis) y de **15 productos** para negocios Premium.
 - **Sistema de Pedidos / Orders** (`spinjob-backend/routers/orders.py`):
   - Permite a los clientes autenticados crear un pedido con múltiples productos del catálogo mediante `POST /businesses/{slug}/orders`.
-  - Permite a los dueños de negocios listar los pedidos de su comercio mediante `GET /businesses/{slug}/orders`, con soporte para filtros de fecha específicos.
-  - Permite actualizar el estado del pedido mediante `PUT /businesses/{slug}/orders/{order_id}/status` (pendiente/entregado).
+  - **Límites de Suscripción:** Solo disponible para negocios en plan **Premium**. Además, cuenta con un límite estricto de **150 pedidos mensuales** por negocio (verificado en backend).
+  - **Control de Inventario (Stock):** Al crear el pedido, se deduce automáticamente la cantidad seleccionada del `stock` de cada producto. Si un pedido cambia de estado a `cancelado`, se restituye la cantidad de inventario correspondiente a cada producto.
+  - **Zona Horaria y Entregas:** Permite a los dueños de negocios cambiar el estado a `entregado` (`PUT /businesses/{slug}/orders/{order_id}/status`), registrando el timestamp en el campo `delivered_at`. Este timestamp se calcula basándose en la zona horaria del país del usuario/negocio (por ejemplo, `America/La_Paz` para Bolivia, `America/Bogota` para Colombia, `America/Lima` para Perú, etc.).
+- **Sistema de Calificaciones y Reseñas** (`spinjob-backend/routers/reviews.py`):
+  - Permite a los usuarios autenticados calificar a un negocio con una puntuación de 1 a 5 estrellas, una descripción textual y opcionalmente adjuntar una imagen.
+  - Cuenta con una restricción de unicidad (`_userid_business_resena_uc`): un usuario puede registrar como máximo una reseña por negocio. Si desea cambiarla, debe actualizarla mediante una petición `PUT`.
+  - Cada vez que se crea, edita o elimina una reseña, el backend ejecuta la función `_recalcular_rating` para recalcular el promedio (`rating`) y el conteo de opiniones (`reviews_count`) y actualizarlos en la tabla `businesses`.
+- **Tarjetero de Favoritos** (`spinjob-backend/routers/tarjetero.py`):
+  - Expone rutas de gestión del tarjetero (`POST /tarjetero/{slug}` y `DELETE /tarjetero/{slug}`) para que los usuarios puedan guardar sus tarjetas profesionales favoritas.
+  - La relación de guardado se almacena en la tabla `saved_cards` con una restricción de unicidad para evitar registros duplicados.
 - **Métricas e Interacciones** (`spinjob-backend/routers/businesses.py`): Registra clics en enlaces digitales y visitas de perfiles mediante la ruta `/businesses/{slug}/interaccion`.
 - **SEO y Sitemaps Dinámicos** (`spinjob-backend/routers/seo.py`): Endpoint `/sitemap.xml` dinámico para indexación en Google de categorías y departamentos, y el generador de Open Graph en `/og/{slug}`.
 

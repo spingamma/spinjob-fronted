@@ -270,7 +270,7 @@ export default function BusinessOrders() {
               <div className="flex gap-3 items-start">
                 <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
                 <p className="text-sm text-gray-700">
-                  <strong className="text-[#1A535C]">Gestión de pedidos ilimitada</strong> (Notificaciones, estados y carrito activo)
+                  <strong className="text-[#1A535C]">Hasta 600 pedidos mensuales</strong> (Notificaciones, estados y carrito activo)
                 </p>
               </div>
               <div className="flex gap-3 items-start">
@@ -297,6 +297,7 @@ export default function BusinessOrders() {
               <button 
                 onClick={() => navigate('/mis-negocios')}
                 className="w-full sm:w-auto px-6 py-3.5 bg-gray-100 hover:bg-gray-200 text-[#1A535C] font-bold rounded-xl transition-all text-sm"
+                data-testid="back-to-businesses-btn"
               >
                 Volver
               </button>
@@ -305,6 +306,7 @@ export default function BusinessOrders() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-[#F9842C] to-[#e06516] text-white font-extrabold rounded-xl hover:shadow-lg hover:shadow-orange-500/10 hover:-translate-y-0.5 transition-all text-sm flex items-center justify-center gap-2"
+                data-testid="activate-premium-orders-btn"
               >
                 <Sparkles size={16} /> Activar Premium (US$5/mes)
               </a>
