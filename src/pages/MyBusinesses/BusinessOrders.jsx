@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Loader2, Calendar, PackageCheck, PackageOpen, Lock, Sparkles, CheckCircle2, XCircle } from 'lucide-react';
 import fetchAuth from '../../utils/fetchAuth';
+import { formatOrderCode } from '../../utils/formatOrderCode';
 
-export default function BusinessOrders() {
-  const { slug } = useParams();
+export default function BusinessOrders({ slugProp, hideHeader = false }) {
+  const params = useParams();
+  const slug = slugProp || params.slug;
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,6 +18,7 @@ export default function BusinessOrders() {
   const [endDate, setEndDate] = useState(todayStr);
 
   const fetchOrders = async (sDate, eDate) => {
+    if (!slug) return;
     setLoading(true);
     const token = localStorage.getItem('spingamma_token');
     if (!token) {
@@ -25,11 +28,11 @@ export default function BusinessOrders() {
     
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
     let url = `${API_URL}/businesses/${slug}/orders`;
-    const params = [];
-    if (sDate) params.push(`start_date=${sDate}`);
-    if (eDate) params.push(`end_date=${eDate}`);
-    if (params.length > 0) {
-      url += `?${params.join('&')}`;
+    const paramsList = [];
+    if (sDate) paramsList.push(`start_date=${sDate}`);
+    if (eDate) paramsList.push(`end_date=${eDate}`);
+    if (paramsList.length > 0) {
+      url += `?${paramsList.join('&')}`;
     }
 
     try {
@@ -50,10 +53,11 @@ export default function BusinessOrders() {
         const data = await res.json();
         const sortedData = data.sort((a, b) => {
           const getScore = (status) => {
-            if (status === "pendiente") return 0;
-            if (status === "entregado") return 1;
-            if (status === "cancelado") return 2;
-            return 3;
+            if (status === "pendiente_de_pago" || status === "pendiente") return 0;
+            if (status === "pagado") return 1;
+            if (status === "entregado") return 2;
+            if (status === "cancelado") return 3;
+            return 4;
           };
           return getScore(a.status) - getScore(b.status);
         });
@@ -76,8 +80,11 @@ export default function BusinessOrders() {
     fetchOrders(startDate, endDate);
   }, [slug, startDate, endDate]);
 
+  const [updatingOrder, setUpdatingOrder] = useState(null);
+
   const handleStatusChange = async (orderId, newStatus) => {
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+    setUpdatingOrder({ id: orderId, status: newStatus });
     
     try {
       const res = await fetchAuth(`${API_URL}/businesses/${slug}/orders/${orderId}/status`, {
@@ -93,10 +100,11 @@ export default function BusinessOrders() {
           const updated = prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o);
           return updated.sort((a, b) => {
             const getScore = (status) => {
-              if (status === "pendiente") return 0;
-              if (status === "entregado") return 1;
-              if (status === "cancelado") return 2;
-              return 3;
+              if (status === "pendiente_de_pago" || status === "pendiente") return 0;
+              if (status === "pagado") return 1;
+              if (status === "entregado") return 2;
+              if (status === "cancelado") return 3;
+              return 4;
             };
             return getScore(a.status) - getScore(b.status);
           });
@@ -107,21 +115,25 @@ export default function BusinessOrders() {
         console.error("Error al actualizar estado", err);
         alert("Hubo un error al actualizar el estado del pedido.");
       }
+    } finally {
+      setUpdatingOrder(null);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] pb-24 font-sans text-[#1A535C]">
+    <div className={`min-h-screen bg-[#F8F9FA] ${hideHeader ? 'pb-8' : 'pb-24'} font-sans text-[#1A535C]`}>
       {/* Header */}
-      <div className="bg-[#1A535C] text-white px-4 py-5 sticky top-0 z-50 shadow-md flex items-center gap-4">
-        <button onClick={() => navigate('/mis-negocios')} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-          <ArrowLeft size={20} />
-        </button>
-        <div>
-          <h1 className="text-lg font-extrabold tracking-tight">Gestión de Pedidos</h1>
-          <p className="text-xs text-white/70">Panel de administración</p>
+      {!hideHeader && (
+        <div className="bg-[#1A535C] text-white px-4 py-5 sticky top-0 z-50 shadow-md flex items-center gap-4">
+          <button onClick={() => navigate('/mis-negocios')} data-testid="business-orders-back-btn" className="p-2 hover:bg-white/10 rounded-full transition-colors">
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h1 className="text-lg font-extrabold tracking-tight">Gestión de Pedidos</h1>
+            <p className="text-xs text-white/70">Panel de administración</p>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="max-w-4xl mx-auto px-4 mt-6">
         {isPremium ? (
@@ -135,6 +147,7 @@ export default function BusinessOrders() {
                     type="date" 
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
+                    data-testid="business-orders-start-date"
                     className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
                   />
                 </div>
@@ -144,6 +157,7 @@ export default function BusinessOrders() {
                     type="date" 
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
+                    data-testid="business-orders-end-date"
                     className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
                   />
                 </div>
@@ -151,6 +165,7 @@ export default function BusinessOrders() {
               <div className="flex gap-2 w-full md:w-auto">
                  <button 
                    onClick={() => { setStartDate(todayStr); setEndDate(todayStr); }} 
+                   data-testid="business-orders-today-btn"
                    className="flex-1 md:flex-none px-4 py-2.5 bg-[#F9842C]/10 text-[#F9842C] hover:bg-[#F9842C]/20 text-xs font-bold rounded-xl transition-colors"
                  >
                    Hoy
@@ -175,14 +190,34 @@ export default function BusinessOrders() {
             ) : (
               <div className="space-y-4">
                 {orders.map(order => {
+                  const isPendiente = order.status === "pendiente_de_pago" || order.status === "pendiente";
+                  const isPagado = order.status === "pagado";
                   const isEntregado = order.status === "entregado";
+                  const isCancelado = order.status === "cancelado";
+
+                  const statusBadgeClass = isCancelado
+                    ? 'bg-red-100 text-red-700 border border-red-200'
+                    : isEntregado
+                    ? 'bg-green-100 text-green-700 border border-green-200'
+                    : isPagado
+                    ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                    : 'bg-amber-100 text-amber-800 border border-amber-200';
+
+                  const statusLabel = isCancelado
+                    ? 'CANCELADO'
+                    : isEntregado
+                    ? 'ENTREGADO'
+                    : isPagado
+                    ? 'PAGADO'
+                    : 'PENDIENTE DE PAGO';
+
                   return (
-                    <div key={order.id} className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:shadow-md">
+                    <div key={order.id} data-testid={`business-order-card-${order.id}`} className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:shadow-md">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-extrabold text-[#1A535C] text-sm">Pedido #{order.id.slice(-6)}</span>
-                          <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${order.status === 'cancelado' ? 'bg-red-100 text-red-700' : isEntregado ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-                            {order.status}
+                          <span className="font-extrabold text-[#1A535C] text-sm">Pedido #{formatOrderCode(order.order_number, order.id)}</span>
+                          <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full ${statusBadgeClass}`}>
+                            {statusLabel}
                           </span>
                         </div>
                         <p className="text-xs text-gray-400 font-medium">Cliente: <span className="text-[#1A535C] font-bold">{order.customer_name}</span></p>
@@ -209,30 +244,59 @@ export default function BusinessOrders() {
                           <p className="font-black text-lg text-[#1A535C]">Bs. {order.total_price.toFixed(2)}</p>
                         </div>
                         
-                        {order.status === "cancelado" ? null : (
-                          <div className="flex gap-2">
-                            {!isEntregado ? (
+                        {!isCancelado && (
+                          <div className="flex gap-2 flex-wrap">
+                            {isPendiente && (
                               <>
                                 <button 
                                   onClick={() => handleStatusChange(order.id, 'cancelado')}
-                                  className="flex items-center gap-1.5 px-3 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-xl shadow-sm transition-colors"
+                                  disabled={updatingOrder?.id === order.id}
+                                  data-testid="cancel-order-btn"
+                                  className="flex items-center gap-1.5 px-3 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                  <XCircle size={14} /> Rechazar
+                                  {updatingOrder?.id === order.id && updatingOrder?.status === 'cancelado' ? (
+                                    <Loader2 size={14} className="animate-spin" />
+                                  ) : (
+                                    <XCircle size={14} />
+                                  )}
+                                  Rechazar
                                 </button>
                                 <button 
-                                  onClick={() => handleStatusChange(order.id, 'entregado')}
-                                  className="flex items-center gap-1.5 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors"
+                                  onClick={() => handleStatusChange(order.id, 'pagado')}
+                                  disabled={updatingOrder?.id === order.id}
+                                  data-testid="mark-paid-btn"
+                                  className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                  <PackageCheck size={14} /> Entregado
+                                  {updatingOrder?.id === order.id && updatingOrder?.status === 'pagado' ? (
+                                    <Loader2 size={14} className="animate-spin" />
+                                  ) : (
+                                    <CheckCircle2 size={14} />
+                                  )}
+                                  Marcar Pagado
                                 </button>
                               </>
-                            ) : (
+                            )}
+
+                            {isPagado && (
                               <button 
-                                onClick={() => handleStatusChange(order.id, 'pendiente')}
-                                className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold rounded-xl transition-colors"
+                                onClick={() => handleStatusChange(order.id, 'entregado')}
+                                disabled={updatingOrder?.id === order.id}
+                                data-testid="mark-delivered-btn"
+                                className="flex items-center gap-1.5 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                               >
-                                <PackageOpen size={14} /> Reabrir
+                                {updatingOrder?.id === order.id && updatingOrder?.status === 'entregado' ? (
+                                  <Loader2 size={14} className="animate-spin" />
+                                ) : (
+                                  <PackageCheck size={14} />
+                                )}
+                                Entregado
                               </button>
+                            )}
+
+                            {isEntregado && (
+                              <div className="flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-3 py-2 rounded-xl border border-green-200">
+                                <CheckCircle2 size={14} /> Completado
+                              </div>
                             )}
                           </div>
                         )}

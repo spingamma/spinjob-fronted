@@ -65,10 +65,10 @@ El sistema relacional se basa en 11 tablas principales (`spinjob-backend/models.
   - **CRUD de Vendedor:** Rutas bajo `/vendedor/` que permiten a un afiliado obtener su código (`/vendedor/my-code`), listar los negocios que ha registrado (`/vendedor/businesses`) y transferir la propiedad del negocio al dueño final (`/vendedor/businesses/{slug}/transfer`) una vez configurado.
 - **Gestión Geográfica de Países y Departamentos** (`spinjob-backend/routers/countries.py`):
   - Expone el endpoint `/countries/` para obtener de forma estructurada los países y sus respectivos departamentos/estados activos configurados por la administración en la tabla `locations`.
-- **Gestión de Catálogos** (`spinjob-backend/routers/products.py`): Rutas CRUD completas. Lógica de cuotas integrada: límite estricto de **3 productos** para negocios estándar (Gratis) y de **15 productos** para negocios Premium.
+- **Gestión de Catálogos** (`spinjob-backend/routers/products.py`): Rutas CRUD completas. Lógica de cuotas integrada: límite estricto de **3 productos** para negocios estándar (Gratis) y de **50 productos** para negocios Premium.
 - **Sistema de Pedidos / Orders** (`spinjob-backend/routers/orders.py`):
   - Permite a los clientes autenticados crear un pedido con múltiples productos del catálogo mediante `POST /businesses/{slug}/orders`.
-  - **Límites de Suscripción:** Solo disponible para negocios en plan **Premium**. Además, cuenta con un límite estricto de **150 pedidos mensuales** por negocio (verificado en backend).
+  - **Límites de Suscripción:** Solo disponible para negocios en plan **Premium**. Además, cuenta con un límite estricto de **600 pedidos mensuales** por negocio (verificado en backend).
   - **Control de Inventario (Stock):** Al crear el pedido, se deduce automáticamente la cantidad seleccionada del `stock` de cada producto. Si un pedido cambia de estado a `cancelado`, se restituye la cantidad de inventario correspondiente a cada producto.
   - **Zona Horaria y Entregas:** Permite a los dueños de negocios cambiar el estado a `entregado` (`PUT /businesses/{slug}/orders/{order_id}/status`), registrando el timestamp en el campo `delivered_at`. Este timestamp se calcula basándose en la zona horaria del país del usuario/negocio (por ejemplo, `America/La_Paz` para Bolivia, `America/Bogota` para Colombia, `America/Lima` para Perú, etc.).
 - **Sistema de Calificaciones y Reseñas** (`spinjob-backend/routers/reviews.py`):
@@ -257,8 +257,8 @@ El sistema diferencia el acceso a las funciones comerciales y de analítica seg�
   - **Insignia 'Verificado':** No se muestra en perfil ni tarjetas.
 
 - **Plan Premium (`premium = true`):**
-  - **Catálogo de productos:** Límite ampliado de **15 productos**.
-  - **Pedidos:** Habilitados en el perfil (carrito y formulario de checkout visibles). El backend cuenta y limita la recepción de pedidos a **150 pedidos mensuales** por negocio.
+  - **Catálogo de productos:** Límite ampliado de **50 productos registrados** (con un máximo de **15 productos visibles** simultáneamente en vitrina).
+  - **Pedidos:** Habilitados en el perfil (carrito y formulario de checkout visibles). El backend cuenta y limita la recepción de pedidos a **600 pedidos mensuales** por negocio.
   - **Gestión de Pedidos:** Habilitado (acceso al panel `/mis-pedidos/:slug` para control de entregas y filtros).
   - **Métricas:** Acceso completo al Dashboard interactivo de tráfico e interacciones.
   - **WhatsApp:** Registro de máximo **2 números** (igual al plan Gratis).

@@ -213,31 +213,7 @@ export default function MisNegocios() {
                     )
                   )}
 
-                  {/* Botón Ver Pedidos - Solo para negocios aprobados */}
-                  {neg.status === 'aprobado' && (
-                    neg.premium ? (
-                      <Link
-                        to={`/mis-pedidos/${neg.slug}`}
-                        className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-teal-600 hover:text-teal-800 transition-colors bg-teal-50/50 hover:bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-100"
-                      >
-                        <span className="flex items-center gap-1.5">
-                          <ShoppingBag size={16} /> Pedidos
-                        </span>
-                      </Link>
-                    ) : (
-                      <button
-                        onClick={() => setPremiumModalData({ isOpen: true, featureName: 'Pedidos' })}
-                        className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-teal-600 hover:text-teal-800 transition-colors bg-teal-50/50 hover:bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-100 text-left"
-                      >
-                        <span className="flex items-center gap-1.5">
-                          <ShoppingBag size={16} /> Pedidos
-                        </span>
-                        <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md font-extrabold flex items-center gap-0.5" title="Característica Premium">
-                          🔒 Premium
-                        </span>
-                      </button>
-                    )
-                  )}
+
 
                   {/* Botón de eliminar (para pendientes, rechazados o admin) */}
                   {(neg.status === 'pendiente' || neg.status === 'rechazado' || isAdmin) && (

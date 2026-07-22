@@ -278,6 +278,14 @@ export default function Directory() {
 
   // --- Category Grid: select a category ---
   const handleSelectCategory = (categoryName) => {
+    if (categoryName?.toLowerCase() === 'tarjetoso') {
+      if (isLoggedIn) {
+        navigate('/perfil/spingamma');
+      } else {
+        handleCardClick('spingamma');
+      }
+      return;
+    }
     filterHook.actions.handleSelectOption('category', categoryName);
   };
 

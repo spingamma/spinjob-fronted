@@ -38,7 +38,8 @@ function Perfil() {
 
     async function obtenerPerfil(intentos = 0) {
       try {
-        const res = await fetchAuth(`${API_URL}/businesses/${slug}`);
+        const targetSlug = slug?.toLowerCase() === 'tarjetoso' ? 'spingamma' : slug;
+        const res = await fetchAuth(`${API_URL}/businesses/${targetSlug}`);
 
         if (res.ok) {
           const data = await res.json();
@@ -188,7 +189,8 @@ function Perfil() {
     // Para recargar los datos
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
-    fetchAuth(`${API_URL}/businesses/${slug}`)
+    const targetSlug = slug?.toLowerCase() === 'tarjetoso' ? 'spingamma' : slug;
+    fetchAuth(`${API_URL}/businesses/${targetSlug}`)
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data) setProfesional(data);
