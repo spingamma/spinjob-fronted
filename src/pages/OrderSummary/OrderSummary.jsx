@@ -266,6 +266,7 @@ export default function OrderSummary() {
 
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
             <h2 className="text-sm font-bold text-[#1A535C] mb-4 border-b pb-2">Detalles del {isOwner ? 'Cliente' : 'Pedido'}</h2>
+            
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isOwner && (
                 <div>

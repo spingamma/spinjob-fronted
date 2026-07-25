@@ -140,3 +140,6 @@ export async function createEntidad(req: Request, res: Response) {
 
 ### 3. Auditoría Reactiva de Campos Huérfanos (Datos que "se pierden")
 - 🚨 **CRÍTICO:** Al debuggear un campo que "se pierde", "llega vacío" o "desaparece al recargar", el **primer paso obligatorio** antes de investigar el frontend es verificar si el backend tiene el campo declarado en los tres niveles: (a) firma del endpoint (parámetro declarado), (b) modelo de BD (columna/campo existente), (c) schema de respuesta (campo expuesto en el DTO). Este es el escenario más común de "campos huérfanos": código frontend que envía datos a un backend que los ignora silenciosamente porque nunca se declararon.
+
+### 4. Retorno Obligatorio de Identificadores (Anti-Ghosting)
+- 🚨 **CRÍTICO:** Todo endpoint que devuelva entidades completas (especialmente endpoints de inicio de sesión, recuperación de sesión o creación de recursos) **ESTÁ OBLIGADO** a incluir el campo `id` (o su equivalente) en el schema/DTO de respuesta. Jamás omitas la llave primaria asumiendo que el cliente no la necesita para la interfaz visual.

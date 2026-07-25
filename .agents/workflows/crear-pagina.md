@@ -8,7 +8,7 @@ description: Crear una nueva página completa (vista de ruta) siguiendo los est�
 Busca el archivo centralizado de enrutamiento (ej. `src/App.jsx`, `src/routes.jsx`, o el enrutador por directorios en Next.js/Remix) para conocer las rutas y cargas perezosas (lazy imports) existentes.
 ```bash
 # Ejemplo para inspeccionar el archivo de enrutamiento:
-powershell -Command "Get-Content src/App.jsx | Select-Object -First 40"
+head -n 40 src/App.jsx
 ```
 
 ## 2. Crear la carpeta y el componente de la página

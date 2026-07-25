@@ -107,10 +107,10 @@ export default function useAuthLogic({ isOpen, onSuccess, onRequireVerification 
 
       if (!data.celular) {
         setTempToken(data.access_token);
-        setTempUserData({ nombre: data.nombre, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false, is_verified: data.is_verified || false });
+        setTempUserData({ id: data.id, email: data.email, nombre: data.nombre, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false, is_verified: data.is_verified || false });
         setIsCompletingPhone(true);
       } else {
-        _completeSession({ nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false, is_verified: data.is_verified || false });
+        _completeSession({ id: data.id, email: data.email, nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false, is_verified: data.is_verified || false });
       }
     } catch (err) {
       setApiError(err.message);
@@ -138,6 +138,8 @@ export default function useAuthLogic({ isOpen, onSuccess, onRequireVerification 
       if (!res.ok) throw new Error(data.detail || 'Error al completar tu celular.');
 
       _completeSession({ 
+        id: tempUserData.id,
+        email: tempUserData.email,
         nombre: tempUserData.nombre, 
         celular: formData.celular, 
         country: formData.country || tempUserData.country,

@@ -51,7 +51,7 @@ Esta habilidad es **obligatoria** y debe activarse automáticamente cada vez que
       - Mecanismos de borrador local (`localStorage.setItem`) deben omitir objetos `File` pesados y cadenas base64 gigantes antes de serializar JSON, para evitar fallos por `QuotaExceededError` en el navegador.
       - **Fallback a la Entidad Servidor:** Al restaurar borradores locales al abrir/editar un formulario, **ningún campo vacío o vaciado en el borrador debe sobreescribir datos válidos del servidor**. Todo atributo restaurado desde borrador debe aplicar un fallback explícito hacia la entidad remota (`draft.campo || serverEntity.campo`) para evitar que borradores obsoletos borren la información oficial.
    7. Está absolutamente **prohibido** dejar un dato interactivo "flotando" solo en la memoria RAM (estado del frontend) si la intención es ser persistente.
-
+   8. **Preservación Estructural al Desestructurar/Mapear Responses:** Al recibir un payload del backend (especialmente en procesos de autenticación, recuperación de sesión o fetching de entidades), el frontend tiene **estrictamente prohibido** construir objetos manuales (ej. `{nombre: data.nombre}`) que filtren o desechen llaves estructurales. Siempre se debe preservar explícitamente el `id` o usar un mapeo integral (`...data`) para evitar el "ghosting" de IDs que rompe la lógica de validaciones de propiedad (`isOwner`).
 ---
 
 ## Ejecución Segura
@@ -77,7 +77,7 @@ Esta habilidad es **obligatoria** y debe activarse automáticamente cada vez que
   2. **Obligatoriamente**, detén tu ejecución y pide aprobación explícita al usuario en el chat antes de transmitir esta información al agente QA.
   3. Tras la aprobación, procede a enviar la información (o delegar la validación) al agente QA.
 - **Regla de Granularidad E2E (El Filtro de Flujos Largos):**
-  - Está strictly prohibido crear pruebas unitarias visuales o tests redundantes para pequeños cambios cosméticos (color de botón, tamaño, textos estáticos). Los escenarios BDD (`.feature`) solo deben representar flujos de negocio completos y largos de extremo a extremo.
+  - Está estrictamente prohibido crear pruebas unitarias visuales o tests redundantes para pequeños cambios cosméticos (color de botón, tamaño, textos estáticos). Los escenarios BDD (`.feature`) solo deben representar flujos de negocio completos y largos de extremo a extremo.
   - Si un cambio cosmético rompe un localizador de un flujo largo existente, se debe actualizar el localizador en el Page Object Model (POM), pero sin añadir nuevos escenarios.
 
 ### 10. Vías de Acción Directa para Estados Pendientes en Listados

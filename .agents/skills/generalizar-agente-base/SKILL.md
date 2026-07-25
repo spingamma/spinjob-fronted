@@ -17,7 +17,7 @@ Esta habilidad tiene dos objetivos principales:
 Para que el agente pueda ser utilizado de forma efectiva como base en otro proyecto, debes documentar las reglas siguiendo estos principios de generalización:
 
 ### 1. Desacoplamiento de Identidad de Marca (Branding Dinámico)
-* **Regla**: No hardcodear valores de colores (como `#1A535C` o `#6A431F`) ni copys textuales específicos directamente en las reglas universales.
+* **Regla**: No codificar valores de forma rígida (hardcodear) en el código como colores (ej. `#1A535C` o `#6A431F`) ni copys textuales específicos directamente en las reglas universales.
 * **Generalización**: Documentar que el sistema de diseño debe leer dinámicamente un archivo de configuración centralizado (ej. `.agents/branding.json` o variables de entorno) y que los componentes deben adaptarse automáticamente a esa paleta.
 
 ### 2. Estándares de Diseño y UI Flexibles

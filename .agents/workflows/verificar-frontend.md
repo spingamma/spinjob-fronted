@@ -45,8 +45,8 @@ Reemplázalos por la marca correcta definida dinámicamente en tu configuración
 ## 6. Prevenir "God Components" (Límite de 300 Líneas)
 Identifica si existen archivos que rompan el límite de 300 líneas en el código de frontend:
 ```bash
-# Comando PowerShell para identificar componentes gigantes en la carpeta src:
-powershell -Command "Get-ChildItem -Recurse src -Include *.jsx,*.js,*.ts,*.tsx | Where-Object { (Get-Content $_.FullName | Measure-Object -Line).Lines -gt 300 } | ForEach-Object { Write-Output \"$($_.FullName): $((Get-Content $_.FullName | Measure-Object -Line).Lines) líneas\" }"
+# Comando en Bash para identificar componentes gigantes en la carpeta src:
+find src -type f \( -name "*.jsx" -o -name "*.js" -o -name "*.tsx" -o -name "*.ts" \) -exec wc -l {} + | awk '$1 > 300'
 ```
 Si se detecta algún archivo que sobrepase el límite, refactorízalo extrayendo componentes hijos o custom hooks.
 
