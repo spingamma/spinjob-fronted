@@ -414,7 +414,7 @@ export default function MyOrders() {
                           data-testid={`claim-order-btn-${order.id}`}
                           onClick={() => {
                             const text = encodeURIComponent(`Hola Tarjetoso, necesito ayuda con mi pedido #${formatOrderCode(order.order_number, order.id)}. El negocio marcó como entregado pero tengo un problema.`);
-                            window.open(`https://wa.me/59174116223?text=${text}`, '_blank');
+                            window.open(`https://wa.me/59164016676?text=${text}`, '_blank');
                           }}
                           className="w-full mt-2 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-red-50 hover:bg-red-100 text-red-600 border border-red-200/60"
                         >
