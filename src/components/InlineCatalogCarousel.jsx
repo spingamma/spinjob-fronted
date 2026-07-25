@@ -237,7 +237,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
               <div className="flex items-center justify-center">
                 <img src={miCarrito} alt="Carrito" className="w-7 h-7 object-contain drop-shadow-md" />
               </div>
-              <span className="text-lg">Ordenar ({totalItems})</span>
+              <span className="text-lg">{isOwner ? 'Ingresar Venta' : 'Ordenar'} ({totalItems})</span>
             </div>
             <span className="text-lg">Bs. {totalPrice.toFixed(2)}</span>
           </button>

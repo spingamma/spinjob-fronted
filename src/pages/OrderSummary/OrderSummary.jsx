@@ -289,10 +289,12 @@ export default function OrderSummary() {
                   </select>
                 </div>
               )}
-              <button type="submit" disabled={loading} data-testid="confirm-order-btn" className="w-full bg-[#F9842C] hover:bg-[#e06516] text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 mt-4 disabled:opacity-60">
-                {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Send size={18} />}
-                Confirmar Pedido{!isOwner && ' (Pagar con QR)'}
-              </button>
+              {!isOwner && (
+                <button type="submit" disabled={loading} data-testid="confirm-order-btn" className="w-full bg-[#F9842C] hover:bg-[#e06516] text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 mt-4 disabled:opacity-60">
+                  {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Send size={18} />}
+                  Confirmar Pedido (Pagar con QR)
+                </button>
+              )}
               {isOwner && (
                 <button
                   type="button"
