@@ -302,7 +302,7 @@ export default function MyOrders() {
                           data-testid={`pay-order-btn-${order.id}`}
                           onClick={() => {
                             const targetSlug = order.business_slug || order.business?.slug || 'spingamma';
-                            navigate(`/perfil/${targetSlug}/orden/${order.id}/seguimiento`);
+                            navigate(`/perfil/${targetSlug}/orden/${order.id}`);
                           }}
                           className="w-full mt-3 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all bg-[#F9842C] hover:bg-[#e06516] text-white"
                         >
