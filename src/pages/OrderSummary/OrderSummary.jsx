@@ -13,7 +13,8 @@ export default function OrderSummary() {
   const user = userStr ? JSON.parse(userStr) : null;
   const token = localStorage.getItem('spingamma_token');
 
-  const isOwner = user && ownerId && String(user.id) === String(ownerId);
+  const [resolvedOwnerId, setResolvedOwnerId] = useState(ownerId || null);
+  const isOwner = user && resolvedOwnerId && String(user.id) === String(resolvedOwnerId);
   const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
   // --- Estados de Checkout (Cart) ---
@@ -28,6 +29,13 @@ export default function OrderSummary() {
   })();
   const [customerName, setCustomerName] = useState(isOwner ? 'Venta Presencial' : (user?.nombre || ''));
   const [selectedDeliveryMethod, setSelectedDeliveryMethod] = useState(isOwner ? 'presencial' : parsedDeliveryMethods[0]);
+
+  useEffect(() => {
+    if (isOwner) {
+      setCustomerName('Venta Presencial');
+      setSelectedDeliveryMethod('presencial');
+    }
+  }, [isOwner]);
   const [presencialPayment, setPresencialPayment] = useState('efectivo');
   const [loading, setLoading] = useState(false);
 
@@ -70,6 +78,7 @@ export default function OrderSummary() {
             const res = await fetchAuth(`${API_URL}/businesses/${s}`);
             if (res && res.ok) {
               const data = await res.json();
+              if (data.owner_id) setResolvedOwnerId(data.owner_id);
               const qr = data.payment_qr_image || data.qr_payment_url || data.payment_qr || data.qr_image || data.qr_image_url || data.qr_code || data.qr || '';
               if (qr) {
                 setFetchedQrImage(qr);
@@ -99,6 +108,7 @@ export default function OrderSummary() {
         const bizRes = await fetchAuth(`${API_URL}/businesses/${activeSlug}`).catch(() => null);
         if (bizRes && bizRes.ok) {
           const bizData = await bizRes.json().catch(() => ({}));
+          if (bizData.owner_id) setResolvedOwnerId(bizData.owner_id);
           resolvedQr = bizData.payment_qr_image || bizData.qr_payment_url || resolvedQr;
           setFetchedQrImage(resolvedQr);
         }

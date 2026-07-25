@@ -57,3 +57,8 @@ Antes de dar por finalizada la tarea, debes verificar:
 ## 10. Prohibición Estricta de Alucinación de Contexto Histórico o de Negocio (Anti-Inventiva)
 🚨 **CRÍTICO:** Cuando detectes una discrepancia en valores duros (como números de teléfono, URLs, textos, configuraciones, etc.), **tienes estrictamente prohibido inventar o asumir** el origen de esa discrepancia (ej. decir "era un número antiguo", "lo dejó el desarrollador anterior", etc.) si no cuentas con evidencia concreta en el código o en el historial.
 - **Acción Obligatoria:** Debes limitarte a informar la discrepancia de forma 100% objetiva (ej. "El código apuntaba a X y lo cambié por Y") y, si hay dudas, debes preguntar al usuario cuál es el valor correcto. Nunca fabriques justificaciones para excusar errores o suposiciones.
+
+## 11. Presencia Obligatoria de Identificadores Primarios (Anti-Ghosting de IDs)
+🚨 **CRÍTICO:** Cada vez que desarrolles, edites o revises un endpoint en el backend que retorne datos de una entidad, especialmente en flujos de **Autenticación (Login/Registro)** o recuperación de sesiones (`/me`), **ESTÁS OBLIGADO** a garantizar que el payload de respuesta incluya explícitamente el identificador primario (`id`, `uuid` o equivalente).
+- **Prohibido omitir el ID:** Jamás asumas que el frontend solo necesita "datos visuales" (como nombre o email). La ausencia silenciosa de IDs rompe lógicas de estado como validaciones de propiedad (ej. `isOwner`) o relaciones entre tablas, causando fallos de permisos difíciles de rastrear.
+- **Acción:** Antes de dar por finalizado un endpoint que devuelve un objeto/entidad, revisa el diccionario de retorno o el esquema (Pydantic/DTO) para confirmar la existencia del campo `id`.
