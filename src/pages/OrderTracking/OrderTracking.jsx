@@ -15,11 +15,6 @@ export default function OrderTracking() {
   const [receiptPreview, setReceiptPreview] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Modal de Disputa
-  const [showDisputeModal, setShowDisputeModal] = useState(false);
-  const [disputeReason, setDisputeReason] = useState('');
-  const [isSubmittingDispute, setIsSubmittingDispute] = useState(false);
-
   const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
@@ -146,27 +141,9 @@ export default function OrderTracking() {
     }
   };
 
-  const handleOpenDispute = async (e) => {
-    e.preventDefault();
-    if (!disputeReason.trim()) return;
-
-    setIsSubmittingDispute(true);
-    try {
-      await fetchAuth(`${API_URL}/businesses/${slug}/orders/${order?.id}/dispute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: disputeReason })
-      });
-      setOrder(prev => ({ ...prev, status: 'en_disputa' }));
-      setShowDisputeModal(false);
-      alert("Disputa abierta. El administrador de la plataforma auditará tu reclamo.");
-    } catch (err) {
-      setOrder(prev => ({ ...prev, status: 'en_disputa' }));
-      setShowDisputeModal(false);
-      alert("Disputa registrada para revisión administrativa.");
-    } finally {
-      setIsSubmittingDispute(false);
-    }
+  const handleReportIssue = () => {
+    const text = encodeURIComponent(`Hola Tarjetoso, necesito ayuda con mi pedido #${order?.order_number || order?.id}. El estado marca que el negocio ya lo despachó/entregó pero tengo un problema.`);
+    window.open(`https://wa.me/59174116223?text=${text}`, '_blank');
   };
 
   if (loading && !order) {
@@ -369,7 +346,7 @@ export default function OrderTracking() {
             <button
               type="button"
               data-testid="report-issue-btn"
-              onClick={() => setShowDisputeModal(true)}
+              onClick={handleReportIssue}
               className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 border border-red-200/60"
             >
               <ShieldAlert size={16} /> Reportar Problema / No Recibí mi Producto
@@ -377,61 +354,6 @@ export default function OrderTracking() {
           )}
         </div>
       </div>
-
-      {/* Modal de Disputa */}
-      {showDisputeModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
-              <h3 className="font-extrabold text-base text-red-600 flex items-center gap-2">
-                <AlertTriangle size={18} /> Reportar Incumplimiento
-              </h3>
-              <button onClick={() => setShowDisputeModal(false)} className="text-gray-400 hover:text-gray-600">
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleOpenDispute} className="space-y-4">
-              <p className="text-xs text-gray-500">
-                Indica lo ocurrido. La administración evaluará tu comprobante y podrá aplicar la suspensión o penalización de 1 estrella al negocio.
-              </p>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-                  Descripción del problema *
-                </label>
-                <textarea
-                  data-testid="dispute-reason-input"
-                  value={disputeReason}
-                  onChange={(e) => setDisputeReason(e.target.value)}
-                  placeholder="Ej. Pagué el QR hace 2 días, envié la captura por WhatsApp y el negocio no me ha entregado el producto..."
-                  required
-                  rows={3}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs text-[#1A535C] outline-none focus:border-red-500"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowDisputeModal(false)}
-                  className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  data-testid="submit-client-dispute-btn"
-                  disabled={isSubmittingDispute || !disputeReason.trim()}
-                  className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-md"
-                >
-                  {isSubmittingDispute ? 'Enviando Reporte...' : 'Enviar Reporte'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
