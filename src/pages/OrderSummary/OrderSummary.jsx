@@ -356,7 +356,8 @@ export default function OrderSummary() {
 
   const getStatusText = (status) => {
     switch (status) {
-      case 'pendiente': return 'Pendiente de Pago';
+      case 'pendiente':
+      case 'pendiente_de_pago': return 'Pendiente de Pago';
       case 'pago_enviado': return 'Pago en Verificación';
       case 'pagado': return 'Pago Confirmado (Preparando)';
       case 'entregado': return 'Enviado / Entregado';
@@ -368,7 +369,8 @@ export default function OrderSummary() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pendiente': return 'bg-amber-100 text-amber-800';
+      case 'pendiente':
+      case 'pendiente_de_pago': return 'bg-amber-100 text-amber-800';
       case 'pago_enviado': return 'bg-orange-100 text-orange-800';
       case 'pagado': return 'bg-blue-100 text-blue-800';
       case 'entregado': return 'bg-green-100 text-green-800';
@@ -379,7 +381,25 @@ export default function OrderSummary() {
   };
 
   const displayQr = order?.qr_image_url || order?.payment_qr_image || fetchedQrImage;
-  const isPending = !order?.status || order?.status === 'pendiente';
+  const isPending = !order?.status || order?.status === 'pendiente' || order?.status === 'pendiente_de_pago';
+
+  const handleDownloadQr = async () => {
+    if (!displayQr) return;
+    try {
+      const response = await fetch(displayQr);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `QR-Pago-${slug || 'negocio'}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error('Error al descargar QR:', err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] pb-24 font-sans text-[#1A535C]">
@@ -416,8 +436,18 @@ export default function OrderSummary() {
             <div className="bg-gray-50 p-2 rounded-2xl inline-block border border-gray-100 shadow-inner mb-4">
               <img src={displayQr} alt="QR de Pago" className="w-48 h-48 object-contain rounded-xl" />
             </div>
+            
+            <button
+              type="button"
+              data-testid="download-qr-btn"
+              onClick={handleDownloadQr}
+              className="text-xs font-bold text-[#F9842C] hover:text-[#e06516] flex items-center justify-center gap-1.5 mx-auto mb-4 py-2 px-4 bg-orange-50 hover:bg-orange-100 rounded-xl border border-orange-200/60 transition-colors"
+            >
+              <Download size={16} /> Descargar Imagen de QR
+            </button>
+
             <p className="text-xs text-gray-500 font-medium mb-4 max-w-[250px] mx-auto">
-              Escanea este QR desde la app de tu banco. Luego sube la captura de pantalla del comprobante exitoso abajo.
+              Escanea este QR desde la app de tu banco o descárgalo. Luego sube la captura de pantalla del comprobante exitoso abajo.
             </p>
           </div>
         )}

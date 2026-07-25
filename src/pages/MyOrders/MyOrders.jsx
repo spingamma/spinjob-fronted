@@ -128,7 +128,7 @@ export default function MyOrders() {
       {/* Header Con Switch Modo Negocio / Cliente */}
       <div className="bg-white px-4 py-4 sticky top-0 z-50 shadow-sm border-b border-gray-100 flex items-center justify-between gap-2">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} data-testid="my-orders-back-btn" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-[#1A535C]">
+          <button onClick={() => navigate('/')} data-testid="my-orders-back-btn" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-[#1A535C]">
             <ArrowLeft size={20} />
           </button>
           <div className="flex items-center gap-2.5">

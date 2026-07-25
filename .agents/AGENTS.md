@@ -48,3 +48,8 @@ Antes de dar por finalizada la tarea, debes verificar:
 🚨 **CRÍTICO:** Queda terminantemente prohibido dejar archivos basura, scripts de prueba (`scratch_*.py`, `test_*.js`) o scripts de migración únicos (`add_column_*.py`) en la raíz del proyecto tras finalizar una tarea.
 - **Acción Obligatoria:** Si creas un archivo temporal para probar una función, extraer datos, o ejecutar un `ALTER TABLE` rápido en la base de datos, **DEBES ELIMINARLO INMEDIATAMENTE** usando comandos del sistema (ej. `rm -f archivo.py`) tan pronto como el script haya cumplido su propósito.
 - Nunca des una tarea por concluida si el directorio de trabajo (frontend o backend) tiene archivos residuales que el usuario no debería subir al repositorio.
+
+## 9. Sincronización Estricta de Literales (Cross-Stack Enum Matching)
+🚨 **CRÍTICO:** Queda estrictamente prohibido copiar, migrar o asumir lógica condicional en el frontend basada en literales (ej. `if (status === 'pendiente')`) sin antes validarla contra la base de datos o la API.
+- **Acción Obligatoria:** Cada vez que desarrolles, refactorices o fusiones componentes del frontend que dependan de "estados", "tipos" o "strings literales", **DEBES OBLIGATORIAMENTE** escanear los modelos, enums o respuestas del backend (ej. `routers/orders.py` o esquemas) para confirmar la sintaxis exacta (ej. constatar si es `pendiente` o `pendiente_de_pago`).
+- La asunción ciega de valores heredados del frontend causa desconexiones silenciosas en la interfaz. ¡El backend es siempre la única fuente de verdad para los literales!
