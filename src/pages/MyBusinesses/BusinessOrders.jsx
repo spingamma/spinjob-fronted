@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, Calendar, PackageCheck, PackageOpen, Lock, Sparkles, CheckCircle2, XCircle, Eye, Download } from 'lucide-react';
+import { ArrowLeft, Loader2, Calendar, PackageCheck, PackageOpen, Lock, Sparkles, CheckCircle2, XCircle, Eye, Download, AlertCircle } from 'lucide-react';
 import fetchAuth from '../../utils/fetchAuth';
 import { formatOrderCode } from '../../utils/formatOrderCode';
 
@@ -44,7 +44,9 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
             setIsPremium(false);
             return;
           }
-        } catch {}
+        } catch (_err) {
+          // ignore
+        }
         alert("No tienes permiso para ver los pedidos de este negocio.");
         navigate('/mis-negocios');
         return;
@@ -81,8 +83,9 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
   }, [slug, startDate, endDate]);
 
   const [updatingOrder, setUpdatingOrder] = useState(null);
+  const [rejectingOrder, setRejectingOrder] = useState(null);
 
-  const handleStatusChange = async (orderId, newStatus) => {
+  const handleStatusChange = async (orderId, newStatus, reason = null) => {
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
     setUpdatingOrder({ id: orderId, status: newStatus });
     
@@ -92,12 +95,15 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
         headers: { 
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ 
+          status: newStatus,
+          payment_rejection_reason: reason 
+        })
       });
 
       if (res.ok) {
         setOrders(prev => {
-          const updated = prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o);
+          const updated = prev.map(o => o.id === orderId ? { ...o, status: newStatus, payment_rejection_reason: reason } : o);
           return updated.sort((a, b) => {
             const getScore = (status) => {
               if (status === "pendiente_de_pago" || status === "pendiente") return 0;
@@ -280,19 +286,62 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
                                     <Download size={14} /> Descargar Comprobante
                                   </button>
                                 )}
-                                <button 
-                                  onClick={() => handleStatusChange(order.id, 'cancelado')}
-                                  disabled={updatingOrder?.id === order.id}
-                                  data-testid="cancel-order-btn"
-                                  className="flex items-center gap-1.5 px-3 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                  {updatingOrder?.id === order.id && updatingOrder?.status === 'cancelado' ? (
-                                    <Loader2 size={14} className="animate-spin" />
-                                  ) : (
+                                {rejectingOrder === order.id ? (
+                                  <div className="flex flex-col gap-2 w-full mt-2">
+                                    <p className="text-xs font-bold text-gray-600 mb-1">
+                                      {order.status === 'pago_enviado' ? 'Selecciona el motivo del pago incorrecto:' : 'Selecciona el motivo del rechazo:'}
+                                    </p>
+                                    
+                                    {order.status === 'pago_enviado' ? (
+                                      <>
+                                        <button 
+                                          onClick={() => {
+                                            handleStatusChange(order.id, 'pendiente_de_pago', 'No llegó el pago a la cuenta del QR');
+                                            setRejectingOrder(null);
+                                          }}
+                                          className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold rounded-xl transition-colors text-left"
+                                        >
+                                          No llegó el pago a la cuenta del QR
+                                        </button>
+                                        <button 
+                                          onClick={() => {
+                                            handleStatusChange(order.id, 'pendiente_de_pago', 'El monto pagado esperado es incorrecto');
+                                            setRejectingOrder(null);
+                                          }}
+                                          className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold rounded-xl transition-colors text-left"
+                                        >
+                                          El monto pagado esperado es incorrecto
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <button 
+                                        onClick={() => {
+                                          handleStatusChange(order.id, 'cancelado', 'Lamentamos no poder atender este pedido en este momento. Esperamos estar disponibles pronto.');
+                                          setRejectingOrder(null);
+                                        }}
+                                        className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold rounded-xl transition-colors text-left"
+                                      >
+                                        No podemos atender este pedido ahora
+                                      </button>
+                                    )}
+
+                                    <button 
+                                      onClick={() => setRejectingOrder(null)}
+                                      className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold rounded-xl transition-colors mt-1"
+                                    >
+                                      Cancelar
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button 
+                                    onClick={() => setRejectingOrder(order.id)}
+                                    disabled={updatingOrder?.id === order.id}
+                                    className="flex items-center gap-1.5 px-3 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  >
                                     <XCircle size={14} />
-                                  )}
-                                  Rechazar
-                                </button>
+                                    {order.status === 'pago_enviado' ? 'Pago incorrecto' : 'Rechazar pedido'}
+                                  </button>
+                                )}
                                 <button 
                                   onClick={() => handleStatusChange(order.id, 'pagado')}
                                   disabled={updatingOrder?.id === order.id}

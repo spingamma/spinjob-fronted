@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Send, CheckCircle, Store, CreditCard, QrCode, Key, ArrowRight, Clock, Download, Upload, CheckCircle2, ShieldAlert, Loader2 } from 'lucide-react';
+import { ArrowLeft, Send, CheckCircle, Store, CreditCard, QrCode, Key, ArrowRight, Clock, Download, Upload, CheckCircle2, ShieldAlert, Loader2, ShoppingBag } from 'lucide-react';
 import fetchAuth from '../../utils/fetchAuth';
 
 export default function OrderSummary() {
@@ -289,10 +289,59 @@ export default function OrderSummary() {
                   </select>
                 </div>
               )}
-              <button type="submit" disabled={loading} className="w-full bg-[#F9842C] hover:bg-[#e06516] text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 mt-4 disabled:opacity-60">
+              <button type="submit" disabled={loading} data-testid="confirm-order-btn" className="w-full bg-[#F9842C] hover:bg-[#e06516] text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 mt-4 disabled:opacity-60">
                 {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Send size={18} />}
-                {isOwner ? 'Registrar Venta Directa' : 'Confirmar Pedido (Pagar con QR)'}
+                Confirmar Pedido{!isOwner && ' (Pagar con QR)'}
               </button>
+              {isOwner && (
+                <button
+                  type="button"
+                  disabled={loading}
+                  data-testid="ingresar-venta-realizada-btn"
+                  onClick={async () => {
+                    if (loading) return;
+                    setLoading(true);
+                    const orderData = {
+                      customer_name: customerName.trim() || 'Venta Presencial',
+                      delivery_method: 'presencial',
+                      payment_method: presencialPayment,
+                      total_price: totalPrice,
+                      is_direct_sale: true,
+                      items: itemsList.map(item => {
+                        const rawMatch = (item.product.price || '0').replace(/[^\d.-]/g, '');
+                        const priceNum = parseFloat(rawMatch);
+                        const validPrice = isNaN(priceNum) ? 0 : priceNum;
+                        return {
+                          product_id: item.product.id || null,
+                          product_name: item.product.name,
+                          quantity: item.quantity,
+                          price_at_time: validPrice,
+                          subtotal: validPrice * item.quantity
+                        };
+                      })
+                    };
+                    try {
+                      const res = await fetchAuth(`${API_URL}/businesses/${slug}/orders`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(orderData)
+                      });
+                      if (!res.ok) throw new Error('Error al registrar venta');
+                      navigate('/mis-compras');
+                    } catch (err) {
+                      if (err.message !== 'SESSION_EXPIRED') {
+                        alert('Hubo un problema al registrar la venta. Intenta nuevamente.');
+                      }
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 mt-2 disabled:opacity-60"
+                >
+                  {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <ShoppingBag size={18} />}
+                  Ingresar Venta Realizada
+                </button>
+              )}
             </form>
           </div>
         </div>
@@ -330,7 +379,8 @@ export default function OrderSummary() {
         body: JSON.stringify(payload)
       });
       if (!res.ok) throw new Error("Error upload");
-      setOrder(prev => ({ ...prev, status: 'pago_enviado', receipt_url: receiptPreview }));
+      // Redireccionar inmediatamente al carrito de pedidos
+      navigate('/mis-compras');
     } catch {
       setReceiptError('No se pudo enviar el comprobante.');
     } finally {
@@ -507,7 +557,7 @@ export default function OrderSummary() {
 
           {(order?.status === 'pagado' || order?.status === 'entregado' || order?.status === 'pago_enviado') && (
             <button type="button" data-testid="report-issue-btn" onClick={handleReportIssue} className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 border border-red-200/60">
-              <ShieldAlert size={16} /> Reportar Problema / No Recibí mi Producto
+              <ShieldAlert size={16} /> Hacer Reclamo
             </button>
           )}
         </div>
