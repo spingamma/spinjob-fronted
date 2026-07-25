@@ -145,7 +145,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
       alert("Para realizar un pedido necesitas iniciar sesión. Por favor ve a la página principal e ingresa a tu cuenta.");
       return;
     }
-    navigate(`/perfil/${slug}/orden`, { state: { cart, businessName, slug, deliveryMethods } });
+    navigate(`/perfil/${slug}/orden`, { state: { cart, businessName, slug, deliveryMethods, paymentQrImage, ownerId } });
   };
 
   return (
