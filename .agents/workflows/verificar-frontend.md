@@ -6,12 +6,19 @@ description: Verificación rápida del frontend — Revisa build, imports, marca
 
 Ejecuta esta lista de comprobación antes de realizar despliegues (deploy) o al terminar el desarrollo de una funcionalidad relevante.
 
-## 1. Construcción Limpia (Build)
-Ejecuta el script de compilación en el directorio del frontend para validar la ausencia de errores de tipos, sintaxis u optimización:
+## 1. Verificación Estricta de Variables e Imports (Linter)
+Antes de construir el proyecto, DEBES ejecutar el linter para atrapar `ReferenceError` y variables no definidas en JSX, ya que el bundler (Vite) no siempre los detecta:
+```bash
+npx eslint src/
+```
+Corrige cualquier variable, ícono o componente no importado que reporte ESLint.
+
+## 2. Construcción Limpia (Build)
+Ejecuta el script de compilación en el directorio del frontend para validar optimización:
 ```bash
 npm run build
 ```
-Corrige cualquier fallo (importaciones rotas, variables no definidas, JSX mal estructurado) antes de continuar.
+Corrige cualquier fallo antes de continuar.
 
 ## 2. Verificar Rutas y Lazy Imports
 Inspecciona el enrutador principal (`App.jsx` o similar) y confirma:

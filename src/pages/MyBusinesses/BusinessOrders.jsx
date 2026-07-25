@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, Calendar, PackageCheck, PackageOpen, Lock, Sparkles, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, Calendar, PackageCheck, PackageOpen, Lock, Sparkles, CheckCircle2, XCircle, Eye, Download } from 'lucide-react';
 import fetchAuth from '../../utils/fetchAuth';
 import { formatOrderCode } from '../../utils/formatOrderCode';
 
@@ -120,6 +120,20 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
     }
   };
 
+  const handleDownloadReceipt = (base64Url, orderNumber) => {
+    try {
+      const link = document.createElement('a');
+      link.href = base64Url;
+      link.download = `comprobante-pedido-${orderNumber}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error("Error al descargar comprobante", err);
+      alert("Hubo un error al intentar descargar el comprobante.");
+    }
+  };
+
   return (
     <div className={`min-h-screen bg-[#F8F9FA] ${hideHeader ? 'pb-8' : 'pb-24'} font-sans text-[#1A535C]`}>
       {/* Header */}
@@ -190,25 +204,34 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
             ) : (
               <div className="space-y-4">
                 {orders.map(order => {
-                  const isPendiente = order.status === "pendiente_de_pago" || order.status === "pendiente";
+                  const isPendiente = order.status === "pendiente_de_pago" || order.status === "pendiente" || order.status === "pago_enviado";
                   const isPagado = order.status === "pagado";
                   const isEntregado = order.status === "entregado";
+                  const isCompletado = order.status === "completado";
                   const isCancelado = order.status === "cancelado";
 
                   const statusBadgeClass = isCancelado
                     ? 'bg-red-100 text-red-700 border border-red-200'
+                    : isCompletado
+                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                     : isEntregado
                     ? 'bg-green-100 text-green-700 border border-green-200'
                     : isPagado
                     ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                    : order.status === "pago_enviado"
+                    ? 'bg-orange-100 text-orange-800 border border-orange-200'
                     : 'bg-amber-100 text-amber-800 border border-amber-200';
 
                   const statusLabel = isCancelado
                     ? 'CANCELADO'
+                    : isCompletado
+                    ? 'COMPLETADO'
                     : isEntregado
                     ? 'ENTREGADO'
                     : isPagado
                     ? 'PAGADO'
+                    : order.status === "pago_enviado"
+                    ? 'PAGO ENVIADO'
                     : 'PENDIENTE DE PAGO';
 
                   return (
@@ -248,6 +271,15 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
                           <div className="flex gap-2 flex-wrap">
                             {isPendiente && (
                               <>
+                                {order.receipt_url && (
+                                  <button 
+                                    onClick={() => handleDownloadReceipt(order.receipt_url, order.order_number)}
+                                    data-testid="download-receipt-btn"
+                                    className="flex items-center gap-1.5 px-3 py-2.5 bg-orange-100 hover:bg-orange-200 text-orange-800 text-xs font-bold rounded-xl shadow-sm border border-orange-200 transition-colors"
+                                  >
+                                    <Download size={14} /> Descargar Comprobante
+                                  </button>
+                                )}
                                 <button 
                                   onClick={() => handleStatusChange(order.id, 'cancelado')}
                                   disabled={updatingOrder?.id === order.id}
@@ -294,8 +326,17 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
                             )}
 
                             {isEntregado && (
-                              <div className="flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-3 py-2 rounded-xl border border-green-200">
-                                <CheckCircle2 size={14} /> Completado
+                              <div className="flex flex-col gap-1 w-full text-right sm:text-left sm:w-auto mt-2 sm:mt-0">
+                                <div className="flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-3 py-2 rounded-xl border border-green-200">
+                                  <PackageCheck size={14} /> Entregado
+                                </div>
+                                <span className="text-[10px] text-gray-400 font-medium">Esperando confirmación del cliente</span>
+                              </div>
+                            )}
+
+                            {isCompletado && (
+                              <div className="flex items-center gap-1 text-emerald-600 text-xs font-bold bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-200">
+                                <CheckCircle2 size={14} /> Confirmado
                               </div>
                             )}
                           </div>

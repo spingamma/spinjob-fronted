@@ -137,3 +137,6 @@ export async function createEntidad(req: Request, res: Response) {
 
 ### 2. Firmas Explícitas de Parámetros (Multipart/Form-Data)
 - 🚨 **CRÍTICO:** Cuando modifiques un envío de datos que utiliza `multipart/form-data`, es absolutamente crítico que actualices explícitamente la firma de la función del controlador o mecanismo de enrutamiento del backend para aceptar el nuevo parámetro. Los frameworks de backend (ej. FastAPI usando `Form(...)`) ignorarán silenciosamente cualquier parámetro nuevo que no esté declarado en la firma de la ruta.
+
+### 3. Auditoría Reactiva de Campos Huérfanos (Datos que "se pierden")
+- 🚨 **CRÍTICO:** Al debuggear un campo que "se pierde", "llega vacío" o "desaparece al recargar", el **primer paso obligatorio** antes de investigar el frontend es verificar si el backend tiene el campo declarado en los tres niveles: (a) firma del endpoint (parámetro declarado), (b) modelo de BD (columna/campo existente), (c) schema de respuesta (campo expuesto en el DTO). Este es el escenario más común de "campos huérfanos": código frontend que envía datos a un backend que los ignora silenciosamente porque nunca se declararon.

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, PackageOpen, ShoppingBag, Lock, Sparkles, CheckCircle2, Briefcase, Building } from 'lucide-react';
+import { ArrowLeft, Loader2, PackageOpen, ShoppingBag, Lock, Sparkles, CheckCircle2, Briefcase, Building, QrCode, Eye, ArrowRight, PackageCheck } from 'lucide-react';
 import BottomNavbar from '../../components/BottomNavbar';
 import fetchAuth from '../../utils/fetchAuth';
 import BusinessOrders from '../MyBusinesses/BusinessOrders';
@@ -97,6 +97,29 @@ export default function MyOrders() {
       fetchUserBusinesses();
     }
   }, [navigate, startDate, endDate, isBusinessMode]);
+
+  const [updatingOrderId, setUpdatingOrderId] = useState(null);
+
+  const handleMarkReceived = async (orderId) => {
+    if (!window.confirm('¿Confirmas que recibiste tu pedido?')) return;
+    setUpdatingOrderId(orderId);
+    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+    try {
+      const res = await fetchAuth(`${API_URL}/usuarios/pedidos/${orderId}/recibido`, {
+        method: 'PUT'
+      });
+      if (res.ok) {
+        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'completado' } : o));
+      } else {
+        alert("No se pudo actualizar el estado del pedido.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Hubo un error al conectar con el servidor.");
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
 
   const premiumBusinesses = myBusinesses.filter(b => b.premium && b.status === 'aprobado');
 
@@ -213,23 +236,33 @@ export default function MyOrders() {
                 const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 
                 const isCancelado = order.status === "cancelado";
+                const isCompletado = order.status === "completado";
                 const isEntregado = order.status === "entregado";
                 const isPagado = order.status === "pagado";
+                const isPagoEnviado = order.status === "pago_enviado";
 
                 const badgeClass = isCancelado 
                   ? 'bg-red-100 text-red-700 border border-red-200' 
+                  : isCompletado
+                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                   : isEntregado 
                   ? 'bg-green-100 text-green-700 border border-green-200' 
                   : isPagado 
                   ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                  : isPagoEnviado
+                  ? 'bg-orange-100 text-orange-800 border border-orange-200'
                   : 'bg-amber-100 text-amber-800 border border-amber-200';
 
                 const statusLabel = isCancelado 
                   ? 'CANCELADO' 
+                  : isCompletado
+                  ? 'COMPLETADO'
                   : isEntregado 
                   ? 'ENTREGADO' 
                   : isPagado 
                   ? 'PAGADO' 
+                  : isPagoEnviado
+                  ? 'PAGO ENVIADO'
                   : 'PENDIENTE DE PAGO';
 
                 return (
@@ -257,11 +290,55 @@ export default function MyOrders() {
                       </div>
                     </div>
 
-                    <div className="md:w-32 flex flex-col justify-between items-end md:items-end border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-4">
+                    <div className="md:w-40 flex flex-col justify-between items-end md:items-end border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-4 w-full">
                       <div className="text-right w-full flex flex-row md:flex-col justify-between md:justify-start items-center md:items-end">
                         <p className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Total</p>
                         <p className="text-xl font-black text-[#1A535C]">Bs. {order.total_price.toFixed(2)}</p>
                       </div>
+
+                      {order.status === 'pendiente' || order.status === 'pendiente_de_pago' ? (
+                        <button
+                          type="button"
+                          data-testid={`pay-order-btn-${order.id}`}
+                          onClick={() => {
+                            const targetSlug = order.business_slug || order.business?.slug || 'spingamma';
+                            navigate(`/perfil/${targetSlug}/orden/${order.id}/seguimiento`);
+                          }}
+                          className="w-full mt-3 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all bg-[#F9842C] hover:bg-[#e06516] text-white"
+                        >
+                          <QrCode size={14} /> Pagar con QR
+                        </button>
+                      ) : order.status === 'pago_enviado' ? (
+                        <button
+                          type="button"
+                          disabled
+                          className="w-full mt-3 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all bg-gray-100 text-gray-500 cursor-not-allowed"
+                        >
+                          <Loader2 size={14} className="animate-spin" /> Verificando Pago
+                        </button>
+                      ) : order.status === 'pagado' || order.status === 'entregado' ? (
+                        <div className="flex flex-col gap-2 w-full mt-3">
+                          {order.status === 'entregado' && (
+                            <div className="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] p-2 rounded-xl text-center font-bold">
+                              Tienes 72 horas para confirmar entrega o presentar reclamo
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            data-testid={`receive-order-btn-${order.id}`}
+                            onClick={() => handleMarkReceived(order.id)}
+                            disabled={updatingOrderId === order.id}
+                            className="w-full py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                          >
+                            {updatingOrderId === order.id ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                              <PackageCheck size={14} />
+                            )}
+                            Producto recibido
+                          </button>
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 );

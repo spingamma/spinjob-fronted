@@ -1,7 +1,6 @@
-// Archivo: src/plantillas/PlantillaGenerica.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, Loader2, Save } from 'lucide-react';
+import { Star, Loader2, Save, CheckCircle2 } from 'lucide-react';
 
 import useAccionesPerfil from '../hooks/useAccionesPerfil';
 import ReviewModal from '../components/ReviewModal';
@@ -44,20 +43,31 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
   } = useAccionesPerfil(profesional, onProtectedAction);
 
   // ==========================================
-  // 📝 MODO EDICIÓN "INLINE"
+  // 📝 MODO EDICIÓN "INLINE" Y BORRADOR
   // ==========================================
   const userId = getUserIdFromToken();
   const userObj = JSON.parse(localStorage.getItem('spingamma_user') || '{}');
   const isAdmin = userObj.is_admin === true;
   const isOwner = isLoggedIn && (isAdmin || profesional?.owner_id === userId);
 
+  const draftStorageKey = isCreateMode 
+    ? 'spingamma_draft_business_create' 
+    : (profesional?.slug ? `spingamma_draft_business_${profesional.slug}` : null);
+
   const [isEditing, setIsEditing] = useState(isCreateMode);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [isRestoredFromDraft, setIsRestoredFromDraft] = useState(false);
+
+  const getServerQr = (prof) => {
+    if (!prof) return '';
+    return prof.payment_qr_image || prof.qr_payment_url || prof.payment_qr || prof.qr_image || prof.qr_image_url || prof.qr_code || prof.qr || '';
+  };
+
   const [editFormData, setEditFormData] = useState(() => {
-    if (!profesional) return {};
     let initialWaNumbers = [];
     try { initialWaNumbers = JSON.parse(profesional.whatsapp_numbers || '[]'); } catch { initialWaNumbers = []; }
     if (initialWaNumbers.length === 0 && profesional.whatsapp) initialWaNumbers = [profesional.whatsapp];
+    if (initialWaNumbers.length === 0) initialWaNumbers = [''];
 
     return {
       name: profesional.name || '',
@@ -88,6 +98,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       })(),
       seller_code: '',
       orders_enabled: profesional.orders_enabled !== false,
+      payment_qr_image: getServerQr(profesional),
       carousel_order: profesional.carousel_order || '',
       delivery_methods: (() => {
         try {
@@ -105,6 +116,60 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
   const [deletedProductsIds, setDeletedProductsIds] = useState([]);
   const [hasUnsavedProduct, setHasUnsavedProduct] = useState(false);
   const [saveError, setSaveError] = useState('');
+
+  // 💾 AUTO-GUARDADO Y RESTAURACIÓN SILENCIOSA DE BORRADOR (EXPIRACIÓN 24 HRS)
+  useEffect(() => {
+    if (isEditing && draftStorageKey) {
+      try {
+        const savedDraft = localStorage.getItem(draftStorageKey);
+        if (savedDraft) {
+          const parsed = JSON.parse(savedDraft);
+          const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+          const isExpired = parsed.updatedAt && (Date.now() - parsed.updatedAt > ONE_DAY_MS);
+          
+          if (isExpired) {
+            localStorage.removeItem(draftStorageKey);
+          } else if (parsed.editFormData) {
+            if (!parsed.editFormData.whatsapp_numbers || parsed.editFormData.whatsapp_numbers.length === 0) {
+              parsed.editFormData.whatsapp_numbers = [''];
+            }
+            const serverQr = getServerQr(profesional);
+            if (serverQr && (!parsed.editFormData.payment_qr_image || !parsed.editFormData.payment_qr_image.startsWith('data:image'))) {
+              parsed.editFormData.payment_qr_image = serverQr;
+            }
+            setEditFormData(parsed.editFormData);
+            if (parsed.localProducts) setLocalProducts(parsed.localProducts);
+            if (parsed.imagePreview) setImagePreview(parsed.imagePreview);
+          }
+        }
+      } catch (err) {
+        console.error("Error cargando borrador:", err);
+      }
+    }
+  }, [isEditing, draftStorageKey, profesional]);
+
+  useEffect(() => {
+    if (isEditing && draftStorageKey) {
+      const timer = setTimeout(() => {
+        try {
+          const { new_image, payment_qr_file, ...cleanFormData } = editFormData;
+          const draftPayload = {
+            editFormData: cleanFormData,
+            localProducts: (localProducts || []).map(p => {
+              const { imageFile, ...cleanP } = p;
+              return cleanP;
+            }),
+            imagePreview,
+            updatedAt: Date.now()
+          };
+          localStorage.setItem(draftStorageKey, JSON.stringify(draftPayload));
+        } catch (err) {
+          console.error("Error guardando borrador en localStorage:", err);
+        }
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [editFormData, localProducts, imagePreview, isEditing, draftStorageKey]);
 
   // Fetch specialties & products
   useEffect(() => {
@@ -125,52 +190,63 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
   }, [isEditing, isCreateMode, profesional?.slug]);
 
   useEffect(() => {
-    if (profesional && !isEditing) {
-      // Al salir de edición, reseteamos el form local
+    if (profesional) {
       let initialWaNumbers = [];
       try { initialWaNumbers = JSON.parse(profesional.whatsapp_numbers || '[]'); } catch { initialWaNumbers = []; }
       if (initialWaNumbers.length === 0 && profesional.whatsapp) initialWaNumbers = [profesional.whatsapp];
+      if (initialWaNumbers.length === 0) initialWaNumbers = [''];
 
-      setEditFormData({
-        name: profesional.name || '',
-        title: profesional.title || '',
-        description: profesional.description || '',
-        experience_years: profesional.experience_years || '',
-        credentials: profesional.credentials || '',
-        phone: profesional.phone || '',
-        whatsapp_numbers: initialWaNumbers,
-        facebook: profesional.facebook || '',
-        instagram: profesional.instagram || '',
-        linkedin: profesional.linkedin || '',
-        tiktok: profesional.tiktok || '',
-        github: profesional.github || '',
-        website: profesional.website || '',
-        country: profesional.country || 'Bolivia',
-        state: profesional.state || '',
-        home_delivery: profesional.home_delivery || false,
-        national_delivery: profesional.national_delivery || false,
-        ubicacion_url: profesional.ubicacion_url || '',
-        category: profesional.category || '',
-        subcategories: (() => {
-          try {
-            return typeof profesional.subcategories === 'string' ? JSON.parse(profesional.subcategories) : (profesional.subcategories || []);
-          } catch(e) {
-            return (profesional.subcategories && profesional.subcategories.length > 0) ? profesional.subcategories.split(',') : [];
-          }
-        })(),
-        seller_code: '',
-        orders_enabled: profesional.orders_enabled !== false,
-        carousel_order: profesional.carousel_order || '',
-        delivery_methods: (() => {
-          try {
-            return typeof profesional.delivery_methods === 'string' ? JSON.parse(profesional.delivery_methods) : (profesional.delivery_methods || []);
-          } catch(e) {
-            return [];
-          }
-        })()
+      const currentQr = getServerQr(profesional);
+
+      setEditFormData(prev => {
+        if (isEditing && prev.payment_qr_image && prev.payment_qr_image.startsWith('data:image')) {
+          return {
+            ...prev,
+            payment_qr_image: prev.payment_qr_image
+          };
+        }
+        return {
+          name: profesional.name || '',
+          title: profesional.title || '',
+          description: profesional.description || '',
+          experience_years: profesional.experience_years || '',
+          credentials: profesional.credentials || '',
+          phone: profesional.phone || '',
+          whatsapp_numbers: initialWaNumbers,
+          facebook: profesional.facebook || '',
+          instagram: profesional.instagram || '',
+          linkedin: profesional.linkedin || '',
+          tiktok: profesional.tiktok || '',
+          github: profesional.github || '',
+          website: profesional.website || '',
+          country: profesional.country || 'Bolivia',
+          state: profesional.state || '',
+          home_delivery: profesional.home_delivery || false,
+          national_delivery: profesional.national_delivery || false,
+          ubicacion_url: profesional.ubicacion_url || '',
+          category: profesional.category || '',
+          subcategories: (() => {
+            try {
+              return typeof profesional.subcategories === 'string' ? JSON.parse(profesional.subcategories) : (profesional.subcategories || []);
+            } catch(e) {
+              return (profesional.subcategories && profesional.subcategories.length > 0) ? profesional.subcategories.split(',') : [];
+            }
+          })(),
+          seller_code: '',
+          orders_enabled: profesional.orders_enabled !== false,
+          payment_qr_image: currentQr || prev.payment_qr_image || '',
+          carousel_order: profesional.carousel_order || '',
+          delivery_methods: (() => {
+            try {
+              return typeof profesional.delivery_methods === 'string' ? JSON.parse(profesional.delivery_methods) : (profesional.delivery_methods || []);
+            } catch(e) {
+              return [];
+            }
+          })()
+        };
       });
     }
-  }, [profesional, isEditing]);
+  }, [profesional]);
 
   const handleEditChange = (e) => {
     if (e.target.name === 'image') {
@@ -197,9 +273,15 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
     }
 
     const isPremium = profesional?.premium === true;
-    if (isPremium && editFormData.orders_enabled && (!editFormData.delivery_methods || editFormData.delivery_methods.length === 0)) {
-      alert("Debes agregar al menos un método de entrega si habilitas los pedidos.");
-      return;
+    if (isPremium && editFormData.orders_enabled) {
+      if (!editFormData.delivery_methods || editFormData.delivery_methods.length === 0) {
+        alert("Debes agregar al menos un método de entrega si habilitas los pedidos.");
+        return;
+      }
+      if (!editFormData.payment_qr_image) {
+        alert("Requisito Obligatorio: Debes subir la imagen de tu QR de Pago Bancario (QR Simple) para habilitar la recepción de pedidos.");
+        return;
+      }
     }
 
 
@@ -230,14 +312,42 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           } else {
              formDataObj.append('whatsapp', '');
           }
-        } else if (key === 'subcategories' || key === 'delivery_methods') {
-          if (payload[key].length > 0) {
-             formDataObj.append(key, JSON.stringify(payload[key]));
+        } else if (key === 'subcategories') {
+          if (Array.isArray(payload[key]) && payload[key].length > 0) {
+             formDataObj.append('subcategories', JSON.stringify(payload[key]));
           }
-        } else if (payload[key] !== null && payload[key] !== '') {
+        } else if (key === 'delivery_methods') {
+          const methods = Array.isArray(payload[key]) ? payload[key] : [];
+          formDataObj.append('delivery_methods', JSON.stringify(methods));
+        } else if (key === 'payment_qr_image' || key === 'payment_qr_file') {
+          // Omitir en bucle, se procesa de forma directa abajo
+        } else if (payload[key] !== null && payload[key] !== undefined && payload[key] !== '') {
           formDataObj.append(key, payload[key]);
         }
       });
+
+      // Procesar Imagen de QR de Pago Bancario (solo enviar si es File o base64 nuevo)
+      // URLs del servidor (ya persistidas en Cloudinary) NO se reenvían
+      if (payload.payment_qr_file instanceof File) {
+        formDataObj.append('payment_qr_image', payload.payment_qr_file);
+      } else if (typeof payload.payment_qr_image === 'string' && payload.payment_qr_image.startsWith('data:image')) {
+        try {
+          const arr = payload.payment_qr_image.split(',');
+          const mime = arr[0].match(/:(.*?);/)[1];
+          const bstr = atob(arr[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          const qrBlob = new Blob([u8arr], { type: mime });
+          const qrFile = new File([qrBlob], "payment_qr.png", { type: mime });
+          formDataObj.append('payment_qr_image', qrFile);
+        } catch(e) {
+          console.error("Error convirtiendo QR base64 a File:", e);
+        }
+      }
+      // Si payment_qr_image es una URL (http/https), no la reenviamos: ya está en Cloudinary
 
       const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
       
@@ -269,6 +379,31 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       
       const responseData = await res.json();
       const currentSlug = isCreateMode ? responseData.slug : profesional.slug;
+
+      // Actualización inmediata de estado local con los datos devueltos por el servidor
+      if (responseData) {
+        const savedQr = getServerQr(responseData) || payload.payment_qr_image;
+        if (savedQr) {
+          if (profesional) {
+            profesional.payment_qr_image = savedQr;
+            profesional.qr_payment_url = savedQr;
+            profesional.payment_qr = savedQr;
+            profesional.qr_image = savedQr;
+            profesional.qr_image_url = savedQr;
+          }
+          setEditFormData(prev => ({ ...prev, payment_qr_image: savedQr, payment_qr_file: null }));
+        }
+        if (responseData.delivery_methods) {
+          let savedMethods = responseData.delivery_methods;
+          if (typeof savedMethods === 'string') {
+            try { savedMethods = JSON.parse(savedMethods); } catch(e) {}
+          }
+          if (Array.isArray(savedMethods)) {
+            if (profesional) profesional.delivery_methods = savedMethods;
+            setEditFormData(prev => ({ ...prev, delivery_methods: savedMethods }));
+          }
+        }
+      }
 
       // 🛒 PROCESAR PRODUCTOS DEL CATÁLOGO
       // 1. Eliminar productos
@@ -333,6 +468,12 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           }
         }
       }
+
+      // 🧹 Limpiar borrador guardado localmente tras guardar con éxito
+      if (draftStorageKey) {
+        localStorage.removeItem(draftStorageKey);
+      }
+      setIsRestoredFromDraft(false);
 
       setIsEditing(false);
       setImagePreview(null);
@@ -417,6 +558,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
                 setCarouselOrder={(val) => setEditFormData(prev => ({ ...prev, carousel_order: val }))}
                 deliveryMethods={editFormData.delivery_methods}
                 setDeliveryMethods={(val) => setEditFormData(prev => ({ ...prev, delivery_methods: val }))}
+                paymentQrImage={editFormData.payment_qr_image}
+                setPaymentQrImage={(val, fileObj) => setEditFormData(prev => ({ ...prev, payment_qr_image: val, payment_qr_file: fileObj || prev.payment_qr_file }))}
                 onModalOpenChange={setIsSubModalOpen}
               />
             </div>
@@ -432,6 +575,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               ordersEnabled={profesional.orders_enabled !== false}
               carouselOrder={profesional.carousel_order}
               deliveryMethods={profesional.delivery_methods}
+              paymentQrImage={getServerQr(profesional)}
+              ownerId={profesional.owner_id}
             />
           )}
         </div>
@@ -525,31 +670,40 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               {saveError}
             </div>
           )}
-          <div className="w-full max-w-4xl mx-auto flex justify-end items-center gap-3">
-            <button 
-              onClick={() => { 
-                if (isCreateMode) {
-                  volverAtras();
-                } else {
-                  setIsEditing(false); 
-                  setImagePreview(null); 
-                }
-              }}
-              disabled={isSavingEdit}
-              data-testid="cancel-edit-btn"
-              className="px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-[#757778] font-bold text-sm transition-all shadow-sm"
-            >
-              Cancelar
-            </button>
-            <button 
-              onClick={handleSaveEdit}
-              disabled={isSavingEdit}
-              data-testid="save-edit-btn"
-              className="px-8 py-3 rounded-xl bg-[#F9842C] hover:bg-[#e06516] text-white font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 min-w-[160px]"
-            >
-              {isSavingEdit ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-              {isSavingEdit ? 'Guardando...' : 'Guardar Cambios'}
-            </button>
+          <div className="w-full max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+              <CheckCircle2 size={15} className="text-emerald-500 shrink-0" />
+              <span>Borrador guardado automáticamente en tu navegador</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => { 
+                  if (draftStorageKey) {
+                    localStorage.removeItem(draftStorageKey);
+                  }
+                  if (isCreateMode) {
+                    volverAtras();
+                  } else {
+                    setIsEditing(false); 
+                    setImagePreview(null); 
+                  }
+                }}
+                disabled={isSavingEdit}
+                data-testid="cancel-edit-btn"
+                className="px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-[#757778] font-bold text-sm transition-all shadow-sm"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={handleSaveEdit}
+                disabled={isSavingEdit}
+                data-testid="save-edit-btn"
+                className="px-8 py-3 rounded-xl bg-[#F9842C] hover:bg-[#e06516] text-white font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 min-w-[160px]"
+              >
+                {isSavingEdit ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                {isSavingEdit ? 'Guardando...' : 'Guardar Cambios'}
+              </button>
+            </div>
           </div>
         </div>
       )}

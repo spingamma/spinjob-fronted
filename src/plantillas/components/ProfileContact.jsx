@@ -43,6 +43,10 @@ export default function ProfileContact({
     newWa.splice(index, 1);
     setEditFormData({ ...editFormData, whatsapp_numbers: newWa });
   };
+  const waNumbersList = (editFormData.whatsapp_numbers && editFormData.whatsapp_numbers.length > 0) 
+    ? editFormData.whatsapp_numbers 
+    : [''];
+
   return (
     <>
       {/* 📱 WHATSAPP Y LLAMADAS */}
@@ -55,31 +59,41 @@ export default function ProfileContact({
           <div className="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm flex flex-col gap-4">
             <div>
               <label className="text-sm font-bold text-[#1A535C] flex items-center gap-2 mb-2">
-                <WhatsappIcon size={16} className="text-[#25D366]" /> Números de WhatsApp (sin código de país)
+                <WhatsappIcon size={16} className="text-[#25D366]" /> Número de WhatsApp (sin código de país)
               </label>
-              {(editFormData.whatsapp_numbers || []).map((num, idx) => (
+              {waNumbersList.map((num, idx) => (
                 <div key={idx} className="flex gap-2 mb-2 items-center">
-                  <input 
-                    value={num} 
-                    onChange={(e) => handleWaChange(idx, e.target.value)} 
-                    className="flex-1 text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded p-2 outline-none transition-all"
-                    placeholder="Ej. 70012345"
-                  />
-                  <button 
-                    onClick={() => handleRemoveWa(idx)}
-                    className="p-2 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors shrink-0"
-                    title="Eliminar número"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  <div className="relative flex-1 flex items-center">
+                    <span className="absolute left-3 text-gray-400">
+                      <WhatsappIcon size={16} className="text-[#25D366]" />
+                    </span>
+                    <input 
+                      data-testid={`input-whatsapp-${idx}`}
+                      value={num} 
+                      onChange={(e) => handleWaChange(idx, e.target.value)} 
+                      className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded pl-9 p-2 outline-none transition-all"
+                      placeholder="Ej. 70012345"
+                    />
+                  </div>
+                  {waNumbersList.length > 1 && (
+                    <button 
+                      data-testid={`remove-whatsapp-${idx}`}
+                      onClick={() => handleRemoveWa(idx)}
+                      className="p-2 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors shrink-0"
+                      title="Eliminar número"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               ))}
-              {(editFormData.whatsapp_numbers || []).length < 2 && (
+              {waNumbersList.length < 2 && (
                 <button 
+                  data-testid="add-whatsapp-btn"
                   onClick={handleAddWa}
-                  className="flex items-center gap-1 text-xs font-bold text-[#F9842C] hover:text-[#e06516] transition-colors mt-1"
+                  className="flex items-center gap-1 text-xs font-bold text-[#F9842C] hover:text-[#e06516] transition-colors mt-2 p-1 rounded hover:bg-orange-50"
                 >
-                  <Plus size={14} /> Añadir otro número
+                  <Plus size={14} /> Añadir otro número de WhatsApp
                 </button>
               )}
             </div>
@@ -88,6 +102,7 @@ export default function ProfileContact({
                 <Phone size={16} className="text-[#1A535C]" /> Teléfono Fijo o Secundario
               </label>
               <input 
+                data-testid="input-phone"
                 name="phone" 
                 value={editFormData.phone || ''} 
                 onChange={handleEditChange} 
@@ -144,27 +159,27 @@ export default function ProfileContact({
           <div className="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-bold text-purple-600 flex items-center gap-2 mb-1"><Globe size={16} /> Sitio Web</label>
-              <input name="website" value={editFormData.website || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="https://..." />
+              <input data-testid="input-website" name="website" value={editFormData.website || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="https://..." />
             </div>
             <div>
               <label className="text-sm font-bold text-blue-600 flex items-center gap-2 mb-1"><Facebook size={16} /> Facebook</label>
-              <input name="facebook" value={editFormData.facebook || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de Facebook" />
+              <input data-testid="input-facebook" name="facebook" value={editFormData.facebook || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de Facebook" />
             </div>
             <div>
               <label className="text-sm font-bold text-pink-600 flex items-center gap-2 mb-1"><Instagram size={16} /> Instagram</label>
-              <input name="instagram" value={editFormData.instagram || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de Instagram" />
+              <input data-testid="input-instagram" name="instagram" value={editFormData.instagram || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de Instagram" />
             </div>
             <div>
               <label className="text-sm font-bold text-sky-600 flex items-center gap-2 mb-1"><Linkedin size={16} /> LinkedIn</label>
-              <input name="linkedin" value={editFormData.linkedin || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de LinkedIn" />
+              <input data-testid="input-linkedin" name="linkedin" value={editFormData.linkedin || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de LinkedIn" />
             </div>
             <div>
               <label className="text-sm font-bold text-black flex items-center gap-2 mb-1"><TiktokIcon size={16} /> TikTok</label>
-              <input name="tiktok" value={editFormData.tiktok || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de TikTok" />
+              <input data-testid="input-tiktok" name="tiktok" value={editFormData.tiktok || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de TikTok" />
             </div>
             <div>
               <label className="text-sm font-bold text-[#757778] flex items-center gap-2 mb-1"><Github size={16} /> GitHub</label>
-              <input name="github" value={editFormData.github || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de GitHub" />
+              <input data-testid="input-github" name="github" value={editFormData.github || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de GitHub" />
             </div>
           </div>
         ) : (

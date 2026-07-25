@@ -1,15 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Package, ExternalLink, Loader2, MoreHorizontal, Plus, Minus, ShoppingCart } from 'lucide-react';
+import { Package, ExternalLink, Loader2, MoreHorizontal, Plus, Minus, ShoppingCart, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cleanWhatsappNumber } from '../utils/phone';
 import miCarrito from '../assets/oso-carrito.webp';
+import CatalogSearchGrid from './CatalogSearchGrid';
 
-export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia', theme = 'light', isPremium = false, ordersEnabled = true, carouselOrder, deliveryMethods }) {
+export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia', theme = 'light', isPremium = false, ordersEnabled = true, carouselOrder, deliveryMethods, paymentQrImage, ownerId }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState({});
   const [limitMsg, setLimitMsg] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+
+  const userStr = localStorage.getItem('spingamma_user');
+  const currentUser = userStr ? JSON.parse(userStr) : null;
+  const isOwner = currentUser && ownerId && String(currentUser.id) === String(ownerId);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setSearchTerm('');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     if (!slug) {
@@ -20,10 +36,16 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
     fetch(`${API_URL}/businesses/${slug}/products`)
       .then(res => res.ok ? res.json() : Promise.reject())
-      .then(data => setProducts(data.filter(p => p.is_visible !== false)))
+      .then(data => {
+        if (isOwner) {
+          setProducts(data);
+        } else {
+          setProducts(data.filter(p => p.is_visible !== false));
+        }
+      })
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
-  }, [slug]);
+  }, [slug, isOwner]);
 
   if (loading) {
     return (
@@ -39,6 +61,13 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
   }
 
   const isDark = theme === 'dark';
+
+  const visibleProducts = isOwner ? products : products.filter(p => p.is_visible !== false);
+  const filteredProducts = visibleProducts.filter(p => 
+    (p.name && p.name.toLowerCase().includes(searchTerm.toLowerCase())) || 
+    (p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
 
   // Agrupar productos por carousel_name
   let grouped = {};
@@ -121,7 +150,45 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
 
   return (
     <div className="w-full relative">
-      {carouselKeys.length > 0 ? (
+      {/* Buscador Global Superior */}
+      <div className="px-4 mb-4">
+        <div className={`relative flex items-center rounded-2xl border px-3 py-2.5 transition-all ${
+          isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-gray-200 text-[#1A535C] shadow-sm'
+        }`}>
+          <Search size={18} className="text-gray-400 mr-2 shrink-0" />
+          <input
+            type="text"
+            data-testid="catalog-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar producto por nombre o descripción..."
+            className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-gray-400"
+          />
+          {searchTerm && (
+            <button
+              type="button"
+              data-testid="clear-catalog-search-btn"
+              onClick={() => setSearchTerm('')}
+              className="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full text-gray-400 transition-colors"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {searchTerm.trim() !== '' ? (
+        <CatalogSearchGrid
+          products={filteredProducts}
+          isDark={isDark}
+          isOwner={isOwner}
+          isPremium={isPremium}
+          ordersEnabled={ordersEnabled}
+          cart={cart}
+          updateCart={updateCart}
+          limitMsg={limitMsg}
+        />
+      ) : carouselKeys.length > 0 ? (
         <div className="flex flex-col gap-4">
           {carouselKeys.map((cname, idx) => (
             <CarouselBlock
@@ -139,6 +206,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
               limitMsg={limitMsg}
             />
           ))}
+
 
           {/* Si hay URL de catálogo externo y ya mostramos productos, lo ofrecemos al final */}
           {catalogUrl && (

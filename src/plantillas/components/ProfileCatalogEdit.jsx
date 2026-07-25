@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Package, Trash2, Pencil, Eye, EyeOff, Layers, Settings2, X, Archive, ChevronDown, ChevronRight, ChevronUp, Check } from 'lucide-react';
+import { Plus, Package, Trash2, Pencil, Eye, EyeOff, Layers, Settings2, X, Archive, ChevronDown, ChevronRight, ChevronUp, Check, Upload, QrCode } from 'lucide-react';
 import ProductFormModal from './ProductFormModal';
 import PremiumModal from '../../components/PremiumModal';
 
@@ -16,6 +16,8 @@ export default function ProfileCatalogEdit({
   setCarouselOrder,
   deliveryMethods = [],
   setDeliveryMethods,
+  paymentQrImage = '',
+  setPaymentQrImage,
   onModalOpenChange
 }) {
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
@@ -234,9 +236,15 @@ export default function ProfileCatalogEdit({
   };
 
   const handleCloseInventory = () => {
-    if (isPremium && ordersEnabled && (!deliveryMethods || deliveryMethods.length === 0)) {
-      alert("Debes agregar al menos un método de entrega antes de salir, o desmarcar la casilla de pedidos.");
-      return;
+    if (isPremium && ordersEnabled) {
+      if (!deliveryMethods || deliveryMethods.length === 0) {
+        alert("Debes agregar al menos un método de entrega antes de salir, o desmarcar la casilla de pedidos.");
+        return;
+      }
+      if (!paymentQrImage) {
+        alert("Debes subir la imagen de tu QR de Pago Bancario antes de salir, o desmarcar la casilla de pedidos.");
+        return;
+      }
     }
     setIsInventoryOpen(false);
   };
@@ -320,7 +328,68 @@ export default function ProfileCatalogEdit({
                     </div>
 
                     {ordersEnabled && (
-                      <div className="mt-4 border-t border-gray-100 pt-4">
+                      <div className="mt-4 border-t border-gray-100 pt-4 space-y-4">
+                        {/* Rediseño UX Premium: Carga de QR Bancario */}
+                        <div className="bg-[#F8F9FA] p-4 rounded-2xl border border-gray-200/80">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <label className="text-xs font-bold text-[#1A535C] flex items-center gap-1.5">
+                              <QrCode size={16} className="text-[#F9842C]" /> QR de Pago Bancario (QR Simple) <span className="text-[#F9842C]">*</span>
+                            </label>
+                            <span className="text-[10px] font-extrabold bg-[#F9842C]/10 text-[#F9842C] px-2 py-0.5 rounded-full border border-[#F9842C]/20 uppercase">
+                              Requerido
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-gray-500 mb-3 leading-relaxed">
+                            Sube la imagen del QR de tu banco (BCP, BNB, Bisa, Mercantil, etc.) para cobros de pedidos.
+                          </p>
+
+                          <div className="flex items-center gap-3">
+                            {paymentQrImage ? (
+                              <div className="relative w-32 h-32 bg-white rounded-2xl border border-gray-200 p-2 overflow-hidden shadow-sm">
+                                <img src={paymentQrImage} alt="QR de Pago Bancario" className="w-full h-full object-contain" />
+                                <button
+                                  type="button"
+                                  data-testid="remove-payment-qr-btn"
+                                  onClick={() => setPaymentQrImage && setPaymentQrImage('')}
+                                  className="absolute top-1.5 right-1.5 bg-gray-900/80 hover:bg-red-600 text-white p-1 rounded-full text-xs shadow transition-colors backdrop-blur-sm"
+                                  title="Cambiar o eliminar QR"
+                                >
+                                  <X size={13} />
+                                </button>
+                              </div>
+                            ) : (
+                              <label className="w-full h-28 border-2 border-dashed border-gray-300 hover:border-[#F9842C] bg-white hover:bg-orange-50/30 rounded-2xl flex flex-col items-center justify-center p-3 cursor-pointer transition-all shadow-sm group">
+                                <Upload size={22} className="text-[#F9842C] group-hover:scale-110 transition-transform mb-1" />
+                                <span className="text-xs font-bold text-[#1A535C] group-hover:text-[#F9842C] transition-colors">
+                                  Subir Imagen de QR de Pago
+                                </span>
+                                <span className="text-[10px] text-gray-400 mt-0.5">Formats: PNG, JPG (Máx 5MB)</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  data-testid="payment-qr-file-input"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      const reader = new FileReader();
+                                      reader.onloadend = () => {
+                                        if (setPaymentQrImage) setPaymentQrImage(reader.result, file);
+                                      };
+                                      reader.readAsDataURL(file);
+                                    }
+                                  }}
+                                  className="hidden"
+                                />
+                              </label>
+                            )}
+                          </div>
+
+                          <p className="text-[11px] text-gray-500 mt-2.5 flex items-center gap-1.5 font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#F9842C] inline-block"></span>
+                            Tus clientes verán este QR al momento de confirmar su pedido.
+                          </p>
+                        </div>
+
                         <div 
                           className="flex justify-between items-center cursor-pointer mb-2"
                           onClick={() => setIsDeliveryOpen(!isDeliveryOpen)}
