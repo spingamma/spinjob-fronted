@@ -53,3 +53,7 @@ Antes de dar por finalizada la tarea, debes verificar:
 🚨 **CRÍTICO:** Queda estrictamente prohibido copiar, migrar o asumir lógica condicional en el frontend basada en literales (ej. `if (status === 'pendiente')`) sin antes validarla contra la base de datos o la API.
 - **Acción Obligatoria:** Cada vez que desarrolles, refactorices o fusiones componentes del frontend que dependan de "estados", "tipos" o "strings literales", **DEBES OBLIGATORIAMENTE** escanear los modelos, enums o respuestas del backend (ej. `routers/orders.py` o esquemas) para confirmar la sintaxis exacta (ej. constatar si es `pendiente` o `pendiente_de_pago`).
 - La asunción ciega de valores heredados del frontend causa desconexiones silenciosas en la interfaz. ¡El backend es siempre la única fuente de verdad para los literales!
+
+## 10. Prohibición Estricta de Alucinación de Contexto Histórico o de Negocio (Anti-Inventiva)
+🚨 **CRÍTICO:** Cuando detectes una discrepancia en valores duros (como números de teléfono, URLs, textos, configuraciones, etc.), **tienes estrictamente prohibido inventar o asumir** el origen de esa discrepancia (ej. decir "era un número antiguo", "lo dejó el desarrollador anterior", etc.) si no cuentas con evidencia concreta en el código o en el historial.
+- **Acción Obligatoria:** Debes limitarte a informar la discrepancia de forma 100% objetiva (ej. "El código apuntaba a X y lo cambié por Y") y, si hay dudas, debes preguntar al usuario cuál es el valor correcto. Nunca fabriques justificaciones para excusar errores o suposiciones.
