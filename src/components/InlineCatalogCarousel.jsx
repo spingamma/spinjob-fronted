@@ -1,51 +1,44 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Package, ExternalLink, Loader2, MoreHorizontal, Plus, Minus, ShoppingCart, Search, X } from 'lucide-react';
+import React from 'react';
+import { Loader2, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { cleanWhatsappNumber } from '../utils/phone';
-import miCarrito from '../assets/oso-carrito.webp';
 import CatalogSearchGrid from './CatalogSearchGrid';
+import { useCatalogData } from './Catalog/hooks/useCatalogData';
+import { useCart } from './Catalog/hooks/useCart';
+import CatalogSearchBar from './Catalog/CatalogSearchBar';
+import CarouselBlock from './Catalog/CarouselBlock';
+import FloatingOrderButton from './Catalog/FloatingOrderButton';
 
-export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia', theme = 'light', isPremium = false, ordersEnabled = true, carouselOrder, deliveryMethods, paymentQrImage, ownerId }) {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [cart, setCart] = useState({});
-  const [limitMsg, setLimitMsg] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+export default function InlineCatalogCarousel({ slug, catalogUrl, theme = 'light', isPremium = false, ordersEnabled = true, carouselOrder, deliveryMethods, paymentQrImage, ownerId }) {
   const navigate = useNavigate();
+  const isDark = theme === 'dark';
 
-  const userStr = localStorage.getItem('spingamma_user');
-  const currentUser = userStr ? JSON.parse(userStr) : null;
-  const isOwner = currentUser && ownerId && String(currentUser.id) === String(ownerId);
+  const {
+    products,
+    loading,
+    searchTerm,
+    setSearchTerm,
+    filteredProducts,
+    grouped,
+    carouselKeys,
+    isOwner
+  } = useCatalogData(slug, isPremium, carouselOrder, ownerId);
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        setSearchTerm('');
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  const {
+    cart,
+    limitMsg,
+    updateCart,
+    totalItems,
+    totalPrice
+  } = useCart();
 
-  useEffect(() => {
-    if (!slug) {
-      setLoading(false);
+  const handleOrder = () => {
+    const token = localStorage.getItem('spingamma_token');
+    if (!token) {
+      alert("Para realizar un pedido necesitas iniciar sesión. Por favor ve a la página principal e ingresa a tu cuenta.");
       return;
     }
-    setLoading(true);
-    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-    fetch(`${API_URL}/businesses/${slug}/products`)
-      .then(res => res.ok ? res.json() : Promise.reject())
-      .then(data => {
-        if (isOwner) {
-          setProducts(data);
-        } else {
-          setProducts(data.filter(p => p.is_visible !== false));
-        }
-      })
-      .catch(() => setProducts([]))
-      .finally(() => setLoading(false));
-  }, [slug, isOwner]);
+    navigate(`/perfil/${slug}/orden`, { state: { cart, slug, deliveryMethods, paymentQrImage, ownerId } });
+  };
 
   if (loading) {
     return (
@@ -60,122 +53,14 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
     return null;
   }
 
-  const isDark = theme === 'dark';
-
-  const visibleProducts = isOwner ? products : products.filter(p => p.is_visible !== false);
-  const filteredProducts = visibleProducts.filter(p => 
-    (p.name && p.name.toLowerCase().includes(searchTerm.toLowerCase())) || 
-    (p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-
-  // Agrupar productos por carousel_name
-  let grouped = {};
-  if (isPremium) {
-    products.forEach(p => {
-      const cname = p.carousel_name || 'Catálogo';
-      if (!grouped[cname]) grouped[cname] = [];
-      grouped[cname].push(p);
-    });
-  } else {
-    grouped['Catálogo'] = products;
-  }
-
-  // Tomar hasta 3 carruseles si es premium, si no 1
-  const maxCarousels = isPremium ? 3 : 1;
-  let carouselKeys = Object.keys(grouped);
-  if (isPremium && carouselOrder) {
-    try {
-      const orderList = JSON.parse(carouselOrder);
-      if (Array.isArray(orderList) && orderList.length > 0) {
-        carouselKeys.sort((a, b) => {
-          const indexA = orderList.indexOf(a);
-          const indexB = orderList.indexOf(b);
-          const posA = indexA === -1 ? Infinity : indexA;
-          const posB = indexB === -1 ? Infinity : indexB;
-          return posA - posB;
-        });
-      }
-    } catch (e) {
-      console.error("Error parsing carouselOrder in InlineCatalogCarousel:", e);
-    }
-  }
-  carouselKeys = carouselKeys.slice(0, maxCarousels);
-
-  const updateCart = (product, delta) => {
-    let limitReached = false;
-    setCart(prev => {
-      const current = prev[product.id]?.quantity || 0;
-      const newQuantity = current + delta;
-
-      if (delta > 0 && product.stock !== undefined && product.stock !== null && product.stock !== '') {
-        if (newQuantity > product.stock) {
-          limitReached = true;
-          return prev;
-        }
-      }
-
-      if (newQuantity <= 0) {
-        const newCart = { ...prev };
-        delete newCart[product.id];
-        return newCart;
-      }
-      return {
-        ...prev,
-        [product.id]: { product, quantity: newQuantity }
-      };
-    });
-
-    if (limitReached) {
-      setLimitMsg(product.id);
-      setTimeout(() => setLimitMsg(null), 2000);
-    }
-  };
-
-  const totalItems = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = Object.values(cart).reduce((sum, item) => {
-    // try to parse price as float. e.g., "Bs. 120" -> 120
-    const priceNum = parseFloat((item.product.price || "0").replace(/[^\d.-]/g, ''));
-    return sum + (priceNum || 0) * item.quantity;
-  }, 0);
-
-  const handleOrder = () => {
-    const token = localStorage.getItem('spingamma_token');
-    if (!token) {
-      alert("Para realizar un pedido necesitas iniciar sesión. Por favor ve a la página principal e ingresa a tu cuenta.");
-      return;
-    }
-    navigate(`/perfil/${slug}/orden`, { state: { cart, businessName, slug, deliveryMethods, paymentQrImage, ownerId } });
-  };
-
   return (
     <div className="w-full relative">
       {/* Buscador Global Superior */}
-      <div className="px-4 mb-4">
-        <div className={`relative flex items-center rounded-2xl border px-3 py-2.5 transition-all ${
-          isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-gray-200 text-[#1A535C] shadow-sm'
-        }`}>
-          <Search size={18} className="text-gray-400 mr-2 shrink-0" />
-          <input
-            type="text"
-            data-testid="catalog-search-input"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar producto por nombre o descripción..."
-            className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-gray-400"
-          />
-          {searchTerm && (
-            <button
-              type="button"
-              data-testid="clear-catalog-search-btn"
-              onClick={() => setSearchTerm('')}
-              className="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full text-gray-400 transition-colors"
-            >
-              <X size={16} />
-            </button>
-          )}
-        </div>
-      </div>
+      <CatalogSearchBar 
+        searchTerm={searchTerm} 
+        setSearchTerm={setSearchTerm} 
+        isDark={isDark} 
+      />
 
       {searchTerm.trim() !== '' ? (
         <CatalogSearchGrid
@@ -196,9 +81,6 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
               title={cname.toUpperCase()}
               products={grouped[cname]}
               isDark={isDark}
-              whatsappNumber={whatsappNumber}
-              businessName={businessName}
-              country={country}
               isPremium={isPremium}
               ordersEnabled={ordersEnabled}
               cart={cart}
@@ -206,7 +88,6 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
               limitMsg={limitMsg}
             />
           ))}
-
 
           {/* Si hay URL de catálogo externo y ya mostramos productos, lo ofrecemos al final */}
           {catalogUrl && (
@@ -226,215 +107,14 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, whatsappNumber
       ) : null}
 
       {/* Floating Order Button */}
-      {isPremium && ordersEnabled && totalItems > 0 && (
-        <div className="fixed bottom-6 left-0 right-0 px-4 z-[90] flex justify-center animate-in slide-in-from-bottom-10">
-          <button
-            data-testid="order-checkout-btn"
-            onClick={handleOrder}
-            className="w-full max-w-sm bg-[#F9842C] hover:bg-[#e06516] text-white font-bold py-4 px-6 rounded-2xl shadow-xl flex items-center justify-between transition-all transform hover:scale-[1.02]"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center">
-                <img src={miCarrito} alt="Carrito" className="w-7 h-7 object-contain drop-shadow-md" />
-              </div>
-              <span className="text-lg">{isOwner ? 'Ingresar Venta' : 'Ordenar'} ({totalItems})</span>
-            </div>
-            <span className="text-lg">Bs. {totalPrice.toFixed(2)}</span>
-          </button>
-        </div>
-      )}
+      <FloatingOrderButton 
+        isPremium={isPremium}
+        ordersEnabled={ordersEnabled}
+        totalItems={totalItems}
+        totalPrice={totalPrice}
+        isOwner={isOwner}
+        handleOrder={handleOrder}
+      />
     </div>
   );
-}
-
-const CarouselBlock = ({ title, products, isDark, whatsappNumber, businessName, country, isPremium, ordersEnabled, cart, updateCart, limitMsg }) => {
-  // Crear un carrusel pseudo-infinito repitiendo los productos 20 veces (nadie hace swipe 50+ veces)
-  const displayProducts = products.length > 0 ? Array(20).fill(products).flat() : [];
-
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [expandedProducts, setExpandedProducts] = useState({});
-  const containerRef = useRef(null);
-
-  const toggleExpand = (idx, e) => {
-    e.stopPropagation();
-    setExpandedProducts(prev => ({
-      ...prev,
-      [idx]: !prev[idx]
-    }));
-  };
-
-  const handleScroll = () => {
-    if (!containerRef.current) return;
-    const container = containerRef.current;
-    const scrollLeft = container.scrollLeft;
-    const containerCenter = scrollLeft + container.offsetWidth / 2;
-
-    let closestIndex = 0;
-    let minDistance = Infinity;
-
-    Array.from(container.children).forEach((child) => {
-      if (!child.hasAttribute('data-product-idx')) return;
-
-      const childCenter = child.offsetLeft + child.offsetWidth / 2;
-      const distance = Math.abs(childCenter - containerCenter);
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestIndex = parseInt(child.getAttribute('data-product-idx'), 10);
-      }
-    });
-
-    if (closestIndex !== activeIndex) {
-      setActiveIndex(closestIndex);
-    }
-  };
-
-  const productsKey = products.map(p => p.id).join(',');
-
-  useEffect(() => {
-    if (products.length === 0 || !containerRef.current) return;
-
-    // Inicializar en el medio de las copias para tener scroll "infinito" hacia ambos lados
-    const startIndex = products.length * 10;
-
-    const initTimer = setTimeout(() => {
-      if (!containerRef.current) return;
-      const targetChild = containerRef.current.children[startIndex + 1]; // +1 por <style>
-      if (targetChild) {
-        containerRef.current.scrollLeft = targetChild.offsetLeft - (containerRef.current.offsetWidth / 2) + (targetChild.offsetWidth / 2);
-        setActiveIndex(startIndex);
-      }
-    }, 100);
-
-    return () => clearTimeout(initTimer);
-  }, [productsKey]);
-
-  const handleProductClick = (product) => {
-    // A pedido del usuario, no redirigir automáticamente a WhatsApp al hacer click en el producto.
-  };
-
-
-  return (
-    <div className="w-full overflow-hidden mb-2">
-      <h3 className={`text-xs font-extrabold tracking-widest mb-4 flex items-center gap-2 px-4 uppercase ${isDark ? 'text-white' : 'text-[#1A535C]'}`}>
-        <span className={`w-1 h-4 rounded-full ${isDark ? 'bg-[#C8A721]' : 'bg-[#1D565F]'}`}></span>
-        {title}
-      </h3>
-
-      <div
-        ref={containerRef}
-        onScroll={handleScroll}
-        className="flex items-center overflow-x-auto snap-x snap-mandatory hide-scroll px-[calc(50%-97.5px)] sm:px-[calc(50%-117.5px)] md:px-[calc(50%-135px)] gap-4 sm:gap-6 pb-4 pt-2 -mb-2"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        <style>{`.hide-scroll::-webkit-scrollbar { display: none; }`}</style>
-
-        {displayProducts.map((product, idx) => {
-          const isActive = activeIndex === idx;
-
-          return (
-            <div
-              key={`${product.id}-${idx}`}
-              data-product-idx={idx}
-              className={`snap-center shrink-0 h-fit w-[195px] sm:w-[235px] md:w-[270px] transition-all duration-300 ease-out flex flex-col rounded-[1.25rem] overflow-hidden border cursor-pointer ${isActive
-                ? (isDark ? 'bg-[#1e1e1e] border-white/10 shadow-[0_15px_30px_-10px_rgba(0,0,0,0.5)] scale-100 z-10' : 'bg-white border-transparent shadow-[0_15px_30px_-10px_rgba(30,61,81,0.15)] scale-100 z-10')
-                : (isDark ? 'bg-[#1e1e1e]/50 border-white/5 scale-90 opacity-100 z-0' : 'bg-white border-gray-200 scale-90 opacity-100 z-0 hover:bg-gray-50')
-                }`}
-              onClick={() => {
-                if (!isActive && containerRef.current) {
-                  const child = containerRef.current.children[idx];
-                  if (child) {
-                    child.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                  }
-                } else {
-                  handleProductClick(product);
-                }
-              }}
-            >
-              {/* Imagen/Icono en la parte superior */}
-              {product.image_url && (
-                <div className="relative w-full flex flex-col justify-start">
-                  <img src={product.image_url} alt={product.name} className="w-full h-auto max-h-[240px] sm:max-h-[280px] md:max-h-[320px] object-contain transition-transform duration-500 hover:scale-105 drop-shadow-sm" />
-                </div>
-              )}
-
-              {/* Info inferior con fondo blanco/oscuro */}
-              <div className="flex flex-col p-4 sm:p-5 pt-3 sm:pt-4 w-full text-left flex-1 justify-between">
-                <div>
-                  <h4 className={`font-bold text-sm sm:text-base leading-tight mb-1.5 line-clamp-2 ${isDark ? 'text-white' : 'text-[#1A535C]'}`}>
-                    {product.name}
-                  </h4>
-                  {product.description && (
-                    <div className="mb-1">
-                      <p className={`text-[11px] sm:text-xs whitespace-pre-wrap ${expandedProducts[idx] ? '' : 'line-clamp-2'} ${isDark ? 'text-gray-400' : 'text-[#757778]'}`}>
-                        {product.description}
-                      </p>
-                      {product.description.length > 60 && (
-                        <button
-                          onClick={(e) => toggleExpand(idx, e)}
-                          className={`text-[10px] font-bold mt-1 cursor-pointer hover:underline block ${isDark ? 'text-[#C8A721]' : 'text-[#F9842C]'}`}
-                        >
-                          {expandedProducts[idx] ? 'Ver menos' : 'Ver más'}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-end justify-between mt-1">
-                  {product.price ? (
-                    <p className={`font-black text-base sm:text-lg ${isDark ? 'text-[#C8A721]' : 'text-[#1A535C]'}`}>
-                      {product.price}
-                    </p>
-                  ) : (
-                    <p className="font-bold text-base sm:text-lg text-transparent select-none">-</p>
-                  )}
-
-                  {isPremium && ordersEnabled && (
-                    product.stock === 0 ? (
-                      <div className="flex items-center gap-2 bg-red-50 text-red-600 rounded-lg p-1.5 px-3">
-                        <span className="font-bold text-xs uppercase tracking-wider">Agotado</span>
-                      </div>
-                    ) : (
-                      <div
-                        className="flex items-center gap-2 bg-gray-100 rounded-lg p-1"
-                        onClick={(e) => e.stopPropagation()} // Prevent carousel item click
-                      >
-                        <button
-                          onClick={() => updateCart(product, -1)}
-                          data-testid={`remove-from-cart-btn-${product.id}`}
-                          className="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:text-red-500"
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <span data-testid={`cart-quantity-${product.id}`} className="font-bold text-sm min-w-[1.2rem] text-center text-[#1A535C]">
-                          {cart[product.id]?.quantity || 0}
-                        </span>
-                        <div className="relative">
-                          <button
-                            onClick={() => updateCart(product, 1)}
-                            data-testid={`add-to-cart-btn-${product.id}`}
-                            className={`w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm transition-colors ${
-                              product.stock !== undefined && product.stock !== null && product.stock !== '' && (cart[product.id]?.quantity || 0) >= product.stock
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-[#1A535C] hover:text-[#F9842C]'
-                            }`}
-                          >
-                            <Plus size={14} />
-                          </button>
-                          {limitMsg === product.id && (
-                            <div className="absolute bottom-full right-0 mb-1 px-2 py-1 bg-gray-800 text-white text-[10px] font-bold rounded shadow-md whitespace-nowrap z-50">
-                              Stock máximo
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
 }

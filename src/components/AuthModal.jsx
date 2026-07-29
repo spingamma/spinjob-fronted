@@ -3,6 +3,7 @@ import { UserPlus, X, Loader2, Phone, MessageCircleQuestion, ChevronDown } from 
 import PhoneInputWithCountry from './PhoneInputWithCountry';
 import useAuthLogic from '../hooks/useAuthLogic';
 import ModalVerificacion from './ModalVerificacion';
+import { API_URL } from '../config/api';
 
 export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = false }) {
   const [showVerify, setShowVerify] = useState(false);
@@ -11,7 +12,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
 
   useEffect(() => {
     if (!isOpen) return;
-    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
     async function loadCountries() {
       try {
         const res = await fetch(`${API_URL}/countries/`);
@@ -66,7 +66,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
     }, 150);
 
     return () => clearTimeout(timeoutId);
-  }, [isOpen, isCompletingPhone, isDarkTheme, GOOGLE_CLIENT_ID]);
+  }, [isOpen, isCompletingPhone, isDarkTheme, GOOGLE_CLIENT_ID]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!isOpen) return null;
 

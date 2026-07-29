@@ -1,75 +1,48 @@
 ---
 name: generalizar-agente-base
-description: Analiza el historial de la conversación o los errores recientes para extraer, generalizar y refactorizar reglas, habilidades y flujos de trabajo. Úsala de forma OBLIGATORIA (como Filtro Meta-Cognitivo silencioso) siempre que debas crear o corregir una regla/skill tras cometer un error, para garantizar que la nueva instrucción sea agnóstica a la tecnología y reutilizable en otros proyectos.
+description: Analiza el historial de la conversación o los errores recientes para extraer, generalizar y refactorizar reglas, habilidades y flujos de trabajo. Úsala de forma OBLIGATORIA siempre que debas crear o corregir una regla/skill tras cometer un error, garantizando que la nueva instrucción sea agnóstica y reutilizable.
 ---
 
-# Skill: Generalizar Agente Base y Documentar Aprendizajes (Filtro Meta-Cognitivo)
+# Skill: Generalizar Agente Base y Filtro Meta-Cognitivo
 
 ## Propósito
 Esta habilidad tiene dos objetivos principales:
-1. **Filtro Meta-Cognitivo (Trigger Automático)**: Actuar como un paso obligatorio *antes* de que el agente escriba o modifique cualquier regla (en `AGENTS.md`) o habilidad (en `SKILL.md`) tras cometer un error. Su función es asegurar que la nueva regla pase por un filtro de generalización y no quede acoplada a una tecnología específica.
-2. **Refactorización Global**: Analizar la trayectoria de la conversación, abstraer las soluciones particulares hacia reglas, skills o workflows genéricos, y actualizar la configuración de personalización del agente.
+1. **Filtro Meta-Cognitivo (Trigger Automático):** Actuar como un paso obligatorio *antes* de que el agente escriba o modifique cualquier regla (`rules/`) o habilidad (`skills/`) tras cometer un error. Su función es asegurar que la nueva regla no quede acoplada a una tecnología específica.
+2. **Refactorización Global:** Analizar la conversación actual, extraer lecciones aprendidas y generalizarlas de forma abstracta para que puedan ser reutilizadas en otros proyectos.
 
----
+## Flujo Secuencial (Paso a Paso)
 
-## 🛠️ Directrices de Abstracción Genérica
+### Paso 1: Leer el Transcript de la Conversación
+1. Identifica el **ID de la conversación** actual (ubicado en tus variables de entorno o `<user_information>`).
+2. Lee el archivo `transcript.jsonl` usando `grep_search` o `view_file` en `<appDataDir>/brain/<conversation_id>/.system_generated/logs/` para entender los problemas discutidos y los acuerdos alcanzados.
 
-Para que el agente pueda ser utilizado de forma efectiva como base en otro proyecto, debes documentar las reglas siguiendo estos principios de generalización:
+### Paso 2: Diseño de Abstracción (Filtro Agnóstico)
+Diseña las nuevas reglas o habilidades aplicando este filtro:
+- **Agnosticismo de Framework:** 
+  - ❌ `main.py` o `App.jsx` → ✅ `entry point` o `archivo principal`.
+  - ❌ `useEffect` → ✅ `ciclo de vida del componente`.
+  - ❌ `APIRouter` → ✅ `mecanismo de enrutamiento`.
+- **Referencias a Repositorios:** Reemplaza nombres quemados por referencias genéricas (ej. `[repositorio_de_pruebas]`).
 
-### 1. Desacoplamiento de Identidad de Marca (Branding Dinámico)
-* **Regla**: No codificar valores de forma rígida (hardcodear) en el código como colores (ej. `#1A535C` o `#6A431F`) ni copys textuales específicos directamente en las reglas universales.
-* **Generalización**: Documentar que el sistema de diseño debe leer dinámicamente un archivo de configuración centralizado (ej. `.agents/branding.json` o variables de entorno) y que los componentes deben adaptarse automáticamente a esa paleta.
+### Paso 3: Mapeo Contextual (Skills vs Global)
+- NUNCA acumules reglas específicas de framework, UI o infraestructura en el archivo global `AGENTS.md`.
+- Deposita las reglas específicas exclusivamente en los archivos correspondientes dentro de `rules/` (ej. `03-frontend-react.md` o `testing-standards.md`).
+- Deja solo directivas universales y conductuales en `AGENTS.md`.
 
-### 2. Estándares de Diseño y UI Flexibles
-* **Evitar truncamiento rígido de texto**: Documentar que los textos importantes (como títulos de tarjetas o nombres de entidades) deben permitir envolturas automáticas de palabra (`break-words`) y expansión a múltiples líneas en lugar de recortarse con elipsis rígidas.
-* **Componentes Minimalistas**: Documentar que los estados de entidad (como verificaciones, medallas) deben usar iconografía minimalista circular (`rounded-full`) sin etiquetas textuales redundantes para optimizar el espacio visual.
-* **Distribución de Filtros Compactos**: Documentar que en layouts de filtrado móvil se debe priorizar una barra de filtros de fila única, adaptando el tamaño de los elementos y envolviendo el texto de los badges activos en multilínea para que entren de forma prolija.
+### Paso 4: Confirmación Interactiva (OBLIGATORIA)
+1. **NUNCA modifiques las reglas sin antes confirmarlo con el usuario.**
+2. Formula un plan o preguntas aclaratorias listando qué archivos vas a modificar y qué reglas genéricas vas a añadir.
+3. Espera la aprobación explícita del usuario mediante el botón "Proceed" o en el chat.
 
-### 3. Lógica Crítica y Condicionales de Dispositivo (Geolocalización)
-* **Detección Dinámica de Coordenadas**: Documentar la precedencia y prioridades al procesar URLs geográficas (priorizar siempre la chincheta exacta `!3d/!4d` sobre el visor general `@`).
-* **Visualización Condicional por GPS**: Documentar que los cálculos basados en geolocalización (como distancias y estimaciones de tiempo) solo deben activarse en dispositivos que cuenten con hardware de GPS (como móviles y tablets con soporte táctil) y únicamente si el usuario otorgó permisos de ubicación. En PCs de escritorio, esta visualización debe quedar completamente oculta.
-* **Bypass de Filtros para Negocios de Entrega (Delivery)**: Documentar que cualquier filtro basado en distancia o tiempo de viaje debe contar con una excepción (bypass) para negocios con modalidad de entrega a domicilio, asegurando que sigan apareciendo en las búsquedas independientemente de su distancia física.
+### Paso 5: Escritura y Actualización
+1. Tras la aprobación, realiza las modificaciones en `rules/` o `skills/`.
+2. Valida que las nuevas reglas no entren en conflicto con las existentes.
 
-### 4. Robustez en Validaciones Coincidentes
-* **Validación Concurrente**: Los límites de longitud en campos de texto clave (ej. nombres limitado a 30 caracteres) deben aplicarse concurrentemente:
-  * **Físicamente en Frontend**: Mediante restricciones de caracteres en inputs (`maxLength`).
-  * **Lógicamente en Frontend**: Mediante validaciones al enviar el formulario mostrando alertas descriptivas.
-  * **Estrictamente en Backend**: Mediante excepciones estructuradas (HTTP 400) para evitar registros maliciosos o corruptos.
+## Directriz Especial de Testing
+- **Testing First:** NUNCA utilices esta habilidad para documentar aprendizajes MIENTRAS haya pruebas fallando. La prioridad SIEMPRE es arreglar los tests. Sólo cuando el test pase (verde), puedes proceder a documentar.
 
----
-
-## 📋 Proceso de Ejecución (Paso a Paso)
-
-Cuando ejecutes este skill, debes seguir estrictamente los siguientes pasos:
-
-### Paso 1: Lectura e Investigación del Historial
-* Lee el archivo de logs de la conversación actual (`transcript.jsonl`) o repasa los checkpoints anteriores.
-* Identifica:
-  * Decisiones clave de diseño.
-  * Bugs de persistencia resueltos.
-  * Lógicas condicionales implementadas (ej. el cálculo de Haversine y el bypass de delivery).
-  * Validaciones críticas.
-
-### Paso 2: Diseño de la Propuesta de Generalización y Distribución Contextual
-* Diseña los textos o las estructuras de carpetas a modificar aplicando el filtro meta-cognitivo de abstracción de arquitectura pura:
-  * **Sustituye términos acoplados**:
-    * ❌ `main.py` o `app.js` → ✅ `entry point` o `archivo principal de configuración`.
-    * ❌ `APIRouter` o `Express router` → ✅ `mecanismo de enrutamiento` o `route config files`.
-    * ❌ `useEffect`, `initState`, etc. → ✅ `ciclo de vida del componente`.
-  * **Referencias a Repositorios**: Reemplazarlas por referencias genéricas como `[repositorio_de_pruebas]` o parametrizarlas con `.env`.
-* **Mapeo Contextual (Skills vs Global)**: NUNCA acumules reglas específicas de framework, UI o infraestructura en el archivo global `AGENTS.md`. 
-  * Las reglas específicas deben depositarse exclusivamente en los archivos de las skills correspondientes (ej. `.agents/skills/desarrollo-frontend/SKILL.md` o `crear-modulo-api/SKILL.md`).
-  * Solo las reglas absolutas, filosóficas o conductuales universales (que apliquen a cualquier petición, sin importar el código) deben ir a `.agents/AGENTS.md`.
-* Redacta las propuestas de forma genérica (sin mencionar nombres del proyecto actual).
-
-### Paso 3: Confirmación Interactiva Obligatoria ⚠️
-> [!IMPORTANT]
-> **NUNCA modifiques las reglas, skills o workflows sin antes confirmarlo con el usuario.**
-> Debes formular una serie de preguntas aclaratorias detalladas en la conversación, listando las reglas que planeas agregar o modificar y esperando su aprobación explícita.
-
-### Paso 4: Escritura y Actualización
-* Una vez el usuario apruebe las propuestas, realiza las modificaciones correspondientes en los archivos de configuración:
-  * Agrega o edita las reglas generales en los archivos de la carpeta [.agents/rules/](file:///.agents/rules/) (ej. `01-reglas-base.md`, `02-frontend-ui.md`, etc.).
-  * Crea o pule skills en [skills/](file:///.agents/skills/).
-  * Adapta las plantillas de workflows en [workflows/](file:///.agents/workflows/).
-* Compila o valida que no haya errores de formato y resume los cambios realizados al usuario.
+## Checklist Obligatorio antes de Finalizar
+- [ ] ¿La regla/skill nueva fue purgada de nombres específicos de frameworks o archivos?
+- [ ] ¿El cambio se ubicó en `rules/` en lugar de inflar `AGENTS.md`?
+- [ ] ¿Esperaste y recibiste la aprobación del usuario antes de editar los archivos?
+- [ ] ¿Declaraste explícitamente en el chat que estás usando la skill `generalizar-agente-base`?

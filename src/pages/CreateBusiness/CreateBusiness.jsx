@@ -32,6 +32,7 @@ export default function CreateBusiness() {
     owner_id: null
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleProtectedAction = (actionParams) => {
     // Para creación no deberíamos necesitar login modal acá,
     // ya que App.jsx ya protege la ruta /crear-negocio

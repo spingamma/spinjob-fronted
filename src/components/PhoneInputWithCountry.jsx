@@ -1,5 +1,5 @@
 // Archivo: src/components/PhoneInputWithCountry.jsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { COUNTRIES, getCountryByName } from '../utils/phone';
 
@@ -31,24 +31,25 @@ export default function PhoneInputWithCountry({
   };
 
   const [phoneState, setPhoneState] = useState(() => getInitialPhoneState(value));
+  const [prevValue, setPrevValue] = useState(value);
+  const [prevCountryName, setPrevCountryName] = useState(countryName);
 
-  // Sincronizar cuando cambia la prop value o el país externamente
-  useEffect(() => {
+  if (value !== prevValue || countryName !== prevCountryName) {
+    setPrevValue(value);
+    setPrevCountryName(countryName);
     setPhoneState(getInitialPhoneState(value));
-  }, [value, countryName]);
+  }
 
   const handleNumberChange = (e) => {
     // Solo permitir números y máximo la longitud del país configurado
     const rawVal = e.target.value.replace(/[^0-9]/g, '');
     const cleanVal = rawVal.substring(0, country.length);
     
-    setPhoneState(prev => {
-      const newState = { ...prev, number: cleanVal };
-      // Notificar al padre con el formato unificado: +[CODIGO][NUMERO]
-      const fullNumber = cleanVal ? `${newState.code}${cleanVal}` : '';
-      onChange(fullNumber);
-      return newState;
-    });
+    const currentCode = phoneState.code;
+    const fullNumber = cleanVal ? `${currentCode}${cleanVal}` : '';
+    
+    setPhoneState(prev => ({ ...prev, number: cleanVal }));
+    onChange(fullNumber);
   };
 
   // Clases premium según el tema

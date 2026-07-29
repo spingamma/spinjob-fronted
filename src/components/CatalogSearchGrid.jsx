@@ -1,7 +1,8 @@
 import React from 'react';
-import { Plus, Minus, EyeOff } from 'lucide-react';
+import { EyeOff } from 'lucide-react';
+import CartQuantityControl from './CartQuantityControl';
 
-export default function CatalogSearchGrid({ products, isDark, isOwner, isPremium, ordersEnabled, cart, updateCart, limitMsg }) {
+export default function CatalogSearchGrid({ products, isDark, isOwner, isPremium, ordersEnabled, cart, updateCart }) {
   if (!products || products.length === 0) {
     return (
       <div data-testid="catalog-search-empty" className="py-12 text-center text-gray-400">
@@ -67,38 +68,15 @@ export default function CatalogSearchGrid({ products, isDark, isOwner, isPremium
                   {product.price ? product.price : `Bs. ${(priceNum || 0).toFixed(2)}`}
                 </span>
 
-                {isPremium && ordersEnabled && product.stock !== 0 && (
-                  <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-white/10 rounded-lg p-1">
-                    <button
-                      type="button"
-                      data-testid={`search-grid-remove-btn-${product.id}`}
-                      onClick={() => updateCart(product, -1)}
-                      className="w-6 h-6 flex items-center justify-center bg-white dark:bg-gray-800 rounded shadow-sm text-gray-600 dark:text-gray-200"
-                    >
-                      <Minus size={12} />
-                    </button>
-                    <span
-                      data-testid={`search-grid-cart-qty-${product.id}`}
-                      className="font-bold text-xs min-w-[1rem] text-center"
-                    >
-                      {cart[product.id]?.quantity || 0}
-                    </span>
-                    <button
-                      type="button"
-                      data-testid={`search-grid-add-btn-${product.id}`}
-                      onClick={() => updateCart(product, 1)}
-                      disabled={
-                        product.stock !== undefined &&
-                        product.stock !== null &&
-                        product.stock !== '' &&
-                        (cart[product.id]?.quantity || 0) >= product.stock
-                      }
-                      className="w-6 h-6 flex items-center justify-center bg-white dark:bg-gray-800 rounded shadow-sm text-[#1A535C] dark:text-white disabled:opacity-30"
-                    >
-                      <Plus size={12} />
-                    </button>
-                  </div>
-                )}
+          {isPremium && ordersEnabled && product.stock !== 0 && (
+            <CartQuantityControl
+              product={product}
+              cart={cart}
+              updateCart={updateCart}
+              isPremium={isPremium}
+              ordersEnabled={ordersEnabled}
+            />
+          )}
               </div>
             </div>
           </div>

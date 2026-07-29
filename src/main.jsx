@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom' // 👈 El semáforo mágico
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { HelmetProvider } from 'react-helmet-async'
 import App from './App.jsx'
+import { AuthProvider } from './context/AuthContext.jsx'
 import './index.css'
 
 // Capturar el evento de instalación lo antes posible para evitar perderlo al navegar
@@ -20,7 +21,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <HelmetProvider>
       <GoogleOAuthProvider clientId={clientId}>
         <BrowserRouter>
-          <App />
+          <AuthProvider>
+            <App />
+          </AuthProvider>
         </BrowserRouter>
       </GoogleOAuthProvider>
     </HelmetProvider>

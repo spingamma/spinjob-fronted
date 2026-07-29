@@ -194,7 +194,7 @@ export function useDirectoryFilters(professionals = [], metadataOverride = null,
         return matchCategory && matchSearch && matchState && matchNeighborhood && matchRating && matchSubcategory && matchDistance;
       })
       .sort((a, b) => (b.rating || 0) - (a.rating || 0));
-  }, [professionals, activeCategory, searchTerm, activeState, activeNeighborhood, activeSubcategory, activeRating, activeDistance, userCoords]);
+  }, [professionals, activeCategory, searchTerm, activeState, activeNeighborhood, activeSubcategory, activeRating, activeDistance, userCoords, serverFiltered]);
 
   // Interactions
   useEffect(() => {
@@ -287,13 +287,12 @@ export function useDirectoryFilters(professionals = [], metadataOverride = null,
     return groupedCategories.find(g => g.category === activeCategory);
   }, [groupedCategories, activeCategory]);
 
-  const currentSubcategories = activeCategoryData ? activeCategoryData.subcategories : [];
-  
   const filteredSubcategories = useMemo(() => {
+    const currentSubcategories = activeCategoryData ? activeCategoryData.subcategories : [];
     const search = normalizeText(subSearch);
     if (!search) return currentSubcategories;
     return currentSubcategories.filter(sub => normalizeText(sub).includes(search));
-  }, [currentSubcategories, subSearch]);
+  }, [activeCategoryData, subSearch]);
 
   return {
     states: {

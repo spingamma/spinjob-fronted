@@ -1,115 +1,33 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { X, Save, Pencil, Image as ImageIcon, Package } from 'lucide-react';
 import CropModal from '../../components/CropModal';
+import useProductForm from '../hooks/useProductForm';
 
 export default function ProductFormModal({
   isOpen,
   onClose,
   product,
   onSubmit,
+  // eslint-disable-next-line no-unused-vars
   isPremium,
   availableCarousels = ['Catálogo'],
   onHasUnsavedProduct
 }) {
-  const [formName, setFormName] = useState('');
-  const [formDesc, setFormDesc] = useState('');
-  const [formPrice, setFormPrice] = useState('');
-  const [formCarousel, setFormCarousel] = useState('Catálogo');
-  const [formImage, setFormImage] = useState(null);
-  const [formPreview, setFormPreview] = useState(null);
-  
-  const [showCropModal, setShowCropModal] = useState(false);
-  const [cropImageSrc, setCropImageSrc] = useState(null);
-
-  const textareaRef = useRef(null);
-
-  // Initialize or reset form when modal opens/closes or product changes
-  useEffect(() => {
-    if (isOpen) {
-      if (product) {
-        // Editing mode
-        setFormName(product.name || '');
-        setFormDesc(product.description || '');
-        setFormPrice(product.price || '');
-        
-        const cName = product.carousel_name || 'Catálogo';
-        setFormCarousel(cName);
-        setFormPreview(product.image_url || null);
-        setFormImage(null);
-      } else {
-        // Creation mode
-        setFormName('');
-        setFormDesc('');
-        setFormPrice('');
-        setFormCarousel(availableCarousels[0] || 'Catálogo');
-        setFormImage(null);
-        setFormPreview(null);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, product]);
-
-  // Adjust description textarea height dynamically
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 180)}px`;
-    }
-  }, [formDesc, isOpen]);
-
-  // Handle unsaved changes notification
-  useEffect(() => {
-    if (onHasUnsavedProduct) {
-      const isUnsaved = isOpen && (
-        formName.trim() !== (product?.name || '').trim() ||
-        formDesc.trim() !== (product?.description || '').trim() ||
-        formPrice.trim() !== (product?.price || '').trim() ||
-        formImage !== null
-      );
-      onHasUnsavedProduct(!!isUnsaved);
-    }
-  }, [isOpen, formName, formDesc, formPrice, formImage, product, onHasUnsavedProduct]);
+  const {
+    formName, setFormName,
+    formDesc, setFormDesc,
+    formPrice, setFormPrice,
+    formCarousel, setFormCarousel,
+    formPreview,
+    showCropModal, setShowCropModal,
+    cropImageSrc, setCropImageSrc,
+    textareaRef,
+    handleImageChange,
+    handleCropDone,
+    handleSubmit
+  } = useProductForm(isOpen, product, availableCarousels, onHasUnsavedProduct, onSubmit);
 
   if (!isOpen) return null;
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCropImageSrc(reader.result);
-        setShowCropModal(true);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleCropDone = (croppedFile) => {
-    setFormImage(croppedFile);
-    const reader = new FileReader();
-    reader.onloadend = () => setFormPreview(reader.result);
-    reader.readAsDataURL(croppedFile);
-    setShowCropModal(false);
-    setCropImageSrc(null);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formName.trim()) return;
-
-    onSubmit({
-      id: product?.id,
-      tempId: product?.tempId,
-      name: formName.trim(),
-      description: formDesc.trim(),
-      price: formPrice.trim(),
-      carousel_name: formCarousel.trim() || 'Catálogo',
-      image_url: formPreview,
-      imageFile: formImage,
-      is_visible: product ? product.is_visible : true,
-      isModified: true
-    });
-  };
 
   return (
     <>

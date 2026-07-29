@@ -68,3 +68,9 @@ Corre el build de producción para asegurarte de que no existan errores de compi
 ```bash
 npm run build
 ```
+
+## 7. Linter y Verificación de Duplicidad de Lógica
+- Ejecuta `npx eslint src/` para garantizar que no haya imports faltantes o referencias sin declarar.
+- Después de linting, utiliza búsqueda de código (`grep`/`rg`) para identificar posibles duplicaciones de lógica o hooks reutilizables antes de finalizar la creación de la página.
+- Si detectas código repetido, refactoriza extrayendo un hook o componente compartido y actualiza los lugares donde se usa.
+- Solo después de pasar estos chequeos, confirma la integración y procede a pruebas locales.

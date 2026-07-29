@@ -1,59 +1,34 @@
 # Clean Code React y Estructura
 
-## Límites y Arquitectura
-1. **LÍMITE ESTRICTO DE 300 LÍNEAS:** Ningún componente, hook o página debe exceder las 300 líneas de código. Si se aproxima a esta cantidad, extrae la lógica a un Custom Hook (`hooks/`) o a subcomponentes (`components/`). Mantén una única responsabilidad por archivo.
+## Límites y Arquitectura (Clean UI Architecture)
+1. **LÍMITE ESTRICTO DE 300 LÍNEAS:** Ningún componente de React (archivo) debe exceder las 300 líneas de código. Si se aproxima a esta cantidad, tienes **ESTRICTAMENTE PROHIBIDO** mantenerlo como un monolito. Aplica inmediatamente el patrón de separación en 3 capas:
+   - **Capa Lógica (Hooks):** Extraer estado (`useState`), fetching (`useEffect`) y controladores a `hooks/useNombre.js`.
+   - **Capa de Utilidades (Utils):** Extraer algoritmos puros a `utils/`.
+   - **Capa de Presentación:** Separar grandes bloques JSX en `components/`.
+   - **Objetivo:** El componente principal queda como enrutador de props.
 2. **DRY + SRP:** La lógica repetida se debe encapsular en Custom Hooks. Los componentes reutilizables deben residir en `src/components/`.
+3. **Prohibición de Barrel Files (Anti-Barrel-Files):** Queda estrictamente prohibido crear archivos `index.js`, `index.ts`, `index.jsx` o `index.tsx` dentro de carpetas de componentes (ej. `components/index.js`) para re-exportar (`export * from ...`). Las importaciones deben ser directas al archivo (ej. `import Boton from './components/Boton/Boton'`).
 
-## Reglas Críticas de Testing e Interacción
-3. **Testing Hooks (OBLIGATORIO EXTREMO):** 🚨 SIEMPRE agrega atributos `data-testid="..."` a TODOS los elementos interactivos (botones, inputs, enlaces `<a>`, modales, etc.). Es considerado un error grave no hacerlo.
-4. **Reposición exacta y Balanceo de JSX (Oxc/Vite):** 🚨 Presta extrema atención al editar, envolver o eliminar JSX.
-   - Si borras una etiqueta de cierre `</div>` huérfana, romperás el árbol de renderizado de React.
-   - **NUNCA** envuelvas condicionalmente bloques de código que contengan etiquetas de apertura o cierre desparejadas de contenedores padres (ej: abrir un fragmento `<>` dentro de un condicional, pero cerrar la etiqueta `</div>` del contenedor padre dentro de este fragmento).
-   - Condiciona únicamente las etiquetas hijas específicas (de forma aislada) o asegúrate de que toda la estructura contenedora (apertura y cierre) quede autocontenida y balanceada dentro de la expresión condicional. Utiliza `view_file` si necesitas confirmar el árbol superior de etiquetas.
+## Testing e Integración
+4. **Testing Hooks (Obligatoriedad Absoluta):** 🚨 SIEMPRE agrega el atributo `data-testid="..."` a TODOS los elementos interactivos nuevos (botones, inputs, enlaces, modales). No asumas que es opcional.
+5. **Vías de Acción Directa:** Queda estrictamente prohibido presentar estados "pendientes" en listados (ej. pedidos pendientes de pago) como simples etiquetas estáticas. Todo elemento en estado pendiente **DEBE** incluir un botón de acción directo (con `data-testid`) hacia la vista de resolución.
 
-## Estado, Hooks y Modales
-5. **Early returns:** NUNCA uses sentencias de retorno anticipado (early returns) antes de que TODOS los hooks (useState, useEffect, useMemo, etc.) del componente hayan sido invocados.
-6. **Listas con estado:** Si los ítems de una lista requieren gestionar estado local individual (ej. "Ver más", "Editar"), extrae cada elemento a un subcomponente dedicado (ej. `ItemCard`). Evita usar colecciones/arrays de estados en el componente padre.
-7. **Modales anidados:** Si un modal despliega un segundo modal encima, usa React Fragment `<>...</>` como contenedor de primer nivel y renderiza el modal secundario FUERA del contenedor de fondo (backdrop) del modal padre.
-8. **Acciones protegidas:** Bloquea y redirige interacciones críticas que requieran sesión activa al flujo de login correspondiente (ej. desplegar un `LoginModal` o redirección de sesión).
+## Estabilidad JSX e Imports
+6. **Verificación Obligatoria de Imports (Micro-Linting):** Cada vez que insertes un nuevo componente o ícono (ej. `<Send />`), **DEBES OBLIGATORIAMENTE** agregarlo al `import`. Vite no detecta `ReferenceError` en tiempo de compilación. Tras editar un JSX, **ESTÁS OBLIGADO** a ejecutar un Micro-Linting rápido en ese archivo.
+7. **Reposición exacta y Balanceo de JSX:** Presta extrema atención al editar JSX. NUNCA envuelvas condicionalmente bloques de código que contengan etiquetas de apertura o cierre desparejadas de contenedores padres.
+8. **Coherencia Estricta de Props (Anti-Prop-Mismatch):** Al conectar un componente padre con un hijo, **DEBES OBLIGATORIAMENTE** verificar que los nombres de las props (prop signatures) coincidan exactamente en ambos lados.
 
-## Lógica de Filtrado con IDs Mixtos (Base de datos vs Temporales)
-9. **Filtros aislados:** Al trabajar con listas de elementos que mezclan registros ya guardados en BD (con `id`) y elementos locales temporales (con `tempId`), aísla y valida ambas variables por separado en el `.filter()`. 
-**NUNCA USES ESTA FORMA:**
-```javascript
-// INCORRECTO: p.tempId !== item.tempId evaluará a 'undefined !== undefined' -> 'false'.
-setItems(prev => prev.filter(p => p.id !== item.id && p.tempId !== item.tempId));
-```
-**FORMA CORRECTA:**
-```javascript
-setItems(prev => prev.filter(p => {
-  if (item.id) return p.id !== item.id;
-  return p.tempId !== item.tempId;
-}));
-```
+## Estado, Efectos y Hooks
+9. **Anti-Eslint-Disable:** Queda terminantemente prohibido usar `// eslint-disable-next-line react-hooks/exhaustive-deps`. Refactoriza usando `useCallback` o `useMemo`.
+10. **Pureza de Render (Anti-Set-State-In-Effect):** Prohibido usar `useEffect` simplemente para "escuchar" una prop y actualizar otro estado local (cascading renders). Usa "Derivación de Estado". Prohibidas las funciones impuras (`Date.now()`, `Math.random()`) en el render directo; usa inicialización perezosa.
+11. **Pureza en Actualizadores de Estado (State Updaters):** 🚨 Queda estrictamente prohibido ejecutar efectos secundarios (side-effects) o invocar callbacks inyectados por el componente padre dentro de una función de actualización de estado (ej. `setState(prev => ...)`). Esto evita errores de ciclo de render cruzado.
+12. **Estabilidad de Dependencias en Efectos (Hooks Loops):** 🚨 Todo callback inyectado que se ejecute dentro de un `useEffect` debe estar estrictamente memoizado (`useCallback`) en su origen. Si esto no es posible por arquitectura, exclúyelo conscientemente del arreglo de dependencias (con supresión justificada de linting) para prevenir bucles de inicialización múltiple.
+13. **Early returns:** NUNCA uses `return` anticipados antes de que TODOS los hooks del componente hayan sido invocados.
+14. **Sincronización de Literales:** Queda prohibido asumir lógica condicional en el frontend basada en literales (ej. `if (status === 'pendiente')`) sin validar la sintaxis exacta con el backend.
 
-## Manejo de Fechas y Timezones
-10. **Fechas Locales vs UTC:** NUNCA uses `new Date().toISOString().split('T')[0]` en el frontend para calcular la fecha actual ("hoy") si tu API backend asume fechas en husos horarios locales. Esto causa desajustes de fecha (el día salta al día siguiente durante la tarde/noche debido a la desviación UTC).
-**FORMA CORRECTA:** Usa los métodos de fecha local del objeto `Date` para construir representaciones robustas en el huso horario local del usuario:
-```javascript
-const today = new Date();
-const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-```
-
-## Formularios y Manejo de Errores de API
-11. **Campos Obligatorios:** Todo campo obligatorio en un formulario debe indicar explícitamente su estatus mediante un asterisco rojo (`<span className="text-red-500">*</span>`) en su etiqueta descriptiva.
-12. **Validación en Cliente (Prevención de 422/BadRequest):** Valida en el cliente que los campos requeridos estén completos y cumplan los tipos esperados antes de realizar la petición HTTP.
-13. **Parseo de Errores de API:** NUNCA pases el string de error crudo devuelto por la API sin verificar su tipo o estructura. Si el backend (FastAPI, Express, etc.) retorna un objeto estructurado o un array de errores de validación, renderízalos amigablemente al usuario en lugar de mostrar `[object Object]`.
-**Ejemplo de parseo para validación estructurada (ej. FastAPI):**
-```javascript
-if (Array.isArray(errData.detail)) {
-  errorMessage = errData.detail.map(e => `${e.loc ? e.loc[e.loc.length-1] : 'Campo'}: ${e.msg}`).join('\n');
-} else {
-  errorMessage = errData.detail || 'Ocurrió un error inesperado';
-}
-```
-
-14. **Sincronización de Estado en Autocompletados (Dropdowns):** Al diseñar buscadores con menús desplegables (dropdowns) donde la selección de un ítem limpia el texto y oculta la lista (`showDropdown = false`) pero mantiene el elemento enfocado (mediante `e.preventDefault()` en el `onMouseDown` del botón para evitar el blur):
-    * Asegura siempre que los eventos `onClick` y `onChange` en el input restablezcan `showDropdown = true`.
-    * De lo contrario, dado que el input ya está enfocado, hacer clic o escribir de nuevo no disparará el evento `onFocus`, dejando la lista de autocompletado permanentemente oculta.
-
+## Flujo de Datos y Persistencia
+15. **Recepción de Identificadores (Anti-Ghosting de IDs):** Está **ESTRICTAMENTE PROHIBIDO** filtrar manualmente los payloads del servidor descartando propiedades estructurales clave. Si recibes una entidad, siempre preserva explícitamente el `id` o usa mapeo integral (`...data`).
+16. **Formularios (Gate Backend-First):** Antes de enviar nuevos campos de datos persistentes, verifica que el backend ya los soporta. No dejes datos flotando solo en memoria RAM si su fin es persistir.
+17. **Parseo de Errores API:** NUNCA pases el string de error crudo devuelto por la API. Muestra mensajes amigables parseando los `detail` del backend.
+18. **Lógica de Filtros Mixtos (tempId vs id):** Al filtrar listas, aísla validaciones si usas `id` (BD) y `tempId` (local). `if (item.id) return p.id !== item.id; return p.tempId !== item.tempId;`.
+19. **Fechas Locales vs UTC:** NUNCA uses `new Date().toISOString().split('T')[0]` en el frontend para fechas locales. Usa los métodos locales (`getFullYear()`, `getMonth()`).

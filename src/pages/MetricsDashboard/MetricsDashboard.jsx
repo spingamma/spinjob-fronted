@@ -1,11 +1,12 @@
-// Archivo: src/pages/MetricsDashboard/MetricsDashboard.jsx
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BarChart2, Calendar, TrendingUp, Users, MousePointerClick, Filter, Lock, Sparkles, CheckCircle2 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Header from '../../components/Header';
 import BottomNavbar from '../../components/BottomNavbar';
-import fetchAuth from '../../utils/fetchAuth';
+import { useMetricsData } from './hooks/useMetricsData';
+import MetricsHeader from './components/MetricsHeader';
+import MetricsSummaryCards from './components/MetricsSummaryCards';
+import MetricsChart from './components/MetricsChart';
+import MetricsPremiumLock from './components/MetricsPremiumLock';
 
 export default function MetricsDashboard() {
   const { slug } = useParams();
@@ -14,13 +15,14 @@ export default function MetricsDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
+  // eslint-disable-next-line no-unused-vars
   const [isAdmin, setIsAdmin] = useState(() => {
     const stored = localStorage.getItem('spingamma_user');
     if (stored) {
       try { 
         const parsed = JSON.parse(stored);
         return parsed.is_admin === true || parsed.is_vendedor === true; 
-      } catch(e) { return false; }
+      } catch { return false; }
     }
     return false;
   });
@@ -32,132 +34,18 @@ export default function MetricsDashboard() {
     navigate('/');
   };
 
-  const [metrics, setMetrics] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isPremium, setIsPremium] = useState(true);
-  
-  // Filtros
-  const [timeFilter, setTimeFilter] = useState('general');
-  const [customStart, setCustomStart] = useState('');
-  const [customEnd, setCustomEnd] = useState('');
-
-  useEffect(() => {
-    const fetchMetrics = async () => {
-      try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-        const res = await fetchAuth(`${API_URL}/businesses/${slug}/metrics`);
-        if (res.status === 403) {
-          setIsPremium(false);
-          setMetrics([]);
-        } else if (res.ok) {
-          const data = await res.json();
-          setMetrics(data);
-          setIsPremium(true);
-        }
-      } catch (err) {
-        console.error("Error al cargar métricas:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMetrics();
-  }, [slug]);
-
-  // Procesar interacciones según el filtro seleccionado
-  const data = useMemo(() => {
-    if (!metrics) return [];
-
-    let start = new Date();
-    let end = new Date();
-    start.setHours(0, 0, 0, 0);
-    end.setHours(23, 59, 59, 999);
-
-    if (timeFilter === 'general') {
-      if (metrics.length === 0) {
-        start.setDate(end.getDate() - 7);
-      } else {
-        const earliest = metrics.reduce((min, m) => {
-          if (!m.date) return min;
-          const d = new Date(m.date.substring(0, 10) + "T00:00:00");
-          return d < min ? d : min;
-        }, new Date());
-        start = new Date(earliest);
-        start.setHours(0, 0, 0, 0);
-      }
-    } else if (timeFilter === '1_month') {
-      start.setMonth(end.getMonth() - 1);
-    } else if (timeFilter === '3_months') {
-      start.setMonth(end.getMonth() - 3);
-    } else if (timeFilter === '6_months') {
-      start.setMonth(end.getMonth() - 6);
-    } else if (timeFilter === 'custom') {
-      if (customStart) start = new Date(customStart + "T00:00:00");
-      if (customEnd) end = new Date(customEnd + "T23:59:59");
-    }
-
-    let result = [];
-    let current = new Date(start);
-    
-    if (end < start) end = new Date(start);
-    const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const maxDays = Math.min(diffDays, 1095); // Max 3 years aprox
-
-    // Preparar el array con todos los días en 0
-    for (let i = 0; i <= maxDays; i++) {
-      const formattedDate = current.toISOString().split('T')[0];
-      const formatOptions = { month: 'short', day: 'numeric' };
-      if (maxDays > 90) formatOptions.year = '2-digit';
-      
-      result.push({
-        date: formattedDate,
-        name: current.toLocaleDateString('es-ES', formatOptions),
-        vistas: 0,
-        clics: 0,
-      });
-      current.setDate(current.getDate() + 1);
-    }
-    
-    // Poblar con métricas reales
-    metrics.forEach(interaction => {
-      const iDate = interaction.date ? interaction.date.substring(0, 10) : null;
-      if (iDate) {
-        const dayEntry = result.find(r => r.date === iDate);
-        if (dayEntry) {
-          if (interaction.platform === 'perfil_view' || interaction.platform === 'Visita Perfil') {
-            dayEntry.vistas += 1;
-          } else {
-            dayEntry.clics += 1;
-          }
-        }
-      }
-    });
-
-    return result;
-  }, [metrics, timeFilter, customStart, customEnd]);
-
-  // Totales dinámicos según el rango filtrado
-  const totalVistas = useMemo(() => data.reduce((sum, item) => sum + item.vistas, 0), [data]);
-  const totalClics = useMemo(() => data.reduce((sum, item) => sum + item.clics, 0), [data]);
-
-  // Custom Tooltip premium
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-[#1A535C]/95 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-xl text-white">
-          <p className="font-bold text-lg mb-2 border-b border-white/10 pb-1">{label}</p>
-          {payload.map((entry, index) => (
-            <div key={index} className="flex items-center gap-2 text-sm my-1">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-              <span className="font-medium">{entry.name}:</span>
-              <span className="font-bold ml-auto">{entry.value}</span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
+  const {
+    isPremium,
+    timeFilter,
+    setTimeFilter,
+    customStart,
+    setCustomStart,
+    customEnd,
+    setCustomEnd,
+    data,
+    totalVistas,
+    totalClics
+  } = useMetricsData(slug);
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] font-sans pb-20">
@@ -176,225 +64,25 @@ export default function MetricsDashboard() {
       />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative">
-        <button onClick={() => navigate('/mis-negocios')} className="flex items-center text-[#32698F] hover:text-[#1D565D] font-medium mb-6 transition-colors group">
-          <ArrowLeft size={20} className="mr-2 group-hover:-translate-x-1 transition-transform" /> Volver a Mis Negocios
-        </button>
-
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-gray-200 pb-5">
-          <h1 className="text-3xl font-extrabold text-[#1A535C] flex items-center gap-3">
-            <BarChart2 className="text-[#F9842C]" size={32} /> Rendimiento de la Tarjeta
-          </h1>
-          
-          {/* Controles de Filtro (Solo si es Premium) */}
-          {isPremium && (
-            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <div className="bg-white px-4 py-2.5 rounded-xl shadow-sm border border-gray-200 flex items-center gap-2 focus-within:ring-2 focus-within:ring-[#1A535C]/20 transition-all">
-                <Calendar size={18} className="text-[#1A535C]" />
-                <select 
-                  value={timeFilter} 
-                  onChange={(e) => setTimeFilter(e.target.value)}
-                  className="bg-transparent text-[#1A535C] font-semibold outline-none cursor-pointer flex-1 text-sm"
-                >
-                  <option value="general">General (Todos los tiempos)</option>
-                  <option value="1_month">Último mes</option>
-                  <option value="3_months">Últimos 3 meses</option>
-                  <option value="6_months">Últimos 6 meses</option>
-                  <option value="custom">Rango de fechas</option>
-                </select>
-              </div>
-              
-              {timeFilter === 'custom' && (
-                <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl shadow-sm border border-gray-200 animate-fade-in">
-                  <input 
-                    type="date" 
-                    value={customStart}
-                    onChange={(e) => setCustomStart(e.target.value)}
-                    className="bg-transparent text-sm text-[#1A535C] font-medium outline-none w-full"
-                  />
-                  <span className="text-gray-300 font-bold">-</span>
-                  <input 
-                    type="date" 
-                    value={customEnd}
-                    onChange={(e) => setCustomEnd(e.target.value)}
-                    className="bg-transparent text-sm text-[#1A535C] font-medium outline-none w-full"
-                  />
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        <MetricsHeader 
+          navigate={navigate}
+          isPremium={isPremium}
+          timeFilter={timeFilter}
+          setTimeFilter={setTimeFilter}
+          customStart={customStart}
+          setCustomStart={setCustomStart}
+          customEnd={customEnd}
+          setCustomEnd={setCustomEnd}
+        />
 
         {isPremium ? (
           <>
-            {/* Tarjetas de Resumen Visual */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 mt-6">
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 flex items-center justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#1A535C]"></div>
-                <div>
-                  <p className="text-[#757778] font-bold mb-1 text-xs uppercase tracking-widest">Aperturas de Tarjeta</p>
-                  <h3 className="text-4xl font-extrabold text-[#1A535C] tracking-tight">{totalVistas}</h3>
-                </div>
-                <div className="bg-[#1A535C]/5 p-4 rounded-xl">
-                  <Users size={32} className="text-[#1A535C]" />
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 flex items-center justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#F9842C]"></div>
-                <div>
-                  <p className="text-[#757778] font-bold mb-1 text-xs uppercase tracking-widest">Interacciones (Clics)</p>
-                  <h3 className="text-4xl font-extrabold text-[#F9842C] tracking-tight">{totalClics}</h3>
-                </div>
-                <div className="bg-[#F9842C]/5 p-4 rounded-xl">
-                  <MousePointerClick size={32} className="text-[#F9842C]" />
-                </div>
-              </div>
-            </div>
-
-            {/* Contenedor de la Gráfica */}
-            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="bg-[#1A535C]/5 p-3 rounded-xl border border-[#1A535C]/10">
-                    <TrendingUp size={24} className="text-[#1A535C]" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-[#1A535C] tracking-tight">Evolución de Tráfico</h2>
-                    <p className="text-sm text-[#757778] font-medium mt-0.5">Métricas de impacto generadas por tu tarjeta</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="h-[400px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorVistas" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#1A535C" stopOpacity={0.15}/>
-                        <stop offset="95%" stopColor="#1A535C" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="colorClics" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#F9842C" stopOpacity={0.15}/>
-                        <stop offset="95%" stopColor="#F9842C" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: '#6B7280', fontSize: 13, fontWeight: 500 }}
-                      dy={10}
-                      minTickGap={30}
-                    />
-                    <YAxis 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: '#6B7280', fontSize: 13, fontWeight: 500 }}
-                    />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend 
-                      verticalAlign="top" 
-                      height={36} 
-                      iconType="circle"
-                      wrapperStyle={{ paddingBottom: '20px', fontWeight: 'bold' }}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="vistas" 
-                      name="Aperturas de Tarjeta" 
-                      stroke="#1A535C" 
-                      strokeWidth={3}
-                      fillOpacity={1} 
-                      fill="url(#colorVistas)" 
-                      activeDot={{ r: 6, fill: "#1A535C", stroke: "#fff", strokeWidth: 3 }}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="clics" 
-                      name="Clics en Redes/Contacto" 
-                      stroke="#F9842C" 
-                      strokeWidth={3}
-                      fillOpacity={1} 
-                      fill="url(#colorClics)" 
-                      activeDot={{ r: 6, fill: "#F9842C", stroke: "#fff", strokeWidth: 3 }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+            <MetricsSummaryCards totalVistas={totalVistas} totalClics={totalClics} />
+            <MetricsChart data={data} />
           </>
         ) : (
-          <div className="bg-gradient-to-br from-[#1A535C]/5 via-[#1D565F]/5 to-transparent border border-white/40 backdrop-blur-lg rounded-3xl p-8 md:p-12 text-center shadow-xl max-w-2xl mx-auto mt-10">
-            <div className="w-20 h-20 bg-gradient-to-tr from-[#F9842C] to-[#e06516] text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/20 animate-pulse">
-              <Lock size={36} />
-            </div>
-            
-            <h2 className="text-3xl font-extrabold text-[#1A535C] tracking-tight mb-4 flex items-center justify-center gap-2">
-              <Sparkles className="text-[#F9842C] fill-[#F9842C]/20" /> Panel de Métricas Premium
-            </h2>
-            
-            <p className="text-[#757778] text-sm mb-6 leading-relaxed max-w-sm mx-auto">
-              Actualiza al plan Premium para desbloquear esta y muchas más herramientas para tu negocio.
-            </p>
-            
-            <div className="bg-white/80 rounded-2xl p-6 border border-gray-200 shadow-sm text-left max-w-sm mx-auto mb-8 flex flex-col gap-3">
-              <p className="text-[#1A535C] font-bold mb-2 flex items-center gap-2 border-b border-gray-100 pb-3">
-                Incluye todo lo del plan Básico, más:
-              </p>
-              <div className="flex gap-3 items-start">
-                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
-                <p className="text-sm text-gray-700">
-                  <strong className="text-[#1A535C]">Vitrina y catálogo ampliados</strong> (15 visibles, 50 en inventario)
-                </p>
-              </div>
-              <div className="flex gap-3 items-start">
-                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
-                <p className="text-sm text-gray-700">
-                  <strong className="text-[#1A535C]">Hasta 600 pedidos mensuales</strong> (Notificaciones, estados y carrito activo)
-                </p>
-              </div>
-              <div className="flex gap-3 items-start">
-                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
-                <p className="text-sm text-gray-700">
-                  <strong className="text-[#1A535C]">Dashboard de métricas completo</strong> (Analítica para ventas)
-                </p>
-              </div>
-              <div className="flex gap-3 items-start">
-                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
-                <p className="text-sm text-gray-700">
-                  <strong className="text-[#1A535C]">Insignia de Cuenta Verificada</strong> (Más confianza)
-                </p>
-              </div>
-              <div className="flex gap-3 items-start">
-                <CheckCircle2 size={18} className="text-[#F9842C] shrink-0 mt-0.5" />
-                <p className="text-sm text-gray-700">
-                  <strong className="text-[#1A535C]">Soporte prioritario</strong> (Vía WhatsApp directo)
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button 
-                onClick={() => navigate('/mis-negocios')}
-                className="w-full sm:w-auto px-6 py-3.5 bg-gray-100 hover:bg-gray-200 text-[#1A535C] font-bold rounded-xl transition-all text-sm"
-                data-testid="back-to-businesses-metrics-btn"
-              >
-                Volver
-              </button>
-              <a 
-                href="https://wa.me/59164016676?text=Hola%20SpinGamma,%20quiero%20actualizar%20mi%20negocio%20al%20plan%20Premium%20para%20activar%20las%20M%C3%A9tricas."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-[#F9842C] to-[#e06516] text-white font-extrabold rounded-xl hover:shadow-lg hover:shadow-orange-500/10 hover:-translate-y-0.5 transition-all text-sm flex items-center justify-center gap-2"
-                data-testid="activate-premium-metrics-btn"
-              >
-                <Sparkles size={16} /> Activar Premium (US$5/mes)
-              </a>
-            </div>
-          </div>
+          <MetricsPremiumLock navigate={navigate} />
         )}
-
       </div>
 
       <BottomNavbar 

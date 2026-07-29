@@ -1,6 +1,11 @@
 import React from 'react';
-import { DoorOpen, LogOut, Share2, QrCode, Edit3, Bookmark, Star, MapPin, Camera, Check, CheckCircle2, Loader2, PlaneTakeoff } from 'lucide-react';
 import MapSelectorModal from '../../components/MapSelectorModal';
+import useProfileLocation from '../hooks/useProfileLocation';
+
+import HeroTopNav from './hero/HeroTopNav';
+import HeroBanner from './hero/HeroBanner';
+import HeroInfoEdit from './hero/HeroInfoEdit';
+import HeroInfoView from './hero/HeroInfoView';
 
 export default function ProfileHero({
   profesional,
@@ -26,481 +31,63 @@ export default function ProfileHero({
   isCreateMode,
   specialtiesData
 }) {
-  const [isMapOpen, setIsMapOpen] = React.useState(false);
-  const [detectedCoords, setDetectedCoords] = React.useState(null);
-  const [resolvingUrl, setResolvingUrl] = React.useState(false);
-  const [countriesList, setCountriesList] = React.useState([]);
-
-  React.useEffect(() => {
-    async function loadCountries() {
-      try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-        const res = await fetch(`${API_URL}/countries/`);
-        if (res.ok) {
-          const data = await res.json();
-          setCountriesList(data);
-        }
-      } catch (err) {
-        console.error("Error loading countries list:", err);
-      }
-    }
-    loadCountries();
-  }, []);
-
-  const parseGoogleMapsCoords = (url) => {
-    if (!url) return null;
-    // 1. Pin data: !3dLat!4dLng
-    let match = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-    if (match) {
-      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
-    }
-    // 2. Query parameter: q=lat,lng
-    match = url.match(/[?&](q|query)=(-?\d+\.\d+),(-?\d+\.\d+)/);
-    if (match) {
-      return { lat: parseFloat(match[2]), lng: parseFloat(match[3]) };
-    }
-    // 3. Path place: /place/lat,lng
-    match = url.match(/\/place\/(-?\d+\.\d+),(-?\d+\.\d+)/);
-    if (match) {
-      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
-    }
-    // 4. Viewport/Camera fallback: @lat,lng
-    match = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-    if (match) {
-      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
-    }
-    // 5. Direct coordinates: "lat,lng"
-    match = url.match(/^\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*$/);
-    if (match) {
-      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
-    }
-    return null;
-  };
-
-  React.useEffect(() => {
-    const url = editFormData?.ubicacion_url;
-    if (!url) {
-      setDetectedCoords(null);
-      return;
-    }
-
-    const parsed = parseGoogleMapsCoords(url);
-    if (parsed) {
-      setDetectedCoords(parsed);
-    } else if (url.includes('maps.app.goo.gl') || url.includes('goo.gl/maps')) {
-      const resolveShortUrl = async () => {
-        setResolvingUrl(true);
-        try {
-          const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-          const res = await fetch(`${API_URL}/businesses/resolve-url?url=${encodeURIComponent(url)}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data.resolved_url) {
-              const parsedResolved = parseGoogleMapsCoords(data.resolved_url);
-              if (parsedResolved) {
-                setDetectedCoords(parsedResolved);
-                setEditFormData(prev => ({
-                  ...prev,
-                  ubicacion_url: `https://www.google.com/maps?q=${parsedResolved.lat},${parsedResolved.lng}`
-                }));
-              }
-            }
-          }
-        } catch (err) {
-          console.error("Error resolving short URL:", err);
-        } finally {
-          setResolvingUrl(false);
-        }
-      };
-
-      const timer = setTimeout(() => {
-        resolveShortUrl();
-      }, 800);
-      return () => clearTimeout(timer);
-    } else {
-      setDetectedCoords(null);
-    }
-  }, [editFormData?.ubicacion_url]);
-
-  const handleMapConfirm = (coords) => {
-    const googleMapsUrl = `https://www.google.com/maps?q=${coords.lat},${coords.lng}`;
-    setEditFormData({
-      ...editFormData,
-      ubicacion_url: googleMapsUrl
-    });
-    setDetectedCoords(coords);
-    setIsMapOpen(false);
-  };
+  const {
+    isMapOpen,
+    setIsMapOpen,
+    detectedCoords,
+    resolvingUrl,
+    countriesList,
+    handleMapConfirm
+  } = useProfileLocation(editFormData, setEditFormData);
 
   return (
     <>
-      {/* 🖼️ BARRA DE NAVEGACIÓN SUPERIOR (FLOTANTE) */}
-      <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-start z-50 pointer-events-none">
-        <button
-          onClick={volverAtras}
-          aria-label="Salir del negocio"
-          className="flex items-center gap-2 bg-white/80 backdrop-blur-md rounded-full px-4 py-2 hover:bg-white text-[#1A535C] hover:text-[#6A431F] border border-gray-200 transition-all shadow-md shrink-0 pointer-events-auto font-medium text-sm"
-        >
-          <DoorOpen size={18} />
-          <span>Salir del negocio</span>
-        </button>
+      <HeroTopNav 
+        volverAtras={volverAtras}
+        isLoggedIn={isLoggedIn}
+        userName={userName}
+        handleLogout={handleLogout}
+        onProtectedAction={onProtectedAction}
+      />
 
-        <div className="flex flex-col items-end gap-3 pointer-events-auto">
-          {/* 🚀 BOTÓN LOGOUT TIPO PILL EN LA ESQUINA SUPERIOR */}
-          {isLoggedIn ? (
-            <button
-              onClick={handleLogout}
-              aria-label="Cerrar sesión"
-              className="flex items-center gap-2 bg-white/90 backdrop-blur-md border border-gray-200 p-1 pr-3 rounded-full hover:bg-white transition-all shadow-md group"
-              title="Cerrar sesión"
-            >
-              <div className="w-8 h-8 rounded-full bg-[#F9842C] flex items-center justify-center text-white font-bold text-sm font-sans">
-                {userName ? userName.charAt(0).toUpperCase() : 'U'}
-              </div>
-              <LogOut size={16} className="text-[#757778] group-hover:text-red-500 transition-colors" />
-            </button>
-          ) : (
-            <button
-              onClick={() => onProtectedAction(null)}
-              aria-label="Ingresar para ver más detalles"
-              className="h-10 px-4 bg-white/90 backdrop-blur-md border border-gray-200 rounded-full flex items-center justify-center hover:bg-white transition-all text-xs font-bold uppercase text-[#1A535C] tracking-widest gap-2 shadow-md"
-            >
-              <DoorOpen size={16} className="text-[#F9842C]" /> Ingresar
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* 🖼️ HEADER BANNER IMAGE */}
       <div className="relative overflow-hidden mb-6 pt-16 bg-[#F8F9FA] sm:bg-transparent">
         <div className="relative z-10 flex flex-col">
-          {/* Hero Banner Image */}
-          <div className="relative w-full max-w-5xl mx-auto mb-4 md:px-4 lg:px-6">
-            <div className="relative aspect-video overflow-hidden md:rounded-[2.5rem] bg-[#F8F9FA]">
-              <img
-                src={imagePreview || profesional.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name)}&background=F8F9FA&color=1E3D51&size=512`}
-                onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name)}&background=F8F9FA&color=1E3D51&size=512`; }}
-                alt={`Foto de perfil de ${profesional.name}`}
-                className="w-full h-full object-cover"
-              />
-              {isEditing && (
-                <label className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center cursor-pointer hover:bg-black/50 transition-colors z-20">
-                  <Camera size={48} className="text-white mb-2" />
-                  <span className="text-white font-bold text-sm bg-black/50 px-3 py-1 rounded-full">Ingresa el logo de tu negocio</span>
-                  <input type="file" accept="image/*" name="image" onChange={handleEditChange} className="hidden" />
-                </label>
-              )}
-              {/* BADGES OVERLAY (Bottom Right del Logo) */}
-              <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 flex flex-col gap-1.5 items-end z-30">
-                {profesional.reviews_count > 0 && (
-                  <div className="bg-white/95 backdrop-blur-sm px-1.5 py-1 rounded-lg border border-gray-100 shadow-sm flex items-center gap-1">
-                    <Star size={12} className="text-[#F9842C] fill-[#F9842C] sm:w-[14px] sm:h-[14px]" />
-                    <span className="font-bold text-[#1A535C] text-[10px] sm:text-xs">{profesional.rating}</span>
-                  </div>
-                )}
-                {profesional.home_delivery && (
-                  <span className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-[#1A535C] text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left">
-                    <span className="shrink-0">📦</span>
-                    <span>Entrega Domicilio</span>
-                  </span>
-                )}
-                {profesional.national_delivery && (
-                  <span className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-[#1A535C] text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left">
-                    <span className="shrink-0">✈️</span>
-                    <span>Delivery Nacional</span>
-                  </span>
-                )}
-              </div>
-            </div>
-            {/* Difuminado por FUERA del overflow-hidden para borrar completamente el borde de la imagen */}
-            <div className="absolute bottom-[-5px] left-[-5px] right-[-5px] h-20 sm:h-24 bg-gradient-to-t from-[#F8F9FA] via-[#F8F9FA]/80 to-[#F8F9FA]/0 pointer-events-none z-10"></div>
+          
+          <HeroBanner 
+            profesional={profesional}
+            imagePreview={imagePreview}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+            handleEditChange={handleEditChange}
+            isOwner={isOwner}
+            handleShare={handleShare}
+            toggleQR={toggleQR}
+            isCreateMode={isCreateMode}
+            links={links}
+            handleLinkClick={handleLinkClick}
+            toggleSaveCard={toggleSaveCard}
+            isSaving={isSaving}
+            isSaved={isSaved}
+          />
 
-            {/* BOTÓN EDITAR (Bottom Left del Logo) */}
-            {isOwner && !isEditing && (
-              <div className="absolute bottom-2.5 left-2.5 sm:bottom-4 sm:left-4 z-30">
-                <button
-                  onClick={() => setIsEditing(true)}
-                  data-testid="edit-profile-btn"
-                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-md border border-white/50 active:scale-95 bg-[#F9842C] text-white hover:bg-[#e06516] animate-bounce-short"
-                  title="Editar Perfil"
-                >
-                  <Edit3 size={18} />
-                </button>
-              </div>
-            )}
-
-            {/* BOTONES COMPARTIR Y QR (Top Left del Logo) */}
-            {!isEditing && !isCreateMode && (
-              <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 flex gap-2 z-30">
-                <button
-                  onClick={handleShare}
-                  data-testid="profile-share-btn"
-                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-[#1A535C] hover:bg-white hover:text-[#6A431F]"
-                  title="Compartir"
-                >
-                  <Share2 size={20} />
-                </button>
-                <button
-                  onClick={toggleQR}
-                  data-testid="profile-qr-btn"
-                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-[#1A535C] hover:bg-white hover:text-[#6A431F]"
-                  title="Mostrar QR"
-                >
-                  <QrCode size={20} />
-                </button>
-              </div>
-            )}
-
-            {/* BOTONES UBICACIÓN Y GUARDAR (Top Right del Logo) */}
-            <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 flex gap-2 z-30">
-              {!isEditing && links.ubicacion && (
-                <button
-                  onClick={(e) => handleLinkClick(e, 'Ubicación', links.ubicacion)}
-                  data-testid="profile-location-btn"
-                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-[#F9842C] hover:bg-white hover:text-[#e06516]"
-                  title="Ver ubicación"
-                >
-                  <MapPin size={18} />
-                </button>
-              )}
-              {!isEditing && !isCreateMode && (
-                <button
-                  onClick={toggleSaveCard}
-                  disabled={isSaving}
-                  data-testid="profile-bookmark-btn"
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 ${isSaved ? 'bg-[#6A431F] border-[#6A431F] text-white hover:bg-[#523317]' : 'bg-white/80 border-white/50 text-[#1A535C] hover:bg-white hover:text-[#6A431F]'}`}
-                  title={isSaved ? "Quitar del tarjetero" : "Guardar en mi tarjetero"}
-                >
-                  <Bookmark size={20} className={isSaved ? 'fill-white' : ''} />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* TITULO, PROFESION Y UBICACION */}
           <div className="flex justify-between items-start px-6 sm:px-8 md:px-6 lg:px-8 max-w-4xl mx-auto w-full gap-4">
             <div className="text-left flex-1">
               {isEditing ? (
-                <>
-                  <div className="flex items-center gap-1 mb-1 w-full relative">
-                    <input
-                      name="name"
-                      value={editFormData.name}
-                      onChange={handleEditChange}
-                      maxLength={30}
-                      className="w-full text-3xl font-extrabold text-[#1A535C] leading-tight bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded px-2 outline-none transition-all pr-6"
-                      placeholder="Nombre del Negocio"
-                    />
-                    <span className="absolute right-2 text-red-500 font-bold text-xl" title="Campo obligatorio">*</span>
-                  </div>
-                  <div className="flex items-center gap-1 mt-1 w-full relative">
-                    <input
-                      name="title"
-                      value={editFormData.title}
-                      onChange={handleEditChange}
-                      className="w-full text-[#6A431F] text-sm font-bold uppercase tracking-widest bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded px-2 outline-none transition-all pr-6"
-                      placeholder="Título o Especialidad"
-                    />
-                    <span className="absolute right-2 text-red-500 font-bold text-lg" title="Campo obligatorio">*</span>
-                  </div>
-
-                  {/* Edición de Categoría y Código de Vendedor */}
-                  <div className="mt-3 flex flex-col sm:flex-row gap-2">
-                    <div className="flex-1 flex flex-col">
-                      <label className="text-xs font-bold text-gray-500 mb-1">Categoría Principal <span className="text-red-500" title="Campo obligatorio">*</span></label>
-                      <select
-                        name="category"
-                        value={editFormData.category || ''}
-                        onChange={(e) => {
-                          // Reset subcategories when category changes
-                          setEditFormData({ ...editFormData, category: e.target.value, subcategories: [] });
-                        }}
-                        className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none cursor-pointer"
-                      >
-                        <option value="">Selecciona una Categoría...</option>
-                        {specialtiesData && specialtiesData.map(g => (
-                          <option key={g.category} value={g.category}>{g.category}</option>
-                        ))}
-                      </select>
-                    </div>
-                    {isCreateMode && (
-                      <div className="flex-1 flex flex-col">
-                        <label className="text-xs font-bold text-gray-500 mb-1">Cód. Referido (Opcional)</label>
-                        <input
-                          data-testid="input-seller-code"
-                          name="seller_code"
-                          value={editFormData.seller_code || ''}
-                          onChange={handleEditChange}
-                          className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded p-2 outline-none transition-all"
-                          placeholder="Ej. ma567"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 🛠️ SUBCATEGORÍAS MÚLTIPLES */}
-                  {isEditing && editFormData?.category && (() => {
-                    const group = specialtiesData?.find(g => g.category === editFormData.category);
-                    const subs = group ? group.subcategories : [];
-                    if (!subs || subs.length === 0) return null;
-
-                    return (
-                      <div className="mt-3 flex flex-col bg-white/50 p-3 rounded-xl border border-gray-200 shadow-sm">
-                        <label className="text-xs font-bold text-gray-500 mb-2">Subcategorías (puedes elegir varias) <span className="text-red-500" title="Campo obligatorio">*</span></label>
-                        <div className="flex flex-wrap gap-2">
-                          {subs.map(s => {
-                            const checked = (editFormData.subcategories || []).includes(s.subcategory);
-                            return (
-                              <button
-                                type="button"
-                                key={s.subcategory}
-                                onClick={() => {
-                                  const prev = editFormData.subcategories || [];
-                                  const newSubs = checked ? prev.filter(x => x !== s.subcategory) : [...prev, s.subcategory];
-                                  setEditFormData({ ...editFormData, subcategories: newSubs });
-                                }}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${checked
-                                  ? 'bg-[#F9842C] text-white border-[#F9842C] shadow-sm'
-                                  : 'bg-white text-[#757778] border-gray-200 hover:border-[#F9842C]/50 hover:text-[#F9842C]'
-                                  }`}
-                              >
-                                {checked && <Check size={14} className="inline mr-1 -mt-0.5" />}
-                                {s.subcategory}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Edición de Ubicación */}
-                  <div className="mt-4 grid grid-cols-2 gap-3 bg-white/50 p-4 rounded-xl border border-gray-200 shadow-sm">
-                    <p className="col-span-2 text-sm font-extrabold text-[#1A535C] flex items-center gap-2">
-                      <MapPin size={16} className="text-[#F9842C]" /> Ubicación Geográfica
-                    </p>
-
-                    <div className="flex flex-col">
-                      <label className="text-xs font-bold text-gray-500 mb-1">País <span className="text-red-500" title="Campo obligatorio">*</span></label>
-                      <select
-                        name="country"
-                        value={editFormData.country || 'Bolivia'}
-                        onChange={(e) => {
-                          setEditFormData(prev => ({ ...prev, country: e.target.value, state: '' }));
-                        }}
-                        className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none cursor-pointer"
-                      >
-                        {countriesList.length === 0 ? (
-                          <option value="Bolivia">Bolivia</option>
-                        ) : (
-                          countriesList.map(c => (
-                            <option key={c.country} value={c.country}>{c.country}</option>
-                          ))
-                        )}
-                      </select>
-                    </div>
-
-                    <div className="flex flex-col">
-                      <label className="text-xs font-bold text-gray-500 mb-1">Departamento <span className="text-red-500" title="Campo obligatorio">*</span></label>
-                      <select
-                        name="state"
-                        value={editFormData.state || ''}
-                        onChange={handleEditChange}
-                        className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none cursor-pointer"
-                      >
-                        <option value="">Selecciona un departamento...</option>
-                        {countriesList.find(c => c.country === (editFormData.country || 'Bolivia'))?.departments?.map(d => (
-                          <option key={d.id} value={d.name}>{d.name}</option>
-                        )) || (
-                            <>
-                              <option value="La Paz">La Paz</option>
-                              <option value="Santa Cruz">Santa Cruz</option>
-                              <option value="Cochabamba">Cochabamba</option>
-                              <option value="Oruro">Oruro</option>
-                              <option value="Potosí">Potosí</option>
-                              <option value="Chuquisaca">Chuquisaca</option>
-                              <option value="Tarija">Tarija</option>
-                              <option value="Beni">Beni</option>
-                              <option value="Pando">Pando</option>
-                            </>
-                          )}
-                      </select>
-                    </div>
-
-                    <div className="flex flex-col col-span-2">
-                      <label className="text-xs font-bold text-gray-500 mb-1">¿Realiza entregas a domicilio?</label>
-                      <select
-                        value={editFormData.national_delivery ? "national" : (editFormData.home_delivery ? "local" : "no")}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setEditFormData(prev => ({
-                            ...prev,
-                            home_delivery: val === 'local',
-                            national_delivery: val === 'national'
-                          }));
-                        }}
-                        className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none cursor-pointer"
-                      >
-                        <option value="no">No realizo envíos / entregas</option>
-                        <option value="local">Sí, realizo entregas a domicilio (Departamental)</option>
-                        <option value="national">Sí, realizo envíos nacionales ✈️</option>
-                      </select>
-                    </div>
-
-                    <div className="flex flex-col col-span-2 gap-2">
-                      <div className="flex justify-between items-center">
-                        <label className="text-xs font-bold text-gray-500">Enlace de Google Maps</label>
-                        <button
-                          type="button"
-                          onClick={() => setIsMapOpen(true)}
-                          data-testid="open-map-selector-button"
-                          className="text-xs font-bold text-[#F9842C] hover:text-[#e06516] flex items-center gap-1.5 bg-[#F9842C]/5 px-3 py-1.5 rounded-xl border border-[#F9842C]/20 hover:bg-[#F9842C]/10 transition-all active:scale-95 cursor-pointer shadow-sm"
-                        >
-                          <MapPin size={14} className="text-[#F9842C]" />
-                          <span>Elegir en el Mapa</span>
-                        </button>
-                      </div>
-
-                      <div className="relative flex items-center">
-                        <input
-                          name="ubicacion_url"
-                          value={editFormData.ubicacion_url || ''}
-                          onChange={handleEditChange}
-                          className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded-xl p-2.5 pr-10 outline-none transition-all"
-                          placeholder="https://maps.app.goo.gl/..."
-                        />
-                        {resolvingUrl && (
-                          <div className="absolute right-3 flex items-center justify-center">
-                            <Loader2 size={16} className="animate-spin text-[#F9842C]" />
-                          </div>
-                        )}
-                      </div>
-
-                      {detectedCoords && (
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200/50 p-2 rounded-xl mt-1 animate-in fade-in duration-200">
-                          <Check size={12} className="bg-emerald-600 text-white rounded-full p-0.5" />
-                          <span>Ubicación detectada correctamente</span>
-                        </div>
-                      )}
-
-                      {!detectedCoords && editFormData.ubicacion_url && !resolvingUrl && (
-                        <div className="text-[10px] font-medium text-amber-600 bg-amber-50/50 border border-amber-200/30 p-2 rounded-xl mt-1 italic">
-                          No pudimos extraer coordenadas del enlace. El mapa usará el centrado de departamento, o puedes elegir con un pin haciendo clic en "Elegir en el Mapa".
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </>
+                <HeroInfoEdit 
+                  editFormData={editFormData}
+                  setEditFormData={setEditFormData}
+                  handleEditChange={handleEditChange}
+                  isCreateMode={isCreateMode}
+                  specialtiesData={specialtiesData}
+                  countriesList={countriesList}
+                  setIsMapOpen={setIsMapOpen}
+                  resolvingUrl={resolvingUrl}
+                  detectedCoords={detectedCoords}
+                />
               ) : (
-                <>
-                  <h1 className="text-3xl font-extrabold text-[#1A535C] leading-tight mb-1 flex items-center gap-1.5 flex-wrap">
-                    <span>{profesional.name}</span>
-                    {profesional.premium && (
-                      <CheckCircle2 size={22} className="text-[#F9842C] fill-[#F9842C]/10 shrink-0" title="Negocio Premium Verificado" />
-                    )}
-                  </h1>
-                  <p className="text-[#6A431F] text-sm font-bold uppercase tracking-widest mb-1">{profesional.title}</p>
-                </>
+                <HeroInfoView 
+                  profesional={profesional}
+                />
               )}
             </div>
           </div>

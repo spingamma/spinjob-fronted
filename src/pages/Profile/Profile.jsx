@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import SeoMeta from '../../components/SeoMeta';
 import AuthModal from '../../components/AuthModal';
 import fetchAuth from '../../utils/fetchAuth';
@@ -8,6 +8,7 @@ import fetchAuth from '../../utils/fetchAuth';
 // 📥 IMPORTACIÓN DE PLANTILLAS
 // ==========================================
 import PlantillaGenerica from '../../plantillas/PlantillaGenerica';
+import { API_URL } from '../../config/api';
 
 function Perfil() {
   const { slug } = useParams();
@@ -23,7 +24,7 @@ function Perfil() {
   const userObj = (() => {
     const stored = localStorage.getItem('spingamma_user');
     if (stored) {
-      try { return JSON.parse(stored); } catch (e) { return null; }
+      try { return JSON.parse(stored); } catch { return null; }
     }
     return null;
   })();
@@ -31,7 +32,6 @@ function Perfil() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingUrl, setPendingUrl] = useState(null);
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
     let isMounted = true;
@@ -86,7 +86,6 @@ function Perfil() {
   // ==========================================
   const registrarVisitaPerfil = async (slug) => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
       const response = await fetchAuth(`${API_URL}/businesses/${slug}/interaccion`, {
         method: 'POST',
         headers: {
@@ -187,7 +186,6 @@ function Perfil() {
   // ==========================================
   const handleUpdate = () => {
     // Para recargar los datos
-    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
     const targetSlug = slug?.toLowerCase() === 'tarjetoso' ? 'spingamma' : slug;
     fetchAuth(`${API_URL}/businesses/${targetSlug}`)

@@ -4,6 +4,7 @@ import { Search, LogOut, ChevronDown, Download, ShoppingCart, Globe } from 'luci
 import { useNavigate } from 'react-router-dom';
 import NavMenu from './NavMenu';
 import CountryModal from './CountryModal';
+import { API_URL } from '../config/api';
 
 const Header = ({
   searchTerm,
@@ -21,15 +22,18 @@ const Header = ({
 }) => {
   const navigate = useNavigate();
   const [deferredPrompt, setDeferredPrompt] = useState(window.deferredPromptEvent || null);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
+  const isIOS = typeof window !== 'undefined' && /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+  const isStandalone = typeof window !== 'undefined' && (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
   const [isCountryModalOpen, setIsCountryModalOpen] = useState(false);
 
   const [localSearch, setLocalSearch] = useState(searchTerm || '');
 
-  useEffect(() => {
+  const [prevSearchTerm, setPrevSearchTerm] = useState(searchTerm);
+
+  if (searchTerm !== prevSearchTerm) {
+    setPrevSearchTerm(searchTerm);
     setLocalSearch(searchTerm || '');
-  }, [searchTerm]);
+  }
 
   const handleSaveCountry = async (selectedCountry) => {
     localStorage.setItem('spingamma_selected_country', selectedCountry);
@@ -37,7 +41,6 @@ const Header = ({
     if (isLoggedIn) {
       try {
         const token = localStorage.getItem('spingamma_token');
-        const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
         const res = await fetch(`${API_URL}/usuarios/actualizar-localizacion`, {
           method: 'PUT',
           headers: {
@@ -65,17 +68,10 @@ const Header = ({
   };
 
   useEffect(() => {
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-      setIsStandalone(true);
+    if (isStandalone) {
       return;
     }
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    if (/iphone|ipad|ipod/.test(userAgent)) {
-      setIsIOS(true);
-    }
-    if (window.deferredPromptEvent) {
-      setDeferredPrompt(window.deferredPromptEvent);
-    }
+
 
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
@@ -84,7 +80,7 @@ const Header = ({
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-  }, []);
+  }, [isStandalone]);
 
   const handleInstallClick = async () => {
     if (isIOS) {

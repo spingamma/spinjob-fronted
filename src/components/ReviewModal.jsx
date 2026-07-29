@@ -1,5 +1,5 @@
 // Archivo: src/components/ReviewModal.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Star, X, Loader2 } from 'lucide-react';
 
 export default function ReviewModal({
@@ -14,8 +14,10 @@ export default function ReviewModal({
   const [hoverRating, setHoverRating] = useState(0);
   const [description, setDescription] = useState("");
 
-  // Al abrir el modal, poblamos con la calificación previa si la hubiera
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       if (calificacionPrevia) {
         setRating(calificacionPrevia.rating || 0);
@@ -25,7 +27,7 @@ export default function ReviewModal({
         setDescription("");
       }
     }
-  }, [isOpen, calificacionPrevia]);
+  }
 
   if (!isOpen) return null;
 

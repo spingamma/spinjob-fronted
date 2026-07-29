@@ -1,5 +1,5 @@
 // Archivo: src/pages/BusinessCardHolder/BusinessCardHolder.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, BookmarkMinus, Eye, Bookmark as BookmarkIcon, Search } from 'lucide-react';
 import BottomNavbar from '../../components/BottomNavbar';
@@ -7,6 +7,7 @@ import Header from '../../components/Header';
 import DirectoryFilterBar from '../../components/DirectoryFilterBar';
 import { useDirectoryFilters } from '../../hooks/useDirectoryFilters';
 import fetchAuth from '../../utils/fetchAuth';
+import { API_URL } from '../../config/api';
 
 export default function Tarjetero() {
   const [tarjetas, setTarjetas] = useState([]);
@@ -17,13 +18,14 @@ export default function Tarjetero() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
+  // eslint-disable-next-line no-unused-vars
   const [isAdmin, setIsAdmin] = useState(() => {
     const stored = localStorage.getItem('spingamma_user');
     if (stored) {
       try { 
         const parsed = JSON.parse(stored);
         return parsed.is_admin === true || parsed.is_vendedor === true; 
-      } catch(e) { return false; }
+      } catch { return false; }
     }
     return false;
   });
@@ -36,7 +38,7 @@ export default function Tarjetero() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const fetchTarjetero = async () => {
+  const fetchTarjetero = useCallback(async () => {
     const token = localStorage.getItem('spingamma_token');
     if (!token) {
       navigate('/');
@@ -44,7 +46,6 @@ export default function Tarjetero() {
     }
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
       const res = await fetchAuth(`${API_URL}/tarjetero`);
       
       if (!res.ok) throw new Error("Error al cargar tu tarjetero");
@@ -56,11 +57,11 @@ export default function Tarjetero() {
     } finally {
       setCargando(false);
     }
-  };
+  }, [navigate]);
 
   useEffect(() => {
     fetchTarjetero();
-  }, [navigate]);
+  }, [fetchTarjetero]);
 
   const filterHook = useDirectoryFilters(tarjetas);
 
@@ -76,7 +77,6 @@ export default function Tarjetero() {
     if (!token) return;
     
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
       const res = await fetchAuth(`${API_URL}/tarjetero/${slug}`, {
         method: 'DELETE'
       });

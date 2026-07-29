@@ -36,7 +36,7 @@ const NavMenu = ({ isLoggedIn, isAdmin, onHomeClick, isMobile = false }) => {
         const parsed = JSON.parse(stored);
         if (parsed.is_admin) return 'Admin';
         if (parsed.is_vendedor) return 'Ventas';
-      } catch (e) {}
+      } catch { /* ignore */ }
     }
     return 'Admin';
   }, []);

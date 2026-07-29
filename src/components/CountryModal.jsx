@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Globe, Check, Loader2, X, ChevronDown } from 'lucide-react';
+import { API_URL } from '../config/api';
 
 export default function CountryModal({ isOpen, isDismissable = false, onClose, onSave, initialCountry = '' }) {
   const [countries, setCountries] = useState([]);
@@ -9,7 +10,6 @@ export default function CountryModal({ isOpen, isDismissable = false, onClose, o
   const [error, setError] = useState(null);
   const [isOpenDropdown, setIsOpenDropdown] = useState(false);
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
     if (!isOpen) return;
@@ -49,10 +49,9 @@ export default function CountryModal({ isOpen, isDismissable = false, onClose, o
         if (isMounted) setIsLoading(false);
       }
     }
-
     fetchCountries();
     return () => { isMounted = false; };
-  }, [isOpen, API_URL]);
+  }, [isOpen, API_URL, setCountries, setError, setIsLoading, setSelectedCountry, selectedCountry]);
 
   if (!isOpen) return null;
 
@@ -85,6 +84,7 @@ export default function CountryModal({ isOpen, isDismissable = false, onClose, o
         {/* Close Button (only if dismissable) */}
         {isDismissable && onClose && (
           <button 
+            data-testid="close-country-modal-btn"
             onClick={onClose}
             className="absolute top-6 right-6 p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors z-20"
             aria-label="Cerrar modal"
@@ -126,6 +126,7 @@ export default function CountryModal({ isOpen, isDismissable = false, onClose, o
               <div className="relative">
                 <button
                   type="button"
+                  data-testid="country-dropdown-btn"
                   onClick={() => setIsOpenDropdown(!isOpenDropdown)}
                   className="w-full flex items-center justify-between bg-gray-50 border border-gray-200 text-[#1A535C] font-bold text-sm px-4 py-3.5 rounded-2xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 transition-all cursor-pointer"
                 >
@@ -150,6 +151,7 @@ export default function CountryModal({ isOpen, isDismissable = false, onClose, o
                           <button
                             key={c.country}
                             type="button"
+                            data-testid={`select-country-${c.country.toLowerCase().replace(/\s+/g, '-')}`}
                             onClick={() => {
                               setSelectedCountry(c.country);
                               setIsOpenDropdown(false);
@@ -178,6 +180,7 @@ export default function CountryModal({ isOpen, isDismissable = false, onClose, o
 
           {/* Action Button */}
           <button
+            data-testid="save-country-btn"
             onClick={handleSave}
             disabled={isLoading || isSaving || !selectedCountry}
             className="w-full mt-8 bg-[#1A535C] hover:bg-[#133d44] text-white py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98] disabled:opacity-50"

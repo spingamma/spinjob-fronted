@@ -68,6 +68,7 @@ export async function getCroppedImg(
   )
 
   // As a blob
+  // eslint-disable-next-line no-unused-vars
   return new Promise((resolve, reject) => {
     croppedCanvas.toBlob((file) => {
       resolve(URL.createObjectURL(file))

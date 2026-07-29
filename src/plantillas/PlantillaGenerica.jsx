@@ -1,518 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, Loader2, Save, CheckCircle2 } from 'lucide-react';
-
-import useAccionesPerfil from '../hooks/useAccionesPerfil';
+import { Star } from 'lucide-react';
 import ReviewModal from '../components/ReviewModal';
 import ModalVerificacion from '../components/ModalVerificacion';
 import InlineCatalogCarousel from '../components/InlineCatalogCarousel';
-import fetchAuth from '../utils/fetchAuth';
-
 import ProfileHero from './components/ProfileHero';
 import ProfileAbout from './components/ProfileAbout';
 import ProfileContact from './components/ProfileContact';
 import ProfileQRModal from './components/ProfileQRModal';
 import ProfileCatalogEdit from './components/ProfileCatalogEdit';
-
-// UTIL: Decodificar JWT para obtener el user ID
-function getUserIdFromToken() {
-  const token = localStorage.getItem('spingamma_token');
-  if (!token) return null;
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const pad = base64.length % 4;
-    const padded = pad ? base64 + '='.repeat(4 - pad) : base64;
-    const payload = JSON.parse(window.atob(padded));
-    return payload.sub;
-  } catch (e) {
-    console.error("Token decode error:", e);
-    return null;
-  }
-}
+import FloatingActionBar from './components/FloatingActionBar';
+import { usePlantillaGenerica } from './hooks/usePlantillaGenerica';
 
 export default function PlantillaGenerica({ profesional, volverAtras, onProtectedAction, onUpdate, isCreateMode = false }) {
   const navigate = useNavigate();
-  // 🚀 EXTRAÍDO AL HOOK: Lógica centralizada
+
   const {
-    mostrarQR, toggleQR, handleDownloadQR, mostrarCalificacion, isLoggedIn, userName, handleLogout,
-    handleShare, handleLinkClick, handleCalificarClick, handleCerrarPanelCalificacion,
-    mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview,
-    mostrarModalVerificacion, setMostrarModalVerificacion,
-    isSaved, isSaving, toggleSaveCard
-  } = useAccionesPerfil(profesional, onProtectedAction);
-
-  // ==========================================
-  // 📝 MODO EDICIÓN "INLINE" Y BORRADOR
-  // ==========================================
-  const userId = getUserIdFromToken();
-  const userObj = JSON.parse(localStorage.getItem('spingamma_user') || '{}');
-  const isAdmin = userObj.is_admin === true;
-  const isOwner = isLoggedIn && (isAdmin || profesional?.owner_id === userId);
-
-  const draftStorageKey = isCreateMode 
-    ? 'spingamma_draft_business_create' 
-    : (profesional?.slug ? `spingamma_draft_business_${profesional.slug}` : null);
-
-  const [isEditing, setIsEditing] = useState(isCreateMode);
-  const [isSavingEdit, setIsSavingEdit] = useState(false);
-  const [isRestoredFromDraft, setIsRestoredFromDraft] = useState(false);
-
-  const getServerQr = (prof) => {
-    if (!prof) return '';
-    return prof.payment_qr_image || prof.qr_payment_url || prof.payment_qr || prof.qr_image || prof.qr_image_url || prof.qr_code || prof.qr || '';
-  };
-
-  const [editFormData, setEditFormData] = useState(() => {
-    let initialWaNumbers = [];
-    try { initialWaNumbers = JSON.parse(profesional.whatsapp_numbers || '[]'); } catch { initialWaNumbers = []; }
-    if (initialWaNumbers.length === 0 && profesional.whatsapp) initialWaNumbers = [profesional.whatsapp];
-    if (initialWaNumbers.length === 0) initialWaNumbers = [''];
-
-    return {
-      name: profesional.name || '',
-      title: profesional.title || '',
-      description: profesional.description || '',
-      experience_years: profesional.experience_years || '',
-      credentials: profesional.credentials || '',
-      phone: profesional.phone || '',
-      whatsapp_numbers: initialWaNumbers,
-      facebook: profesional.facebook || '',
-      instagram: profesional.instagram || '',
-      linkedin: profesional.linkedin || '',
-      tiktok: profesional.tiktok || '',
-      github: profesional.github || '',
-      website: profesional.website || '',
-      country: profesional.country || 'Bolivia',
-      state: profesional.state || '',
-      home_delivery: profesional.home_delivery || false,
-      national_delivery: profesional.national_delivery || false,
-      ubicacion_url: profesional.ubicacion_url || '',
-      category: profesional.category || '',
-      subcategories: (() => {
-        try {
-          return typeof profesional.subcategories === 'string' ? JSON.parse(profesional.subcategories) : (profesional.subcategories || []);
-        } catch(e) {
-          return (profesional.subcategories && profesional.subcategories.length > 0) ? profesional.subcategories.split(',') : [];
-        }
-      })(),
-      seller_code: '',
-      orders_enabled: profesional.orders_enabled !== false,
-      payment_qr_image: getServerQr(profesional),
-      carousel_order: profesional.carousel_order || '',
-      delivery_methods: (() => {
-        try {
-          return typeof profesional.delivery_methods === 'string' ? JSON.parse(profesional.delivery_methods) : (profesional.delivery_methods || []);
-        } catch(e) {
-          return [];
-        }
-      })()
-    };
-  });
-  const [imagePreview, setImagePreview] = useState(null);
-  const [specialtiesData, setSpecialtiesData] = useState([]);
-  const [localProducts, setLocalProducts] = useState([]);
-  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
-  const [deletedProductsIds, setDeletedProductsIds] = useState([]);
-  const [hasUnsavedProduct, setHasUnsavedProduct] = useState(false);
-  const [saveError, setSaveError] = useState('');
-
-  // 💾 AUTO-GUARDADO Y RESTAURACIÓN SILENCIOSA DE BORRADOR (EXPIRACIÓN 24 HRS)
-  useEffect(() => {
-    if (isEditing && draftStorageKey) {
-      try {
-        const savedDraft = localStorage.getItem(draftStorageKey);
-        if (savedDraft) {
-          const parsed = JSON.parse(savedDraft);
-          const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-          const isExpired = parsed.updatedAt && (Date.now() - parsed.updatedAt > ONE_DAY_MS);
-          
-          if (isExpired) {
-            localStorage.removeItem(draftStorageKey);
-          } else if (parsed.editFormData) {
-            if (!parsed.editFormData.whatsapp_numbers || parsed.editFormData.whatsapp_numbers.length === 0) {
-              parsed.editFormData.whatsapp_numbers = [''];
-            }
-            const serverQr = getServerQr(profesional);
-            if (serverQr && (!parsed.editFormData.payment_qr_image || !parsed.editFormData.payment_qr_image.startsWith('data:image'))) {
-              parsed.editFormData.payment_qr_image = serverQr;
-            }
-            setEditFormData(parsed.editFormData);
-            if (parsed.localProducts) setLocalProducts(parsed.localProducts);
-            if (parsed.imagePreview) setImagePreview(parsed.imagePreview);
-          }
-        }
-      } catch (err) {
-        console.error("Error cargando borrador:", err);
-      }
+    isOwner,
+    isEditing,
+    setIsEditing,
+    imagePreview,
+    setImagePreview,
+    isSubModalOpen,
+    setIsSubModalOpen,
+    deletedProductsIds,
+    setDeletedProductsIds,
+    setHasUnsavedProduct,
+    draftStorageKey,
+    profileForm: { editFormData, setEditFormData, handleEditChange },
+    specialtiesData,
+    localProducts,
+    setLocalProducts,
+    saveError,
+    isSavingEdit,
+    handleSaveEdit,
+    getServerQr,
+    waNumbers,
+    links,
+    accionesPerfil: {
+      mostrarQR, toggleQR, handleDownloadQR, isLoggedIn, userName, handleLogout,
+      handleShare, handleLinkClick, handleCalificarClick,
+      mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview,
+      mostrarModalVerificacion, setMostrarModalVerificacion,
+      isSaved, isSaving, toggleSaveCard
     }
-  }, [isEditing, draftStorageKey, profesional]);
-
-  useEffect(() => {
-    if (isEditing && draftStorageKey) {
-      const timer = setTimeout(() => {
-        try {
-          const { new_image, payment_qr_file, ...cleanFormData } = editFormData;
-          const draftPayload = {
-            editFormData: cleanFormData,
-            localProducts: (localProducts || []).map(p => {
-              const { imageFile, ...cleanP } = p;
-              return cleanP;
-            }),
-            imagePreview,
-            updatedAt: Date.now()
-          };
-          localStorage.setItem(draftStorageKey, JSON.stringify(draftPayload));
-        } catch (err) {
-          console.error("Error guardando borrador en localStorage:", err);
-        }
-      }, 400);
-      return () => clearTimeout(timer);
-    }
-  }, [editFormData, localProducts, imagePreview, isEditing, draftStorageKey]);
-
-  // Fetch specialties & products
-  useEffect(() => {
-    if (isEditing) {
-      const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      fetch(`${API_URL}/specialties/grouped`)
-        .then(res => res.ok ? res.json() : [])
-        .then(data => setSpecialtiesData(data))
-        .catch(err => console.error("Error fetching specialties:", err));
-
-      if (!isCreateMode && profesional?.slug) {
-        fetch(`${API_URL}/businesses/${profesional.slug}/products`)
-          .then(res => res.ok ? res.json() : [])
-          .then(data => setLocalProducts(data))
-          .catch(err => console.error("Error fetching products:", err));
-      }
-    }
-  }, [isEditing, isCreateMode, profesional?.slug]);
-
-  useEffect(() => {
-    if (profesional) {
-      let initialWaNumbers = [];
-      try { initialWaNumbers = JSON.parse(profesional.whatsapp_numbers || '[]'); } catch { initialWaNumbers = []; }
-      if (initialWaNumbers.length === 0 && profesional.whatsapp) initialWaNumbers = [profesional.whatsapp];
-      if (initialWaNumbers.length === 0) initialWaNumbers = [''];
-
-      const currentQr = getServerQr(profesional);
-
-      setEditFormData(prev => {
-        if (isEditing && prev.payment_qr_image && prev.payment_qr_image.startsWith('data:image')) {
-          return {
-            ...prev,
-            payment_qr_image: prev.payment_qr_image
-          };
-        }
-        return {
-          name: profesional.name || '',
-          title: profesional.title || '',
-          description: profesional.description || '',
-          experience_years: profesional.experience_years || '',
-          credentials: profesional.credentials || '',
-          phone: profesional.phone || '',
-          whatsapp_numbers: initialWaNumbers,
-          facebook: profesional.facebook || '',
-          instagram: profesional.instagram || '',
-          linkedin: profesional.linkedin || '',
-          tiktok: profesional.tiktok || '',
-          github: profesional.github || '',
-          website: profesional.website || '',
-          country: profesional.country || 'Bolivia',
-          state: profesional.state || '',
-          home_delivery: profesional.home_delivery || false,
-          national_delivery: profesional.national_delivery || false,
-          ubicacion_url: profesional.ubicacion_url || '',
-          category: profesional.category || '',
-          subcategories: (() => {
-            try {
-              return typeof profesional.subcategories === 'string' ? JSON.parse(profesional.subcategories) : (profesional.subcategories || []);
-            } catch(e) {
-              return (profesional.subcategories && profesional.subcategories.length > 0) ? profesional.subcategories.split(',') : [];
-            }
-          })(),
-          seller_code: '',
-          orders_enabled: profesional.orders_enabled !== false,
-          payment_qr_image: currentQr || prev.payment_qr_image || '',
-          carousel_order: profesional.carousel_order || '',
-          delivery_methods: (() => {
-            try {
-              return typeof profesional.delivery_methods === 'string' ? JSON.parse(profesional.delivery_methods) : (profesional.delivery_methods || []);
-            } catch(e) {
-              return [];
-            }
-          })()
-        };
-      });
-    }
-  }, [profesional]);
-
-  const handleEditChange = (e) => {
-    if (e.target.name === 'image') {
-      const file = e.target.files[0];
-      if (file) {
-        setEditFormData({ ...editFormData, new_image: file });
-        setImagePreview(URL.createObjectURL(file));
-      }
-    } else {
-      setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
-    }
-  };
-
-  const handleSaveEdit = async () => {
-    setSaveError('');
-    if (hasUnsavedProduct) {
-      setSaveError("Tienes un producto a medio editar en el catálogo. Por favor completa su nombre y haz clic en 'Añadir' / 'Actualizar', o cancela la edición antes de guardar la tarjeta.");
-      return;
-    }
-
-    if (!editFormData.name?.trim() || !editFormData.title?.trim() || !editFormData.description?.trim() || !editFormData.category?.trim() || !editFormData.state?.trim() || !editFormData.subcategories || editFormData.subcategories.length === 0) {
-      setSaveError("Faltan campos obligatorios. Por favor completa: Nombre, Título, Descripción, Categoría, Subcategoría y Departamento/Estado.");
-      return;
-    }
-
-    const isPremium = profesional?.premium === true;
-    if (isPremium && editFormData.orders_enabled) {
-      if (!editFormData.delivery_methods || editFormData.delivery_methods.length === 0) {
-        alert("Debes agregar al menos un método de entrega si habilitas los pedidos.");
-        return;
-      }
-      if (!editFormData.payment_qr_image) {
-        alert("Requisito Obligatorio: Debes subir la imagen de tu QR de Pago Bancario (QR Simple) para habilitar la recepción de pedidos.");
-        return;
-      }
-    }
-
-
-    if (isCreateMode) {
-      const isVerifiedStrict = userObj?.is_verified === true || userObj?.is_verified === "true" || userObj?.is_verified === 1;
-      if (!isVerifiedStrict) {
-        setMostrarModalVerificacion(true);
-        return;
-      }
-    }
-
-    setIsSavingEdit(true);
-    const token = localStorage.getItem('spingamma_token');
-    try {
-      const payload = { ...editFormData };
-      
-      const formDataObj = new FormData();
-      Object.keys(payload).forEach(key => {
-        if (key === 'new_image') {
-          if (payload[key]) formDataObj.append('image', payload[key]);
-        } else if (key === 'carousel_order') {
-          formDataObj.append('carousel_order', payload[key] || '');
-        } else if (key === 'whatsapp_numbers') {
-          const validNumbers = payload.whatsapp_numbers.filter(n => n.trim() !== '');
-          formDataObj.append('whatsapp_numbers', JSON.stringify(validNumbers));
-          if (validNumbers.length > 0) {
-             formDataObj.append('whatsapp', validNumbers[0]); // fallback legacy
-          } else {
-             formDataObj.append('whatsapp', '');
-          }
-        } else if (key === 'subcategories') {
-          if (Array.isArray(payload[key]) && payload[key].length > 0) {
-             formDataObj.append('subcategories', JSON.stringify(payload[key]));
-          }
-        } else if (key === 'delivery_methods') {
-          const methods = Array.isArray(payload[key]) ? payload[key] : [];
-          formDataObj.append('delivery_methods', JSON.stringify(methods));
-        } else if (key === 'payment_qr_image' || key === 'payment_qr_file') {
-          // Omitir en bucle, se procesa de forma directa abajo
-        } else if (payload[key] !== null && payload[key] !== undefined && payload[key] !== '') {
-          formDataObj.append(key, payload[key]);
-        }
-      });
-
-      // Procesar Imagen de QR de Pago Bancario (solo enviar si es File o base64 nuevo)
-      // URLs del servidor (ya persistidas en Cloudinary) NO se reenvían
-      if (payload.payment_qr_file instanceof File) {
-        formDataObj.append('payment_qr_image', payload.payment_qr_file);
-      } else if (typeof payload.payment_qr_image === 'string' && payload.payment_qr_image.startsWith('data:image')) {
-        try {
-          const arr = payload.payment_qr_image.split(',');
-          const mime = arr[0].match(/:(.*?);/)[1];
-          const bstr = atob(arr[1]);
-          let n = bstr.length;
-          const u8arr = new Uint8Array(n);
-          while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-          }
-          const qrBlob = new Blob([u8arr], { type: mime });
-          const qrFile = new File([qrBlob], "payment_qr.png", { type: mime });
-          formDataObj.append('payment_qr_image', qrFile);
-        } catch(e) {
-          console.error("Error convirtiendo QR base64 a File:", e);
-        }
-      }
-      // Si payment_qr_image es una URL (http/https), no la reenviamos: ya está en Cloudinary
-
-      const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      
-      let res;
-      if (isCreateMode) {
-        res = await fetchAuth(`${API_URL}/businesses/`, {
-          method: 'POST',
-          body: formDataObj
-        });
-      } else {
-        res = await fetchAuth(`${API_URL}/businesses/${profesional.slug}/editar`, {
-          method: 'PUT',
-          body: formDataObj
-        });
-      }
-
-      if (!res.ok) {
-        const errData = await res.json();
-        let errorMessage = "Error al guardar cambios";
-        if (errData.detail) {
-          if (Array.isArray(errData.detail)) {
-             errorMessage = errData.detail.map(e => `${e.loc ? e.loc[e.loc.length-1] : 'Campo'}: ${e.msg}`).join('\n');
-          } else {
-             errorMessage = errData.detail;
-          }
-        }
-        throw new Error(errorMessage);
-      }
-      
-      const responseData = await res.json();
-      const currentSlug = isCreateMode ? responseData.slug : profesional.slug;
-
-      // Actualización inmediata de estado local con los datos devueltos por el servidor
-      if (responseData) {
-        const savedQr = getServerQr(responseData) || payload.payment_qr_image;
-        if (savedQr) {
-          if (profesional) {
-            profesional.payment_qr_image = savedQr;
-            profesional.qr_payment_url = savedQr;
-            profesional.payment_qr = savedQr;
-            profesional.qr_image = savedQr;
-            profesional.qr_image_url = savedQr;
-          }
-          setEditFormData(prev => ({ ...prev, payment_qr_image: savedQr, payment_qr_file: null }));
-        }
-        if (responseData.delivery_methods) {
-          let savedMethods = responseData.delivery_methods;
-          if (typeof savedMethods === 'string') {
-            try { savedMethods = JSON.parse(savedMethods); } catch(e) {}
-          }
-          if (Array.isArray(savedMethods)) {
-            if (profesional) profesional.delivery_methods = savedMethods;
-            setEditFormData(prev => ({ ...prev, delivery_methods: savedMethods }));
-          }
-        }
-      }
-
-      // 🛒 PROCESAR PRODUCTOS DEL CATÁLOGO
-      // 1. Eliminar productos
-      for (const prodId of deletedProductsIds) {
-        try {
-          const delRes = await fetchAuth(`${API_URL}/businesses/${currentSlug}/products/${prodId}`, {
-            method: 'DELETE'
-          });
-          if (!delRes.ok) {
-            const errData = await delRes.json().catch(() => ({}));
-            throw new Error(errData.detail || `Error al eliminar producto`);
-          }
-        } catch (e) {
-          if (e.message !== 'SESSION_EXPIRED') {
-            console.error("Error eliminando producto:", e);
-            throw e;
-          }
-        }
-      }
-
-      // 2. Guardar/Actualizar productos
-      for (const prod of localProducts) {
-        // Solo guardamos si es nuevo o modificado (no tiene id, o tiene 'imageFile', o isModified)
-        // Para simplificar, si el producto tiene id pero no tiene imageFile ni cambios, podríamos omitirlo.
-        // Pero enviaremos todos los que tengan `file` o no tengan `id`, o tengan `isModified`
-        if (!prod.id || prod.isModified) {
-          const pForm = new FormData();
-          pForm.append('name', prod.name.trim());
-          if (prod.description) pForm.append('description', prod.description.trim());
-          if (prod.price) pForm.append('price', prod.price.trim());
-          if (prod.carousel_name) pForm.append('carousel_name', prod.carousel_name.trim());
-          pForm.append('is_visible', prod.is_visible !== false ? 'true' : 'false');
-          if (prod.stock !== undefined && prod.stock !== '' && prod.stock !== null) pForm.append('stock', prod.stock);
-          if (prod.imageFile) pForm.append('image', prod.imageFile);
-
-          const url = prod.id 
-            ? `${API_URL}/businesses/${currentSlug}/products/${prod.id}`
-            : `${API_URL}/businesses/${currentSlug}/products`;
-
-          try {
-            const prodRes = await fetchAuth(url, {
-              method: prod.id ? 'PUT' : 'POST',
-              body: pForm
-            });
-            if (!prodRes.ok) {
-              const errData = await prodRes.json().catch(() => ({}));
-              let errMsg = `Error al guardar el producto "${prod.name}"`;
-              if (errData.detail) {
-                if (Array.isArray(errData.detail)) {
-                  errMsg = errData.detail.map(e => `${e.loc ? e.loc[e.loc.length-1] : 'Campo'}: ${e.msg}`).join('\n');
-                } else {
-                  errMsg = errData.detail;
-                }
-              }
-              throw new Error(errMsg);
-            }
-          } catch (e) {
-            if (e.message !== 'SESSION_EXPIRED') {
-              console.error("Error guardando producto:", e);
-              throw e;
-            }
-          }
-        }
-      }
-
-      // 🧹 Limpiar borrador guardado localmente tras guardar con éxito
-      if (draftStorageKey) {
-        localStorage.removeItem(draftStorageKey);
-      }
-      setIsRestoredFromDraft(false);
-
-      setIsEditing(false);
-      setImagePreview(null);
-      setDeletedProductsIds([]);
-      if (onUpdate) onUpdate();
-
-      if (isCreateMode && currentSlug) {
-        navigate(`/perfil/${currentSlug}`);
-      }
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Hubo un error al guardar los cambios.");
-    } finally {
-      setIsSavingEdit(false);
-    }
-  };
-
-  // 🧹 LIMPIEZA Y FORMATEO DE ENLACES
-  let waNumbers = [];
-  try { waNumbers = JSON.parse(profesional?.whatsapp_numbers || '[]'); } catch { waNumbers = []; }
-  if (waNumbers.length === 0 && profesional?.whatsapp) waNumbers = [profesional.whatsapp];
-  const cleanPhone = profesional?.phone?.replace(/[^0-9]/g, '');
-  
-  const links = {
-    phone: cleanPhone ? `tel:${cleanPhone}` : null,
-    facebook: profesional?.facebook,
-    instagram: profesional?.instagram,
-    linkedin: profesional?.linkedin,
-    website: profesional?.website,
-    github: profesional?.github,
-    tiktok: profesional?.tiktok,
-    ubicacion: profesional?.ubicacion_url
-  };
+  } = usePlantillaGenerica(profesional, onProtectedAction, onUpdate, isCreateMode, navigate);
 
   if (!profesional) return null;
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-[#1A535C] pb-24 font-sans antialiased selection:bg-[#F9842C] selection:text-white relative">
-      
       <ProfileHero 
         profesional={profesional}
         volverAtras={volverAtras}
@@ -538,10 +75,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         specialtiesData={specialtiesData}
       />
 
-      {/* 🧑‍💼 INFO PRINCIPAL DEL PERFIL */}
       <div className="max-w-4xl mx-auto px-6 sm:px-8 md:px-6 lg:px-8 relative z-20">
-
-        {/* 📦 CATÁLOGO INLINE / EDIT (CARRUSEL O FORMULARIO) */}
         <div className="-mx-4 sm:mx-0 mb-2">
           {isEditing ? (
             <div className="px-4 sm:px-0">
@@ -601,22 +135,18 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           setEditFormData={setEditFormData}
         />
 
-        {/* ==========================================
-            BOTÓN CALIFICAR EN LA PARTE INFERIOR
-            ========================================== */}
         {!isEditing && !isCreateMode && (
           <div className="mt-8 flex justify-center w-full z-10 relative px-4">
             <button
                 onClick={handleCalificarClick}
                 data-testid="danos-tu-opinion-btn"
-                className="px-8 py-4 rounded-xl bg-[#F9842C] hover:bg-[#e07323] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 w-full max-w-sm border border-gray-200"
+                className="px-8 py-4 rounded-xl bg-[#F9842C] hover:bg-[#e07323] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 w-full max-w-sm border border-gray-200 cursor-pointer"
             >
                 <Star size={18} className="fill-white text-white" /> Danos tu opinión
             </button>
           </div>
         )}
 
-        {/* 🚀 FOOTER SPINGAMMA */}
         <div className="mt-12 mb-8 text-center flex flex-col items-center justify-center">
             <a 
               href="https://spingamma.github.io/spingamma-landing/" 
@@ -660,53 +190,18 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         userName={userName}
       />
 
-      {/* ==========================================
-          BARRA DE ACCIONES FLOTANTE (MODO EDICIÓN)
-          ========================================== */}
-      {isEditing && !isSubModalOpen && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 bg-white border-t border-gray-200 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-[80] animate-in slide-in-from-bottom-10 flex flex-col justify-center items-center gap-2">
-          {saveError && (
-            <div className="text-red-500 text-xs font-bold text-center animate-in fade-in slide-in-from-bottom-2">
-              {saveError}
-            </div>
-          )}
-          <div className="w-full max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
-            <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
-              <CheckCircle2 size={15} className="text-emerald-500 shrink-0" />
-              <span>Borrador guardado automáticamente en tu navegador</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => { 
-                  if (draftStorageKey) {
-                    localStorage.removeItem(draftStorageKey);
-                  }
-                  if (isCreateMode) {
-                    volverAtras();
-                  } else {
-                    setIsEditing(false); 
-                    setImagePreview(null); 
-                  }
-                }}
-                disabled={isSavingEdit}
-                data-testid="cancel-edit-btn"
-                className="px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-[#757778] font-bold text-sm transition-all shadow-sm"
-              >
-                Cancelar
-              </button>
-              <button 
-                onClick={handleSaveEdit}
-                disabled={isSavingEdit}
-                data-testid="save-edit-btn"
-                className="px-8 py-3 rounded-xl bg-[#F9842C] hover:bg-[#e06516] text-white font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 min-w-[160px]"
-              >
-                {isSavingEdit ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                {isSavingEdit ? 'Guardando...' : 'Guardar Cambios'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <FloatingActionBar 
+        isEditing={isEditing}
+        isSubModalOpen={isSubModalOpen}
+        saveError={saveError}
+        draftStorageKey={draftStorageKey}
+        isCreateMode={isCreateMode}
+        volverAtras={volverAtras}
+        setIsEditing={setIsEditing}
+        setImagePreview={setImagePreview}
+        isSavingEdit={isSavingEdit}
+        handleSaveEdit={handleSaveEdit}
+      />
     </div>
   );
 }

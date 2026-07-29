@@ -3,6 +3,7 @@ import { Phone, Globe, Facebook, Instagram, Linkedin, Github, Plus, Trash2 } fro
 import { WhatsappIcon, TiktokIcon } from './ProfileIcons';
 import { cleanWhatsappNumber } from '../../utils/phone';
 
+// eslint-disable-next-line no-unused-vars
 const SocialButton = ({ icon: Icon, label, url, colorClass, onLinkClick }) => {
   if (!url) return null;
   return (

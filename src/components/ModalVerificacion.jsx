@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Mail, CheckCircle2, Loader2, X, MessageCircle, AlertCircle } from 'lucide-react';
+import { API_URL } from '../config/api';
 
 export default function ModalVerificacion({ isOpen, onClose, onSuccess, userName }) {
   const [step, setStep] = useState(1); // 1 = Info/Send, 2 = Enter Code
@@ -7,7 +8,6 @@ export default function ModalVerificacion({ isOpen, onClose, onSuccess, userName
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
     if (isOpen) {

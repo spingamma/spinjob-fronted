@@ -2,6 +2,8 @@
 import { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ReloadPrompt from './components/ReloadPrompt';
+import ErrorBoundary from './components/ErrorBoundary';
+import NotFound from './pages/NotFound';
 
 // Lazy load de Vistas
 const Directory = lazy(() => import('./pages/Directory/Directory'));
@@ -26,46 +28,47 @@ function App() {
   }, []);
 
   return (
-    <>
-    <Suspense fallback={
-      <div
-        className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#1D565F]"
-        role="status"
-        aria-label="Cargando aplicación..."
-      >
-        <img
-          src="/icon-512.webp"
-          alt="Tarjetoso"
-          className="w-[120px] h-[120px] rounded-3xl animate-pulse"
-        />
-        <span className="mt-5 text-white text-[22px] font-bold tracking-wide">
-          Tarjetoso
-        </span>
-        <div className="mt-7 flex gap-2">
-          <span className="w-2 h-2 rounded-full bg-white/40 animate-bounce [animation-delay:0ms]"></span>
-          <span className="w-2 h-2 rounded-full bg-white/40 animate-bounce [animation-delay:200ms]"></span>
-          <span className="w-2 h-2 rounded-full bg-white/40 animate-bounce [animation-delay:400ms]"></span>
+    <ErrorBoundary>
+      <Suspense fallback={
+        <div
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#1D565F]"
+          role="status"
+          aria-label="Cargando aplicación..."
+        >
+          <img
+            src="/icon-512.webp"
+            alt="Tarjetoso"
+            className="w-[120px] h-[120px] rounded-3xl animate-pulse"
+          />
+          <span className="mt-5 text-white text-[22px] font-bold tracking-wide">
+            Tarjetoso
+          </span>
+          <div className="mt-7 flex gap-2">
+            <span className="w-2 h-2 rounded-full bg-white/40 animate-bounce [animation-delay:0ms]"></span>
+            <span className="w-2 h-2 rounded-full bg-white/40 animate-bounce [animation-delay:200ms]"></span>
+            <span className="w-2 h-2 rounded-full bg-white/40 animate-bounce [animation-delay:400ms]"></span>
+          </div>
         </div>
-      </div>
-    }>
-      <Routes>
-        <Route path="/" element={<Directory />} />
-        <Route path="/directorio/:categoria" element={<Directory />} />
-        <Route path="/directorio/:categoria/:estado" element={<Directory />} />
-        <Route path="/perfil/:slug" element={<Profile />} />
-        <Route path="/crear-negocio" element={<CreateBusiness />} />
-        <Route path="/editar-negocio/:slug" element={<CreateBusiness />} />
-        <Route path="/mis-negocios" element={<MyBusinesses />} />
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/tarjetero" element={<BusinessCardHolder />} />
-        <Route path="/metricas/:slug" element={<MetricsDashboard />} />
-        <Route path="/perfil/:slug/orden/:orderId?" element={<OrderSummary />} />
-        <Route path="/mis-pedidos/:slug" element={<BusinessOrders />} />
-        <Route path="/mis-compras" element={<MyOrders />} />
-      </Routes>
-    </Suspense>
+      }>
+        <Routes>
+          <Route path="/" element={<Directory />} />
+          <Route path="/directorio/:categoria" element={<Directory />} />
+          <Route path="/directorio/:categoria/:estado" element={<Directory />} />
+          <Route path="/perfil/:slug" element={<Profile />} />
+          <Route path="/crear-negocio" element={<CreateBusiness />} />
+          <Route path="/editar-negocio/:slug" element={<CreateBusiness />} />
+          <Route path="/mis-negocios" element={<MyBusinesses />} />
+          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/tarjetero" element={<BusinessCardHolder />} />
+          <Route path="/metricas/:slug" element={<MetricsDashboard />} />
+          <Route path="/perfil/:slug/orden/:orderId?" element={<OrderSummary />} />
+          <Route path="/mis-pedidos/:slug" element={<BusinessOrders />} />
+          <Route path="/mis-compras" element={<MyOrders />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
       <ReloadPrompt />
-    </>
+    </ErrorBoundary>
   );
 }
 

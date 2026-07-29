@@ -1,8 +1,8 @@
 // Archivo: src/components/ProfessionalCard.jsx
 import { Link } from 'react-router-dom';
-import { Star, Edit3, DoorOpen, CheckCircle2, Truck, Plane } from 'lucide-react';
+import { Star, DoorOpen, CheckCircle2 } from 'lucide-react';
 
-export default function ProfessionalCard({ professional, isLoggedIn, isAdmin, onCardClick, userCoords, isMobile }) {
+export default function ProfessionalCard({ professional, isLoggedIn, onCardClick, userCoords }) {
   // Parsers coordinates from business URL
   const parseGoogleMapsCoords = (url) => {
     if (!url) return null;

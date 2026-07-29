@@ -11,29 +11,18 @@ export default function InstallPrompt() {
 
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
+  const isIOS = typeof window !== 'undefined' && /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+  const isStandalone = typeof window !== 'undefined' && (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
 
   useEffect(() => {
     // Si el switch está apagado, detenemos toda la lógica de detección en seco
     if (!IS_PWA_ENABLED) return;
 
-    // 1. Detectar si ya está instalada (Standalone mode)
-    const checkStandalone = () => {
-      return (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone === true);
-    };
-    
-    if (checkStandalone()) {
-      setIsStandalone(true);
+    if (isStandalone) {
       return;
     }
-
-    // 2. Detectar dispositivo iOS (Safari no soporta beforeinstallprompt)
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
     
-    if (isIOSDevice) {
-      setIsIOS(true);
+    if (isIOS) {
       // Mostrar el prompt en iOS después de unos segundos para no ser invasivo
       const timer = setTimeout(() => setShowPrompt(true), 3000);
       return () => clearTimeout(timer);
@@ -54,7 +43,7 @@ export default function InstallPrompt() {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, [IS_PWA_ENABLED]);
+  }, [IS_PWA_ENABLED, isStandalone, isIOS]);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;

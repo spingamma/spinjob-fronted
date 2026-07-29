@@ -7,11 +7,15 @@ description: Verificación rápida del frontend — Revisa build, imports, marca
 Ejecuta esta lista de comprobación antes de realizar despliegues (deploy) o al terminar el desarrollo de una funcionalidad relevante.
 
 ## 1. Verificación Estricta de Variables e Imports (Linter)
-Antes de construir el proyecto, DEBES ejecutar el linter para atrapar `ReferenceError` y variables no definidas en JSX, ya que el bundler (Vite) no siempre los detecta:
+Antes de construir el proyecto, DEBES ejecutar el linter para atrapar `ReferenceError` y variables no definidas en JSX. 
+
+> [!WARNING]
+> **Falsos Positivos de Vite:** Herramientas como Vite empaquetan archivos JSX sin arrojar errores en tiempo de compilación si olvidaste importar un componente o ícono. ¡Un `npm run build` exitoso NO garantiza que la app no tenga fallos por `ReferenceError`!
+
 ```bash
 npx eslint src/
 ```
-Corrige cualquier variable, ícono o componente no importado que reporte ESLint.
+Corrige cualquier variable, ícono (como `<Send />`) o componente no importado que reporte ESLint de forma inmediata.
 
 ## 2. Construcción Limpia (Build)
 Ejecuta el script de compilación en el directorio del frontend para validar optimización:
@@ -71,3 +75,15 @@ Asegura que todos los elementos con los que el usuario interactúa (botones, enl
 npx -y grep -rn "<button" src/ --include="*.jsx" | grep -v "data-testid"
 ```
 Agrega los `data-testid` faltantes en los componentes modificados o nuevos.
+
+## 10. Linter y Verificación de Duplicidad de Lógica
+- Ejecuta `npx eslint src/` para garantizar que no haya imports faltantes o referencias sin declarar.
+- Después del lint, utiliza `grep` o `rg` para buscar lógica duplicada antes de finalizar la tarea.
+- Refactoriza cualquier código repetido en hooks o componentes reutilizables y actualiza los lugares donde se usa.
+- Sólo después de pasar estos chequeos, procede a pruebas locales.
+
+## 11. Revisión de Coherencia de Props (Prop-Drilling)
+Si acabas de dividir o crear subcomponentes:
+- Abre simultáneamente el archivo del componente padre y del componente hijo.
+- Revisa manualmente que los atributos (props) que inyecta el padre coincidan letra por letra con las props que recibe el hijo.
+- Recuerda que en arquitecturas JSX sin TypeScript estricto, enviar una prop mal nombrada no arrojará un error de compilación, pero romperá la aplicación para el usuario.

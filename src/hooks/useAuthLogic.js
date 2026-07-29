@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { parsePhoneNumber } from '../utils/phone';
+import { API_URL } from '../config/api';
 
 /**
  * Custom hook que encapsula la lógica de autenticación (Google y completar celular).
@@ -16,7 +17,6 @@ export default function useAuthLogic({ isOpen, onSuccess, onRequireVerification 
   const [formData, setFormData] = useState({ celular: '', country: '' });
   const [errores, setErrores] = useState({});
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
   // Obtener el WhatsApp de soporte desde el perfil de spingamma
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function useAuthLogic({ isOpen, onSuccess, onRequireVerification 
           else if (tz.includes('Bogota')) defaultCountry = 'Colombia';
           else if (tz.includes('Lima')) defaultCountry = 'Perú';
           else if (tz.includes('Argentina') || tz.includes('Buenos_Aires') || tz.includes('Cordoba') || tz.includes('Mendoza')) defaultCountry = 'Argentina';
-        } catch (e) {}
+        } catch { /* ignore */ }
       }
       if (!defaultCountry) {
         defaultCountry = 'Bolivia';

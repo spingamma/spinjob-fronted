@@ -2,15 +2,22 @@
 import { useState, useEffect } from 'react';
 import { X, ShoppingBag, ExternalLink, Loader2, Package, MessageCircle } from 'lucide-react';
 import { cleanWhatsappNumber } from '../utils/phone';
+import { API_URL } from '../config/api';
 
 export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia' }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
+    if (isOpen && slug) {
+      setLoading(true);
+    }
+  }
 
   useEffect(() => {
     if (!isOpen || !slug) return;
-    setLoading(true);
-    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
     fetch(`${API_URL}/businesses/${slug}/products`)
       .then(res => res.ok ? res.json() : Promise.reject())
       .then(data => setProducts(data))

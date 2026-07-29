@@ -2,48 +2,39 @@
 
 ## Detección y Consulta de Tecnologías
 1. **Verificación Inicial del Stack:** Al iniciar el trabajo en un nuevo proyecto, el agente debe auto-detectar las tecnologías utilizadas leyendo la estructura del repositorio (archivos como `package.json`, `requirements.txt`, `Cargo.toml`, etc.).
-   - **Flujo de Inicialización (Si no se detecta stack claro):**
-     - Si no se encuentra un stack preconfigurado, **pregunta activamente al usuario** qué tecnologías se utilizarán en el frontend, backend y base de datos.
-     - **Recomienda las tres opciones recomendadas por defecto:**
-       - **Frontend:** React + Vite (con Tailwind CSS)
-       - **Backend:** FastAPI + SQLAlchemy
-       - **Base de Datos:** PostgreSQL / Neon DB
-     - Registra el stack acordado en el archivo `.agents/tech-stack.json` en este formato para evitar futuras consultas:
-       ```json
-       {
-         "frontend": "react-vite",
-         "backend": "fastapi-sqlalchemy",
-         "database": "postgresql-neon"
-       }
-       ```
+   - Si no se encuentra un stack preconfigurado, **pregunta activamente al usuario** qué tecnologías se utilizarán.
+   - **Opciones por defecto:** Frontend (React+Vite), Backend (FastAPI+SQLAlchemy), BD (PostgreSQL/Neon).
+   - Registra el stack en `.agents/tech-stack.json`.
+
+## Infraestructura y Entorno (Anti-Infra-Naive)
+2. **Orden Seguro de Carga de Entorno (Anti-Side-Effect):** 🚨 Cuando un módulo ejecuta side-effects a nivel de módulo (conexiones a BD, lectura de envs), está **ESTRICTAMENTE PROHIBIDO** importarlo antes de haber cargado y validado el entorno (`override=True`). Usa importación diferida (lazy import).
+3. **Completitud de Entorno:** Cada vez que crees un `.env.example`, **DEBES OBLIGATORIAMENTE** escanear todas las variables requeridas en el código e incluirlas.
+4. **Puertos y Healthchecks:** Usa puertos no estándar para testing. Todo servicio Docker **DEBE** incluir un healthcheck. Los scripts de infra deben usar "Fail-Fast" (`sys.exit(1)`).
+
+## Arquitectura Limpia (Clean Architecture)
+5. **Anti-God-Endpoints (Fat Services, Skinny Routers):** 🚨 Los controladores/routers **NUNCA** deben contener lógica de negocio compleja, iteraciones pesadas, llamadas a APIs externas o transacciones complejas. Debes delegar la lógica a `services/`.
+6. **Anti-God-Objects (Schemas/Models):** Está prohibido agrupar todos los esquemas, tipos o modelos en un solo archivo (ej. `schemas.py` de 500 líneas). Modulariza en directorios (ej. `schemas/user.py`, `schemas/business.py`).
+7. **Importaciones Explícitas:** Prohibidas importaciones genéricas (ej. `import models`). Usa `from models import Business`.
 
 ## Bases de Datos (Resiliencia y Esquemas)
-2. **Resiliencia de Conexión:** En bases de datos relacionales, asegura siempre configuraciones de pooling y reconexión activa.
-   - En SQLAlchemy: `create_engine(DATABASE_URL, pool_pre_ping=True, pool_recycle=300)`.
-   - Evita desconexiones por inactividad (`OperationalError: SSL connection has been closed unexpectedly`).
-3. **Zero Orphans (Gestión de Esquemas de BD):** Si eliminas, renombras o modificas una columna en los esquemas de código, ejecuta inmediatamente el script de migración correspondiente en el motor de base de datos para no dejar columnas ni tablas huérfanas. 
-   - *Nota de compatibilidad:* No uses emojis ni caracteres complejos en los logs de los scripts ejecutados en consolas Windows para evitar excepciones de codificación (`UnicodeEncodeError`).
-4. **Normalización (Relaciones y Llaves Foráneas):** Evita la redundancia de datos (no guardes nombres ni teléfonos de relaciones en la tabla hijo). Vincula tablas mediante llaves foráneas (`Foreign Keys`) y expón las propiedades necesarias mediante getters o propiedades dinámicas (ej. `@property` en Python).
-5. **Filtros e Indexación:** No intentes aplicar filtros de consulta directa en base de datos (como `.ilike()`) sobre propiedades calculadas o getters virtuales; realiza la indexación y los filtros sobre columnas físicas.
-
-## Autenticación y Seguridad
-6. **Hashing Seguro de Contraseñas:** Usa algoritmos de hashing modernos y seguros directamente (`bcrypt`, `argon2`, etc.). NUNCA utilices librerías obsoletas o inseguras (como `passlib` sin parches).
-7. **Identificadores (IDs):** Utiliza identificadores únicos robustos (`UUIDv4` o equivalentes de alta entropía) como clave primaria en lugar de enteros autoincrementales expuestos públicamente.
+8. **Resiliencia de Conexión:** En SQLAlchemy usa `pool_pre_ping=True, pool_recycle=300`.
+9. **Zero Orphans:** Si modificas esquemas, ejecuta inmediatamente migraciones.
+10. **Normalización:** Evita redundancia de datos. Vincula por FKs y expón por getters/properties. Prohibido aplicar `.ilike()` sobre propiedades virtuales.
+11. **Aislamiento de Propiedades Virtuales en ORM:** 🚨 Nunca utilices propiedades calculadas a nivel de lenguaje (`@property`, getters virtuales) como condiciones en las cláusulas de filtro nativas del ORM (`filter()`, `or_()`). Las consultas deben realizar siempre un `JOIN` explícito con la tabla/entidad donde reside la columna real, y el filtro debe aplicarse estrictamente sobre entidades de la base de datos para evitar `TypeError`.
+## Autenticación, Seguridad e IDs
+12. **Emisión de Identificadores (Anti-Ghosting):** 🚨 Al desarrollar endpoints que retornen datos, especialmente Autenticación, **ESTÁS OBLIGADO** a incluir el `id` primario en el payload/DTO de respuesta.
+13. **Hashing Seguro:** Usa `bcrypt` o `argon2`.
 
 ## Transacciones y API
-8. **Transacciones Seguras:** Todas las operaciones de escritura (POST, PUT, DELETE) deben realizarse dentro de bloques `try/except` o gestores de contexto transaccionales. Asegúrate de ejecutar un rollback explícito en caso de error antes de propagar la excepción HTTP o retornar el error.
-   - *Ejemplo en Python/SQLAlchemy:*
-     ```python
-     try:
-         db.add(item)
-         db.commit()
-     except Exception as e:
-         db.rollback()
-         raise HTTPException(status_code=500, detail=str(e))
-     ```
-9. **Validación con Esquemas / DTOs:** Toda petición entrante y saliente del servidor debe estar validada mediante esquemas estrictos (ej. Pydantic en FastAPI, Zod/Joi en Node.js). Utiliza mapeos automáticos eficientes (ej. `from_attributes = True` o `orm_mode` en Pydantic).
-10. **Límites de Búsqueda y Paginación:** Toda consulta de listados para la interfaz de usuario debe incorporar límites razonables de datos por defecto (`limit(50)` o paginación explícita) para prevenir sobrecarga de memoria o fallos en componentes de visualización.
-11. **Validación Robusta de Variables de Entorno de Terceros (OAuth / SMTP):** Toda funcionalidad que dependa de credenciales o configuraciones externas en el `.env` (como `GOOGLE_CLIENT_ID`, `SMTP_PASSWORD`, etc.) debe verificar su existencia y validez de forma segura:
-    * **NUNCA** lances excepciones no controladas de Python (como `ValueError` o `KeyError`) fuera de bloques `try/except` o fuera del flujo de excepciones HTTP de FastAPI.
-    * Captura estas faltas de configuración y eleva excepciones HTTP estructuradas (ej: `HTTPException(status_code=500, detail="Configuración de autenticación faltante en servidor")`). Esto garantiza que el middleware de CORS pueda adjuntar los headers de respuesta correctos en la respuesta de error en lugar de generar un bloqueo silencioso en el navegador con un error `500 / net::ERR_FAILED`.
+14. **Transacciones Seguras:** Operaciones de escritura (POST, PUT, DELETE) deben realizarse dentro de bloques `try/except` con `db.rollback()` explícito en caso de error.
+15. **Tipado de Retorno Explícito:** 🚨 Prohibido que un endpoint devuelva diccionarios crudos (`{"valid": True}`). Todos deben tipar su retorno explícitamente (`-> schemas.MiRespuesta:`) y devolver instancias validadas (DTO/Pydantic).
+16. **Validación con Esquemas:** Toda petición entrante/saliente debe validarse estrictamente (Pydantic, Zod).
+17. **Límites de Búsqueda:** Incorporar `limit(50)` o paginación por defecto.
+18. **Validación de Variables Externas:** Verifica credenciales de terceros.
+19. **Resiliencia en Rutas y Prevención de Enmascaramiento CORS:** 🚨 Nunca dejes variables de entorno o configuraciones faltantes como excepciones no manejadas (`ValueError`, `KeyError` raw) en la ruta crítica. Siempre intercepta estos errores y eleva un `HTTPException` adecuado (ej. 401 o 500) para permitir que los middlewares de CORS agreguen los encabezados necesarios, evitando que el frontend disfrace el crash del servidor como un simple error de CORS.
 
+## Organización y Almacenamiento (Cloud & Assets)
+20. **Organización Estructural de Recursos (Anti-Messy-Storage):** 🚨 Cada vez que propongas o modifiques rutas para guardar archivos, imágenes o assets en proveedores de nube (S3, Cloudinary, etc.) o sistemas de archivos, **ESTÁ ESTRICTAMENTE PROHIBIDO** inventar carpetas raíz globales de forma arbitraria. 
+    - Debes OBLIGATORIAMENTE escanear e inferir la jerarquía óptima buscando usos previos de la herramienta de almacenamiento en el código base.
+    - Se debe priorizar y respetar la arquitectura de separación por inquilinos (multi-tenant), estructurando las rutas alrededor de identificadores principales (ej. IDs de negocio o usuario) para mantener la base de datos y la nube siempre ordenadas.
+21. **Zero Orphan Assets (Limpieza del Ciclo de Vida):** 🚨 Siempre que implementes la eliminación de un registro en la base de datos, o cuando limpies (`null` / `None`) una columna que referencie a un asset externo (imágenes, documentos en Cloudinary/S3), **ESTÁS OBLIGADO** a programar también la eliminación física de ese recurso a través de la API del proveedor, evitando dejar "huérfanos" (basura digital) que consuman almacenamiento innecesario.

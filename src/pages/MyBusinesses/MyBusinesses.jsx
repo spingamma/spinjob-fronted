@@ -6,31 +6,19 @@ import BottomNavbar from '../../components/BottomNavbar';
 import Header from '../../components/Header';
 import fetchAuth from '../../utils/fetchAuth';
 import PremiumModal from '../../components/PremiumModal';
+import { API_URL } from '../../config/api';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function MisNegocios() {
+  const { isLoggedIn, isAdmin, user, logout } = useAuth();
   const [negocios, setNegocios] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [premiumModalData, setPremiumModalData] = useState({ isOpen: false, featureName: '' });
-
-
   const [searchTerm, setSearchTerm] = useState('');
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-
-  // Estados de Auth para la navegación
-  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
-  const [isAdmin, setIsAdmin] = useState(() => {
-    const stored = localStorage.getItem('spingamma_user');
-    if (stored) {
-      try { 
-        const parsed = JSON.parse(stored);
-        return parsed.is_admin === true || parsed.is_vendedor === true; 
-      } catch (e) { return false; }
-    }
-    return false;
-  });
-  const [isDeleting, setIsDeleting] = useState(null); // Slug del negocio que se está eliminando
+  const [isDeleting, setIsDeleting] = useState(null);
 
   useEffect(() => {
     const fetchMisNegocios = async () => {
@@ -41,7 +29,6 @@ export default function MisNegocios() {
       }
 
       try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
         const res = await fetchAuth(`${API_URL}/usuarios/mis-negocios`);
 
         if (!res.ok) throw new Error("Error al cargar tus negocios");
@@ -59,9 +46,7 @@ export default function MisNegocios() {
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('spingamma_user');
-    localStorage.removeItem('spingamma_token');
-    setIsLoggedIn(false);
+    logout();
     navigate('/');
   };
 
@@ -76,7 +61,6 @@ export default function MisNegocios() {
 
     setIsDeleting(slug);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
       const res = await fetchAuth(`${API_URL}/businesses/${slug}`, {
         method: 'DELETE'
       });
@@ -110,7 +94,7 @@ export default function MisNegocios() {
         setSearchTerm={setSearchTerm}
         isLoggedIn={isLoggedIn}
         isAdmin={isAdmin}
-        userName={JSON.parse(localStorage.getItem('spingamma_user') || '{}').nombre || ''}
+        userName={user?.nombre || ''}
         isUserMenuOpen={isUserMenuOpen}
         setIsUserMenuOpen={setIsUserMenuOpen}
         handleLogout={handleLogout}

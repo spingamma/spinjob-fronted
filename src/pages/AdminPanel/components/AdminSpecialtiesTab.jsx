@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
-import { Bookmark, Plus, Edit3, Trash2, Loader2, Search, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Bookmark, Plus, Edit3, Trash2, Loader2, Search } from 'lucide-react';
 import fetchAuth from '../../../utils/fetchAuth';
+import SpecialtyModal from './SpecialtyModal';
 
 export default function AdminSpecialtiesTab({ API_URL }) {
   const [specialtiesGrouped, setSpecialtiesGrouped] = useState([]);
@@ -17,7 +18,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
   const [isLoadingDeps, setIsLoadingDeps] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fetchSpecialties = async () => {
+  const fetchSpecialties = useCallback(async () => {
     setIsLoading(true);
     try {
       const res = await fetchAuth(`${API_URL}/specialties/`);
@@ -43,11 +44,11 @@ export default function AdminSpecialtiesTab({ API_URL }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [API_URL]);
 
   useEffect(() => {
     fetchSpecialties();
-  }, [API_URL]);
+  }, [fetchSpecialties]);
 
   const openCreateModal = () => {
     setModalMode('create');
@@ -117,7 +118,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
         const errData = await res.json();
         alert(errData.detail || "Ocurrió un error");
       }
-    } catch (err) {
+    } catch {
       alert("Error de conexión");
     } finally {
       setIsSubmitting(false);
@@ -155,6 +156,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
           </div>
           <button 
             onClick={openCreateModal}
+            data-testid="create-specialty-btn"
             className="bg-[#1A535C] hover:bg-[#152b39] text-white px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shrink-0"
           >
             <Plus size={18} /> Nuevo
@@ -182,12 +184,14 @@ export default function AdminSpecialtiesTab({ API_URL }) {
                       <div className="flex items-center gap-1 transition-opacity">
                         <button 
                           onClick={() => openEditModal(sub)}
+                          data-testid={`edit-specialty-${sub.id}`}
                           className="p-1.5 text-gray-400 hover:text-[#1A535C] hover:bg-gray-100 rounded-lg transition-all"
                         >
                           <Edit3 size={16} />
                         </button>
                         <button 
                           onClick={() => openDeleteModal(sub)}
+                          data-testid={`delete-specialty-${sub.id}`}
                           className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                         >
                           <Trash2 size={16} />
@@ -202,97 +206,18 @@ export default function AdminSpecialtiesTab({ API_URL }) {
         )}
       </div>
 
-      {/* MODAL */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className={`p-6 text-white flex justify-between items-center ${modalMode === 'delete' ? 'bg-red-600' : 'bg-[#1A535C]'}`}>
-              <h3 className="font-extrabold text-xl">
-                {modalMode === 'create' ? 'Nueva Especialidad' : modalMode === 'edit' ? 'Editar Especialidad' : 'Eliminar Especialidad'}
-              </h3>
-            </div>
-
-            <div className="p-6 space-y-4">
-              {/* ALERTA DE DEPENDENCIAS PARA EDIT/DELETE */}
-              {['edit', 'delete'].includes(modalMode) && (
-                <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex gap-3 text-orange-800">
-                  <AlertTriangle className="shrink-0 text-orange-500 mt-0.5" size={20} />
-                  <div>
-                    <h4 className="font-bold text-sm">Advertencia de Impacto</h4>
-                    {isLoadingDeps ? (
-                      <p className="text-xs mt-1 flex items-center gap-1 opacity-70"><Loader2 size={12} className="animate-spin"/> Verificando negocios afectados...</p>
-                    ) : dependencies && dependencies.count > 0 ? (
-                      <p className="text-xs mt-1 leading-relaxed">
-                        {modalMode === 'delete' ? (
-                          <>Si confirmas esta acción, <strong>{dependencies.count} negocios</strong> pasarán automáticamente a estado <span className="uppercase font-bold">Pendiente</span> y perderán su insignia de verificación hasta que se les asigne una categoría válida.</>
-                        ) : (
-                          <>Si confirmas, <strong>{dependencies.count} negocios</strong> se actualizarán automáticamente para reflejar el nuevo nombre sin afectar su estado ni verificación.</>
-                        )}
-                      </p>
-                    ) : (
-                      <p className="text-xs mt-1 text-[#1A535C] font-medium">Ningún negocio se verá afectado por esta acción.</p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {modalMode === 'delete' ? (
-                <p className="text-[#757778]">
-                  ¿Estás seguro de que deseas eliminar permanentemente <strong>{selectedSpec?.category} - {selectedSpec?.subcategory}</strong>? Esta acción no se puede deshacer.
-                </p>
-              ) : (
-                <form id="spec-form" onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-bold text-[#757778] mb-1">Categoría Principal</label>
-                    <input 
-                      type="text" 
-                      required
-                      value={formData.category}
-                      onChange={(e) => setFormData({...formData, category: e.target.value})}
-                      placeholder="Ej. Salud, Tecnología..."
-                      className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#F9842C] transition-colors font-medium"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-[#757778] mb-1">Subcategoría / Profesión</label>
-                    <input 
-                      type="text" 
-                      required
-                      value={formData.subcategory}
-                      onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
-                      placeholder="Ej. Dentista, Programador..."
-                      className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#F9842C] transition-colors font-medium"
-                    />
-                  </div>
-                </form>
-              )}
-            </div>
-
-            <div className="p-6 border-t border-gray-100 bg-gray-50 flex gap-3">
-              <button 
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="flex-1 px-4 py-3 rounded-xl font-bold text-[#757778] bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button 
-                type={modalMode === 'delete' ? 'button' : 'submit'}
-                form={modalMode === 'delete' ? undefined : 'spec-form'}
-                onClick={modalMode === 'delete' ? handleSubmit : undefined}
-                disabled={isSubmitting || isLoadingDeps}
-                className={`flex-1 px-4 py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50
-                  ${modalMode === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-[#F9842C] hover:bg-[#a1451a]'}
-                `}
-              >
-                {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : 
-                  modalMode === 'delete' ? 'Eliminar' : 'Guardar'
-                }
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <SpecialtyModal
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        modalMode={modalMode}
+        selectedSpec={selectedSpec}
+        formData={formData}
+        setFormData={setFormData}
+        handleSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+        isLoadingDeps={isLoadingDeps}
+        dependencies={dependencies}
+      />
 
     </div>
   );
