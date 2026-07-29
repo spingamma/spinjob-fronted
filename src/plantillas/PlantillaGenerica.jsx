@@ -12,7 +12,7 @@ import ProfileCatalogEdit from './components/ProfileCatalogEdit';
 import FloatingActionBar from './components/FloatingActionBar';
 import { usePlantillaGenerica } from './hooks/usePlantillaGenerica';
 
-export default function PlantillaGenerica({ profesional, volverAtras, onProtectedAction, onUpdate, isCreateMode = false }) {
+export default function PlantillaGenerica({ profesional, volverAtras, onProtectedAction, onUpdate, isCreateMode = false, initialIsEditing = null }) {
   const navigate = useNavigate();
 
   const {
@@ -44,7 +44,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       mostrarModalVerificacion, setMostrarModalVerificacion,
       isSaved, isSaving, toggleSaveCard
     }
-  } = usePlantillaGenerica(profesional, onProtectedAction, onUpdate, isCreateMode, navigate);
+  } = usePlantillaGenerica(profesional, onProtectedAction, onUpdate, isCreateMode, initialIsEditing, navigate);
 
   if (!profesional) return null;
 

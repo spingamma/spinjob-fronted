@@ -27,7 +27,7 @@ const getServerQr = (prof) => {
   return prof.payment_qr_image || prof.qr_payment_url || prof.payment_qr || prof.qr_image || prof.qr_image_url || prof.qr_code || prof.qr || '';
 };
 
-export function usePlantillaGenerica(profesional, onProtectedAction, onUpdate, isCreateMode, navigate) {
+export function usePlantillaGenerica(profesional, onProtectedAction, onUpdate, isCreateMode, initialIsEditing, navigate) {
   const accionesPerfil = useAccionesPerfil(profesional, onProtectedAction);
   const { setMostrarModalVerificacion } = accionesPerfil;
 
@@ -40,7 +40,7 @@ export function usePlantillaGenerica(profesional, onProtectedAction, onUpdate, i
     ? 'spingamma_draft_business_create' 
     : (profesional?.slug ? `spingamma_draft_business_${profesional.slug}` : null);
 
-  const [isEditing, setIsEditing] = useState(isCreateMode);
+  const [isEditing, setIsEditing] = useState(initialIsEditing !== null ? initialIsEditing : isCreateMode);
   // eslint-disable-next-line no-unused-vars
   const [isRestoredFromDraft, setIsRestoredFromDraft] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);

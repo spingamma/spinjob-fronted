@@ -1,9 +1,15 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import PlantillaGenerica from '../../plantillas/PlantillaGenerica';
+import fetchAuth from '../../utils/fetchAuth';
+import { API_URL } from '../../config/api';
 
 export default function CreateBusiness() {
   const navigate = useNavigate();
+  const { slug } = useParams();
+  const [profesional, setProfesional] = useState(null);
+  const [loading, setLoading] = useState(!!slug);
+  const [error, setError] = useState(null);
   
   // Objeto vacío para que PlantillaGenerica funcione como lienzo en blanco
   const blankProfesional = {
@@ -32,19 +38,46 @@ export default function CreateBusiness() {
     owner_id: null
   };
 
+  useEffect(() => {
+    if (slug) {
+      fetchAuth(`${API_URL}/businesses/${slug}`)
+        .then(res => {
+          if (!res.ok) throw new Error("Error loading business");
+          return res.json();
+        })
+        .then(data => {
+          setProfesional(data);
+          setLoading(false);
+        })
+        .catch(err => {
+          setError(err.message);
+          setLoading(false);
+        });
+    } else {
+      setProfesional(blankProfesional);
+    }
+  }, [slug]);
+
   // eslint-disable-next-line no-unused-vars
   const handleProtectedAction = (actionParams) => {
-    // Para creación no deberíamos necesitar login modal acá,
-    // ya que App.jsx ya protege la ruta /crear-negocio
-    // Pero si hace falta, lo manejamos.
+    // Para creación no deberíamos necesitar login modal acá
   };
+
+  if (loading) {
+    return <div className="text-center p-10 mt-20 text-[#1A535C] font-bold">Cargando datos del negocio...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center p-10 mt-20 text-red-500">Error: {error}</div>;
+  }
 
   return (
     <PlantillaGenerica 
-      profesional={blankProfesional} 
+      profesional={profesional} 
       volverAtras={() => navigate('/')}
       onProtectedAction={handleProtectedAction}
-      isCreateMode={true} 
+      isCreateMode={!slug}
+      initialIsEditing={true}
     />
   );
 }
