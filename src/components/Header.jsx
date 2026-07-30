@@ -103,7 +103,7 @@ const Header = ({
         {/* LOGO E INSTALAR */}
         <div className="flex-shrink-0 flex items-center">
           <div className="flex items-center cursor-pointer" data-testid="header-logo-link" onClick={() => navigate('/')}>
-            <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-[#1A535C] uppercase">TARJETOSO</span>
+            <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-[#1A535C] uppercase hidden md:block ml-3">TARJETOSO</span>
           </div>
 
           {(!isStandalone && (deferredPrompt || isIOS)) && (
