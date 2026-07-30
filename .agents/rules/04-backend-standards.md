@@ -18,7 +18,10 @@
 
 ## Bases de Datos (Resiliencia y Esquemas)
 8. **Resiliencia de Conexión:** En SQLAlchemy usa `pool_pre_ping=True, pool_recycle=300`.
-9. **Zero Orphans:** Si modificas esquemas, ejecuta inmediatamente migraciones.
+9. **Migración Obligatoria de Datos (Anti-Orphaned Data):** 🚨 Cuando modifiques, renombres o extraigas atributos de un modelo persistido en una base de datos relacional:
+    - **Asume Schema Drift:** Comprende que las herramientas de sincronización aditiva (como ORMs sin migraciones) NO eliminarán las columnas antiguas ni migrarán automáticamente sus datos.
+    - **Script Obligatorio:** Es ESTRICTAMENTE OBLIGATORIO crear y ejecutar un script de migración de datos para trasladar la información heredada a la nueva estructura. No asumas que funcionará para registros preexistentes sin este paso.
+    - **Limpieza Pos-Migración:** Tras la ejecución exitosa, elimina inmediatamente el script de migración transitorio.
 10. **Normalización:** Evita redundancia de datos. Vincula por FKs y expón por getters/properties. Prohibido aplicar `.ilike()` sobre propiedades virtuales.
 11. **Aislamiento de Propiedades Virtuales en ORM:** 🚨 Nunca utilices propiedades calculadas a nivel de lenguaje (`@property`, getters virtuales) como condiciones en las cláusulas de filtro nativas del ORM (`filter()`, `or_()`). Las consultas deben realizar siempre un `JOIN` explícito con la tabla/entidad donde reside la columna real, y el filtro debe aplicarse estrictamente sobre entidades de la base de datos para evitar `TypeError`.
 ## Autenticación, Seguridad e IDs
