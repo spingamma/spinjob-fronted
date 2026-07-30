@@ -26,7 +26,15 @@ export function useBusinessOrdersList(slug) {
         if (status === "cancelado") return 3;
         return 4;
       };
-      return getScore(a.status) - getScore(b.status);
+      const scoreA = getScore(a.status);
+      const scoreB = getScore(b.status);
+      if (scoreA !== scoreB) {
+        return scoreA - scoreB;
+      }
+      
+      const dateA = new Date(a.updated_at || a.created_at).getTime();
+      const dateB = new Date(b.updated_at || b.created_at).getTime();
+      return dateB - dateA;
     });
   };
 
@@ -115,17 +123,30 @@ export function useBusinessOrdersList(slug) {
     }
   };
 
-  const handleDownloadReceipt = (base64Url, orderNumber) => {
+  const handleDownloadReceipt = async (url, orderNumber) => {
     try {
-      const link = document.createElement('a');
-      link.href = base64Url;
-      link.download = `comprobante-pedido-${orderNumber}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      if (url.startsWith('data:')) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `comprobante-pedido-${orderNumber}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `comprobante-pedido-${orderNumber}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      }
     } catch (err) {
       console.error("Error al descargar comprobante", err);
-      alert("Hubo un error al intentar descargar el comprobante.");
+      window.open(url, '_blank'); // fallback si falla CORS
     }
   };
 

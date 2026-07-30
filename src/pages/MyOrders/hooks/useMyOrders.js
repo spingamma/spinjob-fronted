@@ -54,7 +54,13 @@ export default function useMyOrders() {
       const res = await fetchAuth(url);
       if (res.ok) {
         const data = await res.json();
-        setOrders(data);
+        // Ordenar del más reciente al más antiguo
+        const sortedData = [...data].sort((a, b) => {
+          const dateA = new Date(a.updated_at || a.created_at).getTime();
+          const dateB = new Date(b.updated_at || b.created_at).getTime();
+          return dateB - dateA;
+        });
+        setOrders(sortedData);
       } else {
         setOrders([]);
       }
@@ -91,14 +97,27 @@ export default function useMyOrders() {
   useEffect(() => {
     const detectInitialMode = async () => {
       try {
+        const storedMode = localStorage.getItem('spingamma_last_mode');
+        const storedSlug = localStorage.getItem('spingamma_last_business_slug');
+        
         const res = await fetchAuth(`${API_URL}/usuarios/mis-negocios`);
         if (res.ok) {
           const data = await res.json();
           setMyBusinesses(data);
           const premiumList = data.filter(b => b.premium && b.status === 'aprobado');
           if (premiumList.length > 0) {
-            setSelectedBusinessSlug(premiumList[0].slug);
-            setIsBusinessMode(true);
+            // Restore slug or pick first
+            if (storedSlug && premiumList.some(b => b.slug === storedSlug)) {
+              setSelectedBusinessSlug(storedSlug);
+            } else {
+              setSelectedBusinessSlug(premiumList[0].slug);
+            }
+            // Restore mode or default true
+            if (storedMode !== null) {
+              setIsBusinessMode(storedMode === 'business');
+            } else {
+              setIsBusinessMode(true);
+            }
           } else {
             setIsBusinessMode(false);
           }
@@ -145,15 +164,25 @@ export default function useMyOrders() {
 
   const premiumBusinesses = myBusinesses.filter(b => b.premium && b.status === 'aprobado');
 
+  const handleSetIsBusinessMode = useCallback((val) => {
+    setIsBusinessMode(val);
+    localStorage.setItem('spingamma_last_mode', val ? 'business' : 'customer');
+  }, []);
+
+  const handleSetSelectedBusinessSlug = useCallback((val) => {
+    setSelectedBusinessSlug(val);
+    localStorage.setItem('spingamma_last_business_slug', val);
+  }, []);
+
   return {
     orders,
     loading,
     isBusinessMode,
-    setIsBusinessMode,
+    setIsBusinessMode: handleSetIsBusinessMode,
     premiumBusinesses,
     loadingBusinesses,
     selectedBusinessSlug,
-    setSelectedBusinessSlug,
+    setSelectedBusinessSlug: handleSetSelectedBusinessSlug,
     startDate,
     setStartDate,
     endDate,

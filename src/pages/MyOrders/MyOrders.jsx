@@ -86,15 +86,15 @@ export default function MyOrders() {
           ) : (
             <div>
               {premiumBusinesses.length > 1 && (
-                <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4 flex items-center justify-between gap-4">
+                <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                   <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Building size={16} className="text-[#F9842C]" /> Seleccionar Negocio:
+                    <Building size={16} className="text-[#F9842C] shrink-0" /> Seleccionar Negocio:
                   </span>
                   <select 
                     value={selectedBusinessSlug}
                     onChange={(e) => setSelectedBusinessSlug(e.target.value)}
                     data-testid="business-selector-dropdown"
-                    className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm font-bold text-[#1A535C] outline-none focus:border-[#F9842C]"
+                    className="w-full sm:w-auto bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm font-bold text-[#1A535C] outline-none focus:border-[#F9842C] truncate"
                   >
                     {premiumBusinesses.map(b => (
                       <option key={b.id} value={b.slug}>{b.nombre_negocio || b.name}</option>
