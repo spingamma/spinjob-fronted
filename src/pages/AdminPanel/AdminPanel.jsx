@@ -11,7 +11,6 @@ import AdminAnalyticsTab from './components/AdminAnalyticsTab';
 import AdminSpecialtiesTab from './components/AdminSpecialtiesTab';
 import AdminVendedorTab from './components/AdminVendedorTab';
 import AdminCountriesTab from './components/AdminCountriesTab';
-import AdminDisputasTab from './components/AdminDisputasTab';
 import AdminNegociosTab from './components/AdminNegociosTab';
 import AdminUsuariosTab from './components/AdminUsuariosTab';
 import { API_URL } from '../../config/api';
@@ -170,18 +169,6 @@ export default function AdminPanel() {
                 <Globe size={18} />
                 Países y Dptos.
               </button>
-              <button
-                onClick={() => setActiveTab('disputas')}
-                data-testid="admin-tab-disputas"
-                className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
-                  ${activeTab === 'disputas' 
-                    ? 'bg-white shadow-sm text-red-500 ring-1 ring-gray-200/50' 
-                    : 'text-gray-400 hover:text-[#757778] hover:bg-gray-100/50'}
-                `}
-              >
-                <ShieldAlert size={18} />
-                Disputas
-              </button>
             </div>
           )}
         </div>
@@ -199,13 +186,6 @@ export default function AdminPanel() {
           <AdminUsuariosTab 
             API_URL={API_URL} 
           />
-        )}
-
-        {/* CONTENIDO DE PESTAÑA: DISPUTAS */}
-        {activeTab === 'disputas' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <AdminDisputasTab />
-          </div>
         )}
 
         {/* CONTENIDO DE PESTAÑA: ANALÍTICAS */}

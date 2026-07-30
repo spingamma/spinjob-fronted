@@ -98,6 +98,32 @@
       <div class="splash-dots">
         <span></span><span></span><span></span>
       </div>
+      <button id="rescue-btn" style="display:none; margin-top: 30px; background: #F9842C; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-family: sans-serif; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        ¿Problemas al cargar? Reparar
+      </button>
+      <script>
+        setTimeout(function() {
+          var splash = document.getElementById('splash-screen');
+          var rescueBtn = document.getElementById('rescue-btn');
+          if (splash && !splash.classList.contains('fade-out')) {
+            rescueBtn.style.display = 'block';
+            rescueBtn.onclick = function() {
+              rescueBtn.innerText = 'Reparando...';
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(regs) {
+                  for (var i = 0; i < regs.length; i++) { regs[i].unregister(); }
+                });
+              }
+              if ('caches' in window) {
+                caches.keys().then(function(keys) {
+                  keys.forEach(function(key) { caches.delete(key); });
+                });
+              }
+              setTimeout(function() { window.location.reload(true); }, 800);
+            };
+          }
+        }, 6000);
+      </script>
     </div>
 
     <div id="root"></div>

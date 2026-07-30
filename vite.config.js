@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     tailwindcss(), // 🚀 2. AQUÍ VUELVE LA MAGIA DEL DISEÑO
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       injectRegister: 'script-defer', // 🚀 ¡LÍNEA MÁGICA PARA LIGHTHOUSE! (Antes estaba en 'auto')
       workbox: {
         maximumFileSizeToCacheInBytes: 5000000, // 🚀 Aumentamos el límite a 5MB para soportar SVGs grandes

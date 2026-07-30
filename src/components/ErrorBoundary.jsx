@@ -18,9 +18,31 @@ export default class ErrorBoundary extends Component {
     console.error('[ErrorBoundary] Crash capturado:', error, info.componentStack);
   }
 
-  handleReload = () => {
+  handleReload = async () => {
+    try {
+      // 1. Limpiar Service Workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (let registration of registrations) {
+          await registration.unregister();
+        }
+      }
+      // 2. Limpiar Caches Storage
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        for (let key of keys) {
+          await caches.delete(key);
+        }
+      }
+      // 3. Limpiar Local Storage y Session Storage (opcional, pero ayuda, aunque no borraremos el token para no desloguear agresivamente a menos que sea necesario)
+      // Mejor solo borramos el caché de assets.
+    } catch (e) {
+      console.error('Error limpiando caches:', e);
+    }
+    
     this.setState({ hasError: false, error: null });
-    window.location.reload();
+    // Force reload bypassing cache
+    window.location.reload(true);
   };
 
   render() {
