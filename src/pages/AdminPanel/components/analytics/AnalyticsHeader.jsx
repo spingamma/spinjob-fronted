@@ -43,10 +43,10 @@ export default function AnalyticsHeader({
               onChange={(e) => setDays(e.target.value === 'custom' ? 'custom' : Number(e.target.value))}
               className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 text-sm font-bold text-[#1A535C] appearance-none cursor-pointer min-w-[140px]"
             >
-              <option value={7}>Últimos 7 días</option>
-              <option value={14}>Últimos 14 días</option>
-              <option value={30}>Últimos 30 días</option>
-              <option value="custom">Personalizado...</option>
+              <option value={30}>Último mes</option>
+              <option value={90}>Últimos 3 meses</option>
+              <option value={180}>Últimos 6 meses</option>
+              <option value="custom">Rango de fechas</option>
             </select>
             <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
