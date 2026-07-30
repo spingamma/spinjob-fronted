@@ -1,46 +1,25 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../hooks/useAuth';
 
 export function useDirectoryAuth({ onLocationChange }) {
   const navigate = useNavigate();
-
-  // Estados de Autenticación
-  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('spingamma_user') !== null);
-  const [userName, setUserName] = useState(() => {
-    const stored = localStorage.getItem('spingamma_user');
-    if (stored) {
-      try { return JSON.parse(stored).nombre; } catch { return ''; }
-    }
-    return '';
-  });
-
-  const [isAdmin, setIsAdmin] = useState(() => {
-    const stored = localStorage.getItem('spingamma_user');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        return parsed.is_admin === true || parsed.is_vendedor === true;
-      } catch { return false; }
-    }
-    return false;
-  });
+  const { isLoggedIn, user, login, logout, isAdmin } = useAuth();
+  
+  const userName = user?.nombre || '';
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingSlug, setPendingSlug] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem('spingamma_user');
-    setIsLoggedIn(false);
-    setUserName('');
-    setIsAdmin(false);
+    logout();
   };
 
   const handleRegisterSuccess = (formData) => {
-    localStorage.setItem('spingamma_user', JSON.stringify(formData));
-    setIsLoggedIn(true);
-    setUserName(formData.nombre);
-    setIsAdmin(formData.is_admin === true || formData.is_vendedor === true);
+    // AuthModal already set the token in localStorage, so we just read it
+    login(formData, localStorage.getItem('spingamma_token'));
+    
     setAuthModalOpen(false);
     
     if (formData.country) {

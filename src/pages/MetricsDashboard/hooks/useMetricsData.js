@@ -8,7 +8,7 @@ export function useMetricsData(slug) {
   const [isPremium, setIsPremium] = useState(true);
   
   // Filtros
-  const [timeFilter, setTimeFilter] = useState('general');
+  const [timeFilter, setTimeFilter] = useState('3_months');
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
 

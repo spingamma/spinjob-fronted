@@ -10,7 +10,7 @@ import AnalyticsNetworkBreakdown from './analytics/AnalyticsNetworkBreakdown';
 
 export default function AdminAnalyticsTab({ API_URL }) {
   const [viewMode, setViewMode] = useState('global');
-  const [days, setDays] = useState(14);
+  const [days, setDays] = useState(90);
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
   const [selectedBusinesses, setSelectedBusinesses] = useState([]);
