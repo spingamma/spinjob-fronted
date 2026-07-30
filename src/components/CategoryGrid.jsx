@@ -37,7 +37,7 @@ const ICON_MAP = [
   { keywords: ['tecnologia', 'digital', 'software', 'programacion', 'ti ', 'sistemas'], icon: Monitor },
   { keywords: ['transporte', 'movilidad', 'logistica', 'envio'], icon: TransporteIcon },
   { keywords: ['educacion', 'capacitacion', 'formacion', 'academia', 'colegio'], icon: GraduationCap },
-  { keywords: ['legal', 'abogado', 'juridico', 'derecho'], icon: Scale },
+  { keywords: ['legal', 'abogado', 'juridico', 'derecho', 'leyes'], icon: Scale },
   { keywords: ['fotografia', 'video', 'audiovisual', 'produccion'], icon: Camera },
   { keywords: ['belleza', 'estetica', 'peluqueria', 'spa', 'cosmetica'], icon: BellezaIcon },
   { keywords: ['musica', 'entretenimiento', 'espectaculo', 'dj'], icon: EntretenimientoIcon },
