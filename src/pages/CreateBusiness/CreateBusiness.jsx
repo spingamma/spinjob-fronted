@@ -4,39 +4,39 @@ import PlantillaGenerica from '../../plantillas/PlantillaGenerica';
 import fetchAuth from '../../utils/fetchAuth';
 import { API_URL } from '../../config/api';
 
+// Objeto vacío para que PlantillaGenerica funcione como lienzo en blanco
+const blankProfesional = {
+  name: '',
+  title: '',
+  category: '',
+  subcategories: '',
+  description: '',
+  experience_years: '',
+  credentials: '',
+  phone: '',
+  whatsapp: '',
+  whatsapp_numbers: '[]',
+  facebook: '',
+  instagram: '',
+  linkedin: '',
+  tiktok: '',
+  github: '',
+  website: '',
+  country: 'Bolivia',
+  state: '',
+  home_delivery: false,
+  national_delivery: false,
+  ubicacion_url: '',
+  image: null,
+  owner_id: null
+};
+
 export default function CreateBusiness() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const [profesional, setProfesional] = useState(null);
   const [loading, setLoading] = useState(!!slug);
   const [error, setError] = useState(null);
-  
-  // Objeto vacío para que PlantillaGenerica funcione como lienzo en blanco
-  const blankProfesional = {
-    name: '',
-    title: '',
-    category: '',
-    subcategories: '',
-    description: '',
-    experience_years: '',
-    credentials: '',
-    phone: '',
-    whatsapp: '',
-    whatsapp_numbers: '[]',
-    facebook: '',
-    instagram: '',
-    linkedin: '',
-    tiktok: '',
-    github: '',
-    website: '',
-    country: 'Bolivia',
-    state: '',
-    home_delivery: false,
-    national_delivery: false,
-    ubicacion_url: '',
-    image: null,
-    owner_id: null
-  };
 
   useEffect(() => {
     if (slug) {
@@ -54,6 +54,7 @@ export default function CreateBusiness() {
           setLoading(false);
         });
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProfesional(blankProfesional);
     }
   }, [slug]);
