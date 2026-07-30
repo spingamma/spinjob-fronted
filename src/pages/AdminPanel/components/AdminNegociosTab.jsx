@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import BusinessDetailsModal from '../../../components/BusinessDetailsModal';
 import { useAdminNegociosTab } from '../hooks/Negocios/useAdminNegociosTab';
 import NegociosHeader from './Negocios/NegociosHeader';
