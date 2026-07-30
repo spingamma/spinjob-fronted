@@ -61,6 +61,7 @@ export default function CheckoutSection({
       delivery_method: isOwner ? "presencial" : selectedDeliveryMethod,
       payment_method: isOwner ? presencialPayment : "qr_simple",
       status: isOwner ? "entregado" : "pendiente",
+      is_direct_sale: !!isOwner,
       total_price: totalPrice,
       items: itemsList.map(item => {
         const rawMatch = (item.product.price || "0").replace(/[^\d.-]/g, '');

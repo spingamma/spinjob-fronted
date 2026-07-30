@@ -29,6 +29,7 @@
 ## Flujo de Datos y Persistencia
 15. **Recepción de Identificadores (Anti-Ghosting de IDs):** Está **ESTRICTAMENTE PROHIBIDO** filtrar manualmente los payloads del servidor descartando propiedades estructurales clave. Si recibes una entidad, siempre preserva explícitamente el `id` o usa mapeo integral (`...data`).
 16. **Formularios (Gate Backend-First):** Antes de enviar nuevos campos de datos persistentes, verifica que el backend ya los soporta. No dejes datos flotando solo en memoria RAM si su fin es persistir.
+17. **Mapeo Explícito de Contexto Privilegiado (Paridad de Payload):** Al desarrollar flujos condicionales (ej. administrador vs. usuario regular) que impactan en la persistencia de datos, está prohibido asumir inferencias implícitas en el servidor. Si el contrato de la API expone un flag explícito para el contexto privilegiado (ej. `is_direct_sale: true`), este **DEBE** enviarse explícitamente en el payload del frontend en lugar de depender únicamente de los valores de respuesta derivados como el `status` o los mensajes.
 17. **Parseo de Errores API:** NUNCA pases el string de error crudo devuelto por la API. Muestra mensajes amigables parseando los `detail` del backend.
 18. **Lógica de Filtros Mixtos (tempId vs id):** Al filtrar listas, aísla validaciones si usas `id` (BD) y `tempId` (local). `if (item.id) return p.id !== item.id; return p.tempId !== item.tempId;`.
 19. **Fechas Locales vs UTC:** NUNCA uses `new Date().toISOString().split('T')[0]` en el frontend para fechas locales. Usa los métodos locales (`getFullYear()`, `getMonth()`).
