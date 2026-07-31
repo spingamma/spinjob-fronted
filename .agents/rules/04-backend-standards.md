@@ -12,7 +12,7 @@
 4. **Puertos y Healthchecks:** Usa puertos no estándar para testing. Todo servicio Docker **DEBE** incluir un healthcheck. Los scripts de infra deben usar "Fail-Fast" (`sys.exit(1)`).
 
 ## Arquitectura Limpia (Clean Architecture)
-5. **Anti-God-Endpoints (Fat Services, Skinny Routers):** 🚨 Los controladores/routers **NUNCA** deben contener lógica de negocio compleja, iteraciones pesadas, llamadas a APIs externas o transacciones complejas. Debes delegar la lógica a `services/`.
+5. **Anti-God-Endpoints (Fat Services, Skinny Routers) y Refactor-On-Touch:** 🚨 Los controladores/routers **NUNCA** deben contener lógica de negocio compleja, iteraciones pesadas, llamadas a APIs externas o transacciones complejas. Debes delegar la lógica a `services/`. Adicionalmente, **si al modificar un router existente notas que incumple esta regla**, tienes el deber (Refactor-On-Touch) de extraer primero la lógica a un servicio antes de añadir tu nueva funcionalidad.
 6. **Anti-God-Objects (Schemas/Models):** Está prohibido agrupar todos los esquemas, tipos o modelos en un solo archivo (ej. `schemas.py` de 500 líneas). Modulariza en directorios (ej. `schemas/user.py`, `schemas/business.py`).
 7. **Importaciones Explícitas:** Prohibidas importaciones genéricas (ej. `import models`). Usa `from models import Business`.
 

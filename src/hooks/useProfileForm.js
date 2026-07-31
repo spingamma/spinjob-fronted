@@ -43,6 +43,7 @@ export default function useProfileForm({ profesional, isEditing, draftStorageKey
       national_delivery: profesional?.national_delivery || false,
       ubicacion_url: profesional?.ubicacion_url || '',
       category: profesional?.category || '',
+      pickup_fee: profesional?.pickup_fee || '',
       subcategories: (() => {
         try {
           return typeof profesional?.subcategories === 'string'
