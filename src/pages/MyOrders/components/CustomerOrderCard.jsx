@@ -20,7 +20,7 @@ export default function CustomerOrderCard({
   const isPagado = order.status === "pagado";
   const isPagoEnviado = order.status === "pago_enviado";
   const isReadyForPickup = order.status === "ready_for_pickup";
-  const isPaqueteria = order.delivery_method?.startsWith('PAQUETERIA|');
+  const isPaqueteria = order.delivery_method?.startsWith('PAQUETERIA|') || order.delivery_method === 'paqueteria' || !!order.pickup_business_id;
 
   const badgeClass = isCancelado 
     ? 'bg-red-100 text-red-700 border border-red-200' 
@@ -50,7 +50,7 @@ export default function CustomerOrderCard({
     ? 'PAGO ENVIADO'
     : 'PENDIENTE DE PAGO';
 
-  const pickupFee = isPaqueteria ? parseFloat(order.delivery_method.split('|')[3]) || 0 : 0;
+  const pickupFee = (order.delivery_method?.startsWith('PAQUETERIA|') ? parseFloat(order.delivery_method.split('|')[3]) : parseFloat(order.pickup_fee)) || 0;
 
   return (
     <div data-testid={`customer-order-card-${order.id}`} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 justify-between transition-all hover:shadow-md">

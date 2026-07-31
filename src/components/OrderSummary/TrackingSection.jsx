@@ -32,11 +32,14 @@ export default function TrackingSection({
       </div>
 
       <div className="max-w-xl mx-auto px-4 mt-6 space-y-6">
-        {/* Order header */}
+        {/* Order Header / Summary */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h2 className="text-sm font-bold text-[#757778] uppercase tracking-wider mb-1">
+              <span className="text-[10px] font-bold text-gray-400 uppercase block mb-1">
+                Código de Pedido
+              </span>
+              <h2 className="text-xl font-extrabold text-[#1A535C]">
                 Orden #{order?.order_number || String(order?.id || '').slice(0, 8)}
               </h2>
               <span className={`text-[11px] font-black uppercase px-2.5 py-1 rounded-md ${
@@ -44,7 +47,7 @@ export default function TrackingSection({
               }`}>{getStatusText(order)}</span>
             </div>
             <div className="text-right">
-              {order?.delivery_method?.startsWith('PAQUETERIA|') ? (
+              {(order?.delivery_method?.startsWith('PAQUETERIA|') || order?.delivery_method === 'paqueteria' || !!order?.pickup_business_id) ? (
                 <div className="flex flex-col items-end gap-1">
                   <div className="flex items-center gap-2 text-xs">
                     <span className="text-gray-500 font-bold uppercase">Productos:</span>
@@ -52,7 +55,7 @@ export default function TrackingSection({
                   </div>
                   <div className="flex items-center gap-2 text-xs text-red-500">
                     <span className="font-bold uppercase">A Pagar (Recojo):</span>
-                    <span className="font-bold">Bs. {parseFloat(order?.delivery_method.split('|')[3] || 0).toFixed(2)}</span>
+                    <span className="font-bold">Bs. {parseFloat((order?.delivery_method?.startsWith('PAQUETERIA|') ? order?.delivery_method.split('|')[3] : order?.pickup_fee) || 0).toFixed(2)}</span>
                   </div>
                 </div>
               ) : (
@@ -143,7 +146,7 @@ export default function TrackingSection({
         {/* Confirmation and Issue actions (when order is paid or ready) */}
         {(order?.status === 'pagado' || order?.status === 'entregado' || order?.status === 'pago_enviado' || order?.status === 'ready_for_pickup') && (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-3">
-            {(!order?.delivery_method?.startsWith('PAQUETERIA|') || order?.status === 'ready_for_pickup') && (
+            {(! (order?.delivery_method?.startsWith('PAQUETERIA|') || order?.delivery_method === 'paqueteria' || !!order?.pickup_business_id) || order?.status === 'ready_for_pickup') && (
               <button type="button" data-testid="confirm-received-btn" onClick={handleConfirmReceived} className="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
                 <CheckCircle2 size={18} /> {order?.status === 'ready_for_pickup' ? 'Confirmar Recojo' : 'Confirmar Producto Recibido'}
               </button>
@@ -161,7 +164,7 @@ export default function TrackingSection({
 // Helper functions
 function getStatusText(order) {
   const status = order?.status;
-  const isPaqueteria = order?.delivery_method?.startsWith('PAQUETERIA|');
+  const isPaqueteria = order?.delivery_method?.startsWith('PAQUETERIA|') || order?.delivery_method === 'paqueteria' || !!order?.pickup_business_id;
   
   switch (status) {
     case 'pendiente':
@@ -186,7 +189,7 @@ function getStatusText(order) {
 
 function getStatusColor(order) {
   const status = order?.status;
-  const isPaqueteria = order?.delivery_method?.startsWith('PAQUETERIA|');
+  const isPaqueteria = order?.delivery_method?.startsWith('PAQUETERIA|') || order?.delivery_method === 'paqueteria' || !!order?.pickup_business_id;
 
   switch (status) {
     case 'pendiente':
