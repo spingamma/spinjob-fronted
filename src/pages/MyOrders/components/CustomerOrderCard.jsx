@@ -50,6 +50,8 @@ export default function CustomerOrderCard({
     ? 'PAGO ENVIADO'
     : 'PENDIENTE DE PAGO';
 
+  const pickupFee = isPaqueteria ? parseFloat(order.delivery_method.split('|')[3]) || 0 : 0;
+
   return (
     <div data-testid={`customer-order-card-${order.id}`} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 justify-between transition-all hover:shadow-md">
       <div className="flex-1">
@@ -75,11 +77,24 @@ export default function CustomerOrderCard({
         </div>
       </div>
 
-      <div className="md:w-40 flex flex-col justify-between items-end md:items-end border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-4 w-full">
-        <div className="text-right w-full flex flex-row md:flex-col justify-between md:justify-start items-center md:items-end">
-          <p className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Total</p>
-          <p className="text-xl font-black text-[#1A535C]">Bs. {order.total_price.toFixed(2)}</p>
-        </div>
+      <div className="md:w-56 flex flex-col justify-between items-end md:items-end border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-4 w-full">
+        {isPaqueteria ? (
+          <div className="w-full flex flex-col gap-1.5 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-gray-500 font-bold uppercase tracking-wider">Productos</span>
+              <span className="font-bold text-[#1A535C]">Bs. {order.total_price.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center text-xs text-red-500">
+              <span className="font-bold uppercase tracking-wider">A Pagar (Recojo)</span>
+              <span className="font-bold">Bs. {pickupFee.toFixed(2)}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="text-right w-full flex flex-row md:flex-col justify-between md:justify-start items-center md:items-end">
+            <p className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Total</p>
+            <p className="text-xl font-black text-[#1A535C]">Bs. {order.total_price.toFixed(2)}</p>
+          </div>
+        )}
 
         {order.status === 'pendiente' || order.status === 'pendiente_de_pago' ? (
           <div className="flex flex-col w-full mt-3 gap-2">
