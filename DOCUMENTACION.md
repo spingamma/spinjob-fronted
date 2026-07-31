@@ -53,6 +53,16 @@ El sistema relacional se basa en 11 tablas principales (`spinjob-backend/models.
 ---
 
 ## 4. Lógica de Negocio y Flujos del Backend (FastAPI)
+
+### 4.1. Arquitectura de Capas (Controller-Service-Model)
+El backend está estructurado bajo un patrón de capas para separar responsabilidades:
+- **Routers (`spinjob-backend/routers/`):** Controladores de FastAPI que definen endpoints, inyectan dependencias y orquestan flujos.
+- **Servicios (`spinjob-backend/services/`):** Capa de lógica de negocio pura (ej. `business_service.py`, `email_service.py`), desvinculando la lógica compleja de las rutas.
+- **Schemas Pydantic (`spinjob-backend/schemas/`):** Modelos modulares de validación de datos (`business.py`, `user.py`, `order.py`, etc.).
+- **Modelos SQLAlchemy (`spinjob-backend/models.py`):** Entidades de mapeo relacional a base de datos.
+- **Testing:** Entorno de pruebas con soporte de base de datos en contenedor (`docker-compose.test.yml`), script de inicialización (`init_test_db.py`) y configuración separada (`.env.test`).
+
+### 4.2. Flujos Principales
 - **Autenticación y Seguridad** (`spinjob-backend/auth.py`, `spinjob-backend/routers/auth.py`):
   - Autenticación simplificada mediante Google OAuth2. Al autenticarse exitosamente con Google, el usuario se crea de forma automática en la base de datos y se le marca como verificado (`is_verified = True`).
   - Si el usuario requiere completar sus datos de contacto, el backend expone el flujo `/usuarios/completar-celular` (`spinjob-backend/routers/users.py`), requiriendo un número telefónico único (validado por país) antes de continuar a ciertas acciones restringidas.
@@ -100,18 +110,26 @@ spinjob-fronted/src/
 │   ├── AuthModal.jsx
 │   ├── BottomNavbar.jsx
 │   ├── BusinessDetailsModal.jsx
+│   ├── CartQuantityControl.jsx
+│   ├── Catalog/             # Subcomponentes modulares del catálogo
 │   ├── CatalogModal.jsx
+│   ├── CatalogSearchGrid.jsx
 │   ├── CategoryGrid.jsx
 │   ├── CountryModal.jsx
 │   ├── CropModal.jsx
 │   ├── DirectoryFilterBar.jsx
+│   ├── DirectoryFilters/    # Componentes granulares de filtrado
+│   ├── ErrorBoundary.jsx    # Captura de errores de React
 │   ├── Header.jsx
 │   ├── InlineCatalogCarousel.jsx
 │   ├── InstallPrompt.jsx
 │   ├── MapSelectorModal.jsx
 │   ├── ModalVerificacion.jsx
 │   ├── NavMenu.jsx
+│   ├── OrderSummary/        # Subcomponentes del proceso de checkout y seguimiento
 │   ├── PhoneInputWithCountry.jsx
+│   ├── PlantillaGenerica/   # Acciones del perfil para plantilla
+│   ├── PremiumModal.jsx
 │   ├── ProfessionalCard.jsx
 │   ├── ReloadPrompt.jsx
 │   ├── ReviewModal.jsx
@@ -129,7 +147,9 @@ spinjob-fronted/src/
 │   ├── MetricsDashboard/
 │   ├── MyBusinesses/        # Incluye BusinessOrders.jsx
 │   ├── MyOrders/
+│   ├── NotFound.jsx         # Vista 404 global
 │   ├── OrderSummary/
+│   ├── OrderTracking/
 │   └── Profile/
 ├── plantillas/              # Sistema de plantillas de perfil
 │   ├── PlantillaGenerica.jsx
@@ -172,9 +192,10 @@ Todas las vistas se cargan con `React.lazy` + `Suspense` (con splash screen anim
 | `/admin` | `pages/AdminPanel/AdminPanel.jsx` | Panel de moderación (admin/vendedor) |
 | `/tarjetero` | `pages/BusinessCardHolder/BusinessCardHolder.jsx` | Tarjetero de favoritos del usuario |
 | `/metricas/:slug` | `pages/MetricsDashboard/MetricsDashboard.jsx` | Dashboard de analítica (solo Premium) |
-| `/perfil/:slug/orden` | `pages/OrderSummary/OrderSummary.jsx` | Resumen de pedido y checkout |
+| `/perfil/:slug/orden/:orderId?` | `pages/OrderSummary/OrderSummary.jsx` | Resumen de pedido, checkout y seguimiento (tracking) |
 | `/mis-pedidos/:slug` | `pages/MyBusinesses/BusinessOrders.jsx` | Panel de pedidos entrantes (vendedor) |
 | `/mis-compras` | `pages/MyOrders/MyOrders.jsx` | Historial de compras del cliente |
+| `*` | `pages/NotFound.jsx` | Página de error 404 (No Encontrado) |
 
 ### 5.4. Componentes Globales (`src/components/`)
 
@@ -184,7 +205,7 @@ Todas las vistas se cargan con `React.lazy` + `Suspense` (con splash screen anim
 - **BottomNavbar.jsx:** Barra de navegación fija inferior (solo móvil, `md:hidden`) con efecto glassmorphism (`backdrop-blur`). Envuelve a `NavMenu` en modo `isMobile`.
 
 #### Directorio y Búsqueda
-- **DirectoryFilterBar.jsx:** Barra de filtros avanzados del directorio: categoría, subcategoría, departamento, barrio/zona, calificación mínima, distancia. Con dropdowns interactivos y búsqueda interna.
+- **DirectoryFilterBar.jsx:** Barra de filtros avanzados del directorio: categoría, subcategoría, departamento, barrio/zona, calificación mínima, distancia. Con dropdowns interactivos y búsqueda interna. Está modularizado internamente usando los componentes de la carpeta `DirectoryFilters/` (`CategoryBadge`, `DistanceFilter`, `LocationFilter`, `RatingFilter`, `SubcategoryFilter`).
 - **CategoryGrid.jsx:** Grid visual de categorías con iconos Lucide mapeados por keywords y navegación SEO-friendly mediante slugs.
 - **ProfessionalCard.jsx:** Tarjeta compacta de profesional en el directorio. Muestra avatar, nombre, categoría, rating, insignia verificado, delivery y distancia calculada (con geolocalización del usuario).
 
@@ -194,7 +215,10 @@ Todas las vistas se cargan con `React.lazy` + `Suspense` (con splash screen anim
 
 #### Catálogo y Pedidos
 - **InlineCatalogCarousel.jsx:** Carrusel de catálogo embebido directamente en el perfil. Incluye sistema de carrito de compras interactivo (agregar/quitar ítems, contador, botón flotante para ir a la orden). Soporta secciones por `carousel_name` y ordenamiento configurable.
-- **CatalogModal.jsx:** Modal alternativo para visualizar el catálogo completo en una ventana superpuesta (usado en contextos distintos al perfil inline).
+- **CatalogModal.jsx / CatalogSearchGrid.jsx:** Modal alternativo y grid de búsqueda para visualizar el catálogo completo en una ventana superpuesta.
+- **Módulos de Catálogo (`components/Catalog/`):** Subcomponentes que encapsulan la interfaz del catálogo, como `CarouselBlock.jsx`, `CatalogSearchBar.jsx`, `FloatingOrderButton.jsx` y `ProductCard.jsx`.
+- **Módulos de Orden (`components/OrderSummary/`):** El proceso de checkout y seguimiento (`TrackingSection.jsx`) se estructura en subcomponentes (`CheckoutSection`, `CustomerForm`, `OrderItems`) para una mejor gestión de la experiencia de compra.
+- **CartQuantityControl.jsx:** Control individual (+/-) para gestionar cantidades de un ítem en el carrito de compras respetando los límites de stock.
 
 #### Interacción con el Perfil
 - **ReviewModal.jsx:** Modal interactivo para dejar opiniones con estrellas (1-5) y opcionalmente adjuntar una imagen.
@@ -211,6 +235,10 @@ Todas las vistas se cargan con `React.lazy` + `Suspense` (con splash screen anim
 - **InstallPrompt.jsx:** Banner de instalación PWA personalizado. Intercepta `beforeinstallprompt`, detecta iOS/Android y modo standalone. Incluye un switch maestro `IS_PWA_ENABLED` para activar/desactivar.
 - **ReloadPrompt.jsx:** Notificación de nueva versión disponible del Service Worker. Permite al usuario actualizar la app o descartar. Verifica actualizaciones automáticamente cada hora.
 
+#### Otros Componentes Globales
+- **ErrorBoundary.jsx:** Componente envolvente global que captura errores de renderizado de React (`componentDidCatch`), evitando caídas completas de la aplicación (pantalla blanca) y mostrando una UI amigable de contingencia.
+- **PremiumModal.jsx:** Modal de upsell o paywall que se muestra a usuarios 'Gratis' cuando intentan acceder a características exclusivas (como métricas avanzadas).
+
 ### 5.5. Componentes de Plantilla (`src/plantillas/`)
 - **PlantillaGenerica.jsx:** Plantilla Premium Unificada. Si el usuario actual es el dueño del negocio o un administrador, se habilita el **Modo Edición Inline** que permite modificar directamente títulos, descripciones, redes sociales, ubicación, especialidades y catálogo de productos sin recargar la página. Se descompone en los siguientes módulos:
   - **ProfileHero.jsx:** Sección superior con foto de avatar (recorte circular), título principal, años de experiencia, matrícula/credencial e insignia de verificado. Soporta edición inline del nombre, título y foto.
@@ -223,13 +251,21 @@ Todas las vistas se cargan con `React.lazy` + `Suspense` (con splash screen anim
 
 ### 5.6. Custom Hooks (`src/hooks/`)
 - **useDirectoryFilters.js:** Sincroniza la barra de búsqueda y filtros avanzados (categoría, subcategoría, departamento, barrio, rating, distancia) en la URL mediante Query Params y parámetros de ruta para SEO.
-- **useAccionesPerfil.jsx:** Centraliza acciones recurrentes de perfiles (compartir, guardar en tarjetero, calificar y registrar clicks analíticos en la API de interacciones).
-- **useAuthLogic.js:** Encapsula la lógica completa de autenticación: flujo Google OAuth, completar celular por país, validación de formato telefónico, manejo de token temporal y sesión. Detecta el país por timezone del navegador (La_Paz → Bolivia, Bogota → Colombia, Lima → Perú, Buenos_Aires → Argentina). También obtiene el WhatsApp de soporte desde el perfil de `spingamma`.
-- **useSEO.js:** Inyecta meta-tags Open Graph, Twitter y Schema.org en el `<head>` del documento de forma imperativa.
+- **useAccionesPerfil.jsx:** Centraliza acciones recurrentes de perfiles (compartir, guardar en tarjetero, calificar y registrar clicks analíticos).
+- **useAuthLogic.js / useAuth.js:** Encapsulan la lógica de autenticación: flujo Google OAuth, completar celular, validación, manejo de token temporal y sesión. Detecta país por timezone.
+- **useSEO.js:** Inyecta meta-tags Open Graph, Twitter y Schema.org.
+- **useProfileForm.js:** Administra el estado complejo y validaciones de los formularios de edición y creación de perfiles.
+- **useOrderData.js / useStatusHelpers.js:** Gestionan la recolección, parseo y formato de la información y estados de los pedidos.
+- **useReceiptUploader.js:** Maneja la lógica de subida de comprobantes de pago para órdenes por QR.
+- **useLeafletMap.js:** Abstracción para el manejo del mapa interactivo y coordenadas.
+- **useIsMobile.js:** Detección de viewport móvil para renderizado condicional responsivo.
+- **Carpeta `profile/`:** Subhooks adicionales específicos para desglosar la lógica interna de interacción del perfil (Premium Inline Edit).
 
 ### 5.7. Utilidades (`src/utils/`)
-- **fetchAuth.js:** Wrapper de `fetch` nativo que inyecta automáticamente el header `Authorization: Bearer <token>` desde `localStorage`. Detecta respuestas `401` (token expirado) y auto-desloguea al usuario con redirección al home.
-- **phone.js:** Mapa centralizado de países admitidos (`COUNTRIES`) con código de país, bandera emoji, y longitud de número. Funciones: `getCountryByName`, `cleanWhatsappNumber` (limpia para wa.me) y `parsePhoneNumber` (separa prefijo del número local).
+- **fetchAuth.js:** Wrapper de `fetch` nativo que inyecta automáticamente el header `Authorization: Bearer <token>` desde `localStorage`. Detecta respuestas `401` (token expirado) y auto-desloguea.
+- **phone.js:** Mapa centralizado de países admitidos (`COUNTRIES`) con código de país, bandera emoji, y longitud de número. Funciones de limpieza y parseo.
+- **formatOrderCode.js:** Formateo visual e identificadores de códigos de pedido.
+- **navigation.js:** Helpers puros de enrutamiento (scrolling y redirect seguro).
 - **slugs.js:** Funciones de normalización de texto a slug SEO-friendly (`slugify`: normaliza acentos, minúsculas, reemplaza espacios por guiones) y `matchSlugToName` (resuelve un slug de vuelta a su nombre legible desde una lista de opciones).
 - **cropImage.js:** Utilidades de recorte de imágenes en canvas: `createImage` (carga una imagen de URL), `getCroppedImg` (recorta con soporte de rotación y flip, retorna blob URL) y `getCroppedImgFile` (convierte el resultado a un objeto `File` listo para subir al servidor).
 
