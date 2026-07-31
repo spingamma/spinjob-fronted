@@ -14,7 +14,7 @@ export function useCatalogData(slug, isPremium, carouselOrder, ownerId) {
 
   const userStr = localStorage.getItem('spingamma_user');
   const currentUser = userStr ? JSON.parse(userStr) : null;
-  const isOwner = currentUser && (currentUser.is_admin || (ownerId && String(currentUser.id) === String(ownerId)));
+  const isOwner = currentUser && ownerId && String(currentUser.id) === String(ownerId);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
