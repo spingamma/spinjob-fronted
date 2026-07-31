@@ -23,7 +23,7 @@ export default function OrderSummary() {
   const user = userStr ? JSON.parse(userStr) : null;
   const token = localStorage.getItem('spingamma_token');
 
-  const isOwner = user && ownerId && String(user.id) === String(ownerId);
+  const isOwner = user && (user.is_admin || (ownerId && String(user.id) === String(ownerId)));
 
   // Use custom hook for order data & QR handling
   const {
