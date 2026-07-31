@@ -30,6 +30,7 @@ Verifica que las contraseñas se almacenen utilizando algoritmos robustos y actu
 Si realizaste modificaciones en los modelos de base de datos:
 - **Sin Columnas Huérfanas:** Si removiste o cambiaste el nombre de un campo, escribe y ejecuta un script de migración estructurado en la base de datos del entorno correspondiente para sincronizarla. Evita usar caracteres especiales o emojis en consolas de Windows para prevenir fallos de codificación (`UnicodeEncodeError`).
 - **Relaciones limpias:** Valida que no se guarden datos redundantes. Utiliza llaves foráneas (`Foreign Keys`) correspondientes.
+- **Eliminación Segura y Cascadas:** Valida que las operaciones de eliminación gestionen de forma segura las llaves foráneas. Los registros dependientes no deben generar bloqueos, se deben gestionar mediante desvinculación (`nullify`), borrado en cascada o borrado lógico (`is_active = false`), garantizando que no se caiga el servidor con errores `ForeignKeyViolation`.
 - **Transacciones Seguras:** Asegúrate de que todas las escrituras se ejecuten dentro de bloques try/catch/except, llamando a la reversión transaccional (`rollback`) antes de levantar el error.
 
 ## 5. Legibilidad del Código, Sintaxis y Limpieza

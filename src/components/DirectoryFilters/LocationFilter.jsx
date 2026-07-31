@@ -56,6 +56,7 @@ export default function LocationFilter({
           </div>
 
           <button
+            data-testid="location-option-all"
             onClick={() => handleSelectOption('location', 'Todas')}
             className={`w-full text-left px-5 py-3 text-sm font-extrabold transition-colors cursor-pointer
               ${activeState === 'Todas' ? 'bg-[#F9842C]/10 text-[#F9842C]' : 'text-[#F9842C] hover:bg-gray-50'}
@@ -66,6 +67,7 @@ export default function LocationFilter({
           {filteredGroupedLocations.map(group => (
             <div key={group.state} className="border-t border-gray-100 my-1 pt-2 pb-1">
               <button
+                data-testid={`location-option-${group.state}`}
                 onClick={() => handleSelectOption('location', group.state)}
                 className={`w-full text-left px-5 py-2 text-sm font-bold transition-colors cursor-pointer
                   ${activeState === group.state && activeNeighborhood === 'Todas' ? 'text-[#F9842C] bg-orange-50/50' : 'text-[#1A535C] hover:bg-gray-50'}
@@ -73,9 +75,10 @@ export default function LocationFilter({
               >
                 📍 {group.state}
               </button>
-              {group.neighborhoods.map(neigh => (
+              {(group.neighborhoods || []).map(neigh => (
                 <button
                   key={neigh}
+                  data-testid={`location-option-${group.state}-${neigh}`}
                   onClick={() => handleSelectOption('location', group.state, neigh)}
                   className={`w-full text-left pl-9 pr-5 py-2 text-sm font-medium transition-colors cursor-pointer
                     ${activeNeighborhood === neigh ? 'text-[#F9842C] font-bold bg-[#F9842C]/5' : 'text-[#757778] hover:bg-gray-50 hover:text-gray-800'}

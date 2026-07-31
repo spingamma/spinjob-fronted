@@ -108,11 +108,28 @@ export default function TrackingSection({
           </div>
         )}
 
-        {/* Confirmation and Issue actions (when order is paid) */}
-        {(order?.status === 'pagado' || order?.status === 'entregado' || order?.status === 'pago_enviado') && (
+        {/* Pickup Code (when ready for pickup) */}
+        {order?.status === 'ready_for_pickup' && (
+          <div className="bg-[#1A535C] rounded-3xl p-6 shadow-md text-center text-white relative overflow-hidden">
+            <h3 className="font-extrabold mb-2 text-sm flex items-center justify-center gap-2">
+              <Key size={18} className="text-[#F9842C]" /> Listo para Recojo
+            </h3>
+            <p className="text-white/80 text-xs mb-4">
+              Tu paquete ya está en la paquetería. Pasa a recogerlo con el siguiente código y tu carnet de identidad.
+            </p>
+            <div className="bg-white/10 rounded-2xl p-4 inline-block mb-4 border border-white/20">
+              <span className="text-4xl font-black tracking-widest text-[#F9842C]">
+                #TRJ-{order?.order_number || String(order?.id || '').slice(0, 4).toUpperCase()}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Confirmation and Issue actions (when order is paid or ready) */}
+        {(order?.status === 'pagado' || order?.status === 'entregado' || order?.status === 'pago_enviado' || order?.status === 'ready_for_pickup') && (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-3">
             <button type="button" data-testid="confirm-received-btn" onClick={handleConfirmReceived} className="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
-              <CheckCircle2 size={18} /> Confirmar Producto Recibido
+              <CheckCircle2 size={18} /> {order?.status === 'ready_for_pickup' ? 'Confirmar Recojo' : 'Confirmar Producto Recibido'}
             </button>
             <button type="button" data-testid="report-issue-btn" onClick={handleReportIssue} className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 border border-red-200/60">
               <ShieldAlert size={16} /> Hacer Reclamo
@@ -136,6 +153,8 @@ function getStatusText(status) {
       return 'Pago Confirmado (Preparando)';
     case 'entregado':
       return 'Enviado / Entregado';
+    case 'ready_for_pickup':
+      return 'Listo para Recojo';
     case 'completado':
       return 'Completado';
     case 'cancelado':
@@ -156,6 +175,8 @@ function getStatusColor(status) {
       return 'bg-blue-100 text-blue-800';
     case 'entregado':
       return 'bg-green-100 text-green-800';
+    case 'ready_for_pickup':
+      return 'bg-[#F9842C] text-white';
     case 'completado':
       return 'bg-emerald-100 text-emerald-800';
     case 'cancelado':

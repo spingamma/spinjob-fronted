@@ -5,6 +5,7 @@ import { useBusinessOrdersList } from './hooks/useBusinessOrdersList';
 import OrdersFilterBar from './components/OrdersFilterBar';
 import OrderCard from './components/OrderCard';
 import PremiumLockScreen from './components/PremiumLockScreen';
+import { API_URL } from '../../config/api';
 
 export default function BusinessOrders({ slugProp, hideHeader = false }) {
   const params = useParams();
@@ -15,6 +16,7 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
     orders,
     loading,
     isPremium,
+    businessCategory,
     startDate,
     setStartDate,
     endDate,
@@ -27,6 +29,40 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
     handleDownloadReceipt
   } = useBusinessOrdersList(slug);
 
+  const isPaqueteria = businessCategory === 'Logística';
+
+  const handlePaqueteExterno = async () => {
+    const fee = prompt("Ingresa la tarifa de recojo (Bs.) cobrada en efectivo:");
+    if (!fee || isNaN(fee)) return;
+    const customer = prompt("Nombre del cliente o remitente externo:");
+    if (!customer) return;
+
+    try {
+      const res = await fetch(`${API_URL}/businesses/${slug}/pickup-orders/external`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('spingamma_token')}`
+        },
+        body: JSON.stringify({
+          customer_name: customer,
+          total_price: parseFloat(fee),
+          items: [],
+          delivery_method: 'pickup'
+        })
+      });
+      if (res.ok) {
+        alert("Paquete externo registrado exitosamente. Está listo para recojo.");
+        window.location.reload();
+      } else {
+        alert("Error al registrar el paquete.");
+      }
+    } catch (err) {
+      console.error("Network error submitting external package:", err);
+      alert("Error de red.");
+    }
+  };
+
   return (
     <div className={`min-h-screen bg-[#F8F9FA] ${hideHeader ? 'pb-8' : 'pb-24'} font-sans text-[#1A535C]`}>
       {!hideHeader && (
@@ -35,7 +71,9 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-lg font-extrabold tracking-tight">Gestión de Pedidos</h1>
+            <h1 className="text-lg font-extrabold tracking-tight">
+              {isPaqueteria ? 'Gestión de Paquetería' : 'Gestión de Pedidos'}
+            </h1>
             <p className="text-xs text-white/70">Panel de administración</p>
           </div>
         </div>
@@ -44,13 +82,24 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
       <div className="max-w-4xl mx-auto px-4 mt-6">
         {isPremium ? (
           <>
-            <OrdersFilterBar 
-              startDate={startDate}
-              setStartDate={setStartDate}
-              endDate={endDate}
-              setEndDate={setEndDate}
-              todayStr={todayStr}
-            />
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+              <OrdersFilterBar 
+                startDate={startDate}
+                setStartDate={setStartDate}
+                endDate={endDate}
+                setEndDate={setEndDate}
+                todayStr={todayStr}
+              />
+              {isPaqueteria && (
+                <button
+                  onClick={handlePaqueteExterno}
+                  className="bg-[#1A535C] hover:bg-[#154249] text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md flex items-center gap-2"
+                >
+                  <PackageOpen size={16} />
+                  Ingresar Paquete Externo
+                </button>
+              )}
+            </div>
 
             {loading ? (
               <div className="flex flex-col items-center py-12">
@@ -76,6 +125,7 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
                     setRejectingOrder={setRejectingOrder}
                     handleStatusChange={handleStatusChange}
                     handleDownloadReceipt={handleDownloadReceipt}
+                    isPaqueteria={isPaqueteria}
                   />
                 ))}
               </div>

@@ -34,6 +34,7 @@ Antes de escribir cualquier componente que envíe o reciba datos persistentes (e
 1. Los campos requeridos vacíos **NO** deben mostrar alertas rojas agresivas antes de la interacción. Usa estilos neutros y sutiles (ej. asterisco rojo o badge "Requerido"). Las alertas agresivas solo aparecen al intentar enviar un formulario inválido.
 2. Los modales pesados deben ocultar dinámicamente barras de acción flotantes para evitar clics accidentales (no dependas solo de `z-index`).
 3. Bloquea y redirige acciones críticas al flujo de autenticación (Login) si el usuario no tiene sesión.
+4. **Aislamiento por Rol (RBAC Visual):** Siempre que implementes botones o acciones que cambien el estado de una entidad, verifica cruzadamente que el rol/usuario actual tiene permisos lógicos para ver ese botón, no confíes solo en el estado del objeto.
 
 ### Paso 5: Micro-Linting y Verificación Final
 Inmediatamente después de modificar un archivo JSX/TSX:
@@ -48,5 +49,6 @@ Inmediatamente después de modificar un archivo JSX/TSX:
 - [ ] ¿Ejecutaste el micro-linting (`npx eslint ...`) tras los cambios y obtuviste 0 errores?
 - [ ] ¿Se preservaron íntegramente los `id` de las entidades recibidas de la API?
 - [ ] ¿Se usaron colores y texturas del branding oficial en lugar de genéricos?
+- [ ] ¿Se validó el aislamiento por rol (Cross-Role UI) para asegurar que botones sensibles no se renderizan a usuarios no autorizados?
 
 > **Nota:** Para conocer las restricciones formales de sintaxis, reglas de React y prohibiciones, consulta el archivo `rules/03-frontend-react.md`.

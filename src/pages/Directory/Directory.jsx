@@ -32,7 +32,7 @@ export default function Directory() {
   }, []);
 
   // 2. Setup preliminar para filtros
-  const tempSearchTerm = searchParams.get('search') || '';
+  const tempSearchTerm = searchParams.get('buscar') || '';
   const tempActiveCategory = categoria || 'Todos';
 
   const showCategoryGrid = tempActiveCategory === 'Todos' && !tempSearchTerm && !verTodos;

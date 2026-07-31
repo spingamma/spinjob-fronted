@@ -113,7 +113,7 @@ export function useDirectoryFilters(professionals = [], metadataOverride = null,
     if (!search) return groupedLocations;
     return groupedLocations.map(group => {
       const matchState = normalizeText(group.state).includes(search);
-      const filteredNeighs = group.neighborhoods.filter(n => normalizeText(n).includes(search));
+      const filteredNeighs = (group.neighborhoods || []).filter(n => normalizeText(n).includes(search));
       if (matchState || filteredNeighs.length > 0) {
         return { ...group, neighborhoods: filteredNeighs };
       }

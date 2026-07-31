@@ -9,12 +9,21 @@ Estás ejecutando el workflow de análisis de impacto utilizando la herramienta 
 Debes seguir estos pasos estrictamente ANTES de proponer o escribir cualquier código.
 
 ## Paso 1: Ejecutar la herramienta de análisis
-Utiliza la herramienta `run_command` para ejecutar el script de análisis de riesgos.
-El comando exacto que debes ejecutar es:
+Utiliza la herramienta `run_command` para ejecutar el análisis de riesgos siguiendo esta lógica condicional:
 
-```bash
-source /home/jhona/Desktop/code-review-graph-main/.venv/bin/activate && cd /home/jhona/Desktop/tarjetoso && code-review-graph detect-changes --brief
-```
+1. **Intento Principal (Requiere Git):** Ejecuta el siguiente comando:
+   ```bash
+   source /home/jhona/Desktop/code-review-graph-main/.venv/bin/activate && cd /home/jhona/Desktop/tarjetoso && code-review-graph detect-changes --brief
+   ```
+2. **Fallback (Si no hay Git):** Si el comando anterior falla indicando que no es un repositorio git, **NO te detengas**. En su lugar:
+   - Ejecuta la construcción del grafo desde cero:
+     ```bash
+     source /home/jhona/Desktop/code-review-graph-main/.venv/bin/activate && cd /home/jhona/Desktop/tarjetoso && code-review-graph build
+     ```
+   - Luego, identifica qué archivos planeas modificar y ejecuta el análisis de impacto explícito:
+     ```bash
+     source /home/jhona/Desktop/code-review-graph-main/.venv/bin/activate && cd /home/jhona/Desktop/tarjetoso && code-review-graph impact --files [rutas/a/tus/archivos]
+     ```
 
 ## Paso 2: Analizar los resultados
 Lee detenidamente la salida del comando del Paso 1.

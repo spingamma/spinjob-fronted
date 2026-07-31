@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Settings2, QrCode, X, Upload, ChevronUp, ChevronDown, Check, Pencil, Trash2 } from 'lucide-react';
 
+import PickupPointSelector from './PickupPointSelector';
+
 export default function CatalogSettings({
   isPremium,
   ordersEnabled,
@@ -14,6 +16,9 @@ export default function CatalogSettings({
   const [newDeliveryMethod, setNewDeliveryMethod] = useState('');
   const [editingDeliveryIndex, setEditingDeliveryIndex] = useState(null);
   const [editingDeliveryText, setEditingDeliveryText] = useState('');
+  const [isSelectingPickupPoint, setIsSelectingPickupPoint] = useState(false);
+  
+  const enablePaqueterias = import.meta.env.VITE_ENABLE_PAQUETERIAS === 'true';
 
   const handleOrdersEnabledChange = (e) => {
     const isChecked = e.target.checked;
@@ -148,24 +153,49 @@ export default function CatalogSettings({
 
               {isDeliveryOpen && (
                 <div className="space-y-3 mt-3 animate-in fade-in zoom-in-95 duration-200">
-                  <form onSubmit={handleAddDeliveryMethod} className="flex gap-2">
-                    <input
-                      data-testid="delivery-method-input"
-                      type="text"
-                      value={newDeliveryMethod}
-                      onChange={(e) => setNewDeliveryMethod(e.target.value)}
-                      placeholder="Añadir opción (ej. Envío a domicilio)"
-                      className="flex-1 text-xs border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#F9842C]"
+                  <div className="flex gap-2">
+                    <form onSubmit={handleAddDeliveryMethod} className="flex flex-1 gap-2">
+                      <input
+                        data-testid="delivery-method-input"
+                        type="text"
+                        value={newDeliveryMethod}
+                        onChange={(e) => setNewDeliveryMethod(e.target.value)}
+                        placeholder="Añadir opción (ej. Envío a domicilio)"
+                        className="flex-1 text-xs border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#F9842C]"
+                      />
+                      <button
+                        data-testid="add-delivery-btn"
+                        type="submit"
+                        disabled={!newDeliveryMethod.trim()}
+                        className="bg-[#F9842C] hover:bg-[#e06516] text-white px-3 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                      >
+                        Añadir
+                      </button>
+                    </form>
+                    {enablePaqueterias && (
+                      <button
+                        type="button"
+                        onClick={() => setIsSelectingPickupPoint(true)}
+                        className="bg-[#1A535C] hover:bg-[#154249] text-white px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap"
+                      >
+                        Añadir Paquetería
+                      </button>
+                    )}
+                  </div>
+                  
+                  {isSelectingPickupPoint && (
+                    <PickupPointSelector 
+                      onCancel={() => setIsSelectingPickupPoint(false)}
+                      onSelect={(point) => {
+                        const fee = point.pickup_fee || 0;
+                        const methodStr = `PAQUETERIA|${point.id}|${point.name}|${fee}`;
+                        if (setDeliveryMethods && !deliveryMethods.includes(methodStr)) {
+                          setDeliveryMethods([...deliveryMethods, methodStr]);
+                        }
+                        setIsSelectingPickupPoint(false);
+                      }}
                     />
-                    <button
-                      data-testid="add-delivery-btn"
-                      type="submit"
-                      disabled={!newDeliveryMethod.trim()}
-                      className="bg-[#F9842C] hover:bg-[#e06516] text-white px-3 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
-                    >
-                      Añadir
-                    </button>
-                  </form>
+                  )}
 
                   <div className="space-y-2">
                     {deliveryMethods.map((method, idx) => (
@@ -198,16 +228,22 @@ export default function CatalogSettings({
                           </div>
                         ) : (
                           <>
-                            <span className="text-xs font-semibold text-gray-700">{method}</span>
+                            <span className="text-xs font-semibold text-gray-700">
+                              {method.startsWith('PAQUETERIA|') 
+                                ? `📦 Paquetería: ${method.split('|')[2]} (Tarifa: ${method.split('|')[3]} Bs)`
+                                : method}
+                            </span>
                             <div className="flex gap-2 ml-2">
-                              <button
-                                type="button"
-                                onClick={() => handleStartEditDelivery(idx, method)}
-                                data-testid={`edit-delivery-${idx}`}
-                                className="text-gray-400 hover:text-[#6A431F] transition-colors"
-                              >
-                                <Pencil size={14} />
-                              </button>
+                              {!method.startsWith('PAQUETERIA|') && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEditDelivery(idx, method)}
+                                  data-testid={`edit-delivery-${idx}`}
+                                  className="text-gray-400 hover:text-[#6A431F] transition-colors"
+                                >
+                                  <Pencil size={14} />
+                                </button>
+                              )}
                               <button
                                 type="button"
                                 onClick={() => handleRemoveDeliveryMethod(idx)}

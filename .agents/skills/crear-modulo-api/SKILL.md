@@ -28,6 +28,7 @@ Utiliza esta habilidad cuando el usuario solicite añadir una nueva entidad o re
 1. Crea la lógica de negocio pesada en la carpeta `services/` (ej. `services/nueva_entidad_service.py`).
 2. Incluye aquí operaciones transaccionales, consultas complejas y llamadas a terceros.
 3. Asegura el uso de bloques `try/except` con `db.rollback()` explícito.
+4. 🚨 **Anti-FK-Violation:** Si desarrollas un servicio de eliminación, limpia las relaciones (Foreign Keys) dependientes antes de eliminar para evitar crasheos.
 
 ### Paso 5: Capa de Presentación API (Routers / Controllers)
 1. Crea el router en `routers/` (Skinny Routers).
@@ -45,5 +46,6 @@ Utiliza esta habilidad cuando el usuario solicite añadir una nueva entidad o re
 - [ ] ¿El endpoint retorna explícitamente el `id`?
 - [ ] ¿La firma del endpoint tiene el tipado de retorno explícito?
 - [ ] ¿Las importaciones son explícitas (`from models import X` en lugar de `import models`)?
+- [ ] ¿El endpoint de eliminación gestiona correctamente las llaves foráneas (desvinculación o soft delete)?
 
 > **Nota:** Para conocer las restricciones formales de arquitectura, transacciones y seguridad, consulta el archivo `rules/04-backend-standards.md`.

@@ -87,3 +87,7 @@ Si acabas de dividir o crear subcomponentes:
 - Abre simultáneamente el archivo del componente padre y del componente hijo.
 - Revisa manualmente que los atributos (props) que inyecta el padre coincidan letra por letra con las props que recibe el hijo.
 - Recuerda que en arquitecturas JSX sin TypeScript estricto, enviar una prop mal nombrada no arrojará un error de compilación, pero romperá la aplicación para el usuario.
+
+## 12. Inspección de Programación Defensiva y Simetría
+- **Colecciones dinámicas:** Asegura que cualquier iteración sobre arreglos provenientes de respuestas de API posean fallbacks a arrays vacíos (`|| []`) antes de ejecutar métodos funcionales como `.map()` o `.filter()`.
+- **Estado compartido:** Verifica que si tu componente lee datos de la URL (query params) o del LocalStorage, las claves coincidan exactamente con las que otros componentes (o hooks) usan para escribir esos datos.
