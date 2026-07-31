@@ -19,7 +19,7 @@ export default function CatalogSettings({
   const [editingDeliveryText, setEditingDeliveryText] = useState('');
   const [isSelectingPickupPoint, setIsSelectingPickupPoint] = useState(false);
   
-  const enablePaqueterias = import.meta.env.VITE_ENABLE_PAQUETERIAS === 'true';
+  const enablePaqueterias = true;
 
   const handleOrdersEnabledChange = (e) => {
     const isChecked = e.target.checked;

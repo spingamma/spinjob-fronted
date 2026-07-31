@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, PackageOpen } from 'lucide-react';
+import { ArrowLeft, Loader2, PackageOpen, X } from 'lucide-react';
 import { useBusinessOrdersList } from './hooks/useBusinessOrdersList';
 import OrdersFilterBar from './components/OrdersFilterBar';
 import OrderCard from './components/OrderCard';
@@ -34,12 +34,31 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
     businessCategory.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes('paqueteria')
   );
 
-  const handlePaqueteExterno = async () => {
-    const fee = prompt("Ingresa la tarifa de recojo (Bs.) cobrada en efectivo:");
-    if (!fee || isNaN(fee)) return;
-    const customer = prompt("Nombre del cliente o remitente externo:");
-    if (!customer) return;
+  const [showPackageModal, setShowPackageModal] = useState(false);
+  const [packageFee, setPackageFee] = useState('');
+  const [packageCustomer, setPackageCustomer] = useState('');
+  const [submittingPackage, setSubmittingPackage] = useState(false);
+  const [packageError, setPackageError] = useState('');
 
+  const handlePaqueteExterno = () => {
+    setPackageFee('');
+    setPackageCustomer('');
+    setPackageError('');
+    setShowPackageModal(true);
+  };
+
+  const submitExternalPackage = async () => {
+    setPackageError('');
+    if (!packageFee || isNaN(packageFee) || parseFloat(packageFee) < 0) {
+      setPackageError('Por favor ingresa una tarifa válida.');
+      return;
+    }
+    if (!packageCustomer.trim()) {
+      setPackageError('El nombre del cliente es obligatorio.');
+      return;
+    }
+
+    setSubmittingPackage(true);
     try {
       const res = await fetch(`${API_URL}/businesses/${slug}/pickup-orders/external`, {
         method: 'POST',
@@ -48,21 +67,23 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
           'Authorization': `Bearer ${localStorage.getItem('spingamma_token')}`
         },
         body: JSON.stringify({
-          customer_name: customer,
-          total_price: parseFloat(fee),
+          customer_name: packageCustomer.trim(),
+          total_price: parseFloat(packageFee),
           items: [],
           delivery_method: 'pickup'
         })
       });
       if (res.ok) {
-        alert("Paquete externo registrado exitosamente. Está listo para recojo.");
+        setShowPackageModal(false);
         window.location.reload();
       } else {
-        alert("Error al registrar el paquete.");
+        setPackageError('Error al registrar el paquete. Verifica los datos o tu conexión.');
       }
     } catch (err) {
       console.error("Network error submitting external package:", err);
-      alert("Error de red.");
+      setPackageError('Error de red al intentar conectar con el servidor.');
+    } finally {
+      setSubmittingPackage(false);
     }
   };
 
@@ -138,6 +159,73 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
           <PremiumLockScreen />
         )}
       </div>
+      {showPackageModal && (
+        <div className="fixed inset-0 z-[99] flex items-center justify-center p-4 bg-[#1A535C]/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-200">
+            <div className="bg-[#1A535C] p-4 flex justify-between items-center text-white">
+              <h3 className="font-extrabold flex items-center gap-2">
+                <PackageOpen size={20} />
+                Ingresar Paquete
+              </h3>
+              <button 
+                onClick={() => setShowPackageModal(false)}
+                className="p-1 hover:bg-white/20 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              {packageError && (
+                <div className="bg-red-50 text-red-500 text-sm font-bold p-3 rounded-xl border border-red-100">
+                  {packageError}
+                </div>
+              )}
+              
+              <div>
+                <label className="block text-sm font-bold text-[#1A535C] mb-1">Nombre del cliente o remitente</label>
+                <input 
+                  type="text" 
+                  value={packageCustomer}
+                  onChange={(e) => setPackageCustomer(e.target.value)}
+                  placeholder="Ej: Juan Pérez"
+                  className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-[#1A535C] outline-none focus:border-[#F9842C] focus:bg-white transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-[#1A535C] mb-1">Tarifa de recojo (Bs.)</label>
+                <input 
+                  type="number" 
+                  value={packageFee}
+                  onChange={(e) => setPackageFee(e.target.value)}
+                  placeholder="Ej: 10"
+                  min="0"
+                  step="0.5"
+                  className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-[#1A535C] outline-none focus:border-[#F9842C] focus:bg-white transition-colors"
+                />
+                <p className="text-xs text-[#757778] mt-1">Monto a cobrar en efectivo al entregar el paquete.</p>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  onClick={submitExternalPackage}
+                  disabled={submittingPackage}
+                  className="w-full bg-[#F9842C] hover:bg-[#e06516] text-white font-extrabold py-3.5 rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-70 flex justify-center items-center gap-2"
+                >
+                  {submittingPackage ? (
+                    <>
+                      <Loader2 size={20} className="animate-spin" /> Procesando...
+                    </>
+                  ) : (
+                    'Confirmar Registro'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
