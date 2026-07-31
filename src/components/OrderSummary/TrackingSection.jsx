@@ -40,8 +40,8 @@ export default function TrackingSection({
                 Orden #{order?.order_number || String(order?.id || '').slice(0, 8)}
               </h2>
               <span className={`text-[11px] font-black uppercase px-2.5 py-1 rounded-md ${
-                getStatusColor(order?.status)
-              }`}>{getStatusText(order?.status)}</span>
+                getStatusColor(order)
+              }`}>{getStatusText(order)}</span>
             </div>
             <div className="text-right">
               <span className="text-xs text-gray-500 font-bold block mb-1">Total</span>
@@ -128,9 +128,11 @@ export default function TrackingSection({
         {/* Confirmation and Issue actions (when order is paid or ready) */}
         {(order?.status === 'pagado' || order?.status === 'entregado' || order?.status === 'pago_enviado' || order?.status === 'ready_for_pickup') && (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-3">
-            <button type="button" data-testid="confirm-received-btn" onClick={handleConfirmReceived} className="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
-              <CheckCircle2 size={18} /> {order?.status === 'ready_for_pickup' ? 'Confirmar Recojo' : 'Confirmar Producto Recibido'}
-            </button>
+            {(!order?.delivery_method?.startsWith('PAQUETERIA|') || order?.status === 'ready_for_pickup') && (
+              <button type="button" data-testid="confirm-received-btn" onClick={handleConfirmReceived} className="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
+                <CheckCircle2 size={18} /> {order?.status === 'ready_for_pickup' ? 'Confirmar Recojo' : 'Confirmar Producto Recibido'}
+              </button>
+            )}
             <button type="button" data-testid="report-issue-btn" onClick={handleReportIssue} className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 border border-red-200/60">
               <ShieldAlert size={16} /> Hacer Reclamo
             </button>
@@ -141,8 +143,11 @@ export default function TrackingSection({
   );
 }
 
-// Helper functions (could be imported from useStatusHelpers, but kept local for simplicity)
-function getStatusText(status) {
+// Helper functions
+function getStatusText(order) {
+  const status = order?.status;
+  const isPaqueteria = order?.delivery_method?.startsWith('PAQUETERIA|');
+  
   switch (status) {
     case 'pendiente':
     case 'pendiente_de_pago':
@@ -152,7 +157,7 @@ function getStatusText(status) {
     case 'pagado':
       return 'Pago Confirmado (Preparando)';
     case 'entregado':
-      return 'Enviado / Entregado';
+      return isPaqueteria ? 'En Camino a Paquetería' : 'Enviado / Entregado';
     case 'ready_for_pickup':
       return 'Listo para Recojo';
     case 'completado':
@@ -164,7 +169,10 @@ function getStatusText(status) {
   }
 }
 
-function getStatusColor(status) {
+function getStatusColor(order) {
+  const status = order?.status;
+  const isPaqueteria = order?.delivery_method?.startsWith('PAQUETERIA|');
+
   switch (status) {
     case 'pendiente':
     case 'pendiente_de_pago':
@@ -174,7 +182,7 @@ function getStatusColor(status) {
     case 'pagado':
       return 'bg-blue-100 text-blue-800';
     case 'entregado':
-      return 'bg-green-100 text-green-800';
+      return isPaqueteria ? 'bg-indigo-100 text-indigo-800' : 'bg-green-100 text-green-800';
     case 'ready_for_pickup':
       return 'bg-[#F9842C] text-white';
     case 'completado':

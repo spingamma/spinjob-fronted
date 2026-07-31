@@ -164,7 +164,7 @@ export default function CatalogSettings({
 
               {isDeliveryOpen && (
                 <div className="space-y-3 mt-3 animate-in fade-in zoom-in-95 duration-200">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <form onSubmit={handleAddDeliveryMethod} className="flex flex-1 gap-2">
                       <input
                         data-testid="delivery-method-input"
@@ -172,13 +172,13 @@ export default function CatalogSettings({
                         value={newDeliveryMethod}
                         onChange={(e) => setNewDeliveryMethod(e.target.value)}
                         placeholder="Añadir opción (ej. Envío a domicilio)"
-                        className="flex-1 text-xs border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#F9842C]"
+                        className="flex-1 min-w-0 text-xs border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#F9842C]"
                       />
                       <button
                         data-testid="add-delivery-btn"
                         type="submit"
                         disabled={!newDeliveryMethod.trim()}
-                        className="bg-[#F9842C] hover:bg-[#e06516] text-white px-3 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                        className="shrink-0 bg-[#F9842C] hover:bg-[#e06516] text-white px-3 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
                       >
                         Añadir
                       </button>
@@ -187,7 +187,7 @@ export default function CatalogSettings({
                       <button
                         type="button"
                         onClick={() => setIsSelectingPickupPoint(true)}
-                        className="bg-[#1A535C] hover:bg-[#154249] text-white px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap"
+                        className="shrink-0 bg-[#1A535C] hover:bg-[#154249] text-white px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap sm:w-auto w-full"
                       >
                         Añadir Paquetería
                       </button>
