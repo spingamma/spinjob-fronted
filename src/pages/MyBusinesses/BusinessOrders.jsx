@@ -29,7 +29,10 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
     handleDownloadReceipt
   } = useBusinessOrdersList(slug);
 
-  const isPaqueteria = businessCategory === 'Logística';
+  const isPaqueteria = businessCategory && (
+    businessCategory.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes('logistica') ||
+    businessCategory.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes('paqueteria')
+  );
 
   const handlePaqueteExterno = async () => {
     const fee = prompt("Ingresa la tarifa de recojo (Bs.) cobrada en efectivo:");

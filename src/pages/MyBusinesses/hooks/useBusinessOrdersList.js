@@ -59,13 +59,21 @@ export function useBusinessOrdersList(slug) {
         setBusinessCategory(category);
       }
 
-      let url = category === 'Logística' 
+      let isLogistica = false;
+      if (category) {
+        const catNorm = category.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if (catNorm.includes('logistica') || catNorm.includes('paqueteria')) {
+          isLogistica = true;
+        }
+      }
+
+      let url = isLogistica 
         ? `${API_URL}/businesses/${slug}/pickup-orders`
         : `${API_URL}/businesses/${slug}/orders`;
         
       const paramsList = [];
-      if (sDate && category !== 'Logística') paramsList.push(`start_date=${sDate}`);
-      if (eDate && category !== 'Logística') paramsList.push(`end_date=${eDate}`);
+      if (sDate && !isLogistica) paramsList.push(`start_date=${sDate}`);
+      if (eDate && !isLogistica) paramsList.push(`end_date=${eDate}`);
       if (paramsList.length > 0) {
         url += `?${paramsList.join('&')}`;
       }
