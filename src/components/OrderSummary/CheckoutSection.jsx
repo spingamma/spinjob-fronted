@@ -30,8 +30,37 @@ export default function CheckoutSection({
     }
   }, [deliveryMethods]);
 
+  const [livePaqueterias, setLivePaqueterias] = useState([]);
+
+  useEffect(() => {
+    const hasPaqueteria = parsedDeliveryMethods.some(m => typeof m === 'string' && m.startsWith('PAQUETERIA|'));
+    if (hasPaqueteria) {
+      fetch(`${API_URL}/businesses/?category=Logística`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) setLivePaqueterias(data);
+        })
+        .catch(console.error);
+    }
+  }, [parsedDeliveryMethods]);
+
+  const liveDeliveryMethods = React.useMemo(() => {
+    if (livePaqueterias.length === 0) return parsedDeliveryMethods;
+    return parsedDeliveryMethods.map(method => {
+      if (typeof method === 'string' && method.startsWith('PAQUETERIA|')) {
+        const parts = method.split('|');
+        const pointId = parts[1];
+        const livePoint = livePaqueterias.find(p => p.id === pointId);
+        if (livePoint) {
+          return `PAQUETERIA|${livePoint.id}|${livePoint.name}|${livePoint.pickup_fee || 0}`;
+        }
+      }
+      return method;
+    });
+  }, [parsedDeliveryMethods, livePaqueterias]);
+
   const [customerName, setCustomerName] = useState(isOwner ? 'Venta Presencial' : (user?.nombre || ''));
-  const [selectedDeliveryMethodRaw, setSelectedDeliveryMethodRaw] = useState(isOwner ? 'presencial' : parsedDeliveryMethods[0]);
+  const [selectedDeliveryMethodRaw, setSelectedDeliveryMethodRaw] = useState(isOwner ? 'presencial' : liveDeliveryMethods[0]);
   const [presencialPayment, setPresencialPayment] = useState('efectivo');
   const [loading, setLoading] = useState(false);
 
@@ -41,6 +70,16 @@ export default function CheckoutSection({
       setSelectedDeliveryMethodRaw('presencial');
     }
   }, [isOwner]);
+
+  useEffect(() => {
+    if (!isOwner && liveDeliveryMethods.length > 0 && selectedDeliveryMethodRaw) {
+      const currentBase = selectedDeliveryMethodRaw.split('|').slice(0, 2).join('|');
+      const updatedMatch = liveDeliveryMethods.find(m => typeof m === 'string' && m.startsWith(currentBase));
+      if (updatedMatch && updatedMatch !== selectedDeliveryMethodRaw) {
+        setSelectedDeliveryMethodRaw(updatedMatch);
+      }
+    }
+  }, [liveDeliveryMethods, isOwner, selectedDeliveryMethodRaw]);
 
   const isPaqueteriaSelected = selectedDeliveryMethodRaw?.startsWith('PAQUETERIA|');
   const paqueteriaDetails = isPaqueteriaSelected ? selectedDeliveryMethodRaw.split('|') : [];
@@ -197,9 +236,9 @@ export default function CheckoutSection({
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Método de Entrega *</label>
                 <select value={selectedDeliveryMethodRaw} onChange={e => setSelectedDeliveryMethodRaw(e.target.value)} className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 font-bold text-gray-700 outline-none" data-testid="delivery-method-select">
-                  {parsedDeliveryMethods.map((method, i) => (
+                  {liveDeliveryMethods.map((method, i) => (
                     <option key={i} value={method}>
-                      {method.startsWith('PAQUETERIA|') 
+                      {typeof method === 'string' && method.startsWith('PAQUETERIA|') 
                         ? `📦 Paquetería: ${method.split('|')[2]} (Recojo: ${method.split('|')[3]} Bs)`
                         : method}
                     </option>

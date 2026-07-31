@@ -8,7 +8,7 @@
  * @returns {Promise<File>} Archivo comprimido (o el original si no se puede).
  */
 export const compressImage = (file, maxWidth = 1024, quality = 0.8) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (!file || !file.type.startsWith('image/')) {
       resolve(file);
       return;
@@ -58,8 +58,8 @@ export const compressImage = (file, maxWidth = 1024, quality = 0.8) => {
           quality
         );
       };
-      img.onerror = (error) => resolve(file); // Si hay error, devolver original
+      img.onerror = () => resolve(file); // Si hay error, devolver original
     };
-    reader.onerror = (error) => resolve(file);
+    reader.onerror = () => resolve(file);
   });
 };
