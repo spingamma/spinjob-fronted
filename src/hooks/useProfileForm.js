@@ -1,5 +1,6 @@
 // src/hooks/useProfileForm.js
 import { useState, useEffect } from 'react';
+import { compressImage } from '../utils/imageUtils';
 
 /**
  * Custom hook to manage the edit form data for PlantillaGenerica.
@@ -123,21 +124,34 @@ export default function useProfileForm({ profesional, isEditing, draftStorageKey
   }, [editFormData, isEditing, draftStorageKey]);
 
   // Simple change handler used by the UI.
-  const handleEditChange = (e) => {
+  const handleEditChange = async (e) => {
     if (e.target.name === 'image') {
       const file = e.target.files[0];
       if (file) {
-        setEditFormData({ ...editFormData, new_image: file });
-        if (setImagePreview) {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            setImagePreview(reader.result);
-          };
-          reader.readAsDataURL(file);
+        try {
+          const compressedFile = await compressImage(file);
+          setEditFormData(prev => ({ ...prev, new_image: compressedFile }));
+          if (setImagePreview) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(compressedFile);
+          }
+        } catch (error) {
+          console.error("Error comprimiendo imagen", error);
+          setEditFormData(prev => ({ ...prev, new_image: file }));
+          if (setImagePreview) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+          }
         }
       }
     } else {
-      setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
+      setEditFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Settings2, QrCode, X, Upload, ChevronUp, ChevronDown, Check, Pencil, Trash2 } from 'lucide-react';
+import { compressImage } from '../../utils/imageUtils';
 
 import PickupPointSelector from './PickupPointSelector';
 
@@ -119,14 +120,24 @@ export default function CatalogSettings({
                         type="file"
                         accept="image/*"
                         data-testid="payment-qr-file-input"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
                           if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              if (setPaymentQrImage) setPaymentQrImage(reader.result, file);
-                            };
-                            reader.readAsDataURL(file);
+                            try {
+                              const compressedFile = await compressImage(file);
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                if (setPaymentQrImage) setPaymentQrImage(reader.result, compressedFile);
+                              };
+                              reader.readAsDataURL(compressedFile);
+                            } catch (err) {
+                              console.error("Error comprimiendo QR", err);
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                if (setPaymentQrImage) setPaymentQrImage(reader.result, file);
+                              };
+                              reader.readAsDataURL(file);
+                            }
                           }
                         }}
                         className="hidden"
