@@ -59,6 +59,7 @@ export function usePlantillaGenerica(profesional, onProtectedAction, onUpdate, i
     isEditing,
     draftStorageKey,
     getServerQr,
+    setImagePreview,
   });
 
   const { editFormData, setEditFormData } = profileForm;

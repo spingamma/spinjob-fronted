@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react';
  * @param {function} params.getServerQr - Helper to obtain QR image URL from a profile.
  * @returns {{ editFormData: Object, setEditFormData: function, handleEditChange: function }}
  */
-export default function useProfileForm({ profesional, isEditing, draftStorageKey, getServerQr }) {
+export default function useProfileForm({ profesional, isEditing, draftStorageKey, getServerQr, setImagePreview }) {
   // Initialise form data based on the profile, mirroring original logic.
   const [editFormData, setEditFormData] = useState(() => {
     let initialWaNumbers = [];
@@ -128,6 +128,13 @@ export default function useProfileForm({ profesional, isEditing, draftStorageKey
       const file = e.target.files[0];
       if (file) {
         setEditFormData({ ...editFormData, new_image: file });
+        if (setImagePreview) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setImagePreview(reader.result);
+          };
+          reader.readAsDataURL(file);
+        }
       }
     } else {
       setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
