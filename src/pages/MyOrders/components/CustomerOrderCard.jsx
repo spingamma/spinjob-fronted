@@ -19,13 +19,17 @@ export default function CustomerOrderCard({
   const isEntregado = order.status === "entregado";
   const isPagado = order.status === "pagado";
   const isPagoEnviado = order.status === "pago_enviado";
+  const isReadyForPickup = order.status === "ready_for_pickup";
+  const isPaqueteria = order.delivery_method?.startsWith('PAQUETERIA|');
 
   const badgeClass = isCancelado 
     ? 'bg-red-100 text-red-700 border border-red-200' 
     : isCompletado
     ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+    : isReadyForPickup
+    ? 'bg-[#F9842C] text-white border border-[#F9842C]'
     : isEntregado 
-    ? 'bg-green-100 text-green-700 border border-green-200' 
+    ? (isPaqueteria ? 'bg-indigo-100 text-indigo-800 border border-indigo-200' : 'bg-green-100 text-green-700 border border-green-200')
     : isPagado 
     ? 'bg-blue-100 text-blue-700 border border-blue-200' 
     : isPagoEnviado
@@ -36,8 +40,10 @@ export default function CustomerOrderCard({
     ? 'CANCELADO' 
     : isCompletado
     ? 'COMPLETADO'
+    : isReadyForPickup
+    ? 'LISTO PARA RECOJO'
     : isEntregado 
-    ? 'ENTREGADO' 
+    ? (isPaqueteria ? 'EN CAMINO A PAQUETERÍA' : 'ENTREGADO')
     : isPagado 
     ? 'PAGADO' 
     : isPagoEnviado
@@ -103,60 +109,68 @@ export default function CustomerOrderCard({
           >
             Pago pendiente de verificar
           </button>
-        ) : order.status === 'pagado' || order.status === 'entregado' ? (
+        ) : order.status === 'pagado' || order.status === 'entregado' || order.status === 'ready_for_pickup' ? (
           <div className="flex flex-col gap-2 w-full mt-3">
-            {order.status === 'entregado' && (
+            {order.status === 'entregado' && !isPaqueteria && (
               <div className="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] p-2 rounded-xl text-center font-bold">
                 Tienes 72 horas para confirmar entrega o presentar reclamo
               </div>
             )}
-            {confirmingReceivedId === order.id ? (
-              <div className="w-full flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setConfirmingReceivedId(null);
-                    handleMarkReceived(order.id);
-                  }}
-                  disabled={updatingOrderId === order.id}
-                  className="flex-1 py-2.5 px-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
-                >
-                  {updatingOrderId === order.id ? (
-                    <Loader2 size={14} className="animate-spin" />
-                  ) : (
-                    <CheckCircle2 size={14} />
-                  )}
-                  Confirmar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setConfirmingReceivedId(null)}
-                  className="flex-1 py-2.5 px-2 rounded-xl font-bold text-xs flex items-center justify-center transition-all bg-gray-100 hover:bg-gray-200 text-gray-700"
-                >
-                  Cancelar
-                </button>
+            {order.status === 'entregado' && isPaqueteria && (
+              <div className="bg-indigo-50 border border-indigo-200 text-indigo-800 text-[10px] p-2 rounded-xl text-center font-bold">
+                El negocio envió tu pedido a la paquetería
               </div>
-            ) : (
-              <button
-                type="button"
-                data-testid={`receive-order-btn-${order.id}`}
-                onClick={() => setConfirmingReceivedId(order.id)}
-                disabled={updatingOrderId === order.id}
-                className="w-full py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
-              >
-                <PackageCheck size={14} />
-                Producto recibido
-              </button>
+            )}
+            
+            {(!isPaqueteria || order.status === 'ready_for_pickup') && (
+              confirmingReceivedId === order.id ? (
+                <div className="w-full flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConfirmingReceivedId(null);
+                      handleMarkReceived(order.id);
+                    }}
+                    disabled={updatingOrderId === order.id}
+                    className="flex-1 py-2.5 px-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                  >
+                    {updatingOrderId === order.id ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <CheckCircle2 size={14} />
+                    )}
+                    Confirmar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingReceivedId(null)}
+                    className="flex-1 py-2.5 px-2 rounded-xl font-bold text-xs flex items-center justify-center transition-all bg-gray-100 hover:bg-gray-200 text-gray-700"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  data-testid={`receive-order-btn-${order.id}`}
+                  onClick={() => setConfirmingReceivedId(order.id)}
+                  disabled={updatingOrderId === order.id}
+                  className="w-full py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                >
+                  <PackageCheck size={14} />
+                  {order.status === 'ready_for_pickup' ? 'Confirmar Recojo' : 'Producto recibido'}
+                </button>
+              )
             )}
           </div>
         ) : null}
 
-        {order.status === 'entregado' && (
+        {(order.status === 'entregado' || order.status === 'ready_for_pickup') && (
           <button
             type="button"
             data-testid={`claim-order-btn-${order.id}`}
             onClick={() => {
-              const text = encodeURIComponent(`Hola Tarjetoso, necesito ayuda con mi pedido #${formatOrderCode(order.order_number, order.id)}. El negocio marcó como entregado pero tengo un problema.`);
+              const text = encodeURIComponent(`Hola Tarjetoso, necesito ayuda con mi pedido #${formatOrderCode(order.order_number, order.id)}.`);
               window.open(`https://wa.me/59164016676?text=${text}`, '_blank');
             }}
             className="w-full mt-2 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all bg-red-50 hover:bg-red-100 text-red-600 border border-red-200/60"
