@@ -81,11 +81,13 @@ export default function CustomerOrderCard({
         {isPaqueteria ? (
           <div className="w-full flex flex-col gap-1.5 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-gray-500 font-bold uppercase tracking-wider">Productos</span>
+              <span className="text-gray-500 font-medium">Productos</span>
               <span className="font-bold text-[#1A535C]">Bs. {order.total_price.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center text-xs text-red-500">
-              <span className="font-bold uppercase tracking-wider">A Pagar (Recojo)</span>
+            <div className="flex justify-between items-center text-xs text-[#F9842C]">
+              <span className="font-medium">
+                {isCompletado ? 'Recojo' : 'A pagar (recojo)'}
+              </span>
               <span className="font-bold">
                 {pickupFee > 0 ? `Bs. ${pickupFee.toFixed(2)}` : 'Bs. 0.00'}
               </span>

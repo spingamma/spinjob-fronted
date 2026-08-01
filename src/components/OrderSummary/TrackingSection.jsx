@@ -50,11 +50,13 @@ export default function TrackingSection({
               {(order?.delivery_method?.startsWith('PAQUETERIA|') || order?.delivery_method === 'paqueteria' || !!order?.pickup_business_id) ? (
                 <div className="flex flex-col items-end gap-1">
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="text-gray-500 font-bold uppercase">Productos:</span>
+                    <span className="text-gray-500 font-medium">Productos:</span>
                     <span className="font-bold text-[#1A535C]">Bs. {parseFloat(order?.total_price || 0).toFixed(2)}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-red-500">
-                    <span className="font-bold uppercase">A Pagar (Recojo):</span>
+                  <div className="flex items-center gap-2 text-xs text-[#F9842C]">
+                    <span className="font-medium">
+                      {order?.status === 'completado' ? 'Recojo:' : 'A pagar (recojo):'}
+                    </span>
                     <span className="font-bold">Bs. {parseFloat((order?.delivery_method?.startsWith('PAQUETERIA|') ? order?.delivery_method.split('|')[3] : order?.pickup_fee) || 0).toFixed(2)}</span>
                   </div>
                 </div>
