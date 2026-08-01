@@ -86,7 +86,9 @@ export default function CustomerOrderCard({
             </div>
             <div className="flex justify-between items-center text-xs text-red-500">
               <span className="font-bold uppercase tracking-wider">A Pagar (Recojo)</span>
-              <span className="font-bold">Bs. {pickupFee.toFixed(2)}</span>
+              <span className="font-bold">
+                {pickupFee > 0 ? `Bs. ${pickupFee.toFixed(2)}` : 'Bs. 0.00'}
+              </span>
             </div>
           </div>
         ) : (
