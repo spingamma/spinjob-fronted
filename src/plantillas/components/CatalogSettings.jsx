@@ -198,7 +198,7 @@ export default function CatalogSettings({
                     <PickupPointSelector 
                       onCancel={() => setIsSelectingPickupPoint(false)}
                       onSelect={(point) => {
-                        const fee = point.pickup_fee || 0;
+                        const fee = (point.pickup_fee !== null && point.pickup_fee !== undefined) ? point.pickup_fee : 0;
                         const methodStr = `PAQUETERIA|${point.id}|${point.name}|${fee}`;
                         if (setDeliveryMethods && !deliveryMethods.includes(methodStr)) {
                           setDeliveryMethods([...deliveryMethods, methodStr]);

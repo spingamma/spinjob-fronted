@@ -52,7 +52,8 @@ export default function CheckoutSection({
         const pointId = parts[1];
         const livePoint = livePaqueterias.find(p => p.id === pointId);
         if (livePoint) {
-          return `PAQUETERIA|${livePoint.id}|${livePoint.name}|${livePoint.pickup_fee || 0}`;
+          const liveFee = livePoint.pickup_fee !== null && livePoint.pickup_fee !== undefined ? livePoint.pickup_fee : (parts[3] || 0);
+          return `PAQUETERIA|${livePoint.id}|${livePoint.name}|${liveFee}`;
         }
       }
       return method;
