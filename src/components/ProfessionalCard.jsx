@@ -58,9 +58,9 @@ export default function ProfessionalCard({ professional, isLoggedIn, onCardClick
   return (
     <Link
       data-testid="professional-card"
-      to={isLoggedIn ? `/perfil/${professional.slug}` : "#"}
+      to={`/perfil/${professional.slug}`}
       onClick={(e) => {
-        if (!isLoggedIn) {
+        if (!isLoggedIn && onCardClick) {
           e.preventDefault();
           onCardClick(professional.slug);
         }

@@ -5,6 +5,14 @@
       "destination": "http://129.80.108.184:8000/sitemap.xml"
     },
     {
+      "source": "/og/(.*)",
+      "destination": "http://129.80.108.184:8000/og/$1"
+    },
+    {
+      "source": "/seo/perfil/(.*)",
+      "destination": "http://129.80.108.184:8000/seo/perfil/$1"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "http://129.80.108.184:8000/$1"
     },

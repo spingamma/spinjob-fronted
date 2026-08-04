@@ -204,11 +204,11 @@ function Perfil() {
     <>
       {profesional && (
         <SeoMeta 
-          title={`${profesional.name} - ${profesional.title}`}
-          description={(profesional.description || `${profesional.name}, ${profesional.title} en ${profesional.category}`).slice(0, 160)}
+          title={`${profesional.name} - ${profesional.title || profesional.category || 'Servicios'}${profesional.state ? ` en ${profesional.state}` : ''}`}
+          description={(profesional.description || `${profesional.name}, ${profesional.title || 'profesional'} en ${profesional.category || 'Bolivia'}. Contacta directamente en Tarjetoso.`).slice(0, 160)}
           url={profesional.canonical_url || `https://tarjetoso.com/perfil/${profesional.slug}`}
-          canonical={profesional.canonical_url}
-          image={profesional.image}
+          canonical={profesional.canonical_url || `https://tarjetoso.com/perfil/${profesional.slug}`}
+          image={profesional.image || 'https://tarjetoso.com/icon-512.png'}
           type="profile"
           jsonLd={jsonLdData}
         />
