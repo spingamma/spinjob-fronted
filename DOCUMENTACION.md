@@ -15,7 +15,7 @@ El proyecto incorpora un panel de administración para moderación de contenido,
 ---
 
 ## 2. Stack Tecnológico
-- **Backend:** Python 3.8+, FastAPI, SQLAlchemy (ORM), psycopg2 (PostgreSQL).
+- **Backend:** Python 3.8+, FastAPI, SQLAlchemy (ORM), psycopg2 (PostgreSQL), Alembic (migraciones).
 - **Frontend:** React 19 (Vite 8), Tailwind CSS 4, React Router DOM 7, Lucide React (Iconos), Recharts (Visualización de datos), react-helmet-async (SEO dinámico), react-easy-crop (Recorte de imágenes), qrcode.react (Generación de QR), jsPDF + jspdf-autotable (Exportación PDF).
 - **Base de Datos:** PostgreSQL alojada en Neon DB.
 - **Almacenamiento de Medios:** Cloudinary (imágenes de perfil, reseñas y catálogo de productos).
@@ -26,7 +26,7 @@ El proyecto incorpora un panel de administración para moderación de contenido,
 ---
 
 ## 3. Arquitectura de la Base de Datos (Modelos SQLAlchemy)
-El sistema relacional se basa en 11 tablas principales (`spinjob-backend/models.py`):
+El sistema relacional se basa en 13 tablas principales (`spinjob-backend/models.py`):
 
 - **Users (`users`):** Almacena la información de usuarios del sistema. Campos: `id` (UUID), `email`, `phone` (celular), `name`, `verification_code`, `is_verified` (booleano crucial para permisos), `is_admin`, `is_vendedor`, `country` (país seleccionado, por defecto "Bolivia") y `state` (departamento/estado, nullable).
 - **Businesses (`businesses`):** Contiene la información del profesional o negocio. Campos clave:
@@ -34,20 +34,26 @@ El sistema relacional se basa en 11 tablas principales (`spinjob-backend/models.
   - `status` ("pendiente", "aprobado", "rechazado").
   - `owner_id` (FK a Users).
   - `referred_by` (FK a Users, ID del vendedor que refirió el negocio).
-  - `premium` (booleano) y `plan_months` / `expiration_date` para vigencia.
+  - `verified` (booleano, insignia de verificación visual).
   - `rating` (promedio) y `reviews_count`.
   - Campos de ubicación: `country` (por defecto "Bolivia"), `state` (departamento), `home_delivery` (booleano), `national_delivery` (booleano, indica si realiza envíos a nivel nacional) y `ubicacion_url` (Google Maps).
-  - Contacto y redes: `phone`, `whatsapp_numbers` (array JSON que permite múltiples números de WhatsApp), `facebook`, `instagram`, `linkedin`, `website`, `tiktok`, `github` y `catalog_url` externo.
+  - Contacto: `phone`, `whatsapp_numbers` (array JSON que permite múltiples números de WhatsApp).
   - E-E-A-T SEO Fields: `experience_years` (años de experiencia) y `credentials` (matrícula/credencial).
-  - Configuración y pedidos: `genero`, `creation_date`, `orders_enabled` (booleano que indica si el negocio tiene habilitada la recepción de pedidos), `carousel_order` (orden de visualización de secciones en formato texto/JSON) y `delivery_methods` (métodos de envío/entrega disponibles del negocio en formato array JSON).
-- **Specialties (`specialties`):** Catálogo central de categorías y subcategorías del directorio. Campos: `id`, `category` (Categoría), `subcategory` (Subcategoría), y `source` ("system" o "user_other").
+  - Configuración y pedidos: `genero`, `orders_enabled` (booleano que indica si el negocio tiene habilitada la recepción de pedidos), `carousel_order` (orden de visualización de secciones en formato texto/JSON), `delivery_methods` (métodos de envío/entrega disponibles del negocio en formato array JSON), `qr_payment_url` (URL de imagen QR para pagos) y `pickup_fee` (tarifa de retiro en punto de recogida).
+  - Catálogo externo: `catalog_url`.
+  - **Propiedades computadas SEO:** `category` y `subcategories` se derivan dinámicamente de la relación con `specialties`. `canonical_url` y `json_ld` (Schema.org con `@graph` que incluye `LocalBusiness` + `BreadcrumbList`) se generan como `@property`.
+  - **Redes sociales** se delegan a la tabla separada `BusinessSocialLinks` (ver abajo), accedidas mediante propiedades proxy (`facebook`, `instagram`, `linkedin`, `website`, `tiktok`, `github`).
+  - **Suscripción** se delega a la tabla separada `BusinessSubscription` (ver abajo), accedida mediante propiedades proxy con setter (`premium`, `plan_months`, `expiration_date`, `creation_date`).
+- **BusinessSocialLinks (`business_social_links`):** Tabla normalizada 1:1 con `businesses`. Almacena los enlaces de redes sociales: `facebook`, `instagram`, `linkedin`, `website`, `tiktok`, `github`. Relacionada vía `business_id` (FK con `ondelete=CASCADE`).
+- **BusinessSubscription (`business_subscriptions`):** Tabla normalizada 1:1 con `businesses`. Almacena datos de suscripción: `creation_date`, `plan_months`, `expiration_date` y `premium` (booleano). Relacionada vía `business_id` (FK con `ondelete=CASCADE`).
+- **Specialties (`specialties`):** Catálogo central de categorías y subcategorías del directorio. Campos: `id`, `category` (Categoría), `subcategory` (Subcategoría), y `source` ("system" o "user_other"). Restricción de unicidad `_category_subcategory_uc`.
 - **business_specialties (`business_specialties`):** Tabla de asociación para la relación Muchos a Muchos entre negocios y especialidades.
-- **Locations (`locations`):** Tabla de configuración geográfica para estructurar la jerarquía de países y departamentos/estados activos. Campos: `id` (String), `country` (String), `state` (String).
-- **Products (`products`):** Mapea los productos de los catálogos. Guarda `id`, `name`, `description`, `price`, `image_url`, `is_visible` (booleano), `carousel_name` (sección del catálogo), `stock` (Integer, nullable, representando la cantidad de inventario disponible; si es nulo, significa stock infinito) y tiene relación directa con `business_id` (FK a Businesses).
-- **Resenas (`resenas`):** Relaciona valoraciones a un negocio. Guarda `id`, `user_id` (FK a Users), `rating` (1-5 estrellas), `descripcion`, `image_url` y `business_id` (FK a Businesses). Cuenta con la restricción de unicidad `_userid_business_resena_uc` para evitar calificaciones duplicadas por el mismo usuario.
+- **Locations (`locations`):** Tabla de configuración geográfica para estructurar la jerarquía de países y departamentos/estados activos. Campos: `id` (String), `country` (String), `state` (String). Restricción de unicidad `_country_state_uc`.
+- **Products (`products`):** Mapea los productos de los catálogos. Guarda `id`, `name`, `description`, `price` (String), `image_url`, `is_visible` (booleano), `carousel_name` (sección del catálogo, default "Catálogo"), `stock` (Integer, nullable, representando la cantidad de inventario disponible; si es nulo, significa stock infinito) y tiene relación directa con `business_id` (FK a Businesses).
+- **Resenas (`resenas`):** Relaciona valoraciones a un negocio. Guarda `id`, `user_id` (FK a Users), `rating` (1-5 estrellas), `descripcion`, `image_url` y `business_id` (FK a Businesses). Cuenta con la restricción de unicidad `_userid_business_resena_uc` para evitar calificaciones duplicadas por el mismo usuario. Incluye propiedad computada `user_name` derivada de la relación con User.
 - **Interactions (`interactions`):** Registro de métricas reales (Visitas al perfil, clics en WhatsApp/Redes, etc.). Relaciona `id`, `platform` (tipo de interacción/clic), `date`, `user_id` (FK a Users) y `business_id` (FK a Businesses).
 - **SavedCards (`saved_cards`):** Tarjetas guardadas en "Mi Tarjetero" de un usuario. Relaciona `user_id` con `business_id` (FK a Businesses), incluyendo la fecha `saved_date` y restricción de unicidad `_user_business_saved_uc`.
-- **Orders (`orders`):** Registra los pedidos generados por clientes. Campos: `id`, `user_id` (FK a Users), `business_id` (FK a Businesses), `customer_name` (nombre ingresado al hacer checkout), `status` ("pendiente", "pago_enviado", "pagado", "entregado", "cancelado", "completado"), `delivery_method` (método de envío seleccionado), `total_price`, `qr_payment` (booleano), `receipt_url` (Text, comprobante codificado en base64), `created_at` (timestamp de creación del pedido) y `delivered_at` (timestamp en el que el pedido cambió a estado "entregado").
+- **Orders (`orders`):** Registra los pedidos generados por clientes. Campos: `id`, `order_number` (Integer, nullable, secuencial por negocio), `user_id` (FK a Users), `business_id` (FK a Businesses), `customer_name` (nombre ingresado al hacer checkout), `status` (default `"pendiente_de_pago"`, valores: `"pendiente_de_pago"`, `"pagado"`, `"entregado"`, `"cancelado"`), `delivery_method` (método de envío seleccionado), `pickup_business_id` (FK a Businesses, nullable, ID del punto de recogida si aplica), `total_price`, `receipt_url` (String, comprobante de pago), `payment_rejection_reason` (String, nullable, motivo de rechazo de pago), `created_at` (timestamp de creación del pedido) y `delivered_at` (timestamp en el que el pedido cambió a estado "entregado").
 - **OrderItems (`order_items`):** Detalle de productos solicitados en un pedido. Campos: `id`, `order_id` (FK a Orders), `product_id` (FK a Products, nullable), `product_name` (nombre del producto en el momento de la compra), `quantity` (cantidad), `price_at_time` (precio unitario histórico) y `subtotal`.
 
 ---
@@ -56,10 +62,12 @@ El sistema relacional se basa en 11 tablas principales (`spinjob-backend/models.
 
 ### 4.1. Arquitectura de Capas (Controller-Service-Model)
 El backend está estructurado bajo un patrón de capas para separar responsabilidades:
-- **Routers (`spinjob-backend/routers/`):** Controladores de FastAPI que definen endpoints, inyectan dependencias y orquestan flujos.
-- **Servicios (`spinjob-backend/services/`):** Capa de lógica de negocio pura (ej. `business_service.py`, `email_service.py`), desvinculando la lógica compleja de las rutas.
-- **Schemas Pydantic (`spinjob-backend/schemas/`):** Modelos modulares de validación de datos (`business.py`, `user.py`, `order.py`, etc.).
+- **Routers (`spinjob-backend/routers/`):** Controladores de FastAPI que definen endpoints, inyectan dependencias y orquestan flujos. Incluye: `admin.py`, `auth.py`, `businesses.py`, `countries.py`, `orders.py`, `products.py`, `reviews.py`, `seo.py`, `specialties.py`, `tarjetero.py`, `users.py`.
+- **Servicios (`spinjob-backend/services/`):** Capa de lógica de negocio pura. Incluye: `admin_service.py`, `business_service.py`, `email_service.py`, `order_service.py`, `product_service.py`, `user_service.py`.
+- **Schemas Pydantic (`spinjob-backend/schemas/`):** Modelos modulares de validación de datos: `business.py`, `user.py`, `order.py`, `product.py`, `specialty.py`, `location.py`, `common.py`.
 - **Modelos SQLAlchemy (`spinjob-backend/models.py`):** Entidades de mapeo relacional a base de datos.
+- **Utilidades (`spinjob-backend/utils/`):** Helpers especializados como `url_resolver.py` (resolución y normalización de URLs).
+- **Migraciones (`spinjob-backend/alembic/`):** Migraciones de esquema de BD gestionadas con Alembic.
 - **Testing:** Entorno de pruebas con soporte de base de datos en contenedor (`docker-compose.test.yml`), script de inicialización (`init_test_db.py`) y configuración separada (`.env.test`).
 
 ### 4.2. Flujos Principales
@@ -75,14 +83,17 @@ El backend está estructurado bajo un patrón de capas para separar responsabili
   - **CRUD de Vendedor:** Rutas bajo `/vendedor/` que permiten a un afiliado obtener su código (`/vendedor/my-code`), listar los negocios que ha registrado (`/vendedor/businesses`) y transferir la propiedad del negocio al dueño final (`/vendedor/businesses/{slug}/transfer`) una vez configurado.
 - **Gestión Geográfica de Países y Departamentos** (`spinjob-backend/routers/countries.py`):
   - Expone el endpoint `/countries/` para obtener de forma estructurada los países y sus respectivos departamentos/estados activos configurados por la administración en la tabla `locations`.
+- **Gestión de Especialidades** (`spinjob-backend/routers/specialties.py`):
+  - Rutas CRUD para administrar el catálogo de categorías/subcategorías del directorio. Soporta creación de especialidades por sistema (admin) y por usuario (fuente "user_other").
 - **Gestión de Catálogos** (`spinjob-backend/routers/products.py`): Rutas CRUD completas. Lógica de cuotas integrada: límite estricto de **3 productos** para negocios estándar (Gratis) y de **50 productos** para negocios Premium.
-- **Sistema de Pedidos / Orders** (`spinjob-backend/routers/orders.py`):
+- **Sistema de Pedidos / Orders** (`spinjob-backend/routers/orders.py`, `spinjob-backend/services/order_service.py`):
   - Permite a los clientes autenticados crear un pedido con múltiples productos del catálogo mediante `POST /businesses/{slug}/orders`.
+  - **Numeración Secuencial:** Cada pedido recibe un `order_number` secuencial por negocio, formateado como código alfanumérico (ej: `a0001`, `b0001`).
   - **Límites de Suscripción:** Solo disponible para negocios en plan **Premium**. Además, cuenta con un límite estricto de **600 pedidos mensuales** por negocio (verificado en backend).
-  - **Soporte de Pago QR (Nativo):** Cuando un negocio tiene un código QR de pago, los pedidos se crean con `qr_payment=True`. El cliente puede subir el comprobante de pago (`receipt_url`) que se guarda directamente como cadena codificada (dataURI / base64) para seguridad y rapidez.
+  - **Soporte de Pago QR (Nativo):** Cuando un negocio tiene un código QR de pago (`qr_payment_url`), los pedidos requieren subir comprobante de pago (`receipt_url`). El dueño puede rechazar un pago especificando un `payment_rejection_reason`.
+  - **Punto de Recogida (Pickup):** Los pedidos pueden especificar un `pickup_business_id` cuando el método de envío es retiro en un punto aliado, y una `pickup_fee` configurable.
   - **Control de Inventario (Stock):** Al crear el pedido, se deduce automáticamente la cantidad seleccionada del `stock` de cada producto. Si un pedido cambia de estado a `cancelado`, se restituye la cantidad de inventario correspondiente a cada producto. Además, se implementó una UX de reducción manual de inventario para que el vendedor pueda rebajar el stock al realizar ventas físicas fuera del sistema.
-  - **Zona Horaria y Ciclo de Estados:** El flujo de estados transita por: `pendiente` → `pago_enviado` → `pagado` → `entregado` → `completado`. Al marcar como `entregado`, se registra el timestamp en `delivered_at` basándose en la zona horaria del país (ej. `America/La_Paz`).
-  - **Auto-Completado Inteligente (Lazy Evaluation):** En lugar de utilizar CronJobs costosos, el backend evalúa perezosamente (on-the-fly) si un pedido en estado `entregado` tiene más de 72 horas de antigüedad al momento en que el usuario (o negocio) consulta su lista de pedidos; si es así, actualiza automáticamente el estado a `completado` en la base de datos sin consumir recursos extra.
+  - **Zona Horaria y Ciclo de Estados:** El flujo de estados transita por: `pendiente_de_pago` → `pagado` → `entregado` → `cancelado` (desde cualquier punto previo). Al marcar como `entregado`, se registra el timestamp en `delivered_at` basándose en la zona horaria del país (ej. `America/La_Paz`).
 - **Sistema de Calificaciones y Reseñas** (`spinjob-backend/routers/reviews.py`):
   - Permite a los usuarios autenticados calificar a un negocio con una puntuación de 1 a 5 estrellas, una descripción textual y opcionalmente adjuntar una imagen.
   - Cuenta con una restricción de unicidad (`_userid_business_resena_uc`): un usuario puede registrar como máximo una reseña por negocio. Si desea cambiarla, debe actualizarla mediante una petición `PUT`.
@@ -102,16 +113,29 @@ El backend está estructurado bajo un patrón de capas para separar responsabili
 spinjob-fronted/src/
 ├── App.jsx                  # Router principal (React Router v7, lazy loading)
 ├── App.css                  # Estilos globales de la aplicación
-├── main.jsx                 # Entry point (BrowserRouter, GoogleOAuthProvider, HelmetProvider)
+├── main.jsx                 # Entry point (BrowserRouter, GoogleOAuthProvider, HelmetProvider, AuthProvider)
 ├── index.css                # Importación de Tailwind CSS
 ├── assets/
-│   └── oso-carrito.webp      # Asset del carrito de compras (mascota)
+│   ├── oso-carrito.webp     # Asset del carrito de compras (mascota)
+│   └── *.webp               # Iconos de categorías (BELLEZA, COMIDA, SALUD, etc.)
+├── config/
+│   └── api.js               # Única fuente de verdad para API_URL
+├── context/
+│   └── AuthContext.jsx      # Provider global de autenticación (AuthProvider)
 ├── components/              # Componentes globales reutilizables
 │   ├── AuthModal.jsx
 │   ├── BottomNavbar.jsx
 │   ├── BusinessDetailsModal.jsx
 │   ├── CartQuantityControl.jsx
 │   ├── Catalog/             # Subcomponentes modulares del catálogo
+│   │   ├── CarouselBlock.jsx
+│   │   ├── CatalogSearchBar.jsx
+│   │   ├── FloatingOrderButton.jsx
+│   │   ├── ProductCard.jsx
+│   │   └── hooks/           # Hooks específicos del catálogo
+│   │       ├── useCarouselScroll.js
+│   │       ├── useCart.js
+│   │       └── useCatalogData.js
 │   ├── CatalogModal.jsx
 │   ├── CatalogSearchGrid.jsx
 │   ├── CategoryGrid.jsx
@@ -119,6 +143,11 @@ spinjob-fronted/src/
 │   ├── CropModal.jsx
 │   ├── DirectoryFilterBar.jsx
 │   ├── DirectoryFilters/    # Componentes granulares de filtrado
+│   │   ├── CategoryBadge.jsx
+│   │   ├── DistanceFilter.jsx
+│   │   ├── LocationFilter.jsx
+│   │   ├── RatingFilter.jsx
+│   │   └── SubcategoryFilter.jsx
 │   ├── ErrorBoundary.jsx    # Captura de errores de React
 │   ├── Header.jsx
 │   ├── InlineCatalogCarousel.jsx
@@ -127,18 +156,38 @@ spinjob-fronted/src/
 │   ├── ModalVerificacion.jsx
 │   ├── NavMenu.jsx
 │   ├── OrderSummary/        # Subcomponentes del proceso de checkout y seguimiento
+│   │   ├── CheckoutSection.jsx
+│   │   ├── CustomerForm.jsx
+│   │   ├── Header.jsx
+│   │   ├── OrderHeader.jsx
+│   │   ├── OrderItems.jsx
+│   │   └── TrackingSection.jsx
 │   ├── PhoneInputWithCountry.jsx
 │   ├── PlantillaGenerica/   # Acciones del perfil para plantilla
+│   │   └── ProfileHeaderActions.jsx
 │   ├── PremiumModal.jsx
 │   ├── ProfessionalCard.jsx
 │   ├── ReloadPrompt.jsx
 │   ├── ReviewModal.jsx
 │   └── SeoMeta.jsx
 ├── hooks/                   # Custom Hooks
+│   ├── profile/             # Subhooks de interacción del perfil
+│   │   ├── useProfileAuth.js
+│   │   ├── useProfileInteraction.js
+│   │   ├── useProfileQRAndShare.js
+│   │   ├── useProfileReview.js
+│   │   └── useProfileTarjetero.js
 │   ├── useAccionesPerfil.jsx
+│   ├── useAuth.js
 │   ├── useAuthLogic.js
 │   ├── useDirectoryFilters.js
-│   └── useSEO.js
+│   ├── useIsMobile.js
+│   ├── useLeafletMap.js
+│   ├── useOrderData.js
+│   ├── useProfileForm.js
+│   ├── useReceiptUploader.js
+│   ├── useSEO.js
+│   └── useStatusHelpers.js
 ├── pages/                   # Vistas de ruta (lazy-loaded)
 │   ├── AdminPanel/
 │   ├── BusinessCardHolder/
@@ -153,17 +202,40 @@ spinjob-fronted/src/
 │   └── Profile/
 ├── plantillas/              # Sistema de plantillas de perfil
 │   ├── PlantillaGenerica.jsx
-│   └── components/
-│       ├── ProductFormModal.jsx
-│       ├── ProfileAbout.jsx
-│       ├── ProfileCatalogEdit.jsx
-│       ├── ProfileContact.jsx
-│       ├── ProfileHero.jsx
-│       ├── ProfileIcons.jsx
-│       └── ProfileQRModal.jsx
-└── utils/                   # Utilidades puras
+│   ├── components/
+│   │   ├── CatalogProductItem.jsx
+│   │   ├── CatalogProductsList.jsx
+│   │   ├── CatalogSettings.jsx
+│   │   ├── FloatingActionBar.jsx
+│   │   ├── PickupPointSelector.jsx
+│   │   ├── ProductFormModal.jsx
+│   │   ├── ProfileAbout.jsx
+│   │   ├── ProfileCatalogEdit.jsx
+│   │   ├── ProfileContact.jsx
+│   │   ├── ProfileHero.jsx
+│   │   ├── ProfileIcons.jsx
+│   │   ├── ProfileQRModal.jsx
+│   │   └── hero/            # Subcomponentes del hero del perfil
+│   │       ├── HeroBanner.jsx
+│   │       ├── HeroInfoEdit.jsx
+│   │       ├── HeroInfoView.jsx
+│   │       └── HeroTopNav.jsx
+│   ├── hooks/               # Hooks específicos de la plantilla
+│   │   ├── useCatalogEdit.js
+│   │   ├── useFetchProfileData.js
+│   │   ├── usePlantillaGenerica.js
+│   │   ├── useProductForm.js
+│   │   ├── useProfileDraft.js
+│   │   ├── useProfileLocation.js
+│   │   └── useProfileSubmit.js
+│   └── utils/               # Utilidades específicas de la plantilla
+│       └── parseGoogleMapsCoords.js
+└── utils/                   # Utilidades puras globales
     ├── cropImage.js
     ├── fetchAuth.js
+    ├── formatOrderCode.js
+    ├── imageUtils.js
+    ├── navigation.js
     ├── phone.js
     └── slugs.js
 ```
@@ -174,10 +246,23 @@ Envuelve la aplicación en los siguientes Providers:
 - `HelmetProvider` — SEO dinámico con `react-helmet-async`.
 - `GoogleOAuthProvider` — Autenticación Google vía `@react-oauth/google` (Client ID desde `VITE_GOOGLE_CLIENT_ID`).
 - `BrowserRouter` — Enrutamiento SPA con React Router v7.
+- `AuthProvider` — Contexto global de autenticación (`src/context/AuthContext.jsx`), centraliza `user`, `login`, `logout`, `updateUser`, `isLoggedIn`, `isAdmin` e `isPremium`.
 
 Además, captura el evento `beforeinstallprompt` de forma temprana en `window.deferredPromptEvent` para garantizar la disponibilidad del prompt PWA.
 
-### 5.3. Rutas y Vistas Principales (`src/App.jsx`)
+### 5.3. Contexto Global de Autenticación (`src/context/AuthContext.jsx`)
+- **AuthProvider:** Wrapper de estado global que lee/escribe al `localStorage` (`spingamma_user`, `spingamma_token`).
+- **Funciones expuestas:** `login(userData, token)`, `logout()`, `updateUser(partial)`.
+- **Flags derivados:** `isLoggedIn`, `isAdmin` (incluye vendedores), `isPremium`.
+- **Consumo:** Se accede mediante el hook `useAuth()` (`src/hooks/useAuth.js`) que expone el contexto `_AuthContext`.
+
+### 5.4. Configuración Centralizada (`src/config/api.js`)
+Única fuente de verdad para la URL base de la API:
+```js
+export const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+```
+
+### 5.5. Rutas y Vistas Principales (`src/App.jsx`)
 Todas las vistas se cargan con `React.lazy` + `Suspense` (con splash screen animado de marca durante la carga):
 
 | Ruta | Componente | Descripción |
@@ -197,7 +282,7 @@ Todas las vistas se cargan con `React.lazy` + `Suspense` (con splash screen anim
 | `/mis-compras` | `pages/MyOrders/MyOrders.jsx` | Historial de compras del cliente |
 | `*` | `pages/NotFound.jsx` | Página de error 404 (No Encontrado) |
 
-### 5.4. Componentes Globales (`src/components/`)
+### 5.6. Componentes Globales (`src/components/`)
 
 #### Navegación y Layout
 - **Header.jsx:** Barra superior responsiva con búsqueda, menú de usuario (login/logout), selector de país, acceso al carrito y botón de descarga PWA. Integra `NavMenu` y `CountryModal`.
@@ -206,7 +291,7 @@ Todas las vistas se cargan con `React.lazy` + `Suspense` (con splash screen anim
 
 #### Directorio y Búsqueda
 - **DirectoryFilterBar.jsx:** Barra de filtros avanzados del directorio: categoría, subcategoría, departamento, barrio/zona, calificación mínima, distancia. Con dropdowns interactivos y búsqueda interna. Está modularizado internamente usando los componentes de la carpeta `DirectoryFilters/` (`CategoryBadge`, `DistanceFilter`, `LocationFilter`, `RatingFilter`, `SubcategoryFilter`).
-- **CategoryGrid.jsx:** Grid visual de categorías con iconos Lucide mapeados por keywords y navegación SEO-friendly mediante slugs.
+- **CategoryGrid.jsx:** Grid visual de categorías con iconos WebP mapeados por keywords y navegación SEO-friendly mediante slugs.
 - **ProfessionalCard.jsx:** Tarjeta compacta de profesional en el directorio. Muestra avatar, nombre, categoría, rating, insignia verificado, delivery y distancia calculada (con geolocalización del usuario).
 
 #### Autenticación
@@ -216,9 +301,10 @@ Todas las vistas se cargan con `React.lazy` + `Suspense` (con splash screen anim
 #### Catálogo y Pedidos
 - **InlineCatalogCarousel.jsx:** Carrusel de catálogo embebido directamente en el perfil. Incluye sistema de carrito de compras interactivo (agregar/quitar ítems, contador, botón flotante para ir a la orden). Soporta secciones por `carousel_name` y ordenamiento configurable.
 - **CatalogModal.jsx / CatalogSearchGrid.jsx:** Modal alternativo y grid de búsqueda para visualizar el catálogo completo en una ventana superpuesta.
-- **Módulos de Catálogo (`components/Catalog/`):** Subcomponentes que encapsulan la interfaz del catálogo, como `CarouselBlock.jsx`, `CatalogSearchBar.jsx`, `FloatingOrderButton.jsx` y `ProductCard.jsx`.
-- **Módulos de Orden (`components/OrderSummary/`):** El proceso de checkout y seguimiento (`TrackingSection.jsx`) se estructura en subcomponentes (`CheckoutSection`, `CustomerForm`, `OrderItems`) para una mejor gestión de la experiencia de compra.
+- **Módulos de Catálogo (`components/Catalog/`):** Subcomponentes que encapsulan la interfaz del catálogo: `CarouselBlock.jsx`, `CatalogSearchBar.jsx`, `FloatingOrderButton.jsx` y `ProductCard.jsx`. Incluye hooks propios: `useCarouselScroll.js` (scroll horizontal del carrusel), `useCart.js` (estado del carrito) y `useCatalogData.js` (fetching y formateo de datos del catálogo).
+- **Módulos de Orden (`components/OrderSummary/`):** El proceso de checkout y seguimiento se estructura en subcomponentes: `CheckoutSection.jsx` (formulario de checkout), `CustomerForm.jsx` (datos del cliente), `Header.jsx` (cabecera del módulo), `OrderHeader.jsx` (resumen del header del pedido), `OrderItems.jsx` (lista de ítems) y `TrackingSection.jsx` (seguimiento de estado del pedido).
 - **CartQuantityControl.jsx:** Control individual (+/-) para gestionar cantidades de un ítem en el carrito de compras respetando los límites de stock.
+- **ProfileHeaderActions.jsx** (`PlantillaGenerica/`): Barra flotante de acciones (guardar/cancelar) visible cuando el perfil está en modo edición.
 
 #### Interacción con el Perfil
 - **ReviewModal.jsx:** Modal interactivo para dejar opiniones con estrellas (1-5) y opcionalmente adjuntar una imagen.
@@ -239,35 +325,69 @@ Todas las vistas se cargan con `React.lazy` + `Suspense` (con splash screen anim
 - **ErrorBoundary.jsx:** Componente envolvente global que captura errores de renderizado de React (`componentDidCatch`), evitando caídas completas de la aplicación (pantalla blanca) y mostrando una UI amigable de contingencia.
 - **PremiumModal.jsx:** Modal de upsell o paywall que se muestra a usuarios 'Gratis' cuando intentan acceder a características exclusivas (como métricas avanzadas).
 
-### 5.5. Componentes de Plantilla (`src/plantillas/`)
+### 5.7. Componentes de Plantilla (`src/plantillas/`)
 - **PlantillaGenerica.jsx:** Plantilla Premium Unificada. Si el usuario actual es el dueño del negocio o un administrador, se habilita el **Modo Edición Inline** que permite modificar directamente títulos, descripciones, redes sociales, ubicación, especialidades y catálogo de productos sin recargar la página. Se descompone en los siguientes módulos:
-  - **ProfileHero.jsx:** Sección superior con foto de avatar (recorte circular), título principal, años de experiencia, matrícula/credencial e insignia de verificado. Soporta edición inline del nombre, título y foto.
+
+#### Hero del Perfil (`plantillas/components/hero/`)
+  - **HeroBanner.jsx:** Sección superior con foto de avatar (recorte circular), título principal, acciones rápidas (compartir, QR, guardar, ubicación) e insignia de verificado. Soporta edición inline de la foto.
+  - **HeroInfoView.jsx:** Vista de solo lectura del nombre y título del negocio con insignia Premium.
+  - **HeroInfoEdit.jsx:** Formulario de edición inline de datos principales: nombre, título, categoría, subcategorías, país, departamento, ubicación con mapa.
+  - **HeroTopNav.jsx:** Barra de navegación superior del perfil con botón de retroceso, login/logout y nombre del usuario.
+
+#### Componentes de Contenido (`plantillas/components/`)
+  - **ProfileHero.jsx:** Componente puente que ensambla HeroBanner + HeroInfoView/HeroInfoEdit según el modo.
   - **ProfileAbout.jsx:** Descripción/biografía del negocio y gestión de especialidades/subcategorías con chips interactivos.
   - **ProfileContact.jsx:** Administra los enlaces a redes sociales (WhatsApp, Facebook, Instagram, TikTok, LinkedIn, GitHub), sitio web y ubicación con tracking de clics analíticos.
   - **ProfileCatalogEdit.jsx:** Panel CRUD interactivo para añadir, modificar, eliminar y reordenar productos del catálogo directamente en el perfil. Gestiona secciones por `carousel_name`.
+  - **CatalogSettings.jsx:** Panel de configuración avanzada del catálogo: habilitar/deshabilitar pedidos (`orders_enabled`), gestión de QR de pago, métodos de envío y tarifas de recogida.
+  - **CatalogProductsList.jsx:** Lista organizada por secciones/carruseles con expansión/colapso de cada grupo.
+  - **CatalogProductItem.jsx:** Ítem individual de producto con controles de visibilidad, stock, edición y eliminación.
+  - **FloatingActionBar.jsx:** Barra flotante de acciones de guardado/cancelación visible durante la edición de la plantilla.
+  - **PickupPointSelector.jsx:** Selector de puntos de recogida aliados para el método de envío "retiro en punto".
   - **ProductFormModal.jsx:** Modal de formulario para crear/editar productos individuales del catálogo. Incluye nombre, descripción, precio, sección (carousel), imagen con recorte y detección de cambios no guardados.
   - **ProfileQRModal.jsx:** Modal de código QR con opción de escanear o descargar la tarjeta digital en alta resolución.
   - **ProfileIcons.jsx:** Iconos SVG personalizados (TikTok, WhatsApp) para redes sociales no incluidas en Lucide React.
 
-### 5.6. Custom Hooks (`src/hooks/`)
+### 5.8. Hooks de Plantilla (`src/plantillas/hooks/`)
+- **usePlantillaGenerica.js:** Hook maestro que orquesta todo el estado y lógica del componente PlantillaGenerica. Compone los demás hooks de plantilla.
+- **useCatalogEdit.js:** Gestiona el estado de edición CRUD del catálogo: productos locales, secciones, ordenamiento y operaciones de guardado.
+- **useFetchProfileData.js:** Fetching de datos auxiliares del perfil (especialidades disponibles) en modo edición/creación.
+- **useProductForm.js:** Estado y validaciones del formulario de producto individual (nombre, descripción, precio, sección, imagen).
+- **useProfileDraft.js:** Persistencia de borradores de edición en `localStorage` para prevenir pérdida de progreso.
+- **useProfileLocation.js:** Gestión del estado de ubicación del perfil: parsing de coordenadas desde URL de Google Maps, integración con mapa Leaflet y lista de países/departamentos.
+- **useProfileSubmit.js:** Lógica de envío de datos editados al backend (submit del formulario de edición inline).
+
+### 5.9. Custom Hooks Globales (`src/hooks/`)
+- **useAuth.js:** Hook consumer del contexto `_AuthContext`. Expone `user`, `isLoggedIn`, `isAdmin`, `isPremium`, `login`, `logout`, `updateUser`.
+- **useAuthLogic.js:** Encapsula la lógica completa de autenticación: flujo Google OAuth, completar celular por país, validación de formato telefónico, manejo de token temporal y sesión. Detecta el país por timezone del navegador (La_Paz → Bolivia, Bogota → Colombia, Lima → Perú, Buenos_Aires → Argentina). También obtiene el WhatsApp de soporte desde el perfil de `spingamma`.
 - **useDirectoryFilters.js:** Sincroniza la barra de búsqueda y filtros avanzados (categoría, subcategoría, departamento, barrio, rating, distancia) en la URL mediante Query Params y parámetros de ruta para SEO.
 - **useAccionesPerfil.jsx:** Centraliza acciones recurrentes de perfiles (compartir, guardar en tarjetero, calificar y registrar clicks analíticos).
-- **useAuthLogic.js / useAuth.js:** Encapsulan la lógica de autenticación: flujo Google OAuth, completar celular, validación, manejo de token temporal y sesión. Detecta país por timezone.
-- **useSEO.js:** Inyecta meta-tags Open Graph, Twitter y Schema.org.
 - **useProfileForm.js:** Administra el estado complejo y validaciones de los formularios de edición y creación de perfiles.
-- **useOrderData.js / useStatusHelpers.js:** Gestionan la recolección, parseo y formato de la información y estados de los pedidos.
+- **useOrderData.js:** Recolección, parseo y formato de la información de los pedidos.
+- **useStatusHelpers.js:** Helpers de formato y presentación visual de estados de pedido.
 - **useReceiptUploader.js:** Maneja la lógica de subida de comprobantes de pago para órdenes por QR.
 - **useLeafletMap.js:** Abstracción para el manejo del mapa interactivo y coordenadas.
 - **useIsMobile.js:** Detección de viewport móvil para renderizado condicional responsivo.
-- **Carpeta `profile/`:** Subhooks adicionales específicos para desglosar la lógica interna de interacción del perfil (Premium Inline Edit).
+- **useSEO.js:** Inyecta meta-tags Open Graph, Twitter y Schema.org en el `<head>` del documento de forma imperativa.
 
-### 5.7. Utilidades (`src/utils/`)
+#### Subhooks de Perfil (`hooks/profile/`)
+- **useProfileAuth.js:** Lectura del estado de autenticación del usuario actual desde `localStorage`.
+- **useProfileInteraction.js:** Registro de interacciones/clics analíticos en el backend y gestión de acciones diferidas pendientes.
+- **useProfileQRAndShare.js:** Lógica de generación de QR y compartir perfil (Web Share API).
+- **useProfileReview.js:** Estado y lógica para el flujo de calificación/reseña (modal, verificación, submit).
+- **useProfileTarjetero.js:** Lógica de guardado/eliminación de tarjeta en el tarjetero de favoritos.
+
+### 5.10. Utilidades Globales (`src/utils/`)
 - **fetchAuth.js:** Wrapper de `fetch` nativo que inyecta automáticamente el header `Authorization: Bearer <token>` desde `localStorage`. Detecta respuestas `401` (token expirado) y auto-desloguea.
 - **phone.js:** Mapa centralizado de países admitidos (`COUNTRIES`) con código de país, bandera emoji, y longitud de número. Funciones de limpieza y parseo.
-- **formatOrderCode.js:** Formateo visual e identificadores de códigos de pedido.
-- **navigation.js:** Helpers puros de enrutamiento (scrolling y redirect seguro).
+- **formatOrderCode.js:** Convierte `order_number` secuencial en código alfanumérico legible (ej: 1 → `a0001`, 10000 → `b0001`). Fallback a últimos 6 caracteres del UUID para pedidos legacy.
+- **imageUtils.js:** Compresión de imágenes en el lado del cliente usando Canvas HTML5 (`compressImage`). Redimensiona a `maxWidth` configurable y convierte a JPEG. No comprime imágenes menores a 300KB.
+- **navigation.js:** Helpers puros de enrutamiento: `goBack`, `goToProfile`, `goToHome`, `replaceWithOrder`.
 - **slugs.js:** Funciones de normalización de texto a slug SEO-friendly (`slugify`: normaliza acentos, minúsculas, reemplaza espacios por guiones) y `matchSlugToName` (resuelve un slug de vuelta a su nombre legible desde una lista de opciones).
 - **cropImage.js:** Utilidades de recorte de imágenes en canvas: `createImage` (carga una imagen de URL), `getCroppedImg` (recorta con soporte de rotación y flip, retorna blob URL) y `getCroppedImgFile` (convierte el resultado a un objeto `File` listo para subir al servidor).
+
+### 5.11. Utilidades de Plantilla (`src/plantillas/utils/`)
+- **parseGoogleMapsCoords.js:** Extrae coordenadas (`lat`, `lng`) de una URL de Google Maps. Soporta múltiples formatos: pin data (`!3d!4d`), query parameters (`q=lat,lng`), path place, viewport (`@lat,lng`) y coordenadas directas.
 
 ---
 
@@ -281,11 +401,14 @@ Todas las vistas se cargan con `React.lazy` + `Suspense` (con splash screen anim
 - **Auto-logout por Token Expirado:** El wrapper `fetchAuth` detecta automáticamente respuestas `401` del backend y cierra la sesión del usuario de forma transparente.
 - **Geolocalización con Leaflet:** Mapa interactivo para selección de ubicación sin dependencias de Google Maps (usa OpenStreetMap vía Leaflet cargado dinámicamente).
 - **Internacionalización de País:** Sistema multi-país con selector de país persistente en `localStorage`, detección automática por timezone del navegador y validación de formato telefónico por país.
+- **Compresión de Imágenes Client-Side:** Antes de subir imágenes al servidor, se comprimen automáticamente vía Canvas HTML5 (reducción a JPEG con calidad configurable), optimizando el uso de ancho de banda y almacenamiento en Cloudinary.
+- **Pago QR Nativo:** Los negocios pueden configurar una imagen QR de pago. Los clientes suben el comprobante directamente desde la interfaz de checkout, y el vendedor puede validar o rechazar el pago.
+- **Puntos de Recogida (Pickup):** Los negocios pueden ofrecer retiro en puntos aliados como método de envío, con selector interactivo de puntos y tarifa configurable.
 
 ---
  
 ## 7. Planes de Suscripción (Gratis vs Premium)
-El sistema diferencia el acceso a las funciones comerciales y de analítica según el estado del campo `premium` (booleano) en el modelo del negocio:
+El sistema diferencia el acceso a las funciones comerciales y de analítica según el estado del campo `premium` (booleano) en el modelo `BusinessSubscription`:
 
 - **Plan Gratis (`premium = false`):**
   - **Perfil público:** Activo en el directorio.

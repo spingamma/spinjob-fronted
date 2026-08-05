@@ -135,11 +135,27 @@ export default function MisNegocios() {
                     <p className="text-[#757778] text-sm">{neg.title} • {neg.category}</p>
                   </div>
 
-                  <div className="flex flex-col items-end">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                     {neg.status === 'aprobado' && (
-                      <div className="flex items-center gap-1.5 text-green-600 bg-green-50 px-3 py-1 rounded-full font-bold text-sm">
-                        <CheckCircle2 size={16} /> Aprobado
-                      </div>
+                      <>
+                        <div className="flex items-center gap-1.5 text-green-600 bg-green-50 px-3 py-1 rounded-full font-bold text-sm">
+                          <CheckCircle2 size={16} /> Aprobado
+                        </div>
+                        {neg.premium ? (
+                          <div className="flex items-center gap-1 text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-1 rounded-full text-xs font-extrabold shadow-xs">
+                            <span>⭐ Plan Premium</span>
+                            {neg.expiration_date && (
+                              <span className="text-amber-600/90 font-normal">
+                                (hasta {new Date(neg.expiration_date.replace(' ', 'T')).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })})
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1 text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full text-xs font-semibold">
+                            <span>Plan Gratuito</span>
+                          </div>
+                        )}
+                      </>
                     )}
                     {neg.status === 'pendiente' && (
                       <div className="flex items-center gap-1.5 text-orange-600 bg-orange-50 px-3 py-1 rounded-full font-bold text-sm">
