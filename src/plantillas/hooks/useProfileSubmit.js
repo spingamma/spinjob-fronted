@@ -61,9 +61,9 @@ export default function useProfileSubmit({
       const formDataObj = new FormData();
       Object.keys(payload).forEach(key => {
         if (key === 'new_image') {
-          if (payload[key]) formDataObj.append('image', payload[key]);
-        } else if (key === 'carousel_order') {
-          formDataObj.append('carousel_order', payload[key] || '');
+          if (payload.new_image instanceof File) {
+            formDataObj.append('image', payload.new_image);
+          }
         } else if (key === 'whatsapp_numbers') {
           const validNumbers = payload.whatsapp_numbers.filter(n => n.trim() !== '');
           formDataObj.append('whatsapp_numbers', JSON.stringify(validNumbers));
@@ -86,8 +86,15 @@ export default function useProfileSubmit({
         }
       });
 
+      console.log("[useProfileSubmit] Keys in formDataObj:");
+      for (let key of formDataObj.keys()) {
+        console.log("  ", key);
+      }
+
       if (payload.payment_qr_file instanceof File) {
         formDataObj.append('payment_qr_image', payload.payment_qr_file);
+      } else if (payload.payment_qr_image instanceof File) {
+        formDataObj.append('payment_qr_image', payload.payment_qr_image);
       } else if (typeof payload.payment_qr_image === 'string' && payload.payment_qr_image.startsWith('data:image')) {
         try {
           const arr = payload.payment_qr_image.split(',');

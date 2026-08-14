@@ -69,28 +69,28 @@ export default function useAnalyticsData({
           let redesCount = {};
           let uniqueUsersGlobal = new Map();
 
-          Object.keys(groupedData).forEach(k => {
-            groupedData[k]['Visitas'] = 0;
-            groupedData[k]['Redes / WhatsApp'] = 0;
+          Object.keys(groupedData).forEach(dateKey => {
+            groupedData[dateKey]['Visitas'] = 0;
+            groupedData[dateKey]['Redes / WhatsApp'] = 0;
           });
 
-          data.forEach(inter => {
-            if (inter.user_id && !uniqueUsersGlobal.has(inter.user_id)) {
-              uniqueUsersGlobal.set(inter.user_id, { 
-                name: inter.user_name || "Anónimo", 
-                phone: inter.user_phone || "Sin registro",
-                is_owner: inter.is_owner || false
+          data.forEach(interaction => {
+            if (interaction.user_id && !uniqueUsersGlobal.has(interaction.user_id)) {
+              uniqueUsersGlobal.set(interaction.user_id, { 
+                name: interaction.user_name || "Anónimo", 
+                phone: interaction.user_phone || "Sin registro",
+                is_owner: interaction.is_owner || false
               });
             }
-            const dateStr = inter.date.substring(0, 10);
+            const dateStr = interaction.date.substring(0, 10);
             if (groupedData[dateStr]) {
-              if (isVisit(inter.platform)) {
+              if (isVisit(interaction.platform)) {
                 groupedData[dateStr]['Visitas'] += 1;
                 sumVisitas++;
               } else {
                 groupedData[dateStr]['Redes / WhatsApp'] += 1;
                 sumContactos++;
-                redesCount[inter.platform] = (redesCount[inter.platform] || 0) + 1;
+                redesCount[interaction.platform] = (redesCount[interaction.platform] || 0) + 1;
               }
             }
           });
@@ -108,8 +108,8 @@ export default function useAnalyticsData({
             return;
           }
 
-          const promises = selectedBusinesses.map(b => 
-            fetchAuth(`${API_URL}/admin/businesses/${b.slug}/interacciones?${queryParams}`).then(res => res.json())
+          const promises = selectedBusinesses.map(business => 
+            fetchAuth(`${API_URL}/admin/businesses/${business.slug}/interacciones?${queryParams}`).then(response => response.json())
           );
           const results = await Promise.all(promises);
 
@@ -118,9 +118,9 @@ export default function useAnalyticsData({
           const newNetworkStats = [];
 
           if (selectedBusinesses.length === 1) {
-            Object.keys(groupedData).forEach(k => {
-              groupedData[k]['Visitas'] = 0;
-              groupedData[k]['Redes / WhatsApp'] = 0;
+            Object.keys(groupedData).forEach(dateKey => {
+              groupedData[dateKey]['Visitas'] = 0;
+              groupedData[dateKey]['Redes / WhatsApp'] = 0;
             });
             let redesCount = {};
             let uniqueUsers = new Map();
@@ -149,35 +149,35 @@ export default function useAnalyticsData({
             });
             newNetworkStats.push({ business: selectedBusinesses[0], redes: redesCount, visitas: visitasNegocio, users: uniqueUsers });
           } else {
-            Object.keys(groupedData).forEach(k => {
-              selectedBusinesses.forEach(b => { groupedData[k][b.slug] = 0; });
+            Object.keys(groupedData).forEach(dateKey => {
+              selectedBusinesses.forEach(business => { groupedData[dateKey][business.slug] = 0; });
             });
-            selectedBusinesses.forEach((b, i) => {
+            selectedBusinesses.forEach((business, index) => {
               let redesCount = {};
               let uniqueUsers = new Map();
               let visitasNegocio = 0;
 
-              results[i].forEach(inter => {
-                if (inter.user_id && !uniqueUsers.has(inter.user_id)) {
-                  uniqueUsers.set(inter.user_id, { 
-                    name: inter.user_name || "Anónimo", 
-                    phone: inter.user_phone || "Sin registro",
-                    is_owner: inter.is_owner || false
+              results[index].forEach(interaction => {
+                if (interaction.user_id && !uniqueUsers.has(interaction.user_id)) {
+                  uniqueUsers.set(interaction.user_id, { 
+                    name: interaction.user_name || "Anónimo", 
+                    phone: interaction.user_phone || "Sin registro",
+                    is_owner: interaction.is_owner || false
                   });
                 }
-                const dateStr = inter.date.substring(0, 10);
+                const dateStr = interaction.date.substring(0, 10);
                 if (groupedData[dateStr]) {
-                  groupedData[dateStr][b.slug] += 1;
-                  if (isVisit(inter.platform)) {
+                  groupedData[dateStr][business.slug] += 1;
+                  if (isVisit(interaction.platform)) {
                     sumVisitas++;
                     visitasNegocio++;
                   } else {
                     sumContactos++;
-                    redesCount[inter.platform] = (redesCount[inter.platform] || 0) + 1;
+                    redesCount[interaction.platform] = (redesCount[interaction.platform] || 0) + 1;
                   }
                 }
               });
-              newNetworkStats.push({ business: b, redes: redesCount, visitas: visitasNegocio, users: uniqueUsers });
+              newNetworkStats.push({ business: business, redes: redesCount, visitas: visitasNegocio, users: uniqueUsers });
             });
           }
 

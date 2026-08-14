@@ -39,27 +39,27 @@ function Perfil() {
     async function obtenerPerfil(intentos = 0) {
       try {
         const targetSlug = slug?.toLowerCase() === 'tarjetoso' ? 'spingamma' : slug;
-        const res = await fetchAuth(`${API_URL}/businesses/${targetSlug}`);
+        const response = await fetchAuth(`${API_URL}/businesses/${targetSlug}`);
 
-        if (res.ok) {
-          const data = await res.json();
+        if (response.ok) {
+          const data = await response.json();
           if (isMounted) {
             setProfesional(data);
             setCargando(false);
           }
-        } else if (res.status === 404 || res.status === 403) {
+        } else if (response.status === 404 || response.status === 403) {
           if (isMounted) {
             setProfesional(null);
             setCargando(false);
           }
         } else {
-          throw new Error(`HTTP error! status: ${res.status}`);
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      } catch (err) {
-        if (err.message === 'SESSION_EXPIRED') {
+      } catch (error) {
+        if (error.message === 'SESSION_EXPIRED') {
           return;
         }
-        console.warn(`Intento ${intentos + 1} fallido. El servidor backend podría estar despertando...`, err);
+        console.warn(`Intento ${intentos + 1} fallido. El servidor backend podría estar despertando...`, error);
 
         if (intentos < 10 && isMounted) {
           if (intentos === 1) setMensajeCarga("Conectando al servidor seguro, por favor espera...");
@@ -68,7 +68,7 @@ function Perfil() {
 
           setTimeout(() => obtenerPerfil(intentos + 1), 3500);
         } else if (isMounted) {
-          console.error("Error definitivo cargando perfil:", err);
+          console.error("Error definitivo cargando perfil:", error);
           setCargando(false);
         }
       }
@@ -189,13 +189,13 @@ function Perfil() {
 
     const targetSlug = slug?.toLowerCase() === 'tarjetoso' ? 'spingamma' : slug;
     fetchAuth(`${API_URL}/businesses/${targetSlug}`)
-      .then(res => res.ok ? res.json() : null)
+      .then(response => response.ok ? response.json() : null)
       .then(data => {
         if (data) setProfesional(data);
       })
-      .catch(err => {
-        if (err.message !== 'SESSION_EXPIRED') {
-          console.error("Error refreshing profile", err);
+      .catch(error => {
+        if (error.message !== 'SESSION_EXPIRED') {
+          console.error("Error refreshing profile", error);
         }
       });
   };

@@ -70,7 +70,7 @@ export default function MisNegocios() {
         throw new Error(errorData.detail || "Error al eliminar el negocio");
       }
 
-      setNegocios(prev => prev.filter(n => n.slug !== slug));
+      setNegocios(previousNegocios => previousNegocios.filter(negocio => negocio.slug !== slug));
     } catch (err) {
       alert(`Error: ${err.message}`);
     } finally {
