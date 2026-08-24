@@ -40,12 +40,12 @@ export default defineConfig({
         ]
       },
       manifest: {
-        name: "Tarjetoso Directorio", // 🚀 CAMBIADO AQUÍ
+        name: "Tarjetoso", // 🚀 CAMBIADO AQUÍ
         short_name: "Tarjetoso",      // 🚀 CAMBIADO AQUÍ (Nombre en el ícono del celular)
         start_url: "/",
         display: "standalone",
-        background_color: "#1D565F",
-        theme_color: "#1E3D51",
+        background_color: "#1A535C",
+        theme_color: "#1A535C",
         description: "Directorio de Tarjetas Digitales Tarjetoso", // 🚀 CAMBIADO AQUÍ
         icons: [
           {

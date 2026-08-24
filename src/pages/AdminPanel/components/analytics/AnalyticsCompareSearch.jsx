@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Loader2, Plus, X } from 'lucide-react';
 import fetchAuth from '../../../../utils/fetchAuth';
 
-const COLORS = ['#1A535C', '#F9842C', '#6A431F', '#757778', '#1A535C', '#F9842C', '#6A431F'];
+const COLORS = ['var(--color-primary)', 'var(--color-secondary)', 'var(--color-accent)', '#6B7280', 'var(--color-primary)', 'var(--color-secondary)', 'var(--color-accent)'];
 
 export default function AnalyticsCompareSearch({ API_URL, selectedBusinesses, setSelectedBusinesses }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -72,11 +72,11 @@ export default function AnalyticsCompareSearch({ API_URL, selectedBusinesses, se
   return (
     <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative z-10">
       <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-4">
-        <h3 className="font-bold text-[#757778]">Selecciona Negocios a Comparar</h3>
+        <h3 className="font-bold text-gray-500">Selecciona Negocios a Comparar</h3>
         <button 
           onClick={handleAddAllBusinesses}
           disabled={isLoadingAll}
-          className="text-sm font-bold bg-[#1A535C] hover:bg-[#152b39] text-white px-4 py-2 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2"
+          className="text-sm font-bold bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2"
         >
           {isLoadingAll ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
           Cargar Todos (Top 50)
@@ -96,9 +96,9 @@ export default function AnalyticsCompareSearch({ API_URL, selectedBusinesses, se
             setSearchTerm(e.target.value);
             setShowDropdown(true);
           }}
-          className="w-full bg-white border border-gray-200 py-3.5 pl-12 pr-10 rounded-2xl outline-none focus:border-[#F9842C] focus:ring-4 focus:ring-[#F9842C]/10 transition-all font-medium text-[#1A535C] shadow-sm"
+          className="w-full bg-white border border-gray-200 py-3.5 pl-12 pr-10 rounded-2xl outline-none focus:border-secondary focus:ring-4 focus:ring-secondary/10 transition-all font-medium text-primary shadow-sm"
         />
-        {isSearching && <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#F9842C] animate-spin" />}
+        {isSearching && <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary animate-spin" />}
 
         {showDropdown && searchResults.length > 0 && (
           <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl overflow-hidden z-[100] max-h-72 overflow-y-auto">
@@ -109,10 +109,10 @@ export default function AnalyticsCompareSearch({ API_URL, selectedBusinesses, se
                 className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-50 last:border-0"
               >
                 <div>
-                  <p className="font-bold text-[#1A535C]">{b.name}</p>
-                  <p className="text-xs text-[#757778]">{b.category}</p>
+                  <p className="font-bold text-primary">{b.name}</p>
+                  <p className="text-xs text-gray-500">{b.category}</p>
                 </div>
-                <Plus size={18} className="text-[#F9842C]" />
+                <Plus size={18} className="text-secondary" />
               </button>
             ))}
           </div>

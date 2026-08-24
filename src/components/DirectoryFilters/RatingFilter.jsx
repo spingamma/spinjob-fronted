@@ -8,11 +8,11 @@ export default function RatingFilter({ activeRating, openDropdown, toggleDropdow
         data-testid="filter-trigger-rating"
         onClick={() => toggleDropdown('rating')}
         className={`flex items-center bg-white border rounded-xl px-3 py-2 shadow-sm transition-all hover:bg-gray-50 cursor-pointer
-          ${openDropdown === 'rating' ? 'border-[#F9842C] ring-1 ring-[#F9842C]/30' : 'border-gray-200'}
+          ${openDropdown === 'rating' ? 'border-secondary ring-1 ring-secondary/30' : 'border-gray-200'}
         `}
       >
-        <Star size={14} className={`mr-1.5 flex-shrink-0 transition-colors ${openDropdown === 'rating' ? 'fill-[#F9842C] text-[#F9842C]' : 'text-[#F9842C]'}`} />
-        <span className="text-xs sm:text-sm text-[#1A535C] font-bold truncate">
+        <Star size={14} className={`mr-1.5 flex-shrink-0 transition-colors ${openDropdown === 'rating' ? 'fill-secondary text-secondary' : 'text-secondary'}`} />
+        <span className="text-xs sm:text-sm text-primary font-bold truncate">
           {activeRating === 'Todos' ? 'Ranking' : activeRating.replace(' Estrellas', '★')}
         </span>
         {activeRating !== 'Todos' && (
@@ -22,12 +22,12 @@ export default function RatingFilter({ activeRating, openDropdown, toggleDropdow
               e.stopPropagation();
               handleSelectOption('rating', 'Todos');
             }}
-            className="p-0.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-[#F9842C] transition-colors ml-1 cursor-pointer"
+            className="p-0.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-secondary transition-colors ml-1 cursor-pointer"
           >
             <X size={12} />
           </button>
         )}
-        <ChevronDown size={11} className={`text-gray-400 ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'rating' ? 'rotate-180 text-[#F9842C]' : ''}`} />
+        <ChevronDown size={11} className={`text-gray-400 ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'rating' ? 'rotate-180 text-secondary' : ''}`} />
       </div>
 
       {openDropdown === 'rating' && (
@@ -42,7 +42,7 @@ export default function RatingFilter({ activeRating, openDropdown, toggleDropdow
               key={opt.value}
               onClick={() => handleSelectOption('rating', opt.value)}
               className={`w-full text-left px-5 py-3 text-sm font-bold transition-colors cursor-pointer
-                ${activeRating === opt.value ? 'bg-[#F9842C]/10 text-[#F9842C]' : 'text-[#757778] hover:bg-gray-50'}
+                ${activeRating === opt.value ? 'bg-secondary/10 text-secondary' : 'text-gray-500 hover:bg-gray-50'}
               `}
             >
               {opt.label}

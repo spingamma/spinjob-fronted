@@ -19,10 +19,10 @@ export default function HeroBanner({
 }) {
   return (
     <div className="relative w-full max-w-5xl mx-auto mb-4 md:px-4 lg:px-6">
-      <div className="relative aspect-video overflow-hidden md:rounded-[2.5rem] bg-[#F8F9FA]">
+      <div className="relative aspect-video overflow-hidden md:rounded-[2.5rem] bg-brand-bg">
         <img
-          src={imagePreview || profesional.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name || 'Negocio')}&background=F8F9FA&color=1E3D51&size=512`}
-          onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name || 'Negocio')}&background=F8F9FA&color=1E3D51&size=512`; }}
+          src={imagePreview || profesional.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name || 'Negocio')}&background=F8F9FA&color=1A535C&size=512`}
+          onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name || 'Negocio')}&background=F8F9FA&color=1A535C&size=512`; }}
           alt={`Foto de perfil de ${profesional.name}`}
           className="w-full h-full object-cover"
         />
@@ -38,18 +38,18 @@ export default function HeroBanner({
         <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 flex flex-col gap-1.5 items-end z-30">
           {profesional.reviews_count > 0 && (
             <div className="bg-white/95 backdrop-blur-sm px-1.5 py-1 rounded-lg border border-gray-100 shadow-sm flex items-center gap-1">
-              <Star size={12} className="text-[#F9842C] fill-[#F9842C] sm:w-[14px] sm:h-[14px]" />
-              <span className="font-bold text-[#1A535C] text-[10px] sm:text-xs">{profesional.rating}</span>
+              <Star size={12} className="text-secondary fill-secondary sm:w-[14px] sm:h-[14px]" />
+              <span className="font-bold text-primary text-[10px] sm:text-xs">{profesional.rating}</span>
             </div>
           )}
           {profesional.home_delivery && (
-            <span className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-[#1A535C] text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left">
+            <span className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-primary text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left">
               <span className="shrink-0">📦</span>
               <span>Entrega Domicilio</span>
             </span>
           )}
           {profesional.national_delivery && (
-            <span className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-[#1A535C] text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left">
+            <span className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-primary text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left">
               <span className="shrink-0">✈️</span>
               <span>Delivery Nacional</span>
             </span>
@@ -58,7 +58,7 @@ export default function HeroBanner({
       </div>
       
       {/* Fade para unir con el fondo */}
-      <div className="absolute bottom-[-5px] left-[-5px] right-[-5px] h-20 sm:h-24 bg-gradient-to-t from-[#F8F9FA] via-[#F8F9FA]/80 to-[#F8F9FA]/0 pointer-events-none z-10"></div>
+      <div className="absolute bottom-[-5px] left-[-5px] right-[-5px] h-20 sm:h-24 bg-gradient-to-t from-brand-bg via-brand-bg/80 to-brand-bg/0 pointer-events-none z-10"></div>
 
       {/* BOTÓN EDITAR */}
       {isOwner && !isEditing && (
@@ -66,7 +66,7 @@ export default function HeroBanner({
           <button
             onClick={() => setIsEditing(true)}
             data-testid="edit-profile-btn"
-            className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-md border border-white/50 active:scale-95 bg-[#F9842C] text-white hover:bg-[#e06516] animate-bounce-short"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-md border border-white/50 active:scale-95 bg-secondary text-white hover:bg-secondary/90 animate-bounce-short"
             title="Editar Perfil"
           >
             <Edit3 size={18} />
@@ -80,7 +80,7 @@ export default function HeroBanner({
           <button
             onClick={handleShare}
             data-testid="profile-share-btn"
-            className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-[#1A535C] hover:bg-white hover:text-[#6A431F]"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-primary hover:bg-white hover:text-accent"
             title="Compartir"
           >
             <Share2 size={20} />
@@ -88,7 +88,7 @@ export default function HeroBanner({
           <button
             onClick={toggleQR}
             data-testid="profile-qr-btn"
-            className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-[#1A535C] hover:bg-white hover:text-[#6A431F]"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-primary hover:bg-white hover:text-accent"
             title="Mostrar QR"
           >
             <QrCode size={20} />
@@ -102,7 +102,7 @@ export default function HeroBanner({
           <button
             onClick={(e) => handleLinkClick(e, 'Ubicación', links.ubicacion)}
             data-testid="profile-location-btn"
-            className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-[#F9842C] hover:bg-white hover:text-[#e06516]"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-secondary hover:bg-white hover:text-secondary/80"
             title="Ver ubicación"
           >
             <MapPin size={18} />
@@ -113,7 +113,7 @@ export default function HeroBanner({
             onClick={toggleSaveCard}
             disabled={isSaving}
             data-testid="profile-bookmark-btn"
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 ${isSaved ? 'bg-[#6A431F] border-[#6A431F] text-white hover:bg-[#523317]' : 'bg-white/80 border-white/50 text-[#1A535C] hover:bg-white hover:text-[#6A431F]'}`}
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 ${isSaved ? 'bg-accent border-accent text-white hover:bg-accent/90' : 'bg-white/80 border-white/50 text-primary hover:bg-white hover:text-accent'}`}
             title={isSaved ? "Quitar del tarjetero" : "Guardar en mi tarjetero"}
           >
             <Bookmark size={20} className={isSaved ? 'fill-white' : ''} />

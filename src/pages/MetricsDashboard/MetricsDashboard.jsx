@@ -48,7 +48,7 @@ export default function MetricsDashboard() {
   } = useMetricsData(slug);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] font-sans pb-20">
+    <div className="min-h-screen bg-brand-bg font-sans pb-20">
       <Header 
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}

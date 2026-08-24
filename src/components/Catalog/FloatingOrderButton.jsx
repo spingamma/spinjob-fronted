@@ -11,7 +11,7 @@ export default function FloatingOrderButton({ isPremium, ordersEnabled, totalIte
       <button
         data-testid="order-checkout-btn"
         onClick={handleOrder}
-        className="w-full max-w-sm bg-[#F9842C] hover:bg-[#e06516] text-white font-bold py-4 px-6 rounded-2xl shadow-xl flex items-center justify-between transition-all transform hover:scale-[1.02]"
+        className="w-full max-w-sm bg-secondary hover:bg-secondary/90 text-white font-bold py-4 px-6 rounded-2xl shadow-xl flex items-center justify-between transition-all transform hover:scale-[1.02]"
       >
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center">

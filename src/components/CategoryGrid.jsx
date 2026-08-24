@@ -52,7 +52,7 @@ const ICON_MAP = [
 
 // --- Color Palette (rotating backgrounds) ---
 const COLOR_PALETTE = [
-  { bg: '#FFF4EC', icon: '#F9842C' },  // Tarjetoso Warm Tint
+  { bg: '#FFF4EC', icon: 'var(--color-secondary)' },  // Tarjetoso Warm Tint
   { bg: '#E0F2F1', icon: '#00897B' },  // Teal
   { bg: '#FFF3E0', icon: '#E65100' },  // Orange
   { bg: '#F3E5F5', icon: '#7B1FA2' },  // Purple
@@ -79,7 +79,7 @@ function getCategoryConfig(categoryName, index) {
   if (normalized === 'tarjetoso') {
     return {
       IconComponent: '/icon-192.webp',
-      colors: { bg: '#FFF4EC', icon: '#F9842C' }
+      colors: { bg: '#FFF4EC', icon: 'var(--color-secondary)' }
     };
   }
 
@@ -122,7 +122,7 @@ export default function CategoryGrid({ categories, onSelectCategory }) {
                 key="Tarjetoso"
                 data-testid="category-card-tarjetoso"
                 onClick={() => onSelectCategory('Tarjetoso')}
-                className="group flex flex-col items-center text-center bg-[#1A535C] rounded-2xl border border-[#1A535C] shadow-sm hover:shadow-lg transition-all duration-300 p-4 py-6 hover:scale-[1.02] hover:bg-[#15434a] focus:outline-none focus:ring-2 focus:ring-[#F9842C]/40 active:scale-[0.98] cursor-pointer"
+                className="group flex flex-col items-center text-center bg-primary rounded-2xl border border-primary shadow-sm hover:shadow-lg transition-all duration-300 p-4 py-6 hover:scale-[1.02] hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-secondary/40 active:scale-[0.98] cursor-pointer"
               >
                 {/* Icon Container without colored margins */}
                 <div className="w-[64px] h-[64px] md:w-[74px] md:h-[74px] rounded-2xl flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110 overflow-hidden bg-white">
@@ -151,7 +151,7 @@ export default function CategoryGrid({ categories, onSelectCategory }) {
               key={cat.category}
               data-testid={`category-card-${slugify(cat.category)}`}
               onClick={() => onSelectCategory(cat.category)}
-              className="group flex flex-col items-center text-center bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 p-4 py-6 hover:scale-[1.02] hover:border-[#6A431F]/30 focus:outline-none focus:ring-2 focus:ring-[#6A431F]/20 active:scale-[0.98] cursor-pointer"
+              className="group flex flex-col items-center text-center bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 p-4 py-6 hover:scale-[1.02] hover:border-accent/30 focus:outline-none focus:ring-2 focus:ring-accent/20 active:scale-[0.98] cursor-pointer"
             >
               {/* Icon Container without colored margins */}
               <div
@@ -174,7 +174,7 @@ export default function CategoryGrid({ categories, onSelectCategory }) {
               </div>
 
               {/* Category Name */}
-              <h4 className="text-xs sm:text-sm font-bold text-[#1A535C] mb-1 leading-tight min-w-0 w-full whitespace-normal">
+              <h4 className="text-xs sm:text-sm font-bold text-primary mb-1 leading-tight min-w-0 w-full whitespace-normal">
                 {cat.category}
               </h4>
 

@@ -94,27 +94,27 @@ export default function CountryModal({ isOpen, isDismissable = false, onClose, o
         )}
 
         {/* Decorative Top Accent */}
-        <div className="h-3 rounded-t-[2.5rem] bg-gradient-to-r from-[#1A535C] via-[#F9842C] to-[#1A535C]" />
+        <div className="h-3 rounded-t-[2.5rem] bg-gradient-to-r from-primary via-secondary to-primary" />
 
         <div className="p-8 sm:p-10 text-center">
           {/* Header Icon */}
-          <div className="w-16 h-16 mx-auto bg-gradient-to-tr from-[#1A535C]/10 to-[#F9842C]/10 rounded-3xl flex items-center justify-center text-[#1A535C] mb-6">
-            <Globe size={32} className="text-[#1A535C] animate-pulse" />
+          <div className="w-16 h-16 mx-auto bg-gradient-to-tr from-primary/10 to-secondary/10 rounded-3xl flex items-center justify-center text-primary mb-6">
+            <Globe size={32} className="text-primary animate-pulse" />
           </div>
 
           {/* Title */}
-          <h2 className="text-2xl font-extrabold text-[#1A535C] mb-2 leading-tight">
+          <h2 className="text-2xl font-extrabold text-primary mb-2 leading-tight">
             Selecciona tu País
           </h2>
-          <p className="text-sm text-[#757778] mb-8 max-w-xs mx-auto">
+          <p className="text-sm text-gray-500 mb-8 max-w-xs mx-auto">
             Para brindarte una experiencia personalizada y mostrarte los negocios correctos para tu región.
           </p>
 
           {/* Loading State */}
           {isLoading ? (
             <div className="py-8 flex flex-col items-center justify-center">
-              <Loader2 className="animate-spin text-[#F9842C] mb-2" size={32} />
-              <span className="text-xs font-bold text-[#1A535C]">Cargando países...</span>
+              <Loader2 className="animate-spin text-secondary mb-2" size={32} />
+              <span className="text-xs font-bold text-primary">Cargando países...</span>
             </div>
           ) : (
             <div className="space-y-4 text-left">
@@ -128,10 +128,10 @@ export default function CountryModal({ isOpen, isDismissable = false, onClose, o
                   type="button"
                   data-testid="country-dropdown-btn"
                   onClick={() => setIsOpenDropdown(!isOpenDropdown)}
-                  className="w-full flex items-center justify-between bg-gray-50 border border-gray-200 text-[#1A535C] font-bold text-sm px-4 py-3.5 rounded-2xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 transition-all cursor-pointer"
+                  className="w-full flex items-center justify-between bg-gray-50 border border-gray-200 text-primary font-bold text-sm px-4 py-3.5 rounded-2xl outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/30 transition-all cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <Globe size={18} className="text-[#1A535C]/60" />
+                    <Globe size={18} className="text-primary/60" />
                     <span>{selectedCountry || "Selecciona tu país..."}</span>
                   </div>
                   <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${isOpenDropdown ? 'rotate-180' : ''}`} />
@@ -157,11 +157,11 @@ export default function CountryModal({ isOpen, isDismissable = false, onClose, o
                               setIsOpenDropdown(false);
                             }}
                             className={`flex items-center justify-between w-full px-5 py-3 text-left text-sm font-semibold transition-all hover:bg-gray-50 cursor-pointer ${
-                              isSelected ? 'text-[#F9842C] bg-[#F9842C]/5 font-bold' : 'text-[#1A535C]'
+                              isSelected ? 'text-secondary bg-secondary/5 font-bold' : 'text-primary'
                             }`}
                           >
                             <span>{c.country}</span>
-                            {isSelected && <Check size={14} className="text-[#F9842C]" />}
+                            {isSelected && <Check size={14} className="text-secondary" />}
                           </button>
                         );
                       })}
@@ -183,7 +183,7 @@ export default function CountryModal({ isOpen, isDismissable = false, onClose, o
             data-testid="save-country-btn"
             onClick={handleSave}
             disabled={isLoading || isSaving || !selectedCountry}
-            className="w-full mt-8 bg-[#1A535C] hover:bg-[#133d44] text-white py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98] disabled:opacity-50"
+            className="w-full mt-8 bg-primary hover:bg-primary/90 text-white py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98] disabled:opacity-50"
           >
             {isSaving ? (
               <>

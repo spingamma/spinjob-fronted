@@ -24,8 +24,8 @@ export default function CatalogSearchGrid({ products, isDark, isOwner, isPremium
             data-testid={`catalog-search-item-${product.id}`}
             className={`flex flex-col rounded-2xl overflow-hidden border transition-all ${
               isDark
-                ? 'bg-[#1e1e1e] border-white/10 text-white'
-                : 'bg-white border-gray-200 text-[#1A535C] shadow-sm'
+                ? 'bg-gray-900 border-white/10 text-white'
+                : 'bg-white border-gray-200 text-primary shadow-sm'
             }`}
           >
             <div className="relative w-full h-36 bg-gray-50 flex items-center justify-center overflow-hidden">
@@ -64,7 +64,7 @@ export default function CatalogSearchGrid({ products, isDark, isOwner, isPremium
               </div>
 
               <div className="flex items-end justify-between mt-2 pt-2 border-t border-gray-100/10">
-                <span className="font-black text-sm text-[#F9842C]">
+                <span className="font-black text-sm text-secondary">
                   {product.price ? product.price : `Bs. ${(priceNum || 0).toFixed(2)}`}
                 </span>
 

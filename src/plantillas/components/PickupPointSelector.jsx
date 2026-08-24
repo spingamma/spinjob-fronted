@@ -30,7 +30,7 @@ export default function PickupPointSelector({ onSelect, onCancel }) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm w-full mt-2 animate-in zoom-in-95">
       <div className="flex justify-between items-center mb-3">
-        <h5 className="font-bold text-[#1A535C] text-sm">Seleccionar Paquetería</h5>
+        <h5 className="font-bold text-primary text-sm">Seleccionar Paquetería</h5>
         <button onClick={onCancel} className="text-gray-400 hover:text-gray-600 text-xs font-semibold">Cancelar</button>
       </div>
 
@@ -41,7 +41,7 @@ export default function PickupPointSelector({ onSelect, onCancel }) {
           placeholder="Buscar por nombre o ciudad..." 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full text-xs pl-9 py-2 border border-gray-200 rounded-lg outline-none focus:border-[#F9842C]"
+          className="w-full text-xs pl-9 py-2 border border-gray-200 rounded-lg outline-none focus:border-secondary"
         />
       </div>
 
@@ -53,15 +53,15 @@ export default function PickupPointSelector({ onSelect, onCancel }) {
             <div 
               key={point.id} 
               onClick={() => onSelect(point)}
-              className="flex justify-between items-center p-2 border border-gray-100 rounded-lg hover:border-[#F9842C] hover:bg-orange-50 cursor-pointer transition-colors"
+              className="flex justify-between items-center p-2 border border-gray-100 rounded-lg hover:border-secondary hover:bg-orange-50 cursor-pointer transition-colors"
             >
               <div>
-                <p className="text-xs font-bold text-[#1A535C]">{point.name}</p>
+                <p className="text-xs font-bold text-primary">{point.name}</p>
                 <p className="text-[10px] text-gray-500 flex items-center gap-1">
                   <MapPin size={10} /> {point.state}, {point.country}
                 </p>
                 {point.pickup_fee !== null && point.pickup_fee !== undefined && (
-                  <p className="text-[10px] text-[#F9842C] font-semibold mt-0.5">Tarifa recojo: {point.pickup_fee} Bs</p>
+                  <p className="text-[10px] text-secondary font-semibold mt-0.5">Tarifa recojo: {point.pickup_fee} Bs</p>
                 )}
               </div>
               <div className="text-gray-300">

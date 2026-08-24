@@ -22,8 +22,8 @@ export default function CarouselBlock({ title, products, isDark, isPremium, orde
 
   return (
     <div className="w-full overflow-hidden mb-2">
-      <h3 className={`text-xs font-extrabold tracking-widest mb-4 flex items-center gap-2 px-4 uppercase ${isDark ? 'text-white' : 'text-[#1A535C]'}`}>
-        <span className={`w-1 h-4 rounded-full ${isDark ? 'bg-[#C8A721]' : 'bg-[#1D565F]'}`}></span>
+      <h3 className={`text-xs font-extrabold tracking-widest mb-4 flex items-center gap-2 px-4 uppercase ${isDark ? 'text-white' : 'text-primary'}`}>
+        <span className={`w-1 h-4 rounded-full ${isDark ? 'bg-yellow-500' : 'bg-primary/90'}`}></span>
         {title}
       </h3>
 

@@ -54,24 +54,24 @@ export default function PhoneInputWithCountry({
 
   // Clases premium según el tema
   const selectBg = isDarkTheme 
-    ? 'bg-[#32698F] text-white border-[#32698F]' 
-    : 'bg-gray-100 text-[#1A535C] border-gray-200';
+    ? 'bg-primary/90 text-white border-primary/50' 
+    : 'bg-gray-100 text-primary border-gray-200';
     
   const inputBg = isDarkTheme 
-    ? 'bg-[#32698F] text-white border-[#32698F] placeholder-[#E6E2DF]/50 focus:border-[#F9842C]' 
-    : 'bg-transparent text-[#1A535C] placeholder-gray-400 focus:border-[#F9842C]';
+    ? 'bg-primary/90 text-white border-primary/50 placeholder-gray-200/50 focus:border-secondary' 
+    : 'bg-transparent text-primary placeholder-gray-400 focus:border-secondary';
 
   return (
     <div className={`flex items-stretch rounded-xl border transition-all overflow-hidden ${
       isDarkTheme 
-        ? 'border-[#32698F] focus-within:border-[#F9842C] focus-within:ring-1 focus-within:ring-[#F9842C]' 
-        : 'border-gray-200 focus-within:border-[#F9842C] focus-within:ring-1 focus-within:ring-[#F9842C]'
+        ? 'border-primary/50 focus-within:border-secondary focus-within:ring-1 focus-within:ring-secondary' 
+        : 'border-gray-200 focus-within:border-secondary focus-within:ring-1 focus-within:ring-secondary'
     } ${className}`}>
       
       {/* Selector de país dinámico */}
       <div 
         className={`flex items-center gap-1.5 px-3 select-none border-r ${
-          isDarkTheme ? 'border-[#1A535C]/30' : 'border-gray-200'
+          isDarkTheme ? 'border-primary/30' : 'border-gray-200'
         } ${selectBg}`}
         title={`${country.flag} (País seleccionado)`}
       >

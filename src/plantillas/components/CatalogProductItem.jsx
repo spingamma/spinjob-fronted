@@ -35,17 +35,17 @@ export default function CatalogProductItem({
               disabled={product.stock === undefined || product.stock === null}
               className={`w-12 text-xs bg-white border rounded px-1.5 py-0.5 text-center font-semibold outline-none transition-colors ${
                 product.stock === undefined || product.stock === null 
-                  ? 'opacity-50 cursor-not-allowed border-gray-200 text-[#1A535C]' 
+                  ? 'opacity-50 cursor-not-allowed border-gray-200 text-primary' 
                   : product.stock === '' 
                     ? 'border-red-500 text-red-500 bg-red-50 focus:border-red-600' 
-                    : 'border-gray-200 text-[#1A535C] focus:border-[#F9842C]'
+                    : 'border-gray-200 text-primary focus:border-secondary'
               }`}
             />
             <label className="flex items-center gap-1 ml-1 cursor-pointer" title="Stock infinito">
               <input
                 data-testid={`stock-infinite-check-${product.id || product.tempId}`}
                 type="checkbox"
-                className="w-3.5 h-3.5 accent-[#F9842C] cursor-pointer"
+                className="w-3.5 h-3.5 accent-secondary cursor-pointer"
                 checked={product.stock === undefined || product.stock === null}
                 onChange={(e) => handleStockChange(product, e.target.checked ? null : '0')}
               />
@@ -58,7 +58,7 @@ export default function CatalogProductItem({
           <button
             data-testid={`edit-btn-${product.id || product.tempId}`}
             onClick={() => handleOpenEdit(product)}
-            className="p-1.5 text-gray-400 hover:text-[#6A431F] bg-gray-50 hover:bg-[#6A431F]/10 rounded-lg transition-colors border border-gray-100"
+            className="p-1.5 text-gray-400 hover:text-accent bg-gray-50 hover:bg-accent/10 rounded-lg transition-colors border border-gray-100"
             title="Editar"
           >
             <Pencil size={14} />
@@ -68,7 +68,7 @@ export default function CatalogProductItem({
               <button
                 data-testid={`visibility-btn-${product.id || product.tempId}`}
                 onClick={() => toggleVisibility(product)}
-                className={`p-1.5 rounded-lg transition-colors border ${product.is_visible !== false ? 'text-[#F9842C] bg-orange-50 border-orange-100 hover:bg-orange-100' : 'text-gray-400 bg-gray-50 border-gray-100 hover:bg-gray-100'}`}
+                className={`p-1.5 rounded-lg transition-colors border ${product.is_visible !== false ? 'text-secondary bg-orange-50 border-orange-100 hover:bg-orange-100' : 'text-gray-400 bg-gray-50 border-gray-100 hover:bg-gray-100'}`}
                 title={product.is_visible !== false ? "Ocultar elemento" : (localProductsCountVisible >= limitVisible ? "Límite alcanzado" : "Hacer visible")}
               >
                 {product.is_visible !== false ? <Eye size={14} /> : <EyeOff size={14} />}

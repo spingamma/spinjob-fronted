@@ -97,7 +97,7 @@ export default function useAnalyticsData({
 
           setGlobalStats({ totalVisitas: sumVisitas, totalContactos: sumContactos });
           setChartData(Object.values(groupedData));
-          setNetworkStats([{ business: { name: "Toda la Aplicación", color: '#1A535C' }, redes: redesCount, visitas: sumVisitas, users: uniqueUsersGlobal }]);
+          setNetworkStats([{ business: { name: "Toda la Aplicación", color: 'var(--color-primary)' }, redes: redesCount, visitas: sumVisitas, users: uniqueUsersGlobal }]);
 
         } else if (viewMode === 'compare') {
           if (selectedBusinesses.length === 0) {

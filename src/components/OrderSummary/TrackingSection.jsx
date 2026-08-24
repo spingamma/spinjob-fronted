@@ -23,7 +23,7 @@ export default function TrackingSection({
   handleReportIssue,
 }) {
   return (
-    <div className="min-h-screen bg-[#F8F9FA] pb-24 font-sans text-[#1A535C]">
+    <div className="min-h-screen bg-brand-bg pb-24 font-sans text-primary">
       <div className="bg-white px-4 py-4 sticky top-0 z-50 shadow-sm flex items-center gap-4">
         <button onClick={() => navigate('/mis-compras')} className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors" data-testid="back-button-tracking">
           <ArrowLeft size={20} />
@@ -39,7 +39,7 @@ export default function TrackingSection({
               <span className="text-[10px] font-bold text-gray-400 uppercase block mb-1">
                 Código de Pedido
               </span>
-              <h2 className="text-xl font-extrabold text-[#1A535C]">
+              <h2 className="text-xl font-extrabold text-primary">
                 Orden #{order?.order_number || String(order?.id || '').slice(0, 8)}
               </h2>
               <span className={`text-[11px] font-black uppercase px-2.5 py-1 rounded-md ${
@@ -51,9 +51,9 @@ export default function TrackingSection({
                 <div className="flex flex-col items-end gap-1">
                   <div className="flex items-center gap-2 text-xs">
                     <span className="text-gray-500 font-medium">Productos:</span>
-                    <span className="font-bold text-[#1A535C]">Bs. {parseFloat(order?.total_price || 0).toFixed(2)}</span>
+                    <span className="font-bold text-primary">Bs. {parseFloat(order?.total_price || 0).toFixed(2)}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-[#F9842C]">
+                  <div className="flex items-center gap-2 text-xs text-secondary">
                     <span className="font-medium">
                       {order?.status === 'completado' ? 'Recojo:' : 'A pagar (recojo):'}
                     </span>
@@ -63,7 +63,7 @@ export default function TrackingSection({
               ) : (
                 <>
                   <span className="text-xs text-gray-500 font-bold block mb-1">Total</span>
-                  <span className="text-xl font-black text-[#1A535C]">Bs. {parseFloat(order?.total_price || 0).toFixed(2)}</span>
+                  <span className="text-xl font-black text-primary">Bs. {parseFloat(order?.total_price || 0).toFixed(2)}</span>
                 </>
               )}
             </div>
@@ -73,8 +73,8 @@ export default function TrackingSection({
         {/* QR payment */}
         {isPending && displayQr && (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-center relative overflow-hidden">
-            <h3 className="font-extrabold text-[#1A535C] mb-4 flex items-center justify-center gap-2">
-              <QrCode size={18} className="text-[#F9842C]" /> Realiza el pago
+            <h3 className="font-extrabold text-primary mb-4 flex items-center justify-center gap-2">
+              <QrCode size={18} className="text-secondary" /> Realiza el pago
             </h3>
             <div className="bg-gray-50 p-2 rounded-2xl inline-block border border-gray-100 shadow-inner mb-4">
               <img src={displayQr} alt="QR de Pago" className="w-48 h-48 object-contain rounded-xl" />
@@ -83,7 +83,7 @@ export default function TrackingSection({
               type="button"
               data-testid="download-qr-btn"
               onClick={handleDownloadQr}
-              className="text-xs font-bold text-[#F9842C] hover:text-[#e06516] flex items-center justify-center gap-1.5 mx-auto mb-4 py-2 px-4 bg-orange-50 hover:bg-orange-100 rounded-xl border border-orange-200/60 transition-colors"
+              className="text-xs font-bold text-secondary hover:text-secondary/80 flex items-center justify-center gap-1.5 mx-auto mb-4 py-2 px-4 bg-orange-50 hover:bg-orange-100 rounded-xl border border-orange-200/60 transition-colors"
             >
               <Download size={16} /> Descargar Imagen de QR
             </button>
@@ -96,8 +96,8 @@ export default function TrackingSection({
         {/* Receipt upload (when pending or waiting verification) */}
         {(isPending || (order?.status === 'pago_enviado' && !order?.receipt_url)) && (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-            <h3 className="font-extrabold text-[#1A535C] mb-4 flex items-center gap-2 text-sm">
-              <Upload size={16} className="text-[#F9842C]" /> Sube tu comprobante
+            <h3 className="font-extrabold text-primary mb-4 flex items-center gap-2 text-sm">
+              <Upload size={16} className="text-secondary" /> Sube tu comprobante
             </h3>
             <form onSubmit={handleUploadReceipt} className="space-y-4">
               <div className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center bg-gray-50 hover:bg-orange-50/30 transition-colors relative">
@@ -111,7 +111,7 @@ export default function TrackingSection({
                     <input type="file" accept="image/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                     <div className="flex flex-col items-center justify-center gap-2 pointer-events-none py-4">
                       <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-gray-400"><Key size={20} /></div>
-                      <span className="text-sm font-bold text-[#1A525C]">Toca para seleccionar imagen</span>
+                      <span className="text-sm font-bold text-primary">Toca para seleccionar imagen</span>
                       <span className="text-[10px] text-gray-400">Solo imágenes (JPG, PNG). Máx 5MB.</span>
                     </div>
                   </>
@@ -119,7 +119,7 @@ export default function TrackingSection({
               </div>
               {receiptError && <p className="text-xs text-red-500 font-bold text-center">{receiptError}</p>}
               {receiptPreview && (
-                <button type="submit" disabled={isUploading} className="w-full py-3.5 bg-[#F9842C] hover:bg-[#e06516] text-white font-bold text-sm rounded-xl shadow-md transition-all flex justify-center items-center gap-2 disabled:opacity-60" data-testid="submit-receipt-btn">
+                <button type="submit" disabled={isUploading} className="w-full py-3.5 bg-secondary hover:bg-secondary/90 text-white font-bold text-sm rounded-xl shadow-md transition-all flex justify-center items-center gap-2 disabled:opacity-60" data-testid="submit-receipt-btn">
                   {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
                   Enviar Comprobante
                 </button>
@@ -130,15 +130,15 @@ export default function TrackingSection({
 
         {/* Pickup Code (when ready for pickup) */}
         {order?.status === 'ready_for_pickup' && (
-          <div className="bg-[#1A535C] rounded-3xl p-6 shadow-md text-center text-white relative overflow-hidden">
+          <div className="bg-primary rounded-3xl p-6 shadow-md text-center text-white relative overflow-hidden">
             <h3 className="font-extrabold mb-2 text-sm flex items-center justify-center gap-2">
-              <Key size={18} className="text-[#F9842C]" /> Listo para Recojo
+              <Key size={18} className="text-secondary" /> Listo para Recojo
             </h3>
             <p className="text-white/80 text-xs mb-4">
               Tu paquete ya está en la paquetería. Pasa a recogerlo con el siguiente código y tu carnet de identidad.
             </p>
             <div className="bg-white/10 rounded-2xl p-4 inline-block mb-4 border border-white/20">
-              <span className="text-4xl font-black tracking-widest text-[#F9842C]">
+              <span className="text-4xl font-black tracking-widest text-secondary">
                 #TRJ-{order?.order_number || String(order?.id || '').slice(0, 4).toUpperCase()}
               </span>
             </div>
@@ -204,7 +204,7 @@ function getStatusColor(order) {
     case 'entregado':
       return isPaqueteria ? 'bg-indigo-100 text-indigo-800' : 'bg-green-100 text-green-800';
     case 'ready_for_pickup':
-      return 'bg-[#F9842C] text-white';
+      return 'bg-secondary text-white';
     case 'completado':
       return 'bg-emerald-100 text-emerald-800';
     case 'cancelado':

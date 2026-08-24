@@ -50,7 +50,7 @@ export default function ProfileHero({
         onProtectedAction={onProtectedAction}
       />
 
-      <div className="relative overflow-hidden mb-6 pt-16 bg-[#F8F9FA] sm:bg-transparent">
+      <div className="relative overflow-hidden mb-6 pt-16 bg-brand-bg sm:bg-transparent">
         <div className="relative z-10 flex flex-col">
           
           <HeroBanner 

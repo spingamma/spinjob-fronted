@@ -15,8 +15,8 @@ export default function AnalyticsHeader({
 }) {
   return (
     <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-20">
-      <h2 className="text-xl font-extrabold text-[#1A535C] flex items-center gap-2">
-        <BarChart2 size={24} className="text-[#F9842C]" />
+      <h2 className="text-xl font-extrabold text-primary flex items-center gap-2">
+        <BarChart2 size={24} className="text-secondary" />
         Analíticas
       </h2>
 
@@ -24,13 +24,13 @@ export default function AnalyticsHeader({
         <div className="flex bg-gray-100 p-1 rounded-xl w-full sm:w-auto shrink-0">
           <button
             onClick={() => setViewMode('global')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'global' ? 'bg-white shadow-sm text-[#1A535C]' : 'text-[#757778] hover:text-[#757778]'}`}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'global' ? 'bg-white shadow-sm text-primary' : 'text-gray-500 hover:text-gray-500'}`}
           >
             <Globe size={16} /> Aplicación
           </button>
           <button
             onClick={() => setViewMode('compare')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'compare' ? 'bg-white shadow-sm text-[#1A535C]' : 'text-[#757778] hover:text-[#757778]'}`}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'compare' ? 'bg-white shadow-sm text-primary' : 'text-gray-500 hover:text-gray-500'}`}
           >
             <Building size={16} /> Negocios
           </button>
@@ -41,7 +41,7 @@ export default function AnalyticsHeader({
             <select 
               value={days}
               onChange={(e) => setDays(e.target.value === 'custom' ? 'custom' : Number(e.target.value))}
-              className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 text-sm font-bold text-[#1A535C] appearance-none cursor-pointer min-w-[140px]"
+              className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-2.5 rounded-xl outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/30 text-sm font-bold text-primary appearance-none cursor-pointer min-w-[140px]"
             >
               <option value={30}>Último mes</option>
               <option value={90}>Últimos 3 meses</option>
@@ -57,14 +57,14 @@ export default function AnalyticsHeader({
                 type="date" 
                 value={customStartDate} 
                 onChange={e => setCustomStartDate(e.target.value)}
-                className="bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl outline-none text-sm font-bold text-[#757778] focus:border-[#F9842C] w-full sm:w-auto"
+                className="bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl outline-none text-sm font-bold text-gray-500 focus:border-secondary w-full sm:w-auto"
               />
               <span className="text-gray-400">-</span>
               <input 
                 type="date" 
                 value={customEndDate} 
                 onChange={e => setCustomEndDate(e.target.value)}
-                className="bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl outline-none text-sm font-bold text-[#757778] focus:border-[#F9842C] w-full sm:w-auto"
+                className="bg-gray-50 border border-gray-200 px-3 py-2.5 rounded-xl outline-none text-sm font-bold text-gray-500 focus:border-secondary w-full sm:w-auto"
               />
             </div>
           )}
@@ -73,7 +73,7 @@ export default function AnalyticsHeader({
         {hasChartData && (
           <button 
             onClick={onDownloadPDF}
-            className="w-full sm:w-auto bg-[#1A535C] hover:bg-[#133d44] text-white font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shrink-0 shadow-sm"
+            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shrink-0 shadow-sm"
             title="Descargar Reporte en PDF"
           >
             <Download size={18} />

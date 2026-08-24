@@ -13,7 +13,7 @@ export default function AddCountryForm({
   return (
     <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-md animate-in fade-in slide-in-from-top-4 duration-200">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-bold text-[#1A535C]">Nuevo País</h3>
+        <h3 className="font-bold text-primary">Nuevo País</h3>
         <button onClick={() => setIsAddingCountry(false)} className="text-gray-400 hover:text-gray-600">
           <X size={18} />
         </button>
@@ -26,7 +26,7 @@ export default function AddCountryForm({
             value={newCountryName}
             onChange={(e) => setNewCountryName(e.target.value)}
             placeholder="Ej. Colombia"
-            className="w-full text-sm bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-[#F9842C] transition-all"
+            className="w-full text-sm bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-secondary transition-all"
             required
           />
         </div>
@@ -37,7 +37,7 @@ export default function AddCountryForm({
             value={newCountryDept}
             onChange={(e) => setNewCountryDept(e.target.value)}
             placeholder="Ej. Antioquia"
-            className="w-full text-sm bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-[#F9842C] transition-all"
+            className="w-full text-sm bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-secondary transition-all"
             required
           />
         </div>
@@ -45,7 +45,7 @@ export default function AddCountryForm({
           <button
             type="submit"
             disabled={submitting}
-            className="flex-1 bg-[#F9842C] hover:bg-[#e06d1c] text-white py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-all"
+            className="flex-1 bg-secondary hover:bg-secondary/90 text-white py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-all"
           >
             {submitting ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
             Guardar País

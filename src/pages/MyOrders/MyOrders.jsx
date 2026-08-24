@@ -19,7 +19,7 @@ export default function MyOrders() {
   } = useMyOrders();
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] pb-24 font-sans text-[#1A535C]">
+    <div className="min-h-screen bg-brand-bg pb-24 font-sans text-primary">
       <MyOrdersHeader 
         navigate={navigate} 
         isBusinessMode={isBusinessMode} 
@@ -28,7 +28,7 @@ export default function MyOrders() {
 
       {isBusinessMode === null ? (
         <div className="flex flex-col items-center py-16">
-          <Loader2 className="animate-spin text-[#F9842C] mb-4" size={32} />
+          <Loader2 className="animate-spin text-secondary mb-4" size={32} />
           <p className="font-bold text-gray-500">Cargando...</p>
         </div>
       ) : !isBusinessMode ? (
@@ -40,7 +40,7 @@ export default function MyOrders() {
           />
           {loading ? (
             <div className="flex flex-col items-center py-12">
-              <Loader2 className="animate-spin text-[#F9842C] mb-4" size={32} />
+              <Loader2 className="animate-spin text-secondary mb-4" size={32} />
               <p className="font-bold text-gray-500">Cargando tus compras...</p>
             </div>
           ) : orders.length === 0 ? (
@@ -48,12 +48,12 @@ export default function MyOrders() {
               <div className="mb-4">
                 <img src="/oso-carrito.webp" alt="Aún no tienes pedidos" className="w-24 h-24 object-contain mix-blend-multiply opacity-80" />
               </div>
-              <h3 className="font-bold text-xl mb-2 text-[#1A535C]">No se encontraron pedidos</h3>
+              <h3 className="font-bold text-xl mb-2 text-primary">No se encontraron pedidos</h3>
               <p className="text-gray-400 text-sm max-w-xs mx-auto mb-6">No hay pedidos registrados en el rango de fechas seleccionado.</p>
               <button 
                 onClick={() => navigate('/')}
                 data-testid="my-orders-goto-directory-btn"
-                className="px-6 py-3 bg-[#F9842C] text-white font-bold rounded-xl shadow-md hover:bg-[#e06516] transition-colors"
+                className="px-6 py-3 bg-secondary text-white font-bold rounded-xl shadow-md hover:bg-secondary/90 transition-colors"
               >
                 Ir al Directorio
               </button>
@@ -78,7 +78,7 @@ export default function MyOrders() {
         <div className="max-w-4xl mx-auto px-4 mt-6">
           {loadingBusinesses ? (
             <div className="flex flex-col items-center py-12">
-              <Loader2 className="animate-spin text-[#F9842C] mb-4" size={32} />
+              <Loader2 className="animate-spin text-secondary mb-4" size={32} />
               <p className="font-bold text-gray-500">Cargando datos de negocio...</p>
             </div>
           ) : premiumBusinesses.length === 0 ? (
@@ -88,13 +88,13 @@ export default function MyOrders() {
               {premiumBusinesses.length > 1 && (
                 <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                   <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Building size={16} className="text-[#F9842C] shrink-0" /> Seleccionar Negocio:
+                    <Building size={16} className="text-secondary shrink-0" /> Seleccionar Negocio:
                   </span>
                   <select 
                     value={selectedBusinessSlug}
                     onChange={(e) => setSelectedBusinessSlug(e.target.value)}
                     data-testid="business-selector-dropdown"
-                    className="w-full sm:w-auto bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm font-bold text-[#1A535C] outline-none focus:border-[#F9842C] truncate"
+                    className="w-full sm:w-auto bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm font-bold text-primary outline-none focus:border-secondary truncate"
                   >
                     {premiumBusinesses.map(b => (
                       <option key={b.id} value={b.slug}>{b.nombre_negocio || b.name}</option>

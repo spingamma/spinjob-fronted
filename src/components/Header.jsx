@@ -103,14 +103,14 @@ const Header = ({
         {/* LOGO E INSTALAR */}
         <div className="flex-shrink-0 flex items-center">
           <div className="flex items-center cursor-pointer" data-testid="header-logo-link" onClick={() => navigate('/')}>
-            <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-[#1A535C] uppercase hidden md:block ml-3">TARJETOSO</span>
+            <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-primary uppercase hidden md:block ml-3">TARJETOSO</span>
           </div>
 
           {(!isStandalone && (deferredPrompt || isIOS)) && (
             <button
               onClick={handleInstallClick}
               data-testid="header-install-btn"
-              className="flex items-center justify-center bg-[#F9842C] hover:bg-[#e06516] text-white rounded-xl shadow-sm transition-all w-10 h-10 shrink-0 ml-2"
+              className="flex items-center justify-center bg-secondary hover:bg-secondary/90 text-white rounded-xl shadow-sm transition-all w-10 h-10 shrink-0 ml-2"
               title="Descargar App"
             >
               <Download size={18} />
@@ -120,7 +120,7 @@ const Header = ({
 
         {/* BUSCADOR Y NAV */}
         <div className="flex-1 max-w-5xl px-1 sm:px-0 flex items-center justify-end md:justify-center gap-3 md:gap-8">
-          <div className="flex-1 max-w-3xl flex items-center bg-gray-50 border border-gray-200 rounded-full shadow-inner py-1.5 pl-4 pr-1.5 focus-within:ring-2 focus-within:ring-[#F9842C] transition-all gap-1 sm:gap-2">
+          <div className="flex-1 max-w-3xl flex items-center bg-gray-50 border border-gray-200 rounded-full shadow-inner py-1.5 pl-4 pr-1.5 focus-within:ring-2 focus-within:ring-secondary transition-all gap-1 sm:gap-2">
             <input
               data-testid="search-input"
               type="text"
@@ -133,14 +133,14 @@ const Header = ({
                   setSearchTerm(localSearch);
                 }
               }}
-              className="w-full bg-transparent text-[#1A535C] placeholder-gray-400 outline-none text-sm sm:text-base mr-1"
+              className="w-full bg-transparent text-primary placeholder-gray-400 outline-none text-sm sm:text-base mr-1"
             />
             <button
               onClick={() => setSearchTerm(localSearch)}
               data-testid="search-button"
               className={`w-8 h-8 rounded-full transition-all duration-200 focus:outline-none shrink-0 shadow-sm flex items-center justify-center ${
                 localSearch.trim()
-                  ? 'bg-[#F9842C] hover:bg-[#e06516] text-white'
+                  ? 'bg-secondary hover:bg-secondary/90 text-white'
                   : 'bg-gray-200 text-gray-400 hover:bg-gray-300'
               }`}
               title="Buscar"
@@ -175,22 +175,22 @@ const Header = ({
                   title="Mis Pedidos"
                 >
                   <div className="group-hover:scale-110 transition-transform mb-1 flex items-center justify-center h-[22px] w-[22px]">
-                    <ShoppingCart size={22} className="text-[#1A535C] group-hover:text-[#F9842C] transition-colors" />
+                    <ShoppingCart size={22} className="text-primary group-hover:text-secondary transition-colors" />
                   </div>
-                  <span className="text-[10px] font-bold text-[#1A535C] uppercase tracking-tighter group-hover:text-[#F9842C] leading-none relative z-10">PEDIDOS</span>
+                  <span className="text-[10px] font-bold text-primary uppercase tracking-tighter group-hover:text-secondary leading-none relative z-10">PEDIDOS</span>
                 </button>
 
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center gap-1.5 sm:gap-2 bg-white hover:bg-gray-50 border border-gray-200 py-1 sm:py-1.5 px-1.5 sm:px-3 rounded-full shadow-sm transition-all"
                 >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#1D565D] flex items-center justify-center shadow-inner flex-shrink-0">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/90 flex items-center justify-center shadow-inner flex-shrink-0">
                     <span className="text-white font-bold text-xs sm:text-sm">
                       {userName ? userName.charAt(0).toUpperCase() : 'U'}
                     </span>
                   </div>
-                  <span className="text-sm text-[#757778] hidden lg:block mr-1 truncate max-w-[100px]">
-                    Hola, <strong className="text-[#1A535C] font-semibold">{userName.split(' ')[0]}</strong>
+                  <span className="text-sm text-gray-500 hidden lg:block mr-1 truncate max-w-[100px]">
+                    Hola, <strong className="text-primary font-semibold">{userName.split(' ')[0]}</strong>
                   </span>
                   <ChevronDown size={16} className={`text-gray-400 transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -200,13 +200,13 @@ const Header = ({
                     <div className="p-2 space-y-1">
                       <button
                         onClick={() => { setIsCountryModalOpen(true); setIsUserMenuOpen(false); }}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-[#1A535C] hover:bg-gray-50 rounded-xl transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-primary hover:bg-gray-50 rounded-xl transition-colors"
                       >
                         <Globe size={18} /> País
                       </button>
                       <button
                         onClick={() => { handleLogout(); setIsUserMenuOpen(false); }}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-[#757778] hover:bg-gray-50 hover:text-red-600 rounded-xl transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-50 hover:text-red-600 rounded-xl transition-colors"
                       >
                         <LogOut size={18} /> Cerrar sesión
                       </button>
@@ -218,7 +218,7 @@ const Header = ({
           ) : (
             <button
               onClick={() => setAuthModalOpen(true)}
-              className="flex items-center justify-center bg-[#1D565D] hover:bg-[#154045] text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-full transition-colors shadow-sm"
+              className="flex items-center justify-center bg-primary/90 hover:bg-primary/80 text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-full transition-colors shadow-sm"
             >
               <span className="text-xs sm:text-sm font-semibold tracking-wide">Ingresar</span>
             </button>

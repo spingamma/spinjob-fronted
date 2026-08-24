@@ -35,13 +35,13 @@ export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsa
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-[#1A535C]/60 backdrop-blur-md" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-primary/60 backdrop-blur-md" onClick={onClose}>
       <div
         className="bg-white w-full sm:max-w-2xl sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[80vh] animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-gradient-to-br from-[#1A535C] to-[#32698F] p-5 relative shrink-0">
+        <div className="bg-gradient-to-br from-primary to-primary/80 p-5 relative shrink-0">
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay"></div>
           <button data-testid="catalog-close-btn" onClick={onClose} aria-label="Cerrar catálogo" className="absolute top-4 right-4 z-20 text-white/80 hover:text-white transition-colors p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm">
             <X size={20} />
@@ -67,7 +67,7 @@ export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsa
           ) : products.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
               <Package size={48} className="mb-3 opacity-50" />
-              <p className="font-semibold text-[#757778]">Sin productos aún</p>
+              <p className="font-semibold text-gray-500">Sin productos aún</p>
               <p className="text-xs text-gray-400 mt-1">Este negocio todavía no ha publicado productos.</p>
             </div>
           ) : (
@@ -79,7 +79,7 @@ export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsa
           )}
           {!loading && products.length > 0 && catalogUrl && (
             <div className="mt-6 text-center">
-              <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-bold text-[#32698F] hover:text-[#F9842C] transition-colors">
+              <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-bold text-primary/80 hover:text-secondary transition-colors">
                 <ExternalLink size={16} /> Ver catálogo completo
               </a>
             </div>
@@ -113,14 +113,14 @@ const ProductCard = ({ product, whatsappNumber, businessName, country }) => {
 
         {product.description && (
           <div className="mt-0.5">
-            <p className={`text-xs text-[#757778] whitespace-pre-wrap ${!expanded ? 'line-clamp-2' : ''}`}>
+            <p className={`text-xs text-gray-500 whitespace-pre-wrap ${!expanded ? 'line-clamp-2' : ''}`}>
               {product.description}
             </p>
             {isLong && (
               <button
                 data-testid="catalog-ver-mas-btn"
                 onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-                className="text-[#F9842C] font-bold text-[10px] mt-1 hover:underline uppercase"
+                className="text-secondary font-bold text-[10px] mt-1 hover:underline uppercase"
               >
                 {expanded ? 'Ver menos' : 'Ver más'}
               </button>
@@ -139,7 +139,7 @@ const ProductCard = ({ product, whatsappNumber, businessName, country }) => {
             href={waUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 flex items-center justify-center gap-1.5 bg-[#25D366] hover:bg-[#1fb855] text-white text-xs font-bold py-2 px-3 rounded-lg transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.97]"
+            className="mt-2 flex items-center justify-center gap-1.5 bg-green-500 hover:bg-green-500 text-white text-xs font-bold py-2 px-3 rounded-lg transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.97]"
             onClick={(e) => e.stopPropagation()}
           >
             <MessageCircle size={14} className="fill-white" />

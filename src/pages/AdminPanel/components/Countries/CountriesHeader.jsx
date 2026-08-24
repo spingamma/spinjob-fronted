@@ -5,8 +5,8 @@ export default function CountriesHeader({ fetchCountries, setIsAddingCountry }) 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/80 backdrop-blur border border-gray-100 rounded-3xl p-6 shadow-sm">
       <div>
-        <h2 className="text-xl font-bold text-[#1A535C] flex items-center gap-2">
-          <Globe size={22} className="text-[#F9842C]" />
+        <h2 className="text-xl font-bold text-primary flex items-center gap-2">
+          <Globe size={22} className="text-secondary" />
           Gestión de Localizaciones
         </h2>
         <p className="text-sm text-gray-500 mt-1">
@@ -23,7 +23,7 @@ export default function CountriesHeader({ fetchCountries, setIsAddingCountry }) 
         </button>
         <button
           onClick={() => setIsAddingCountry(true)}
-          className="flex-1 sm:flex-initial bg-[#1A535C] hover:bg-[#133d44] text-white px-5 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98]"
+          className="flex-1 sm:flex-initial bg-primary hover:bg-primary/90 text-white px-5 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98]"
         >
           <Plus size={18} />
           <span>Agregar País</span>

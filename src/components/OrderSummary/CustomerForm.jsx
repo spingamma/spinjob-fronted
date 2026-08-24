@@ -41,7 +41,7 @@ export const CustomerForm = ({
             onChange={(e) => setCustomerName(e.target.value)}
             placeholder="Ej. Juan Pérez"
             data-testid="customer-name-input"
-            className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-[#F9842C] focus:ring-4 focus:ring-orange-50 transition-all outline-none font-bold"
+            className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-secondary focus:ring-4 focus:ring-orange-50 transition-all outline-none font-bold"
           />
         </div>
       )}

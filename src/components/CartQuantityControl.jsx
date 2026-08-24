@@ -43,7 +43,7 @@ export default function CartQuantityControl({ product, cart, updateCart }) {
         data-testid={`search-grid-add-btn-${product.id}`}
         onClick={() => updateCart(product, 1)}
         disabled={isDisabled}
-        className="w-6 h-6 flex items-center justify-center bg-white dark:bg-gray-800 rounded shadow-sm text-[#1A535C] dark:text-white disabled:opacity-30"
+        className="w-6 h-6 flex items-center justify-center bg-white dark:bg-gray-800 rounded shadow-sm text-primary dark:text-white disabled:opacity-30"
       >
         <Plus size={12} />
       </button>

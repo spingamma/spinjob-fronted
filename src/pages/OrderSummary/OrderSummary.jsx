@@ -45,10 +45,10 @@ export default function OrderSummary() {
   // Guard: not logged in
   if (!token) {
     return (
-      <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center p-6 text-center">
-        <h2 className="text-xl font-bold text-[#1A535C] mb-4">Debes iniciar sesión</h2>
-        <p className="mb-6 text-[#757778]">Para continuar necesitas estar registrado e iniciar sesión.</p>
-        <button onClick={() => navigate('/')} className="px-6 py-3 bg-[#F9842C] text-white rounded-xl font-bold" data-testid="login-home-btn">
+      <div className="min-h-screen bg-brand-bg flex flex-col items-center justify-center p-6 text-center">
+        <h2 className="text-xl font-bold text-primary mb-4">Debes iniciar sesión</h2>
+        <p className="mb-6 text-gray-500">Para continuar necesitas estar registrado e iniciar sesión.</p>
+        <button onClick={() => navigate('/')} className="px-6 py-3 bg-secondary text-white rounded-xl font-bold" data-testid="login-home-btn">
           Ir al Inicio para ingresar
         </button>
       </div>
@@ -58,9 +58,9 @@ export default function OrderSummary() {
   // Loading tracking data
   if (isTrackingLoading) {
     return (
-      <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center p-6 text-center">
-        <Loader2 size={36} className="animate-spin text-[#F9842C] mb-3" />
-        <p className="text-sm font-bold text-[#1A535C]">Cargando información de tu pedido...</p>
+      <div className="min-h-screen bg-brand-bg flex flex-col items-center justify-center p-6 text-center">
+        <Loader2 size={36} className="animate-spin text-secondary mb-3" />
+        <p className="text-sm font-bold text-primary">Cargando información de tu pedido...</p>
       </div>
     );
   }
@@ -72,9 +72,9 @@ export default function OrderSummary() {
     // Validate cart presence
     if (!cart || Object.keys(cart).length === 0) {
       return (
-        <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center p-6 text-center">
-          <h2 className="text-xl font-bold text-[#1A535C] mb-4">No hay productos en tu orden</h2>
-          <button onClick={() => navigate(`/perfil/${slug}`)} className="px-6 py-3 bg-[#F9842C] text-white rounded-xl font-bold" data-testid="back-to-profile-btn">
+        <div className="min-h-screen bg-brand-bg flex flex-col items-center justify-center p-6 text-center">
+          <h2 className="text-xl font-bold text-primary mb-4">No hay productos en tu orden</h2>
+          <button onClick={() => navigate(`/perfil/${slug}`)} className="px-6 py-3 bg-secondary text-white rounded-xl font-bold" data-testid="back-to-profile-btn">
             Volver al perfil
           </button>
         </div>

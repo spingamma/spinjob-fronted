@@ -76,7 +76,7 @@ export default function Directory() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-[#1A535C] font-sans pb-12 antialiased selection:bg-[#F9842C] selection:text-white relative">
+    <div className="min-h-screen bg-brand-bg text-primary font-sans pb-12 antialiased selection:bg-secondary selection:text-white relative">
       <SeoMeta
         title={categoryStr || stateStr ? `${categoryStr || 'Profesionales'} ${stateStr}` : null}
         description={seoDesc}

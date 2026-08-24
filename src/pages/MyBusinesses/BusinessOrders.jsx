@@ -88,9 +88,9 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
   };
 
   return (
-    <div className={`min-h-screen bg-[#F8F9FA] ${hideHeader ? 'pb-8' : 'pb-24'} font-sans text-[#1A535C]`}>
+    <div className={`min-h-screen bg-brand-bg ${hideHeader ? 'pb-8' : 'pb-24'} font-sans text-primary`}>
       {!hideHeader && (
-        <div className="bg-[#1A535C] text-white px-4 py-5 sticky top-0 z-50 shadow-md flex items-center gap-4">
+        <div className="bg-primary text-white px-4 py-5 sticky top-0 z-50 shadow-md flex items-center gap-4">
           <button onClick={() => navigate('/mis-negocios')} data-testid="business-orders-back-btn" className="p-2 hover:bg-white/10 rounded-full transition-colors">
             <ArrowLeft size={20} />
           </button>
@@ -117,7 +117,7 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
               {isPaqueteria && (
                 <button
                   onClick={handlePaqueteExterno}
-                  className="bg-[#1A535C] hover:bg-[#154249] text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md flex items-center gap-2"
+                  className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md flex items-center gap-2"
                 >
                   <PackageOpen size={16} />
                   Ingresar Paquete Externo
@@ -127,7 +127,7 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
 
             {loading ? (
               <div className="flex flex-col items-center py-12">
-                <Loader2 className="animate-spin text-[#F9842C] mb-4" size={32} />
+                <Loader2 className="animate-spin text-secondary mb-4" size={32} />
                 <p className="font-bold text-gray-500">Cargando pedidos...</p>
               </div>
             ) : orders.length === 0 ? (
@@ -160,9 +160,9 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
         )}
       </div>
       {showPackageModal && (
-        <div className="fixed inset-0 z-[99] flex items-center justify-center p-4 bg-[#1A535C]/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[99] flex items-center justify-center p-4 bg-primary/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-200">
-            <div className="bg-[#1A535C] p-4 flex justify-between items-center text-white">
+            <div className="bg-primary p-4 flex justify-between items-center text-white">
               <h3 className="font-extrabold flex items-center gap-2">
                 <PackageOpen size={20} />
                 Ingresar Paquete
@@ -183,18 +183,18 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
               )}
               
               <div>
-                <label className="block text-sm font-bold text-[#1A535C] mb-1">Nombre del cliente o remitente</label>
+                <label className="block text-sm font-bold text-primary mb-1">Nombre del cliente o remitente</label>
                 <input 
                   type="text" 
                   value={packageCustomer}
                   onChange={(e) => setPackageCustomer(e.target.value)}
                   placeholder="Ej: Juan Pérez"
-                  className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-[#1A535C] outline-none focus:border-[#F9842C] focus:bg-white transition-colors"
+                  className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-primary outline-none focus:border-secondary focus:bg-white transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-[#1A535C] mb-1">Tarifa de recojo (Bs.)</label>
+                <label className="block text-sm font-bold text-primary mb-1">Tarifa de recojo (Bs.)</label>
                 <input 
                   type="number" 
                   value={packageFee}
@@ -202,16 +202,16 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
                   placeholder="Ej: 10"
                   min="0"
                   step="0.5"
-                  className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-[#1A535C] outline-none focus:border-[#F9842C] focus:bg-white transition-colors"
+                  className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-primary outline-none focus:border-secondary focus:bg-white transition-colors"
                 />
-                <p className="text-xs text-[#757778] mt-1">Monto a cobrar en efectivo al entregar el paquete.</p>
+                <p className="text-xs text-gray-500 mt-1">Monto a cobrar en efectivo al entregar el paquete.</p>
               </div>
 
               <div className="pt-2">
                 <button
                   onClick={submitExternalPackage}
                   disabled={submittingPackage}
-                  className="w-full bg-[#F9842C] hover:bg-[#e06516] text-white font-extrabold py-3.5 rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-70 flex justify-center items-center gap-2"
+                  className="w-full bg-secondary hover:bg-secondary/90 text-white font-extrabold py-3.5 rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-70 flex justify-center items-center gap-2"
                 >
                   {submittingPackage ? (
                     <>

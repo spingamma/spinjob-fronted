@@ -10,11 +10,11 @@ export default function DistanceFilter({ activeDistance, openDropdown, toggleDro
         data-testid="filter-trigger-distance"
         onClick={() => toggleDropdown('distance')}
         className={`flex items-center bg-white border rounded-xl px-3 py-2 shadow-sm transition-all hover:bg-gray-50 cursor-pointer
-          ${openDropdown === 'distance' ? 'border-[#F9842C] ring-1 ring-[#F9842C]/30' : 'border-gray-200'}
+          ${openDropdown === 'distance' ? 'border-secondary ring-1 ring-secondary/30' : 'border-gray-200'}
         `}
       >
-        <MapPin size={14} className={`mr-1.5 flex-shrink-0 transition-colors ${openDropdown === 'distance' ? 'text-[#F9842C]' : 'text-[#32698F]'}`} />
-        <span className="text-xs sm:text-sm text-[#1A535C] font-bold truncate">
+        <MapPin size={14} className={`mr-1.5 flex-shrink-0 transition-colors ${openDropdown === 'distance' ? 'text-secondary' : 'text-primary/80'}`} />
+        <span className="text-xs sm:text-sm text-primary font-bold truncate">
           {activeDistance === 'Todos' ? 'Distancia' : (
             activeDistance === 'Minutos' ? 'Minutos' :
             activeDistance === 'Pocas horas' ? 'Pocas horas' :
@@ -28,12 +28,12 @@ export default function DistanceFilter({ activeDistance, openDropdown, toggleDro
               e.stopPropagation();
               handleSelectOption('distance', 'Todos');
             }}
-            className="p-0.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-[#F9842C] transition-colors ml-1 cursor-pointer"
+            className="p-0.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-secondary transition-colors ml-1 cursor-pointer"
           >
             <X size={12} />
           </button>
         )}
-        <ChevronDown size={11} className={`text-gray-400 ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'distance' ? 'rotate-180 text-[#F9842C]' : ''}`} />
+        <ChevronDown size={11} className={`text-gray-400 ml-1 flex-shrink-0 transition-transform duration-300 ${openDropdown === 'distance' ? 'rotate-180 text-secondary' : ''}`} />
       </div>
 
       {openDropdown === 'distance' && (
@@ -49,7 +49,7 @@ export default function DistanceFilter({ activeDistance, openDropdown, toggleDro
               key={opt.value}
               onClick={() => handleSelectOption('distance', opt.value)}
               className={`w-full text-left px-5 py-3 text-sm font-bold transition-colors border-t border-gray-50/50 first:border-none cursor-pointer
-                ${activeDistance === opt.value ? 'bg-[#F9842C]/10 text-[#F9842C]' : 'text-[#757778] hover:bg-gray-50'}
+                ${activeDistance === opt.value ? 'bg-secondary/10 text-secondary' : 'text-gray-500 hover:bg-gray-50'}
               `}
             >
               {opt.label}

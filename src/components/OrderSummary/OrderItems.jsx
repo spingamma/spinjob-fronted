@@ -8,7 +8,7 @@ import { CheckCircle2 } from "lucide-react";
  */
 export const OrderItems = ({ itemsList, totalPrice }) => (
   <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
-    <h2 className="text-sm font-bold text-[#757778] uppercase tracking-wider mb-4 border-b pb-2">
+    <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">
       Para: {/* Business name is rendered by the parent */}
     </h2>
     <div className="space-y-4">
@@ -20,7 +20,7 @@ export const OrderItems = ({ itemsList, totalPrice }) => (
           <div key={idx} className="flex justify-between items-center">
             <div className="flex-1 pr-4">
               <p className="font-bold text-sm">{item.product.name}</p>
-              <p className="text-xs text-[#757778]">
+              <p className="text-xs text-gray-500">
                 {item.quantity} x Bs. {validPrice.toFixed(2)}
               </p>
             </div>
@@ -31,7 +31,7 @@ export const OrderItems = ({ itemsList, totalPrice }) => (
     </div>
     <div className="mt-6 pt-4 border-t border-gray-100 flex justify-between items-end">
       <span className="text-gray-500 font-bold">Total a pagar</span>
-      <span className="text-2xl font-black text-[#F9842C]">Bs. {totalPrice.toFixed(2)}</span>
+      <span className="text-2xl font-black text-secondary">Bs. {totalPrice.toFixed(2)}</span>
     </div>
   </div>
 );

@@ -64,8 +64,8 @@ export default function ProfileCatalogEdit({
 
   return (
     <div className="mb-8">
-      <h3 className="text-lg font-bold text-[#1A535C] mb-4 flex items-center gap-2">
-        <span className="w-1.5 h-6 bg-[#6A431F] rounded-full"></span> Catálogo de Productos
+      <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+        <span className="w-1.5 h-6 bg-accent rounded-full"></span> Catálogo de Productos
       </h3>
 
       <div className="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm flex flex-col items-center justify-center py-10">
@@ -75,7 +75,7 @@ export default function ProfileCatalogEdit({
         <button
           data-testid="open-inventory-btn"
           onClick={() => setIsInventoryOpen(true)}
-          className="bg-[#F9842C] hover:bg-[#e06516] text-white px-6 py-3 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
+          className="bg-secondary hover:bg-secondary/90 text-white px-6 py-3 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
         >
           <Layers size={20} />
           Catálogo e Inventario
@@ -84,7 +84,7 @@ export default function ProfileCatalogEdit({
 
       {isInventoryOpen && (
         <div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-[#1A535C]/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-primary/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
           onMouseDown={handleCloseInventory}
         >
           <div
@@ -92,7 +92,7 @@ export default function ProfileCatalogEdit({
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-gradient-to-br from-[#1A535C] to-[#32698F] p-5 relative shrink-0 flex items-center justify-between rounded-t-3xl">
+            <div className="bg-gradient-to-br from-primary to-primary/80 p-5 relative shrink-0 flex items-center justify-between rounded-t-3xl">
               <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay rounded-t-3xl"></div>
               <div className="relative z-10 flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center backdrop-blur-sm">

@@ -74,22 +74,22 @@ export default function InstallPrompt() {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 md:bottom-6 md:left-auto md:right-6 md:w-[400px] z-[150] animate-in slide-in-from-bottom-10 fade-in duration-500">
-      <div className="bg-[#1A535C]/95 backdrop-blur-md border border-[#32698F] p-4 sm:p-5 rounded-2xl shadow-2xl relative overflow-hidden group">
+      <div className="bg-primary/95 backdrop-blur-md border border-primary/50 p-4 sm:p-5 rounded-2xl shadow-2xl relative overflow-hidden group">
         
         {/* Efecto de luz de fondo */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#F9842C] to-[#F9842C]"></div>
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-secondary"></div>
         
         <button 
           onClick={handleClose}
           data-testid="install-prompt-close-btn"
-          className="absolute top-3 right-3 p-1.5 text-[#E6E2DF] hover:text-white bg-[#32698F]/50 hover:bg-[#32698F] rounded-full transition-colors"
+          className="absolute top-3 right-3 p-1.5 text-gray-200 hover:text-white bg-primary/90/50 hover:bg-primary/90 rounded-full transition-colors"
           aria-label="Cerrar"
         >
           <X size={16} />
         </button>
 
         <div className="flex items-start gap-4 mt-1">
-          <div className="w-12 h-12 bg-white rounded-xl shadow-inner flex items-center justify-center shrink-0 border-2 border-[#F9842C]/20">
+          <div className="w-12 h-12 bg-white rounded-xl shadow-inner flex items-center justify-center shrink-0 border-2 border-secondary/20">
             <img 
               src="/icon-192.webp" 
               alt="SpinGamma Logo" 
@@ -107,18 +107,18 @@ export default function InstallPrompt() {
 </h3>
             
             {isIOS ? (
-              <div className="text-[#E6E2DF] text-xs leading-relaxed">
-                Instala esta app en tu iPhone: toca el ícono <Share size={12} className="inline mx-0.5 text-[#F9842C]" /> <strong>Compartir</strong> abajo y luego <PlusSquare size={12} className="inline mx-0.5 text-[#F9842C]" /> <strong>Agregar a inicio</strong>.
+              <div className="text-gray-200 text-xs leading-relaxed">
+                Instala esta app en tu iPhone: toca el ícono <Share size={12} className="inline mx-0.5 text-secondary" /> <strong>Compartir</strong> abajo y luego <PlusSquare size={12} className="inline mx-0.5 text-secondary" /> <strong>Agregar a inicio</strong>.
               </div>
             ) : (
               <>
-                <p className="text-[#E6E2DF] text-xs mb-3 leading-relaxed">
+                <p className="text-gray-200 text-xs mb-3 leading-relaxed">
                   Agrega nuestro directorio a tu pantalla de inicio para acceso rápido, sin ocupar espacio.
                 </p>
                 <button 
                   onClick={handleInstallClick}
                   data-testid="install-prompt-btn"
-                  className="w-full bg-[#F9842C] hover:bg-[#e06516] text-white text-sm font-bold py-2.5 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+                  className="w-full bg-secondary hover:bg-secondary/90 text-white text-sm font-bold py-2.5 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
                 >
                   <Download size={16} />
                   Instalar App

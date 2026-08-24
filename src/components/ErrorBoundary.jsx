@@ -56,7 +56,7 @@ export default class ErrorBoundary extends Component {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#F8F9FA',
+          background: 'var(--color-brand-bg)',
           padding: '2rem',
           fontFamily: 'Inter, sans-serif',
           textAlign: 'center',
@@ -64,17 +64,17 @@ export default class ErrorBoundary extends Component {
         data-testid="error-boundary"
       >
         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
-        <h1 style={{ color: '#1A535C', fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem' }}>
+        <h1 style={{ color: 'var(--color-primary)', fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem' }}>
           Algo salió mal
         </h1>
-        <p style={{ color: '#757778', maxWidth: '400px', margin: '0 0 1.5rem' }}>
+        <p className="text-gray-500 max-w-[400px] mb-6">
           Ocurrió un error inesperado. Por favor, recarga la página o vuelve al inicio.
         </p>
         <button
           onClick={this.handleReload}
           data-testid="error-boundary-reload-btn"
           style={{
-            background: '#1A535C',
+            background: 'var(--color-primary)',
             color: '#fff',
             border: 'none',
             borderRadius: '12px',

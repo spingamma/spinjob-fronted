@@ -52,27 +52,27 @@ export default function ProfileContact({
     <>
       {/* 📱 WHATSAPP Y LLAMADAS */}
       <div className="mb-8">
-        <h3 className="text-lg font-bold text-[#1A535C] flex items-center gap-2 mb-4">
-          <span className="w-1.5 h-6 bg-[#6A431F] rounded-full"></span> Contáctanos
+        <h3 className="text-lg font-bold text-primary flex items-center gap-2 mb-4">
+          <span className="w-1.5 h-6 bg-accent rounded-full"></span> Contáctanos
         </h3>
         
         {isEditing ? (
           <div className="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm flex flex-col gap-4">
             <div>
-              <label className="text-sm font-bold text-[#1A535C] flex items-center gap-2 mb-2">
-                <WhatsappIcon size={16} className="text-[#25D366]" /> Número de WhatsApp (sin código de país)
+              <label className="text-sm font-bold text-primary flex items-center gap-2 mb-2">
+                <WhatsappIcon size={16} className="text-green-500" /> Número de WhatsApp (sin código de país)
               </label>
               {waNumbersList.map((num, idx) => (
                 <div key={idx} className="flex gap-2 mb-2 items-center">
                   <div className="relative flex-1 flex items-center">
                     <span className="absolute left-3 text-gray-400">
-                      <WhatsappIcon size={16} className="text-[#25D366]" />
+                      <WhatsappIcon size={16} className="text-green-500" />
                     </span>
                     <input 
                       data-testid={`input-whatsapp-${idx}`}
                       value={num} 
                       onChange={(e) => handleWaChange(idx, e.target.value)} 
-                      className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded pl-9 p-2 outline-none transition-all"
+                      className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-secondary focus:bg-white rounded pl-9 p-2 outline-none transition-all"
                       placeholder="Ej. 70012345"
                     />
                   </div>
@@ -92,22 +92,22 @@ export default function ProfileContact({
                 <button 
                   data-testid="add-whatsapp-btn"
                   onClick={handleAddWa}
-                  className="flex items-center gap-1 text-xs font-bold text-[#F9842C] hover:text-[#e06516] transition-colors mt-2 p-1 rounded hover:bg-orange-50"
+                  className="flex items-center gap-1 text-xs font-bold text-secondary hover:text-secondary/80 transition-colors mt-2 p-1 rounded hover:bg-orange-50"
                 >
                   <Plus size={14} /> Añadir otro número de WhatsApp
                 </button>
               )}
             </div>
             <div>
-              <label className="text-sm font-bold text-[#1A535C] flex items-center gap-2 mb-1">
-                <Phone size={16} className="text-[#1A535C]" /> Teléfono Fijo o Secundario
+              <label className="text-sm font-bold text-primary flex items-center gap-2 mb-1">
+                <Phone size={16} className="text-primary" /> Teléfono Fijo o Secundario
               </label>
               <input 
                 data-testid="input-phone"
                 name="phone" 
                 value={editFormData.phone || ''} 
                 onChange={handleEditChange} 
-                className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded p-2 outline-none transition-all"
+                className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-secondary focus:bg-white rounded p-2 outline-none transition-all"
                 placeholder="Ej. 2441234"
               />
             </div>
@@ -122,12 +122,12 @@ export default function ProfileContact({
                   data-testid={`button-whatsapp-${idx}`}
                   key={`wa-${idx}`}
                   onClick={(e) => handleLinkClick(e, `WhatsApp ${idx + 1}`, `https://wa.me/${clean}`)}
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white text-[#1A535C] font-bold flex items-center justify-center shadow-sm hover:bg-[#25D366] hover:text-white border border-gray-200 hover:border-[#25D366] hover:shadow-lg active:scale-[0.98] transition-all group relative"
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white text-primary font-bold flex items-center justify-center shadow-sm hover:bg-green-500 hover:text-white border border-gray-200 hover:border-green-500 hover:shadow-lg active:scale-[0.98] transition-all group relative"
                   title={`WhatsApp ${idx + 1}`}
                 >
-                  <WhatsappIcon size={32} className="text-[#25D366] group-hover:text-white transition-colors" />
+                  <WhatsappIcon size={32} className="text-green-500 group-hover:text-white transition-colors" />
                   {waNumbers.length > 1 && (
-                    <span className="absolute -bottom-2 -right-2 bg-[#25D366] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs border-2 border-white shadow-sm">{idx + 1}</span>
+                    <span className="absolute -bottom-2 -right-2 bg-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs border-2 border-white shadow-sm">{idx + 1}</span>
                   )}
                 </button>
               );
@@ -137,10 +137,10 @@ export default function ProfileContact({
               <button 
                 data-testid="button-phone"
                 onClick={(e) => handleLinkClick(e, 'Llamar', links.phone)}
-                className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-2xl bg-white text-[#1A535C] font-bold hover:bg-[#1A535C] hover:text-white transition-colors border border-gray-200 hover:border-[#1A535C] hover:shadow-lg shadow-sm group"
+                className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-2xl bg-white text-primary font-bold hover:bg-primary hover:text-white transition-colors border border-gray-200 hover:border-primary hover:shadow-lg shadow-sm group"
                 title="Llamar"
               >
-                <Phone size={32} className="text-[#1A535C] group-hover:text-white transition-colors" />
+                <Phone size={32} className="text-primary group-hover:text-white transition-colors" />
               </button>
             )}
           </div>
@@ -151,8 +151,8 @@ export default function ProfileContact({
       {(links.website || links.facebook || links.instagram || links.linkedin || links.tiktok || links.github || isEditing) && (
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4 gap-4">
-          <h3 className="text-lg font-bold text-[#1A535C] flex items-center gap-2">
-            <span className="w-1.5 h-6 bg-[#6A431F] rounded-full"></span> Redes Sociales
+          <h3 className="text-lg font-bold text-primary flex items-center gap-2">
+            <span className="w-1.5 h-6 bg-accent rounded-full"></span> Redes Sociales
           </h3>
         </div>
         
@@ -160,27 +160,27 @@ export default function ProfileContact({
           <div className="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-bold text-purple-600 flex items-center gap-2 mb-1"><Globe size={16} /> Sitio Web</label>
-              <input data-testid="input-website" name="website" value={editFormData.website || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="https://..." />
+              <input data-testid="input-website" name="website" value={editFormData.website || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-secondary rounded p-2 outline-none" placeholder="https://..." />
             </div>
             <div>
               <label className="text-sm font-bold text-blue-600 flex items-center gap-2 mb-1"><Facebook size={16} /> Facebook</label>
-              <input data-testid="input-facebook" name="facebook" value={editFormData.facebook || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de Facebook" />
+              <input data-testid="input-facebook" name="facebook" value={editFormData.facebook || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-secondary rounded p-2 outline-none" placeholder="URL de Facebook" />
             </div>
             <div>
               <label className="text-sm font-bold text-pink-600 flex items-center gap-2 mb-1"><Instagram size={16} /> Instagram</label>
-              <input data-testid="input-instagram" name="instagram" value={editFormData.instagram || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de Instagram" />
+              <input data-testid="input-instagram" name="instagram" value={editFormData.instagram || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-secondary rounded p-2 outline-none" placeholder="URL de Instagram" />
             </div>
             <div>
               <label className="text-sm font-bold text-sky-600 flex items-center gap-2 mb-1"><Linkedin size={16} /> LinkedIn</label>
-              <input data-testid="input-linkedin" name="linkedin" value={editFormData.linkedin || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de LinkedIn" />
+              <input data-testid="input-linkedin" name="linkedin" value={editFormData.linkedin || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-secondary rounded p-2 outline-none" placeholder="URL de LinkedIn" />
             </div>
             <div>
               <label className="text-sm font-bold text-black flex items-center gap-2 mb-1"><TiktokIcon size={16} /> TikTok</label>
-              <input data-testid="input-tiktok" name="tiktok" value={editFormData.tiktok || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de TikTok" />
+              <input data-testid="input-tiktok" name="tiktok" value={editFormData.tiktok || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-secondary rounded p-2 outline-none" placeholder="URL de TikTok" />
             </div>
             <div>
-              <label className="text-sm font-bold text-[#757778] flex items-center gap-2 mb-1"><Github size={16} /> GitHub</label>
-              <input data-testid="input-github" name="github" value={editFormData.github || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none" placeholder="URL de GitHub" />
+              <label className="text-sm font-bold text-gray-500 flex items-center gap-2 mb-1"><Github size={16} /> GitHub</label>
+              <input data-testid="input-github" name="github" value={editFormData.github || ''} onChange={handleEditChange} className="w-full text-sm bg-white/60 border border-dashed border-gray-400 focus:border-secondary rounded p-2 outline-none" placeholder="URL de GitHub" />
             </div>
           </div>
         ) : (
@@ -190,7 +190,7 @@ export default function ProfileContact({
             <SocialButton icon={Instagram} label="Instagram" url={links.instagram} colorClass="text-pink-600 hover:bg-pink-600" onLinkClick={handleLinkClick} />
             <SocialButton icon={Linkedin} label="LinkedIn" url={links.linkedin} colorClass="text-sky-600 hover:bg-sky-600" onLinkClick={handleLinkClick} />
             <SocialButton icon={TiktokIcon} label="TikTok" url={links.tiktok} colorClass="text-black hover:bg-black" onLinkClick={handleLinkClick} />
-            <SocialButton icon={Github} label="GitHub" url={links.github} colorClass="text-[#757778] hover:bg-gray-700" onLinkClick={handleLinkClick} />
+            <SocialButton icon={Github} label="GitHub" url={links.github} colorClass="text-gray-500 hover:bg-gray-700" onLinkClick={handleLinkClick} />
           </div>
         )}
       </div>

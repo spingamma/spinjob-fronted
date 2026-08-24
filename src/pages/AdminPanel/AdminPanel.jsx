@@ -60,7 +60,7 @@ export default function AdminPanel() {
     }
   }, [navigate, token]);
 
-  if (!token) return <div className="text-center py-20 text-[#1A535C] font-bold">Verificando credenciales...</div>;
+  if (!token) return <div className="text-center py-20 text-primary font-bold">Verificando credenciales...</div>;
 
   if (error) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -74,17 +74,17 @@ export default function AdminPanel() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] pb-24 font-sans">
+    <div className="min-h-screen bg-brand-bg pb-24 font-sans">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
         {/* Header Dashboard */}
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden mb-8">
-          <div className="bg-[#1A535C] p-8 flex flex-col sm:flex-row justify-between items-center gap-6">
+          <div className="bg-primary p-8 flex flex-col sm:flex-row justify-between items-center gap-6">
             <div className="text-white">
               <h1 className="text-3xl font-extrabold flex items-center gap-3">
                 <ShieldCheck size={32} /> Panel de Control
               </h1>
-              <p className="text-[#E6E2DF] mt-1">Administración central de Tarjetoso</p>
+              <p className="text-gray-200 mt-1">Administración central de Tarjetoso</p>
             </div>
             <button 
               onClick={() => navigate('/')} 
@@ -101,8 +101,8 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('negocios')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'negocios' 
-                    ? 'bg-white shadow-sm text-[#F9842C] ring-1 ring-gray-200/50' 
-                    : 'text-gray-400 hover:text-[#757778] hover:bg-gray-100/50'}
+                    ? 'bg-white shadow-sm text-secondary ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-gray-500 hover:bg-gray-100/50'}
                 `}
               >
                 <Building size={18} />
@@ -118,8 +118,8 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('analytics')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'analytics' 
-                    ? 'bg-white shadow-sm text-[#F9842C] ring-1 ring-gray-200/50' 
-                    : 'text-gray-400 hover:text-[#757778] hover:bg-gray-100/50'}
+                    ? 'bg-white shadow-sm text-secondary ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-gray-500 hover:bg-gray-100/50'}
                 `}
               >
                 <BarChart2 size={18} />
@@ -129,8 +129,8 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('especialidades')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'especialidades' 
-                    ? 'bg-white shadow-sm text-[#F9842C] ring-1 ring-gray-200/50' 
-                    : 'text-gray-400 hover:text-[#757778] hover:bg-gray-100/50'}
+                    ? 'bg-white shadow-sm text-secondary ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-gray-500 hover:bg-gray-100/50'}
                 `}
               >
                 <Bookmark size={18} />
@@ -140,8 +140,8 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('vendedor')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'vendedor' 
-                    ? 'bg-white shadow-sm text-[#F9842C] ring-1 ring-gray-200/50' 
-                    : 'text-gray-400 hover:text-[#757778] hover:bg-gray-100/50'}
+                    ? 'bg-white shadow-sm text-secondary ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-gray-500 hover:bg-gray-100/50'}
                 `}
               >
                 <Store size={18} />
@@ -151,8 +151,8 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('usuarios')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'usuarios' 
-                    ? 'bg-white shadow-sm text-[#F9842C] ring-1 ring-gray-200/50' 
-                    : 'text-gray-400 hover:text-[#757778] hover:bg-gray-100/50'}
+                    ? 'bg-white shadow-sm text-secondary ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-gray-500 hover:bg-gray-100/50'}
                 `}
               >
                 <Users size={18} />
@@ -162,8 +162,8 @@ export default function AdminPanel() {
                 onClick={() => setActiveTab('paises')}
                 className={`flex-none flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold transition-all text-sm whitespace-nowrap
                   ${activeTab === 'paises' 
-                    ? 'bg-white shadow-sm text-[#F9842C] ring-1 ring-gray-200/50' 
-                    : 'text-gray-400 hover:text-[#757778] hover:bg-gray-100/50'}
+                    ? 'bg-white shadow-sm text-secondary ring-1 ring-gray-200/50' 
+                    : 'text-gray-400 hover:text-gray-500 hover:bg-gray-100/50'}
                 `}
               >
                 <Globe size={18} />

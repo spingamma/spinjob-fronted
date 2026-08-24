@@ -9,7 +9,7 @@ export default function NegociosHeader({
 }) {
   return (
     <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 px-2">
-      <h2 className="text-xl font-extrabold text-[#1A535C]">
+      <h2 className="text-xl font-extrabold text-primary">
         {negocioStatusFilter === 'pendientes' && 'Revisiones Pendientes'}
         {negocioStatusFilter === 'premium' && 'Negocios Premium'}
         {negocioStatusFilter === 'basico' && 'Negocios Plan Básico'}
@@ -21,7 +21,7 @@ export default function NegociosHeader({
         <select 
           value={negocioStatusFilter}
           onChange={(e) => setNegocioStatusFilter(e.target.value)}
-          className="bg-white border border-gray-200 px-4 py-2.5 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 text-sm font-bold text-[#1A535C]"
+          className="bg-white border border-gray-200 px-4 py-2.5 rounded-xl outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/30 text-sm font-bold text-primary"
         >
           <option value="pendientes">Pendientes</option>
           <option value="premium">Premium</option>
@@ -37,7 +37,7 @@ export default function NegociosHeader({
             placeholder="Buscar por nombre o categoría..." 
             value={searchNegocios}
             onChange={(e) => setSearchNegocios(e.target.value)}
-            className="w-full bg-white border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 transition-all text-sm font-medium"
+            className="w-full bg-white border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/30 transition-all text-sm font-medium"
           />
         </div>
       </div>

@@ -23,7 +23,7 @@ export default function OrderCard({
     : isCompletado
     ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
     : isReadyForPickup
-    ? 'bg-[#F9842C] text-white border border-[#F9842C]'
+    ? 'bg-secondary text-white border border-secondary'
     : isEntregado
     ? 'bg-green-100 text-green-700 border border-green-200'
     : isPagado
@@ -50,12 +50,12 @@ export default function OrderCard({
     <div data-testid={`business-order-card-${order.id}`} className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:shadow-md">
       <div className="space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-extrabold text-[#1A535C] text-sm">Pedido #{formatOrderCode(order.order_number, order.id)}</span>
+          <span className="font-extrabold text-primary text-sm">Pedido #{formatOrderCode(order.order_number, order.id)}</span>
           <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full ${statusBadgeClass}`}>
             {statusLabel}
           </span>
         </div>
-        <p className="text-xs text-gray-400 font-medium">Cliente: <span className="text-[#1A535C] font-bold">{order.customer_name}</span></p>
+        <p className="text-xs text-gray-400 font-medium">Cliente: <span className="text-primary font-bold">{order.customer_name}</span></p>
         <p className="text-xs text-gray-400 font-medium">Fecha: <span className="font-semibold text-gray-600">{new Date(order.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></p>
         {order.delivered_at && (
           <p className="text-xs text-green-600 font-medium mt-0.5">Fecha de Entrega: <span className="font-semibold">{new Date(order.delivered_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></p>
@@ -76,7 +76,7 @@ export default function OrderCard({
       <div className="flex items-center justify-between sm:justify-end gap-6 shrink-0">
         <div>
           <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider text-right">Total</p>
-          <p className="font-black text-lg text-[#1A535C]">Bs. {order.total_price.toFixed(2)}</p>
+          <p className="font-black text-lg text-primary">Bs. {order.total_price.toFixed(2)}</p>
         </div>
         
         {!isCancelado && (
@@ -194,7 +194,7 @@ export default function OrderCard({
                 onClick={() => handleStatusChange(order.id, 'ready_for_pickup')}
                 disabled={updatingOrder?.id === order.id}
                 data-testid="mark-ready-btn"
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-[#F9842C] hover:bg-[#e06516] text-white text-xs font-bold rounded-xl shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-secondary hover:bg-secondary/90 text-white text-xs font-bold rounded-xl shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {updatingOrder?.id === order.id && updatingOrder?.status === 'ready_for_pickup' ? (
                   <Loader2 size={14} className="animate-spin" />
@@ -222,7 +222,7 @@ export default function OrderCard({
             )}
 
             {isReadyForPickup && !isPaqueteria && (
-              <div className="flex items-center gap-1 text-[#F9842C] text-xs font-bold bg-orange-50 px-3 py-2 rounded-xl border border-orange-200">
+              <div className="flex items-center gap-1 text-secondary text-xs font-bold bg-orange-50 px-3 py-2 rounded-xl border border-orange-200">
                 <PackageCheck size={14} /> Listo para Recojo
               </div>
             )}

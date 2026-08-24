@@ -43,13 +43,13 @@ export default function ReviewModal({
   const isEditing = !!calificacionPrevia;
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-[#1A535C]/60 backdrop-blur-md transition-opacity" onClick={onClose}>
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-primary/60 backdrop-blur-md transition-opacity" onClick={onClose}>
       <div 
         className="bg-white border border-gray-100 rounded-[2rem] shadow-2xl w-full max-w-lg relative animate-in zoom-in-95 duration-300 overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cabecera decorativa */}
-        <div className="bg-[#1A535C] p-6 relative">
+        <div className="bg-primary p-6 relative">
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay"></div>
           
           <button 
@@ -67,8 +67,8 @@ export default function ReviewModal({
             <h3 className="text-xl font-extrabold text-white mb-1">
               {isEditing ? 'Cambia tu Calificación' : 'Califica a'}
             </h3>
-            {!isEditing && <p className="text-[#F9842C] font-bold text-lg">{profesionalName}</p>}
-            {isEditing && <p className="text-[#F9842C] text-sm mt-1">Ya calificaste a este profesional antes.</p>}
+            {!isEditing && <p className="text-secondary font-bold text-lg">{profesionalName}</p>}
+            {isEditing && <p className="text-secondary text-sm mt-1">Ya calificaste a este profesional antes.</p>}
           </div>
         </div>
 
@@ -78,7 +78,7 @@ export default function ReviewModal({
             
             {/* ESTRELLAS */}
             <div className="flex flex-col items-center gap-2">
-              <label className="text-sm font-bold text-[#757778] uppercase tracking-wider">
+              <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">
                 ¿Cuántas estrellas le das?
               </label>
               <div className="flex gap-2 justify-center">
@@ -98,7 +98,7 @@ export default function ReviewModal({
                       size={40} 
                       className={`
                         ${(hoverRating || rating) >= star 
-                          ? "fill-[#F9842C] text-[#F9842C]" 
+                          ? "fill-secondary text-secondary" 
                           : "fill-gray-100 text-gray-300"} 
                         transition-colors
                       `} 
@@ -111,7 +111,7 @@ export default function ReviewModal({
 
             {/* TEXTAREA OPINIÓN */}
             <div>
-              <label htmlFor="descripcion_servicio" className="block text-sm font-bold text-[#1A535C] mb-2">
+              <label htmlFor="descripcion_servicio" className="block text-sm font-bold text-primary mb-2">
                 Describe tu experiencia (Opcional)
               </label>
               <textarea 
@@ -121,7 +121,7 @@ export default function ReviewModal({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="¿Cómo fue el servicio, el trato, la puntualidad?"
-                className="w-full bg-gray-50 border border-gray-200 text-[#1A535C] rounded-2xl p-4 focus:ring-2 focus:ring-[#F9842C]/30 focus:border-[#F9842C] focus:bg-white outline-none transition-all resize-none disabled:opacity-60"
+                className="w-full bg-gray-50 border border-gray-200 text-primary rounded-2xl p-4 focus:ring-2 focus:ring-secondary/30 focus:border-secondary focus:bg-white outline-none transition-all resize-none disabled:opacity-60"
                 rows="4"
               />
             </div>
@@ -133,8 +133,8 @@ export default function ReviewModal({
               disabled={isSubmitting || rating === 0}
               className={`w-full text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition-all flex justify-center items-center gap-2 mt-2
                 ${(isSubmitting || rating === 0) 
-                  ? 'bg-gray-300 cursor-not-allowed text-[#757778] shadow-none' 
-                  : 'bg-[#F9842C] hover:bg-[#e06516] hover:-translate-y-0.5 hover:shadow-xl'
+                  ? 'bg-gray-300 cursor-not-allowed text-gray-500 shadow-none' 
+                  : 'bg-secondary hover:bg-secondary/90 hover:-translate-y-0.5 hover:shadow-xl'
                 }
               `}
             >

@@ -46,7 +46,7 @@ export default function CatalogProductsList({
         <button
           data-testid="add-product-btn"
           onClick={handleOpenCreate}
-          className="w-full bg-[#1A535C] hover:bg-[#133d44] text-white px-4 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm mb-6 mt-4"
+          className="w-full bg-primary hover:bg-primary/90 text-white px-4 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm mb-6 mt-4"
         >
           <Plus size={18} />
           Añadir Producto
@@ -55,8 +55,8 @@ export default function CatalogProductsList({
 
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-bold text-[#1A535C] flex items-center gap-2">
-            <Package size={16} className="text-[#F9842C]" /> Productos Registrados
+          <h4 className="text-sm font-bold text-primary flex items-center gap-2">
+            <Package size={16} className="text-secondary" /> Productos Registrados
           </h4>
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-lg">
@@ -96,7 +96,7 @@ export default function CatalogProductsList({
                     className="w-full bg-gray-50 hover:bg-gray-100 px-4 py-3 flex items-center justify-between transition-colors border-b border-gray-100 cursor-pointer"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#1A535C] text-sm">{catalogName}</span>
+                      <span className="font-bold text-primary text-sm">{catalogName}</span>
                       <span className="text-xs bg-white px-2 py-0.5 rounded-md border border-gray-200 text-gray-500 font-semibold">
                         {catalogProducts.length}
                       </span>
@@ -172,14 +172,14 @@ export default function CatalogProductsList({
                     value={newSectionName}
                     onChange={(e) => setNewSectionName(e.target.value)}
                     placeholder="Nueva Sección"
-                    className="w-full sm:flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
+                    className="w-full sm:flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-primary outline-none focus:border-secondary transition-all"
                     required
                   />
                   {newSectionName.trim().length > 0 && (
                     <button
                       data-testid="btn-add-section"
                       type="submit"
-                      className="bg-[#F9842C] hover:bg-[#e06516] text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all shrink-0 animate-in fade-in zoom-in-95 duration-200"
+                      className="bg-secondary hover:bg-secondary/90 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all shrink-0 animate-in fade-in zoom-in-95 duration-200"
                     >
                       Guardar
                     </button>
@@ -196,7 +196,7 @@ export default function CatalogProductsList({
                   <button
                     data-testid="premium-info-btn-sections"
                     onClick={() => setPremiumModalData({ isOpen: true, featureName: 'Secciones del Catálogo' })}
-                    className="mt-2 text-xs font-bold text-[#F9842C] hover:text-[#e06516] underline"
+                    className="mt-2 text-xs font-bold text-secondary hover:text-secondary/80 underline"
                   >
                     Más información
                   </button>

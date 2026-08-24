@@ -27,7 +27,7 @@ export default function CustomerOrderCard({
     : isCompletado
     ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
     : isReadyForPickup
-    ? 'bg-[#F9842C] text-white border border-[#F9842C]'
+    ? 'bg-secondary text-white border border-secondary'
     : isEntregado 
     ? (isPaqueteria ? 'bg-indigo-100 text-indigo-800 border border-indigo-200' : 'bg-green-100 text-green-700 border border-green-200')
     : isPagado 
@@ -68,7 +68,7 @@ export default function CustomerOrderCard({
           {order.items?.map((item, idx) => (
             <div key={idx} className="flex justify-between items-center text-sm">
               <span className="font-medium text-gray-700">
-                <span className="font-bold text-[#1A535C] mr-2">{item.quantity}x</span> 
+                <span className="font-bold text-primary mr-2">{item.quantity}x</span> 
                 {item.product_name}
               </span>
               <span className="text-gray-500 font-bold text-xs">Bs. {item.subtotal.toFixed(2)}</span>
@@ -82,9 +82,9 @@ export default function CustomerOrderCard({
           <div className="w-full flex flex-col gap-1.5 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
             <div className="flex justify-between items-center text-xs">
               <span className="text-gray-500 font-medium">Productos</span>
-              <span className="font-bold text-[#1A535C]">Bs. {order.total_price.toFixed(2)}</span>
+              <span className="font-bold text-primary">Bs. {order.total_price.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center text-xs text-[#F9842C]">
+            <div className="flex justify-between items-center text-xs text-secondary">
               <span className="font-medium">
                 {isCompletado ? 'Recojo' : 'A pagar (recojo)'}
               </span>
@@ -96,7 +96,7 @@ export default function CustomerOrderCard({
         ) : (
           <div className="text-right w-full flex flex-row md:flex-col justify-between md:justify-start items-center md:items-end">
             <p className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Total</p>
-            <p className="text-xl font-black text-[#1A535C]">Bs. {order.total_price.toFixed(2)}</p>
+            <p className="text-xl font-black text-primary">Bs. {order.total_price.toFixed(2)}</p>
           </div>
         )}
 
@@ -115,7 +115,7 @@ export default function CustomerOrderCard({
                 const targetSlug = order.business_slug || order.business?.slug || 'spingamma';
                 navigate(`/perfil/${targetSlug}/orden/${order.id}`);
               }}
-              className="w-full py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all bg-[#F9842C] hover:bg-[#e06516] text-white"
+              className="w-full py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all bg-secondary hover:bg-secondary/90 text-white"
             >
               <QrCode size={14} /> {order.payment_rejection_reason ? 'Volver a intentar' : 'Pagar con QR'}
             </button>

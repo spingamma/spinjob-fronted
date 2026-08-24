@@ -65,7 +65,7 @@ export default function CreateBusiness() {
   };
 
   if (loading) {
-    return <div className="text-center p-10 mt-20 text-[#1A535C] font-bold">Cargando datos del negocio...</div>;
+    return <div className="text-center p-10 mt-20 text-primary font-bold">Cargando datos del negocio...</div>;
   }
 
   if (error) {

@@ -11,8 +11,8 @@ export default function AnalyticsChart({
   const getChartAreas = () => {
     if (viewMode === 'global' || (viewMode === 'compare' && selectedBusinesses.length === 1)) {
       return [
-        { dataKey: 'Visitas', name: 'Visitas', color: '#1A535C' },
-        { dataKey: 'Redes / WhatsApp', name: 'Redes / WhatsApp', color: '#F9842C', customName: 'Redes / WhatsApp' }
+        { dataKey: 'Visitas', name: 'Visitas', color: 'var(--color-primary)' },
+        { dataKey: 'Redes / WhatsApp', name: 'Redes / WhatsApp', color: 'var(--color-secondary)', customName: 'Redes / WhatsApp' }
       ];
     } else if (viewMode === 'compare' && selectedBusinesses.length > 1) {
       return selectedBusinesses.map(b => ({
@@ -28,7 +28,7 @@ export default function AnalyticsChart({
 
   return (
     <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 z-0">
-      <h3 className="font-bold text-[#757778] mb-6 flex items-center gap-2">
+      <h3 className="font-bold text-gray-500 mb-6 flex items-center gap-2">
         {viewMode === 'global' ? 'Comportamiento de la App (Visitas vs Contactos)' : 
          (selectedBusinesses.length === 1 ? `Comportamiento de ${selectedBusinesses[0].name}` : 'Comparativa de Interacciones Totales')}
       </h3>
@@ -42,7 +42,7 @@ export default function AnalyticsChart({
         </div>
       ) : isLoadingChart ? (
         <div className="py-20 flex justify-center">
-          <Loader2 size={40} className="animate-spin text-[#F9842C]" />
+          <Loader2 size={40} className="animate-spin text-secondary" />
         </div>
       ) : chartData.length > 0 && chartAreas.length > 0 ? (
         <div className="w-full h-[450px] min-h-[450px]">
@@ -61,7 +61,7 @@ export default function AnalyticsChart({
               <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} dx={-10} allowDecimals={false} />
               <Tooltip 
                 contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
-                labelStyle={{ fontWeight: 'bold', color: '#1A535C', marginBottom: '8px' }}
+                labelStyle={{ fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '8px' }}
                 formatter={(value, name) => {
                   const area = chartAreas.find(a => a.dataKey === name);
                   return [value, area ? (area.customName || area.name) : name];

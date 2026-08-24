@@ -35,7 +35,7 @@ export default function CheckoutSection({
   });
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] pb-24 font-sans text-[#1A535C]">
+    <div className="min-h-screen bg-brand-bg pb-24 font-sans text-primary">
       <div className="bg-white px-4 py-4 sticky top-0 z-50 shadow-sm flex items-center gap-4">
         <button onClick={() => navigate(-1)} className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors" data-testid="back-button-checkout">
           <ArrowLeft size={20} />
@@ -54,7 +54,7 @@ export default function CheckoutSection({
         )}
 
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
-          <h2 className="text-sm font-bold text-[#757778] uppercase tracking-wider mb-4 border-b pb-2">Para: {slug}</h2>
+          <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">Para: {slug}</h2>
           <div className="space-y-4">
             {itemsList.map((item, idx) => {
               const rawMatch = (item.product.price || '0').replace(/[^\d.-]/g, '');
@@ -64,7 +64,7 @@ export default function CheckoutSection({
                 <div key={idx} className="flex justify-between items-center">
                   <div className="flex-1 pr-4">
                     <p className="font-bold text-sm">{item.product.name}</p>
-                    <p className="text-xs text-[#757778]">{item.quantity} x Bs. {validPrice.toFixed(2)}</p>
+                    <p className="text-xs text-gray-500">{item.quantity} x Bs. {validPrice.toFixed(2)}</p>
                   </div>
                   <p className="font-black">Bs. {(item.quantity * validPrice).toFixed(2)}</p>
                 </div>
@@ -84,21 +84,21 @@ export default function CheckoutSection({
                 </div>
                 <div className="flex justify-between items-end mt-2 pt-2 border-t border-gray-100">
                   <span className="text-gray-500 font-bold">Costo Total</span>
-                  <span className="text-xl font-black text-[#F9842C]">Bs. {(totalPrice + pickupFee).toFixed(2)}</span>
+                  <span className="text-xl font-black text-secondary">Bs. {(totalPrice + pickupFee).toFixed(2)}</span>
                 </div>
               </>
             )}
             {!isPaqueteriaSelected && (
               <div className="flex justify-between items-end">
                 <span className="text-gray-500 font-bold">Total a pagar</span>
-                <span className="text-2xl font-black text-[#F9842C]">Bs. {(totalPrice ?? 0).toFixed(2)}</span>
+                <span className="text-2xl font-black text-secondary">Bs. {(totalPrice ?? 0).toFixed(2)}</span>
               </div>
             )}
           </div>
         </div>
 
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-sm font-bold text-[#1A535C] mb-4 border-b pb-2">Detalles del {isOwner ? 'Cliente' : 'Pedido'}</h2>
+          <h2 className="text-sm font-bold text-primary mb-4 border-b pb-2">Detalles del {isOwner ? 'Cliente' : 'Pedido'}</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isOwner && (
               <div>
@@ -109,7 +109,7 @@ export default function CheckoutSection({
                   value={customerName}
                   onChange={e => setCustomerName(e.target.value)}
                   placeholder="Ej. Juan Pérez"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-[#F9842C] focus:ring-4 focus:ring-orange-50 transition-all outline-none font-bold"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-secondary focus:ring-4 focus:ring-orange-50 transition-all outline-none font-bold"
                   data-testid="customer-name-input"
                 />
               </div>
@@ -138,7 +138,7 @@ export default function CheckoutSection({
               </div>
             )}
             {!isOwner && (
-              <button type="submit" disabled={loading} data-testid="confirm-order-btn" className="w-full bg-[#F9842C] hover:bg-[#e06516] text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 mt-4 disabled:opacity-60">
+              <button type="submit" disabled={loading} data-testid="confirm-order-btn" className="w-full bg-secondary hover:bg-secondary/90 text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 mt-4 disabled:opacity-60">
                 {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Send size={18} />}
                 Confirmar Pedido (Pagar con QR)
               </button>

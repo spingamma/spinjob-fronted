@@ -85,10 +85,10 @@ export default function MisNegocios() {
     }
   };
 
-  if (cargando) return <div className="text-center py-20 text-[#1A535C] font-bold">Cargando tus negocios...</div>;
+  if (cargando) return <div className="text-center py-20 text-primary font-bold">Cargando tus negocios...</div>;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] font-sans pb-20">
+    <div className="min-h-screen bg-brand-bg font-sans pb-20">
       <Header
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -104,15 +104,15 @@ export default function MisNegocios() {
       />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative">
-        <button onClick={() => navigate(-1)} className="flex items-center text-[#6A431F] hover:text-[#F9842C] font-bold mb-6 transition-colors group">
+        <button onClick={() => navigate(-1)} className="flex items-center text-accent hover:text-secondary font-bold mb-6 transition-colors group">
           <ArrowLeft size={20} className="mr-2 transition-transform group-hover:-translate-x-1" /> Volver
         </button>
 
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-extrabold text-[#1A535C] flex items-center gap-3">
-            <Building className="text-[#F9842C]" /> Mis Negocios
+          <h1 className="text-3xl font-extrabold text-primary flex items-center gap-3">
+            <Building className="text-secondary" /> Mis Negocios
           </h1>
-          <Link to="/crear-negocio" onClick={handleNuevoNegocioClick} className="bg-[#F9842C] hover:bg-[#e06516] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-transform hover:-translate-y-0.5">
+          <Link to="/crear-negocio" onClick={handleNuevoNegocioClick} className="bg-secondary hover:bg-secondary/90 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-transform hover:-translate-y-0.5">
             <PlusCircle size={18} /> Nuevo
           </Link>
         </div>
@@ -121,8 +121,8 @@ export default function MisNegocios() {
 
         {negocios.length === 0 ? (
           <div className="bg-white rounded-2xl p-10 text-center shadow-sm border border-gray-100">
-            <p className="text-[#757778] mb-4">Aún no has registrado ningún negocio.</p>
-            <Link to="/crear-negocio" className="text-[#F9842C] font-bold underline">Crea tu primer perfil profesional</Link>
+            <p className="text-gray-500 mb-4">Aún no has registrado ningún negocio.</p>
+            <Link to="/crear-negocio" className="text-secondary font-bold underline">Crea tu primer perfil profesional</Link>
           </div>
         ) : (
           <div className="grid gap-6">
@@ -131,8 +131,8 @@ export default function MisNegocios() {
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
-                    <h3 className="font-bold text-xl text-[#1A535C]">{neg.name}</h3>
-                    <p className="text-[#757778] text-sm">{neg.title} • {neg.category}</p>
+                    <h3 className="font-bold text-xl text-primary">{neg.name}</h3>
+                    <p className="text-gray-500 text-sm">{neg.title} • {neg.category}</p>
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
@@ -181,7 +181,7 @@ export default function MisNegocios() {
                   {neg.status === 'aprobado' && (
                     <Link
                       to={`/perfil/${neg.slug}`}
-                      className="flex items-center gap-2 text-sm font-bold text-[#32698F] hover:text-[#F9842C] transition-colors"
+                      className="flex items-center gap-2 text-sm font-bold text-primary/80 hover:text-secondary transition-colors"
                     >
                       <Eye size={18} /> Ver Tarjeta Pública
                     </Link>

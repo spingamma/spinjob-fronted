@@ -20,7 +20,7 @@ export default function HeroInfoEdit({
           value={editFormData.name || ''}
           onChange={handleEditChange}
           maxLength={30}
-          className="w-full text-3xl font-extrabold text-[#1A535C] leading-tight bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded px-2 outline-none transition-all pr-6"
+          className="w-full text-3xl font-extrabold text-primary leading-tight bg-white/60 border border-dashed border-gray-400 focus:border-secondary focus:bg-white rounded px-2 outline-none transition-all pr-6"
           placeholder="Nombre del Negocio"
         />
         <span className="absolute right-2 text-red-500 font-bold text-xl" title="Campo obligatorio">*</span>
@@ -30,7 +30,7 @@ export default function HeroInfoEdit({
           name="title"
           value={editFormData.title || ''}
           onChange={handleEditChange}
-          className="w-full text-[#6A431F] text-sm font-bold uppercase tracking-widest bg-white/60 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded px-2 outline-none transition-all pr-6"
+          className="w-full text-accent text-sm font-bold uppercase tracking-widest bg-white/60 border border-dashed border-gray-400 focus:border-secondary focus:bg-white rounded px-2 outline-none transition-all pr-6"
           placeholder="Título o Especialidad"
         />
         <span className="absolute right-2 text-red-500 font-bold text-lg" title="Campo obligatorio">*</span>
@@ -45,7 +45,7 @@ export default function HeroInfoEdit({
             onChange={(e) => {
               setEditFormData({ ...editFormData, category: e.target.value, subcategories: [] });
             }}
-            className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none cursor-pointer"
+            className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-secondary rounded p-2 outline-none cursor-pointer"
           >
             <option value="">Selecciona una Categoría...</option>
             {specialtiesData && specialtiesData.map(g => (
@@ -61,7 +61,7 @@ export default function HeroInfoEdit({
               name="seller_code"
               value={editFormData.seller_code || ''}
               onChange={handleEditChange}
-              className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] focus:bg-white rounded p-2 outline-none transition-all"
+              className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-secondary focus:bg-white rounded p-2 outline-none transition-all"
               placeholder="Ej. ma567"
             />
           </div>
@@ -89,8 +89,8 @@ export default function HeroInfoEdit({
                       setEditFormData({ ...editFormData, subcategories: newSubs });
                     }}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${checked
-                      ? 'bg-[#F9842C] text-white border-[#F9842C] shadow-sm'
-                      : 'bg-white text-[#757778] border-gray-200 hover:border-[#F9842C]/50 hover:text-[#F9842C]'
+                      ? 'bg-secondary text-white border-secondary shadow-sm'
+                      : 'bg-white text-gray-500 border-gray-200 hover:border-secondary/50 hover:text-secondary'
                       }`}
                   >
                     {checked && <Check size={14} className="inline mr-1 -mt-0.5" />}
@@ -104,8 +104,8 @@ export default function HeroInfoEdit({
       })()}
 
       <div className="mt-4 grid grid-cols-2 gap-3 bg-white/50 p-4 rounded-xl border border-gray-200 shadow-sm">
-        <p className="col-span-2 text-sm font-extrabold text-[#1A535C] flex items-center gap-2">
-          <MapPin size={16} className="text-[#F9842C]" /> Ubicación Geográfica
+        <p className="col-span-2 text-sm font-extrabold text-primary flex items-center gap-2">
+          <MapPin size={16} className="text-secondary" /> Ubicación Geográfica
         </p>
 
         <div className="flex flex-col">
@@ -116,7 +116,7 @@ export default function HeroInfoEdit({
             onChange={(e) => {
               setEditFormData(prev => ({ ...prev, country: e.target.value, state: '' }));
             }}
-            className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none cursor-pointer"
+            className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-secondary rounded p-2 outline-none cursor-pointer"
           >
             {countriesList.length === 0 ? (
               <option value="Bolivia">Bolivia</option>
@@ -134,7 +134,7 @@ export default function HeroInfoEdit({
             name="state"
             value={editFormData.state || ''}
             onChange={handleEditChange}
-            className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none cursor-pointer"
+            className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-secondary rounded p-2 outline-none cursor-pointer"
           >
             <option value="">Selecciona un departamento...</option>
             {countriesList.find(c => c.country === (editFormData.country || 'Bolivia'))?.departments?.map(d => (
@@ -167,7 +167,7 @@ export default function HeroInfoEdit({
                 national_delivery: val === 'national'
               }));
             }}
-            className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded p-2 outline-none cursor-pointer"
+            className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-secondary rounded p-2 outline-none cursor-pointer"
           >
             <option value="no">No realizo envíos / entregas</option>
             <option value="local">Sí, realizo entregas a domicilio (Departamental)</option>
@@ -182,9 +182,9 @@ export default function HeroInfoEdit({
               type="button"
               onClick={() => setIsMapOpen(true)}
               data-testid="open-map-selector-button"
-              className="text-xs font-bold text-[#F9842C] hover:text-[#e06516] flex items-center gap-1.5 bg-[#F9842C]/5 px-3 py-1.5 rounded-xl border border-[#F9842C]/20 hover:bg-[#F9842C]/10 transition-all active:scale-95 cursor-pointer shadow-sm"
+              className="text-xs font-bold text-secondary hover:text-secondary/80 flex items-center gap-1.5 bg-secondary/5 px-3 py-1.5 rounded-xl border border-secondary/20 hover:bg-secondary/10 transition-all active:scale-95 cursor-pointer shadow-sm"
             >
-              <MapPin size={14} className="text-[#F9842C]" />
+              <MapPin size={14} className="text-secondary" />
               <span>Elegir en el Mapa</span>
             </button>
           </div>
@@ -194,12 +194,12 @@ export default function HeroInfoEdit({
               name="ubicacion_url"
               value={editFormData.ubicacion_url || ''}
               onChange={handleEditChange}
-              className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-[#F9842C] rounded-xl p-2.5 pr-10 outline-none transition-all"
+              className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-secondary rounded-xl p-2.5 pr-10 outline-none transition-all"
               placeholder="https://maps.app.goo.gl/..."
             />
             {resolvingUrl && (
               <div className="absolute right-3 flex items-center justify-center">
-                <Loader2 size={16} className="animate-spin text-[#F9842C]" />
+                <Loader2 size={16} className="animate-spin text-secondary" />
               </div>
             )}
           </div>

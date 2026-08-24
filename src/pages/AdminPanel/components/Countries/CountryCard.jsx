@@ -33,12 +33,12 @@ export default function CountryCard({
                 type="text"
                 value={editCountryName}
                 onChange={(e) => setEditCountryName(e.target.value)}
-                className="text-base font-bold text-[#1A535C] bg-white border border-gray-200 px-2 py-1 rounded-lg outline-none focus:border-[#F9842C] w-full"
+                className="text-base font-bold text-primary bg-white border border-gray-200 px-2 py-1 rounded-lg outline-none focus:border-secondary w-full"
               />
               <button
                 onClick={() => handleUpdateCountry(c.country)}
                 disabled={submitting}
-                className="p-1.5 bg-[#1A535C] text-white rounded-lg hover:bg-[#133d44]"
+                className="p-1.5 bg-primary text-white rounded-lg hover:bg-primary/90"
               >
                 <Save size={14} />
               </button>
@@ -50,8 +50,8 @@ export default function CountryCard({
               </button>
             </div>
           ) : (
-            <h3 className="font-extrabold text-[#1A535C] text-lg flex items-center gap-2">
-              <Globe size={18} className="text-[#1A535C]/60" />
+            <h3 className="font-extrabold text-primary text-lg flex items-center gap-2">
+              <Globe size={18} className="text-primary/60" />
               {c.country}
             </h3>
           )}
@@ -64,7 +64,7 @@ export default function CountryCard({
                 setEditingCountry(c.country);
                 setEditCountryName(c.country);
               }}
-              className="p-2 text-gray-400 hover:text-[#1A535C] hover:bg-gray-100 rounded-xl transition-all"
+              className="p-2 text-gray-400 hover:text-primary hover:bg-gray-100 rounded-xl transition-all"
             >
               <Edit2 size={16} />
             </button>
@@ -90,7 +90,7 @@ export default function CountryCard({
             {c.departments.map((dept) => (
               <div
                 key={dept.id}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-100 text-[#1A535C] font-bold text-xs rounded-full transition-all"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-100 text-primary font-bold text-xs rounded-full transition-all"
               >
                 {editingDept?.id === dept.id ? (
                   <div className="flex items-center gap-1">
@@ -98,12 +98,12 @@ export default function CountryCard({
                       type="text"
                       value={editDeptName}
                       onChange={(e) => setEditDeptName(e.target.value)}
-                      className="bg-white border border-gray-200 px-1 py-0.5 rounded outline-none w-24 text-xs font-bold text-[#1A535C]"
+                      className="bg-white border border-gray-200 px-1 py-0.5 rounded outline-none w-24 text-xs font-bold text-primary"
                     />
                     <button
                       onClick={() => handleUpdateDepartment(dept.id)}
                       disabled={submitting}
-                      className="text-[#1A535C] hover:text-[#F9842C]"
+                      className="text-primary hover:text-secondary"
                     >
                       <Save size={12} />
                     </button>
@@ -116,14 +116,14 @@ export default function CountryCard({
                   </div>
                 ) : (
                   <>
-                    <MapPin size={10} className="text-[#F9842C]" />
+                    <MapPin size={10} className="text-secondary" />
                     <span>{dept.name}</span>
                     <button
                       onClick={() => {
                         setEditingDept(dept);
                         setEditDeptName(dept.name);
                       }}
-                      className="ml-1 text-gray-400 hover:text-[#1A535C] transition-all"
+                      className="ml-1 text-gray-400 hover:text-primary transition-all"
                     >
                       <Edit2 size={10} />
                     </button>
@@ -149,12 +149,12 @@ export default function CountryCard({
                 value={newDeptName}
                 onChange={(e) => setNewDeptName(e.target.value)}
                 placeholder="Nuevo dpto..."
-                className="flex-1 text-xs bg-gray-50 border border-gray-200 rounded-xl p-2.5 outline-none focus:border-[#F9842C] transition-all"
+                className="flex-1 text-xs bg-gray-50 border border-gray-200 rounded-xl p-2.5 outline-none focus:border-secondary transition-all"
               />
               <button
                 onClick={() => handleAddDepartment(c.country)}
                 disabled={submitting || !newDeptName.trim()}
-                className="bg-[#1A535C] hover:bg-[#133d44] text-white p-2.5 rounded-xl font-bold text-xs flex items-center gap-1 transition-all"
+                className="bg-primary hover:bg-primary/90 text-white p-2.5 rounded-xl font-bold text-xs flex items-center gap-1 transition-all"
               >
                 {submitting ? <Loader2 className="animate-spin" size={14} /> : <Plus size={14} />}
               </button>
@@ -171,7 +171,7 @@ export default function CountryCard({
           ) : (
             <button
               onClick={() => setAddingDeptToCountry(c.country)}
-              className="w-full flex items-center justify-center gap-1.5 py-2 px-3 border border-dashed border-gray-200 text-gray-400 hover:text-[#1A535C] hover:border-[#1A535C] rounded-xl text-xs font-bold transition-all"
+              className="w-full flex items-center justify-center gap-1.5 py-2 px-3 border border-dashed border-gray-200 text-gray-400 hover:text-primary hover:border-primary rounded-xl text-xs font-bold transition-all"
             >
               <Plus size={14} />
               <span>Agregar Departamento</span>

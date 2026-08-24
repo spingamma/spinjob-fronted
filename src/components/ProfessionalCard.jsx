@@ -65,37 +65,37 @@ export default function ProfessionalCard({ professional, isLoggedIn, onCardClick
           onCardClick(professional.slug);
         }
       }}
-      className="group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 hover:border-[#F9842C]/30 overflow-hidden"
+      className="group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 hover:border-secondary/30 overflow-hidden"
     >
       <div className="relative aspect-square overflow-hidden bg-gray-50">
         <img
-          src={professional.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(professional.name)}&background=F8F9FA&color=1E3D51&size=256`}
+          src={professional.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(professional.name)}&background=F8F9FA&color=1A535C&size=256`}
           alt={`Foto de perfil de ${professional.name}`}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           onError={(e) => {
             e.target.onerror = null;
-            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(professional.name)}&background=F8F9FA&color=1E3D51&size=256`;
+            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(professional.name)}&background=F8F9FA&color=1A535C&size=256`;
           }}
         />
 
         {professional.premium && (
           <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-white/95 backdrop-blur-sm p-1 sm:p-1.5 rounded-full flex items-center justify-center shadow-sm border border-gray-100" title="Verificado">
-            <CheckCircle2 size={13} className="text-[#F9842C] sm:w-[16px] sm:h-[16px]" />
+            <CheckCircle2 size={13} className="text-secondary sm:w-[16px] sm:h-[16px]" />
           </div>
         )}
         {professional.reviews_count > 0 && (
           <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/95 backdrop-blur-sm px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-lg flex items-center gap-1 shadow-sm border border-gray-100">
-            <Star size={12} className="fill-[#F9842C] text-[#F9842C] sm:w-[14px] sm:h-[14px]" />
+            <Star size={12} className="fill-secondary text-secondary sm:w-[14px] sm:h-[14px]" />
             <span className="text-xs sm:text-sm font-bold text-gray-900">{professional.rating}</span>
           </div>
         )}
       </div>
       <div className="flex flex-col flex-1 p-3 sm:p-4">
         <div className="flex flex-col flex-1">
-          <h3 className="font-bold text-[#1A535C] text-base sm:text-lg leading-tight pr-1 sm:pr-2 break-words">
+          <h3 className="font-bold text-primary text-base sm:text-lg leading-tight pr-1 sm:pr-2 break-words">
             {professional.name}
           </h3>
-          <p className="text-[#6A431F] font-semibold text-xs sm:text-sm mb-1.5 break-words leading-snug">
+          <p className="text-accent font-semibold text-xs sm:text-sm mb-1.5 break-words leading-snug">
             {professional.title}
           </p>
         </div>
@@ -108,7 +108,7 @@ export default function ProfessionalCard({ professional, isLoggedIn, onCardClick
           >
             <div className="text-gray-500 font-medium flex items-center gap-1 text-left min-w-0">
               {travelMessage && (
-                <span className="text-[#6A431F] font-semibold flex items-center gap-1.5 break-words leading-tight w-full" title={travelMessage}>
+                <span className="text-accent font-semibold flex items-center gap-1.5 break-words leading-tight w-full" title={travelMessage}>
                   <span className="shrink-0">🚗</span>
                   <span>{travelMessage}</span>
                 </span>
@@ -119,7 +119,7 @@ export default function ProfessionalCard({ professional, isLoggedIn, onCardClick
               {professional.home_delivery && (
                 <div 
                   data-testid="card-delivery-badge"
-                  className="px-1.5 py-0.5 rounded-lg bg-[#1A535C]/5 text-[#1A535C] border border-[#1A535C]/10 flex items-start gap-1 font-bold text-[9px] sm:text-[10px] w-[65px] sm:w-[75px] leading-tight text-left"
+                  className="px-1.5 py-0.5 rounded-lg bg-primary/5 text-primary border border-primary/10 flex items-start gap-1 font-bold text-[9px] sm:text-[10px] w-[65px] sm:w-[75px] leading-tight text-left"
                 >
                   <span className="shrink-0">📦</span>
                   <span>Delivery</span>
@@ -128,7 +128,7 @@ export default function ProfessionalCard({ professional, isLoggedIn, onCardClick
               {professional.national_delivery && (
                 <div 
                   data-testid="card-national-delivery-badge"
-                  className="px-1.5 py-0.5 rounded-lg bg-[#1A535C]/5 text-[#1A535C] border border-[#1A535C]/10 flex items-start gap-1 font-bold text-[9px] sm:text-[10px] w-[65px] sm:w-[75px] leading-tight text-left"
+                  className="px-1.5 py-0.5 rounded-lg bg-primary/5 text-primary border border-primary/10 flex items-start gap-1 font-bold text-[9px] sm:text-[10px] w-[65px] sm:w-[75px] leading-tight text-left"
                 >
                   <span className="shrink-0">✈️</span>
                   <span className="break-words">Delivery Nacional</span>
@@ -139,7 +139,7 @@ export default function ProfessionalCard({ professional, isLoggedIn, onCardClick
         )}
 
         <div className="mt-auto pt-2 w-full">
-          <div className="w-full flex items-center justify-center gap-1.5 border-2 border-[#6A431F] text-[#6A431F] group-hover:bg-[#6A431F] group-hover:text-white font-bold py-1.5 sm:py-2 px-3 rounded-full transition-colors text-xs sm:text-sm">
+          <div className="w-full flex items-center justify-center gap-1.5 border-2 border-accent text-accent group-hover:bg-accent group-hover:text-white font-bold py-1.5 sm:py-2 px-3 rounded-full transition-colors text-xs sm:text-sm">
             <DoorOpen size={14} /> Visitar
           </div>
         </div>

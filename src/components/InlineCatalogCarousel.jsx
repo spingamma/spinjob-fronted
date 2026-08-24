@@ -43,8 +43,8 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, theme = 'light
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-gray-400 w-full mb-8">
-        <Loader2 size={32} className="animate-spin mb-3 text-[#F9842C]" />
-        <p className="text-sm font-bold uppercase tracking-widest text-[#1A535C]">Cargando productos...</p>
+        <Loader2 size={32} className="animate-spin mb-3 text-secondary" />
+        <p className="text-sm font-bold uppercase tracking-widest text-primary">Cargando productos...</p>
       </div>
     );
   }
@@ -92,7 +92,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, theme = 'light
           {/* Si hay URL de catálogo externo y ya mostramos productos, lo ofrecemos al final */}
           {catalogUrl && (
             <div className="px-4 mt-2 mb-8">
-              <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className={`w-full flex items-center justify-center gap-3 font-bold py-4 px-6 rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 border ${isDark ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-gray-200 text-[#1A535C] hover:border-[#F9842C]/30'}`}>
+              <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className={`w-full flex items-center justify-center gap-3 font-bold py-4 px-6 rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 border ${isDark ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-gray-200 text-primary hover:border-secondary/30'}`}>
                 <ExternalLink size={20} /> Ver catálogo completo
               </a>
             </div>
@@ -100,7 +100,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, theme = 'light
         </div>
       ) : catalogUrl ? (
         <div className="px-4 mb-8">
-          <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className={`w-full flex items-center justify-center gap-3 font-bold py-4 px-6 rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 border ${isDark ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-gray-200 text-[#1A535C] hover:border-[#F9842C]/30'}`}>
+          <a href={catalogUrl} target="_blank" rel="noopener noreferrer" className={`w-full flex items-center justify-center gap-3 font-bold py-4 px-6 rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 border ${isDark ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white border-gray-200 text-primary hover:border-secondary/30'}`}>
             <ExternalLink size={20} /> Ir al catálogo externo
           </a>
         </div>

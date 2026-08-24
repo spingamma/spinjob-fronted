@@ -31,7 +31,7 @@ export default function AdminNegociosTab({ API_URL, onUpdatePendingCount }) {
   if (cargando && negocios.length === 0) {
     return (
       <div className="py-20 flex flex-col items-center">
-        <Loader2 size={40} className="animate-spin text-[#F9842C] mb-2" />
+        <Loader2 size={40} className="animate-spin text-secondary mb-2" />
         <p className="text-gray-400 font-bold">Cargando negocios...</p>
       </div>
     );
@@ -104,7 +104,7 @@ export default function AdminNegociosTab({ API_URL, onUpdatePendingCount }) {
                       setNegocioSeleccionado(null);
                     }
                   }}
-                  className="flex-1 bg-[#1A535C] hover:bg-[#133d44] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+                  className="flex-1 bg-primary hover:bg-primary/90 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
                 >
                   <CheckCircle size={18} /> Aprobar Ahora
                 </button>

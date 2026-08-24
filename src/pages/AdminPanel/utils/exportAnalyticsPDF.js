@@ -37,7 +37,7 @@ export const exportAnalyticsPDF = ({
     networkStats.forEach(stat => {
       // Título del Negocio
       doc.setFontSize(14);
-      doc.setTextColor(30, 61, 81); // #1A535C
+      doc.setTextColor(26, 83, 92); // #1A535C
       doc.text(`Negocio: ${stat.business.name}`, 14, finalY);
       finalY += 6;
 

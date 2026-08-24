@@ -136,11 +136,11 @@ export default function AdminSpecialtiesTab({ API_URL }) {
       {/* Header y Buscador */}
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-xl font-extrabold text-[#1A535C] flex items-center gap-2">
-            <Bookmark size={24} className="text-[#F9842C]" />
+          <h2 className="text-xl font-extrabold text-primary flex items-center gap-2">
+            <Bookmark size={24} className="text-secondary" />
             Catálogo de Especialidades
           </h2>
-          <p className="text-sm text-[#757778] mt-1">Gestiona las categorías y profesiones disponibles.</p>
+          <p className="text-sm text-gray-500 mt-1">Gestiona las categorías y profesiones disponibles.</p>
         </div>
 
         <div className="flex w-full md:w-auto gap-3">
@@ -151,13 +151,13 @@ export default function AdminSpecialtiesTab({ API_URL }) {
               placeholder="Buscar..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 text-sm font-medium"
+              className="w-full bg-gray-50 border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/30 text-sm font-medium"
             />
           </div>
           <button 
             onClick={openCreateModal}
             data-testid="create-specialty-btn"
-            className="bg-[#1A535C] hover:bg-[#152b39] text-white px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shrink-0"
+            className="bg-primary hover:bg-primary/90 text-white px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shrink-0"
           >
             <Plus size={18} /> Nuevo
           </button>
@@ -168,7 +168,7 @@ export default function AdminSpecialtiesTab({ API_URL }) {
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         {isLoading ? (
           <div className="py-20 flex justify-center">
-            <Loader2 size={40} className="animate-spin text-[#F9842C]" />
+            <Loader2 size={40} className="animate-spin text-secondary" />
           </div>
         ) : filteredGroups.length === 0 ? (
           <div className="py-20 text-center text-gray-400 font-bold">No se encontraron resultados.</div>
@@ -176,16 +176,16 @@ export default function AdminSpecialtiesTab({ API_URL }) {
           <div className="divide-y divide-gray-100">
             {filteredGroups.map(group => (
               <div key={group.category} className="p-6 hover:bg-gray-50/50 transition-colors">
-                <h3 className="font-black text-lg text-[#1A535C] mb-4">{group.category}</h3>
+                <h3 className="font-black text-lg text-primary mb-4">{group.category}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {group.subcategories.filter(s => s.subcategory.toLowerCase().includes(searchTerm.toLowerCase()) || searchTerm === '').map(sub => (
-                    <div key={sub.id} className="bg-white border border-gray-200 rounded-xl p-3 flex justify-between items-center group/item hover:border-[#F9842C]/30 transition-all">
-                      <span className="font-medium text-[#6A431F] text-sm">{sub.subcategory}</span>
+                    <div key={sub.id} className="bg-white border border-gray-200 rounded-xl p-3 flex justify-between items-center group/item hover:border-secondary/30 transition-all">
+                      <span className="font-medium text-accent text-sm">{sub.subcategory}</span>
                       <div className="flex items-center gap-1 transition-opacity">
                         <button 
                           onClick={() => openEditModal(sub)}
                           data-testid={`edit-specialty-${sub.id}`}
-                          className="p-1.5 text-gray-400 hover:text-[#1A535C] hover:bg-gray-100 rounded-lg transition-all"
+                          className="p-1.5 text-gray-400 hover:text-primary hover:bg-gray-100 rounded-lg transition-all"
                         >
                           <Edit3 size={16} />
                         </button>

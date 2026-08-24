@@ -19,21 +19,21 @@ export default function MapSelectorModal({ isOpen, onClose, onConfirm, initialCo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-[#1A535C]/50 backdrop-blur-sm transition-opacity">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-primary/50 backdrop-blur-sm transition-opacity">
       <div 
         className="bg-white rounded-[2rem] border border-gray-100 shadow-2xl w-full max-w-xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-[#F8F9FA]">
+        <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-brand-bg">
           <div className="flex items-center gap-2">
-            <MapPin size={22} className="text-[#F9842C]" />
-            <h3 className="text-lg font-bold text-[#1A535C]">Seleccionar Ubicación</h3>
+            <MapPin size={22} className="text-secondary" />
+            <h3 className="text-lg font-bold text-primary">Seleccionar Ubicación</h3>
           </div>
           <button 
             onClick={onClose}
             data-testid="map-close-button"
-            className="text-gray-400 hover:text-[#1A535C] p-2 hover:bg-gray-200/50 rounded-full transition-colors cursor-pointer"
+            className="text-gray-400 hover:text-primary p-2 hover:bg-gray-200/50 rounded-full transition-colors cursor-pointer"
           >
             <X size={20} />
           </button>
@@ -47,8 +47,8 @@ export default function MapSelectorModal({ isOpen, onClose, onConfirm, initialCo
             </div>
           ) : !leafletLoaded ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
-              <Loader2 size={36} className="animate-spin text-[#F9842C]" />
-              <span className="text-sm font-medium text-[#757778]">Cargando mapa interactivo...</span>
+              <Loader2 size={36} className="animate-spin text-secondary" />
+              <span className="text-sm font-medium text-gray-500">Cargando mapa interactivo...</span>
             </div>
           ) : (
             <>
@@ -61,13 +61,13 @@ export default function MapSelectorModal({ isOpen, onClose, onConfirm, initialCo
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Buscar zona, calle, plaza en Bolivia..."
                     data-testid="map-search-input"
-                    className="flex-1 text-sm bg-gray-50 border border-gray-200 focus:border-[#F9842C] focus:bg-white rounded-xl px-3 py-2.5 outline-none transition-all"
+                    className="flex-1 text-sm bg-gray-50 border border-gray-200 focus:border-secondary focus:bg-white rounded-xl px-3 py-2.5 outline-none transition-all"
                   />
                   <button
                     type="submit"
                     disabled={searching}
                     data-testid="map-search-button"
-                    className="bg-[#1A535C] hover:bg-[#154249] text-white p-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center shrink-0 cursor-pointer disabled:opacity-50"
+                    className="bg-primary hover:bg-primary/90 text-white p-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center shrink-0 cursor-pointer disabled:opacity-50"
                     title="Buscar"
                   >
                     {searching ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
@@ -79,10 +79,10 @@ export default function MapSelectorModal({ isOpen, onClose, onConfirm, initialCo
                   onClick={handleGpsLocation}
                   disabled={gpsLoading}
                   data-testid="map-gps-button"
-                  className="bg-white hover:bg-gray-50 text-[#1A535C] border border-gray-200 px-3 py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 font-bold text-xs cursor-pointer disabled:opacity-50"
+                  className="bg-white hover:bg-gray-50 text-primary border border-gray-200 px-3 py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 font-bold text-xs cursor-pointer disabled:opacity-50"
                   title="Usar ubicación actual por GPS"
                 >
-                  {gpsLoading ? <Loader2 size={16} className="animate-spin text-[#F9842C]" /> : <Navigation size={16} className="text-[#F9842C] fill-[#F9842C]/10" />}
+                  {gpsLoading ? <Loader2 size={16} className="animate-spin text-secondary" /> : <Navigation size={16} className="text-secondary fill-secondary/10" />}
                   <span>Mi Ubicación</span>
                 </button>
               </div>
@@ -93,13 +93,13 @@ export default function MapSelectorModal({ isOpen, onClose, onConfirm, initialCo
               </div>
 
               {/* Instructions & Lat/Lng Output */}
-              <div className="bg-[#F8F9FA] rounded-xl p-3 border border-gray-100 flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-wider font-extrabold text-[#757778]">Ayuda</span>
-                <p className="text-[11px] text-[#757778]">Haz clic en el mapa para posicionar el pin rojo en el lugar exacto de tu negocio, o arrastra el pin directamente.</p>
+              <div className="bg-brand-bg rounded-xl p-3 border border-gray-100 flex flex-col gap-1">
+                <span className="text-[10px] uppercase tracking-wider font-extrabold text-gray-500">Ayuda</span>
+                <p className="text-[11px] text-gray-500">Haz clic en el mapa para posicionar el pin rojo en el lugar exacto de tu negocio, o arrastra el pin directamente.</p>
                 {coords && (
-                  <div className="flex justify-between items-center mt-1 border-t border-gray-200/60 pt-1 text-[11px] font-bold text-[#1A535C]">
+                  <div className="flex justify-between items-center mt-1 border-t border-gray-200/60 pt-1 text-[11px] font-bold text-primary">
                     <span>Pin colocado en el mapa</span>
-                    <span className="text-[#F9842C]">✓ Ubicación lista</span>
+                    <span className="text-secondary">✓ Ubicación lista</span>
                   </div>
                 )}
               </div>
@@ -108,11 +108,11 @@ export default function MapSelectorModal({ isOpen, onClose, onConfirm, initialCo
         </div>
 
         {/* Modal Footer */}
-        <div className="p-5 border-t border-gray-100 bg-[#F8F9FA] flex justify-end gap-3">
+        <div className="p-5 border-t border-gray-100 bg-brand-bg flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl bg-white hover:bg-gray-100 text-[#757778] border border-gray-200 font-bold text-sm transition-all cursor-pointer"
+            className="px-5 py-2.5 rounded-xl bg-white hover:bg-gray-100 text-gray-500 border border-gray-200 font-bold text-sm transition-all cursor-pointer"
           >
             Cancelar
           </button>
@@ -121,7 +121,7 @@ export default function MapSelectorModal({ isOpen, onClose, onConfirm, initialCo
             onClick={() => coords && onConfirm(coords)}
             disabled={!leafletLoaded || !coords}
             data-testid="map-confirm-button"
-            className="px-6 py-2.5 rounded-xl bg-[#F9842C] hover:bg-[#e06516] text-white font-bold text-sm shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+            className="px-6 py-2.5 rounded-xl bg-secondary hover:bg-secondary/90 text-white font-bold text-sm shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
           >
             <MapPin size={16} />
             Confirmar Ubicación

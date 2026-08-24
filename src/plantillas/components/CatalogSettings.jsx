@@ -39,8 +39,8 @@ export default function CatalogSettings({
 
   return (
     <div className="pt-2">
-      <h4 className="text-sm font-bold text-[#1A535C] flex items-center gap-2 mb-4">
-        <Settings2 size={16} className="text-[#F9842C]" /> Configuración de Catálogo
+      <h4 className="text-sm font-bold text-primary flex items-center gap-2 mb-4">
+        <Settings2 size={16} className="text-secondary" /> Configuración de Catálogo
       </h4>
 
       {isPremium && (
@@ -52,9 +52,9 @@ export default function CatalogSettings({
               id="ordersEnabledCheckbox"
               checked={ordersEnabled}
               onChange={handleOrdersEnabledChange}
-              className="w-4 h-4 text-[#F9842C] focus:ring-[#F9842C] border-gray-300 rounded cursor-pointer"
+              className="w-4 h-4 text-secondary focus:ring-secondary border-gray-300 rounded cursor-pointer"
             />
-            <label htmlFor="ordersEnabledCheckbox" className="text-xs font-bold text-[#1A535C] cursor-pointer select-none">
+            <label htmlFor="ordersEnabledCheckbox" className="text-xs font-bold text-primary cursor-pointer select-none">
               Habilitar "Mis pedidos" (Carrito de compras)
             </label>
           </div>
@@ -62,12 +62,12 @@ export default function CatalogSettings({
           {ordersEnabled && (
             <div className="mt-4 border-t border-gray-100 pt-4 space-y-4">
               {/* Rediseño UX Premium: Carga de QR Bancario */}
-              <div className="bg-[#F8F9FA] p-4 rounded-2xl border border-gray-200/80">
+              <div className="bg-brand-bg p-4 rounded-2xl border border-gray-200/80">
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-[#1A535C] flex items-center gap-1.5">
-                    <QrCode size={16} className="text-[#F9842C]" /> QR de Pago Bancario (QR Simple) <span className="text-[#F9842C]">*</span>
+                  <label className="text-xs font-bold text-primary flex items-center gap-1.5">
+                    <QrCode size={16} className="text-secondary" /> QR de Pago Bancario (QR Simple) <span className="text-secondary">*</span>
                   </label>
-                  <span className="text-[10px] font-extrabold bg-[#F9842C]/10 text-[#F9842C] px-2 py-0.5 rounded-full border border-[#F9842C]/20 uppercase">
+                  <span className="text-[10px] font-extrabold bg-secondary/10 text-secondary px-2 py-0.5 rounded-full border border-secondary/20 uppercase">
                     Requerido
                   </span>
                 </div>
@@ -90,9 +90,9 @@ export default function CatalogSettings({
                       </button>
                     </div>
                   ) : (
-                    <label className="w-full h-28 border-2 border-dashed border-gray-300 hover:border-[#F9842C] bg-white hover:bg-orange-50/30 rounded-2xl flex flex-col items-center justify-center p-3 cursor-pointer transition-all shadow-sm group">
-                      <Upload size={22} className="text-[#F9842C] group-hover:scale-110 transition-transform mb-1" />
-                      <span className="text-xs font-bold text-[#1A535C] group-hover:text-[#F9842C] transition-colors">
+                    <label className="w-full h-28 border-2 border-dashed border-gray-300 hover:border-secondary bg-white hover:bg-orange-50/30 rounded-2xl flex flex-col items-center justify-center p-3 cursor-pointer transition-all shadow-sm group">
+                      <Upload size={22} className="text-secondary group-hover:scale-110 transition-transform mb-1" />
+                      <span className="text-xs font-bold text-primary group-hover:text-secondary transition-colors">
                         Subir Imagen de QR de Pago
                       </span>
                       <span className="text-[10px] text-gray-400 mt-0.5">Formats: PNG, JPG (Máx 5MB)</span>
@@ -127,7 +127,7 @@ export default function CatalogSettings({
                 </div>
 
                 <p className="text-[11px] text-gray-500 mt-2.5 flex items-center gap-1.5 font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#F9842C] inline-block"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-secondary inline-block"></span>
                   Tus clientes verán este QR al momento de confirmar su pedido.
                 </p>
               </div>
@@ -136,7 +136,7 @@ export default function CatalogSettings({
                 className="flex justify-between items-center cursor-pointer mb-2"
                 onClick={() => setIsDeliveryOpen(!isDeliveryOpen)}
               >
-                <label className="text-xs font-bold text-[#1A535C] cursor-pointer">Métodos de entrega</label>
+                <label className="text-xs font-bold text-primary cursor-pointer">Métodos de entrega</label>
                 <div className="text-gray-400">
                   {isDeliveryOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </div>
@@ -152,13 +152,13 @@ export default function CatalogSettings({
                         value={newDeliveryMethod}
                         onChange={(e) => setNewDeliveryMethod(e.target.value)}
                         placeholder="Añadir opción (ej. Envío a domicilio)"
-                        className="flex-1 min-w-0 text-xs border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#F9842C]"
+                        className="flex-1 min-w-0 text-xs border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-secondary"
                       />
                       <button
                         data-testid="add-delivery-btn"
                         type="submit"
                         disabled={!newDeliveryMethod.trim()}
-                        className="shrink-0 bg-[#F9842C] hover:bg-[#e06516] text-white px-3 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                        className="shrink-0 bg-secondary hover:bg-secondary/90 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
                       >
                         Añadir
                       </button>
@@ -167,7 +167,7 @@ export default function CatalogSettings({
                       <button
                         type="button"
                         onClick={() => setIsSelectingPickupPoint(true)}
-                        className="shrink-0 bg-[#1A535C] hover:bg-[#154249] text-white px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap sm:w-auto w-full"
+                        className="shrink-0 bg-primary hover:bg-primary/90 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap sm:w-auto w-full"
                       >
                         Añadir Paquetería
                       </button>
@@ -190,7 +190,7 @@ export default function CatalogSettings({
                               type="text"
                               value={editingDeliveryText}
                               onChange={(e) => setEditingDeliveryText(e.target.value)}
-                              className="flex-1 text-xs border border-gray-200 rounded px-2 py-1 outline-none focus:border-[#F9842C]"
+                              className="flex-1 text-xs border border-gray-200 rounded px-2 py-1 outline-none focus:border-secondary"
                               autoFocus
                             />
                             <button
@@ -223,7 +223,7 @@ export default function CatalogSettings({
                                   type="button"
                                   onClick={() => handleStartEditDelivery(idx, method)}
                                   data-testid={`edit-delivery-${idx}`}
-                                  className="text-gray-400 hover:text-[#6A431F] transition-colors"
+                                  className="text-gray-400 hover:text-accent transition-colors"
                                 >
                                   <Pencil size={14} />
                                 </button>

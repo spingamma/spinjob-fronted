@@ -5,7 +5,7 @@ export default function CatalogSearchBar({ searchTerm, setSearchTerm, isDark }) 
   return (
     <div className="px-4 mb-4">
       <div className={`relative flex items-center rounded-2xl border px-3 py-2.5 transition-all ${
-        isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-gray-200 text-[#1A535C] shadow-sm'
+        isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-gray-200 text-primary shadow-sm'
       }`}>
         <Search size={18} className="text-gray-400 mr-2 shrink-0" />
         <input

@@ -11,7 +11,7 @@ export default function OrdersFilterBar({ startDate, setStartDate, endDate, setE
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             data-testid="business-orders-start-date"
-            className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
+            className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-primary outline-none focus:border-secondary transition-all"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -21,7 +21,7 @@ export default function OrdersFilterBar({ startDate, setStartDate, endDate, setE
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             data-testid="business-orders-end-date"
-            className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] transition-all"
+            className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-primary outline-none focus:border-secondary transition-all"
           />
         </div>
       </div>
@@ -29,7 +29,7 @@ export default function OrdersFilterBar({ startDate, setStartDate, endDate, setE
          <button 
            onClick={() => { setStartDate(todayStr); setEndDate(todayStr); }} 
            data-testid="business-orders-today-btn"
-           className="flex-1 md:flex-none px-4 py-2.5 bg-[#F9842C]/10 text-[#F9842C] hover:bg-[#F9842C]/20 text-xs font-bold rounded-xl transition-colors"
+           className="flex-1 md:flex-none px-4 py-2.5 bg-secondary/10 text-secondary hover:bg-secondary/20 text-xs font-bold rounded-xl transition-colors"
          >
            Hoy
          </button>

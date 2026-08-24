@@ -31,7 +31,7 @@ function App() {
     <ErrorBoundary>
       <Suspense fallback={
         <div
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#1D565F]"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-primary/90"
           role="status"
           aria-label="Cargando aplicación..."
         >

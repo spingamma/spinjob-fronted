@@ -33,7 +33,7 @@ export default function ProductFormModal({
     <>
       <div 
         data-testid="product-modal-backdrop"
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-[#1A535C]/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-primary/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
         onClick={onClose}
       >
         <div 
@@ -42,7 +42,7 @@ export default function ProductFormModal({
           onClick={(e) => e.stopPropagation()}
         >
         {/* Header */}
-        <div className="bg-gradient-to-br from-[#1A535C] to-[#32698F] p-5 relative shrink-0 flex items-center justify-between">
+        <div className="bg-gradient-to-br from-primary to-primary/80 p-5 relative shrink-0 flex items-center justify-between">
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent mix-blend-overlay"></div>
           <div className="relative z-10 flex items-center gap-3">
             <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center backdrop-blur-sm">
@@ -75,13 +75,13 @@ export default function ProductFormModal({
             <label htmlFor="productImageInput" className="cursor-pointer shrink-0 relative group">
               {formPreview ? (
                 <>
-                  <img src={formPreview} alt="Preview" className="w-20 h-20 rounded-2xl object-cover border-2 border-[#F9842C] shadow-sm" />
+                  <img src={formPreview} alt="Preview" className="w-20 h-20 rounded-2xl object-cover border-2 border-secondary shadow-sm" />
                   <div className="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Pencil size={18} className="text-white" />
                   </div>
                 </>
               ) : (
-                <div className="w-20 h-20 rounded-2xl bg-gray-50 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 hover:border-[#F9842C] hover:bg-orange-50/30 transition-all">
+                <div className="w-20 h-20 rounded-2xl bg-gray-50 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 hover:border-secondary hover:bg-orange-50/30 transition-all">
                   <ImageIcon size={28} className="text-gray-400" />
                   <span className="text-[10px] font-bold text-gray-400 mt-1">Subir foto</span>
                 </div>
@@ -98,7 +98,7 @@ export default function ProductFormModal({
             </label>
             <div className="flex-1 space-y-3">
               <div>
-                <label className="text-xs font-bold text-[#1A535C] block mb-1">Nombre del producto <span className="text-red-500">*</span></label>
+                <label className="text-xs font-bold text-primary block mb-1">Nombre del producto <span className="text-red-500">*</span></label>
                 <input
                   data-testid="product-name-input"
                   type="text" 
@@ -106,7 +106,7 @@ export default function ProductFormModal({
                   onChange={(e) => setFormName(e.target.value)}
                   placeholder="Nombre del producto"
                   required
-                  className="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all"
+                  className="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-primary outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
                 />
               </div>
             </div>
@@ -114,24 +114,24 @@ export default function ProductFormModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-[#1A535C] block mb-1">Precio</label>
+              <label className="text-xs font-bold text-primary block mb-1">Precio</label>
               <input
                 data-testid="product-price-input"
                 type="text" 
                 value={formPrice} 
                 onChange={(e) => setFormPrice(e.target.value)}
                 placeholder="Precio (ej. Bs. 120 o Consultar)"
-                className="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all"
+                className="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-primary outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-[#1A535C] block mb-1">Catálogo / Sección del menú</label>
+              <label className="text-xs font-bold text-primary block mb-1">Catálogo / Sección del menú</label>
               <select
                 data-testid="product-carousel-select"
                 value={formCarousel}
                 onChange={(e) => setFormCarousel(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all cursor-pointer"
+                className="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-primary outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all cursor-pointer"
               >
                 {availableCarousels.map(name => (
                   <option key={name} value={name}>{name}</option>
@@ -141,7 +141,7 @@ export default function ProductFormModal({
           </div>
 
           <div>
-            <label className="text-xs font-bold text-[#1A535C] block mb-1">Descripción del producto</label>
+            <label className="text-xs font-bold text-primary block mb-1">Descripción del producto</label>
             <div className="relative">
               <textarea
                 data-testid="product-desc-input"
@@ -151,7 +151,7 @@ export default function ProductFormModal({
                 placeholder="Escribe una breve descripción del producto..."
                 rows="3"
                 maxLength={400}
-                className="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 pb-8 text-sm text-[#1A535C] outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C] transition-all resize-none overflow-y-auto"
+                className="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 pb-8 text-sm text-primary outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all resize-none overflow-y-auto"
               />
               <div className="absolute bottom-2.5 right-3.5 text-[10px] font-bold text-gray-400 bg-white/80 px-1 backdrop-blur-sm rounded">
                 {formDesc.length}/400
@@ -165,7 +165,7 @@ export default function ProductFormModal({
               data-testid="product-modal-cancel-btn"
               type="button" 
               onClick={onClose} 
-              className="flex-1 py-3 rounded-xl text-sm font-bold text-[#757778] bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-200"
+              className="flex-1 py-3 rounded-xl text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-200"
             >
               Cancelar
             </button>
@@ -173,7 +173,7 @@ export default function ProductFormModal({
               data-testid="product-modal-submit-btn"
               type="submit" 
               disabled={!formName.trim()} 
-              className={`flex-1 py-3 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all ${!formName.trim() ? 'bg-gray-200 cursor-not-allowed text-gray-400' : 'bg-[#F9842C] hover:bg-[#e06516]'}`}
+              className={`flex-1 py-3 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all ${!formName.trim() ? 'bg-gray-200 cursor-not-allowed text-gray-400' : 'bg-secondary hover:bg-secondary/90'}`}
             >
               <Save size={16} />
               {product ? 'Actualizar' : 'Añadir'}

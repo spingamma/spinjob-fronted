@@ -12,7 +12,7 @@ export default function VendedorFilters({
       <select 
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
-        className="w-full sm:w-auto bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 text-sm font-bold text-[#1A535C] appearance-none"
+        className="w-full sm:w-auto bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/30 text-sm font-bold text-primary appearance-none"
       >
         <option value="todos">Todos los Negocios</option>
         <option value="possible">Con Posible Dueño</option>
@@ -27,7 +27,7 @@ export default function VendedorFilters({
           placeholder="Buscar negocio..." 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-white border border-gray-200 py-2.5 pl-11 pr-4 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/10 transition-all font-medium text-[#1A535C]"
+          className="w-full bg-white border border-gray-200 py-2.5 pl-11 pr-4 rounded-xl outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/10 transition-all font-medium text-primary"
         />
       </div>
     </div>

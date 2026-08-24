@@ -17,7 +17,7 @@ export default function SpecialtyModal({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className={`p-6 text-white flex justify-between items-center ${modalMode === 'delete' ? 'bg-red-600' : 'bg-[#1A535C]'}`}>
+        <div className={`p-6 text-white flex justify-between items-center ${modalMode === 'delete' ? 'bg-red-600' : 'bg-primary'}`}>
           <h3 className="font-extrabold text-xl">
             {modalMode === 'create' ? 'Nueva Especialidad' : modalMode === 'edit' ? 'Editar Especialidad' : 'Eliminar Especialidad'}
           </h3>
@@ -41,38 +41,38 @@ export default function SpecialtyModal({
                     )}
                   </p>
                 ) : (
-                  <p className="text-xs mt-1 text-[#1A535C] font-medium">Ningún negocio se verá afectado por esta acción.</p>
+                  <p className="text-xs mt-1 text-primary font-medium">Ningún negocio se verá afectado por esta acción.</p>
                 )}
               </div>
             </div>
           )}
 
           {modalMode === 'delete' ? (
-            <p className="text-[#757778]">
+            <p className="text-gray-500">
               ¿Estás seguro de que deseas eliminar permanentemente <strong>{selectedSpec?.category} - {selectedSpec?.subcategory}</strong>? Esta acción no se puede deshacer.
             </p>
           ) : (
             <form id="spec-form" onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-[#757778] mb-1">Categoría Principal</label>
+                <label className="block text-sm font-bold text-gray-500 mb-1">Categoría Principal</label>
                 <input 
                   type="text" 
                   required
                   value={formData.category}
                   onChange={(e) => setFormData({...formData, category: e.target.value})}
                   placeholder="Ej. Salud, Tecnología..."
-                  className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#F9842C] transition-colors font-medium"
+                  className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-secondary transition-colors font-medium"
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-[#757778] mb-1">Subcategoría / Profesión</label>
+                <label className="block text-sm font-bold text-gray-500 mb-1">Subcategoría / Profesión</label>
                 <input 
                   type="text" 
                   required
                   value={formData.subcategory}
                   onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
                   placeholder="Ej. Dentista, Programador..."
-                  className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#F9842C] transition-colors font-medium"
+                  className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-secondary transition-colors font-medium"
                 />
               </div>
             </form>
@@ -84,7 +84,7 @@ export default function SpecialtyModal({
             type="button"
             onClick={() => setIsOpen(false)}
             data-testid="cancel-specialty-btn"
-            className="flex-1 px-4 py-3 rounded-xl font-bold text-[#757778] bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
+            className="flex-1 px-4 py-3 rounded-xl font-bold text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
           >
             Cancelar
           </button>
@@ -95,7 +95,7 @@ export default function SpecialtyModal({
             disabled={isSubmitting || isLoadingDeps}
             data-testid="submit-specialty-btn"
             className={`flex-1 px-4 py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50
-              ${modalMode === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-[#F9842C] hover:bg-[#a1451a]'}
+              ${modalMode === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-secondary hover:bg-secondary/90'}
             `}
           >
             {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : 

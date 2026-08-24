@@ -11,7 +11,7 @@ export default function AdminCountriesTab() {
   if (crud.loading && crud.countries.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <Loader2 className="animate-spin text-[#F9842C] mb-4" size={40} />
+        <Loader2 className="animate-spin text-secondary mb-4" size={40} />
         <p className="text-gray-500 font-medium">Cargando países y departamentos...</p>
       </div>
     );

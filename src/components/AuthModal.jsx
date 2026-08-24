@@ -91,15 +91,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
   // ══════════════════════════════════════════
   // Theme tokens
   // ══════════════════════════════════════════
-  const bgOverlay = isDarkTheme ? 'bg-[#152a38]/90' : 'bg-[#1A535C]/80';
-  const bgModal = isDarkTheme ? 'bg-[#1A535C] border-[#32698F]' : 'bg-white border-gray-200';
-  const textTitle = isDarkTheme ? 'text-white' : 'text-[#1A535C]';
-  const textSub = isDarkTheme ? 'text-[#E6E2DF]' : 'text-[#757778]';
-  const btnCloseBg = isDarkTheme ? 'bg-[#32698F] text-[#E6E2DF] hover:bg-[#F9842C] hover:text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-[#1A535C]';
-  const iconWrapBg = isDarkTheme ? 'bg-[#32698F] border-[#F9842C]' : 'bg-orange-50 border-[#F9842C]';
-  const iconColor = isDarkTheme ? 'text-[#F9842C]' : 'text-[#F9842C]';
-  const labelColor = isDarkTheme ? 'text-[#F9842C]' : 'text-[#F9842C]';
-  const btnSubmitBg = isDarkTheme ? 'bg-[#F9842C] hover:bg-[#e06516] text-white' : 'bg-[#F9842C] hover:bg-[#e06516] text-white';
+  const bgOverlay = isDarkTheme ? 'bg-gray-900/90' : 'bg-primary/80';
+  const bgModal = isDarkTheme ? 'bg-primary border-primary/50' : 'bg-white border-gray-200';
+  const textTitle = isDarkTheme ? 'text-white' : 'text-primary';
+  const textSub = isDarkTheme ? 'text-gray-200' : 'text-gray-500';
+  const btnCloseBg = isDarkTheme ? 'bg-primary/90 text-gray-200 hover:bg-secondary hover:text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-primary';
+  const iconWrapBg = isDarkTheme ? 'bg-primary/90 border-secondary' : 'bg-orange-50 border-secondary';
+  const iconColor = isDarkTheme ? 'text-secondary' : 'text-secondary';
+  const labelColor = isDarkTheme ? 'text-secondary' : 'text-secondary';
+  const btnSubmitBg = isDarkTheme ? 'bg-secondary hover:bg-secondary/90 text-white' : 'bg-secondary hover:bg-secondary/90 text-white';
 
   // ── Error alert ──
   const renderError = () => apiError && (
@@ -171,20 +171,20 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
                   onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                   disabled={isLoading}
                   className={`w-full text-sm rounded-xl py-3 pl-3 pr-10 border outline-none cursor-pointer appearance-none focus:ring-1 transition-all ${isDarkTheme
-                    ? 'bg-[#32698F] border-[#32698F] text-white focus:border-[#F9842C] focus:ring-[#F9842C]/30'
-                    : 'bg-gray-100 border-gray-200 text-[#1A535C] focus:border-[#F9842C] focus:ring-[#F9842C]/30'
+                    ? 'bg-primary/90 border-primary/50 text-white focus:border-secondary focus:ring-secondary/30'
+                    : 'bg-gray-100 border-gray-200 text-primary focus:border-secondary focus:ring-secondary/30'
                     }`}
                   required
                 >
                   <option value="" disabled>Selecciona tu país...</option>
                   {countriesList.map(c => (
-                    <option key={c.country} value={c.country} className={isDarkTheme ? 'bg-[#1A535C]' : 'bg-white'}>
+                    <option key={c.country} value={c.country} className={isDarkTheme ? 'bg-primary' : 'bg-white'}>
                       {c.country}
                     </option>
                   ))}
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <ChevronDown size={16} className={isDarkTheme ? 'text-white/60' : 'text-[#1A535C]/60'} />
+                  <ChevronDown size={16} className={isDarkTheme ? 'text-white/60' : 'text-primary/60'} />
                 </div>
               </div>
             </div>
@@ -208,7 +208,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, isDarkTheme = fa
                 href={whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`inline-flex items-center justify-center gap-2 text-sm font-semibold transition-colors ${isDarkTheme ? 'text-[#E6E2DF]/70 hover:text-[#F9842C]' : 'text-gray-500 hover:text-[#F9842C]'}`}
+                className={`inline-flex items-center justify-center gap-2 text-sm font-semibold transition-colors ${isDarkTheme ? 'text-gray-200/70 hover:text-secondary' : 'text-gray-500 hover:text-secondary'}`}
               >
                 <MessageCircleQuestion size={18} />
                 Necesito ayuda

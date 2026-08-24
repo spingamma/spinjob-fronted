@@ -42,7 +42,7 @@ export default function FloatingActionBar({
             }}
             disabled={isSavingEdit}
             data-testid="cancel-edit-btn"
-            className="px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-[#757778] font-bold text-sm transition-all shadow-sm"
+            className="px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold text-sm transition-all shadow-sm"
           >
             Cancelar
           </button>
@@ -50,7 +50,7 @@ export default function FloatingActionBar({
             onClick={handleSaveEdit}
             disabled={isSavingEdit}
             data-testid="save-edit-btn"
-            className="px-8 py-3 rounded-xl bg-[#F9842C] hover:bg-[#e06516] text-white font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 min-w-[160px]"
+            className="px-8 py-3 rounded-xl bg-secondary hover:bg-secondary/90 text-white font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 min-w-[160px]"
           >
             {isSavingEdit ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
             {isSavingEdit ? 'Guardando...' : 'Guardar Cambios'}

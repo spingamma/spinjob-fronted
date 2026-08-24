@@ -49,7 +49,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
   if (!profesional) return null;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-[#1A535C] pb-24 font-sans antialiased selection:bg-[#F9842C] selection:text-white relative">
+    <div className="min-h-screen bg-brand-bg text-primary pb-24 font-sans antialiased selection:bg-secondary selection:text-white relative">
       <ProfileHero 
         profesional={profesional}
         volverAtras={volverAtras}
@@ -140,7 +140,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             <button
                 onClick={handleCalificarClick}
                 data-testid="danos-tu-opinion-btn"
-                className="px-8 py-4 rounded-xl bg-[#F9842C] hover:bg-[#e07323] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 w-full max-w-sm border border-gray-200 cursor-pointer"
+                className="px-8 py-4 rounded-xl bg-secondary hover:bg-secondary/90 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 w-full max-w-sm border border-gray-200 cursor-pointer"
             >
                 <Star size={18} className="fill-white text-white" /> Danos tu opinión
             </button>
@@ -155,8 +155,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               aria-label="Ir a la página de SpinGamma"
               className="group flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity"
             >
-              <span className="text-xs text-[#757778] font-medium">Tecnología desarrollada por</span>
-              <span className="text-sm font-extrabold text-[#1A535C] tracking-wider group-hover:text-[#F9842C] transition-colors">SPINGAMMA</span>
+              <span className="text-xs text-gray-500 font-medium">Tecnología desarrollada por</span>
+              <span className="text-sm font-extrabold text-primary tracking-wider group-hover:text-secondary transition-colors">TARJETOSO</span>
             </a>
         </div>
       </div>

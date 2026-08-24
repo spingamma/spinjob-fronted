@@ -58,7 +58,7 @@ export default function AdminVendedorTab({ API_URL }) {
       {/* LISTADO DE NEGOCIOS */}
       {isLoading ? (
         <div className="py-20 flex justify-center">
-          <Loader2 size={40} className="animate-spin text-[#F9842C]" />
+          <Loader2 size={40} className="animate-spin text-secondary" />
         </div>
       ) : filteredBusinesses.length === 0 ? (
         <div className="bg-white rounded-3xl p-16 text-center border border-gray-100 shadow-sm">

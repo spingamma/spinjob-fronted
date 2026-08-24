@@ -58,7 +58,7 @@ export default function AdminUsuariosTab({ API_URL }) {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-50 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-          <h2 className="text-xl font-extrabold text-[#1A535C]">Gestión de Usuarios</h2>
+          <h2 className="text-xl font-extrabold text-primary">Gestión de Usuarios</h2>
           
           <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3">
             {/* Input Búsqueda */}
@@ -69,7 +69,7 @@ export default function AdminUsuariosTab({ API_URL }) {
                 placeholder="Buscar usuario..." 
                 value={userSearchTerm}
                 onChange={(e) => setUserSearchTerm(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#F9842C] focus:ring-1 focus:ring-[#F9842C]/30 transition-all text-sm font-medium"
+                className="w-full bg-gray-50 border border-gray-200 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/30 transition-all text-sm font-medium"
               />
             </div>
           </div>
@@ -78,24 +78,24 @@ export default function AdminUsuariosTab({ API_URL }) {
         <div className="p-6">
           {isLoadingUsers ? (
             <div className="py-20 flex flex-col items-center">
-              <Loader2 size={40} className="animate-spin text-[#F9842C] mb-2" />
+              <Loader2 size={40} className="animate-spin text-secondary mb-2" />
               <p className="text-gray-400 font-bold">Buscando...</p>
             </div>
           ) : users.length === 0 ? (
             <div className="text-center py-16">
-              <CheckCircle size={48} className="mx-auto mb-4 text-[#1A535C] opacity-20" />
+              <CheckCircle size={48} className="mx-auto mb-4 text-primary opacity-20" />
               <p className="text-gray-400 font-bold">No se encontraron usuarios.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {users.map(user => (
-                <div key={user.id} className="group bg-gray-50/50 rounded-2xl border border-gray-100 p-5 hover:border-[#F9842C]/30 transition-all hover:bg-white hover:shadow-md flex flex-col h-full">
+                <div key={user.id} className="group bg-gray-50/50 rounded-2xl border border-gray-100 p-5 hover:border-secondary/30 transition-all hover:bg-white hover:shadow-md flex flex-col h-full">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-[#1A535C] leading-tight truncate" title={user.name}>{user.name}</h3>
-                      <p className="text-xs text-[#757778] truncate mt-0.5">{user.email || 'Sin correo'}</p>
+                      <h3 className="font-bold text-primary leading-tight truncate" title={user.name}>{user.name}</h3>
+                      <p className="text-xs text-gray-500 truncate mt-0.5">{user.email || 'Sin correo'}</p>
                       {user.phone ? (
-                        <p className="text-[10px] bg-gray-100 inline-block px-1.5 py-0.5 rounded mt-1 font-mono text-[#757778]">{user.phone}</p>
+                        <p className="text-[10px] bg-gray-100 inline-block px-1.5 py-0.5 rounded mt-1 font-mono text-gray-500">{user.phone}</p>
                       ) : (
                         <p className="text-[10px] bg-gray-100 inline-block px-1.5 py-0.5 rounded mt-1 font-sans italic text-gray-400">Sin teléfono</p>
                       )}
@@ -162,13 +162,13 @@ export default function AdminUsuariosTab({ API_URL }) {
             <div className="p-6 space-y-4">
               <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Usuario a eliminar</p>
-                <h4 className="font-extrabold text-[#1A535C] mt-1 text-base">{deleteConfirmUser.name}</h4>
-                <p className="text-xs text-[#757778] mt-0.5">{deleteConfirmUser.email || 'Sin correo'}</p>
-                <p className="text-xs font-mono text-[#757778] mt-0.5">{deleteConfirmUser.phone || 'Sin teléfono'}</p>
+                <h4 className="font-extrabold text-primary mt-1 text-base">{deleteConfirmUser.name}</h4>
+                <p className="text-xs text-gray-500 mt-0.5">{deleteConfirmUser.email || 'Sin correo'}</p>
+                <p className="text-xs font-mono text-gray-500 mt-0.5">{deleteConfirmUser.phone || 'Sin teléfono'}</p>
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-bold text-[#1A535C]">Se eliminará definitivamente de la base de datos:</p>
+                <p className="text-sm font-bold text-primary">Se eliminará definitivamente de la base de datos:</p>
                 <ul className="text-xs text-gray-600 space-y-1.5 list-disc pl-5 font-medium">
                   <li>Todos los <strong>negocios y tarjetas digitales</strong> propiedad del usuario.</li>
                   <li>Todos los <strong>productos e inventario</strong> de dichos negocios.</li>
@@ -184,7 +184,7 @@ export default function AdminUsuariosTab({ API_URL }) {
               <button
                 onClick={() => setDeleteConfirmUser(null)}
                 data-testid="cancel-delete-button"
-                className="flex-1 font-bold py-3 rounded-xl bg-white hover:bg-gray-100 text-[#757778] border border-gray-200 text-sm transition-all focus:outline-none"
+                className="flex-1 font-bold py-3 rounded-xl bg-white hover:bg-gray-100 text-gray-500 border border-gray-200 text-sm transition-all focus:outline-none"
               >
                 Cancelar
               </button>

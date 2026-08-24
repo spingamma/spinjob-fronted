@@ -153,25 +153,25 @@ function Perfil() {
 
   if (cargando) {
     return (
-      <div className="min-h-screen bg-[#1A535C] flex flex-col items-center justify-center px-4 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#F9842C] mb-6 shadow-lg"></div>
+      <div className="min-h-screen bg-primary flex flex-col items-center justify-center px-4 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-secondary mb-6 shadow-lg"></div>
         <p className="text-white font-bold text-lg mb-2">{mensajeCarga}</p>
-        <p className="text-[#E6E2DF] text-sm animate-pulse">Asegurando la mejor experiencia...</p>
+        <p className="text-gray-200 text-sm animate-pulse">Asegurando la mejor experiencia...</p>
       </div>
     );
   }
 
   if (!profesional) {
     return (
-      <div className="min-h-screen bg-[#1A535C] flex flex-col items-center justify-center px-6 text-center">
-        <div className="w-20 h-20 bg-[#32698F] rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-[#F9842C] shadow-inner text-4xl">
+      <div className="min-h-screen bg-primary flex flex-col items-center justify-center px-6 text-center">
+        <div className="w-20 h-20 bg-primary/90 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-secondary shadow-inner text-4xl">
           🔍
         </div>
         <h2 className="text-2xl font-bold text-white mb-3">Perfil no encontrado o inactivo</h2>
-        <p className="text-[#E6E2DF] mb-8 max-w-md">El profesional que buscas no existe en nuestra base de datos o su plan de suscripción ha expirado.</p>
+        <p className="text-gray-200 mb-8 max-w-md">El profesional que buscas no existe en nuestra base de datos o su plan de suscripción ha expirado.</p>
         <button
           onClick={() => navigate("/")}
-          className="bg-[#F9842C] hover:bg-[#e06516] text-white font-bold px-8 py-3 rounded-xl transition-all shadow-lg hover:-translate-y-1"
+          className="bg-secondary hover:bg-secondary/90 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-lg hover:-translate-y-1"
         >
           Explorar Directorio
         </button>

@@ -28,8 +28,8 @@ function ReloadPrompt() {
   if (!offlineReady && !needRefresh) return null;
 
   return (
-    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[999] bg-white border border-[#1A535C]/10 p-4 rounded-xl shadow-2xl flex flex-col items-center gap-3 w-[90%] max-w-[320px] transition-all duration-500 ease-out">
-      <div className="text-sm text-[#1A535C] text-center font-medium">
+    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[999] bg-white border border-primary/10 p-4 rounded-xl shadow-2xl flex flex-col items-center gap-3 w-[90%] max-w-[320px] transition-all duration-500 ease-out">
+      <div className="text-sm text-primary text-center font-medium">
         {offlineReady
           ? 'App instalada. Funciona sin conexión.'
           : '¡Nueva versión disponible!'}
@@ -38,7 +38,7 @@ function ReloadPrompt() {
       {needRefresh && (
         <button
           onClick={() => updateServiceWorker(true)}
-          className="w-full flex items-center justify-center gap-2 bg-[#F9842C] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#F9842C]/90 transition-colors shadow-md"
+          className="w-full flex items-center justify-center gap-2 bg-secondary text-white px-4 py-2 rounded-lg font-medium hover:bg-secondary/90 transition-colors shadow-md"
         >
           <RefreshCw className="w-4 h-4" />
           Actualizar ahora
@@ -47,7 +47,7 @@ function ReloadPrompt() {
       
       <button
         onClick={close}
-        className="absolute top-2 right-2 text-gray-400 hover:text-[#757778] p-1 bg-gray-50 rounded-full"
+        className="absolute top-2 right-2 text-gray-400 hover:text-gray-500 p-1 bg-gray-50 rounded-full"
         aria-label="Cerrar notificación"
       >
         <X className="w-4 h-4" />
