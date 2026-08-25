@@ -1,6 +1,6 @@
 // Archivo: src/components/Header.jsx
 import React, { useState, useEffect } from 'react';
-import { Search, LogOut, ChevronDown, Download, ShoppingCart, Globe } from 'lucide-react';
+import { Search, LogOut, ChevronDown, Download, ShoppingCart, Globe, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NavMenu from './NavMenu';
 import CountryModal from './CountryModal';
@@ -158,10 +158,23 @@ const Header = ({
               />
             </div>
           )}
+
+          {isLoggedIn && (
+            <button
+              onClick={() => navigate('/mis-compras')}
+              className="flex flex-col items-center justify-center p-1.5 hover:bg-gray-100 rounded-xl transition-all duration-200 group min-w-[60px]"
+              title="Mis Pedidos"
+            >
+              <div className="group-hover:scale-110 transition-transform mb-1 flex items-center justify-center h-[22px] w-[22px]">
+                <ShoppingCart size={22} className="text-primary group-hover:text-secondary transition-colors" />
+              </div>
+              <span className="text-[10px] font-bold text-primary uppercase tracking-tighter group-hover:text-secondary leading-none relative z-10">PEDIDOS</span>
+            </button>
+          )}
         </div>
 
         {/* USUARIO */}
-        <div className="flex items-center flex-shrink-0 relative">
+        <div className={`${isLoggedIn ? 'hidden md:flex' : 'flex'} items-center flex-shrink-0 relative`}>
           {isLoggedIn ? (
             <>
               {isUserMenuOpen && (
@@ -169,16 +182,6 @@ const Header = ({
               )}
 
               <div className="flex items-center gap-1 relative z-50">
-                <button
-                  onClick={() => navigate('/mis-compras')}
-                  className="flex flex-col items-center justify-center p-1.5 hover:bg-gray-100 rounded-xl transition-all duration-200 group min-w-[60px]"
-                  title="Mis Pedidos"
-                >
-                  <div className="group-hover:scale-110 transition-transform mb-1 flex items-center justify-center h-[22px] w-[22px]">
-                    <ShoppingCart size={22} className="text-primary group-hover:text-secondary transition-colors" />
-                  </div>
-                  <span className="text-[10px] font-bold text-primary uppercase tracking-tighter group-hover:text-secondary leading-none relative z-10">PEDIDOS</span>
-                </button>
 
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
@@ -198,6 +201,14 @@ const Header = ({
                 {isUserMenuOpen && (
                   <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
                     <div className="p-2 space-y-1">
+                      {(isAdmin || (localStorage.getItem('spingamma_user') && (() => { try { return JSON.parse(localStorage.getItem('spingamma_user')).is_vendedor; } catch(e) { return false; } })())) && (
+                        <button
+                          onClick={() => { navigate('/admin'); setIsUserMenuOpen(false); }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-primary hover:bg-gray-50 rounded-xl transition-colors"
+                        >
+                          <Shield size={18} /> {isAdmin ? 'Panel Admin' : 'Panel Ventas'}
+                        </button>
+                      )}
                       <button
                         onClick={() => { setIsCountryModalOpen(true); setIsUserMenuOpen(false); }}
                         className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-primary hover:bg-gray-50 rounded-xl transition-colors"

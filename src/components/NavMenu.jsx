@@ -73,14 +73,6 @@ const NavMenu = ({ isLoggedIn, isAdmin, onHomeClick, isMobile = false }) => {
       show: isLoggedIn,
       active: location.pathname === '/mis-negocios'
     },
-    {
-      id: 'admin',
-      icon: <Shield size={22} />,
-      label: labelMenuAdmin,
-      onClick: () => navigate('/admin'),
-      show: isAdmin,
-      active: location.pathname === '/admin'
-    }
   ];
 
   return (

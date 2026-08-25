@@ -1,17 +1,34 @@
 // Archivo: src/components/BottomNavbar.jsx
 import React from 'react';
 import NavMenu from './NavMenu';
+import MobileUserMenu from './MobileUserMenu';
 
-const BottomNavbar = ({ isLoggedIn, isAdmin, onHomeClick }) => {
+const BottomNavbar = ({ isLoggedIn, isAdmin, onHomeClick, onLocationChange }) => {
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-gray-200 z-40 pb-safe shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-      <div className="max-w-md mx-auto px-4 py-2">
-        <NavMenu 
-          isLoggedIn={isLoggedIn} 
-          isAdmin={isAdmin} 
-          onHomeClick={onHomeClick} 
-          isMobile={true} 
-        />
+      <div className="max-w-md mx-auto px-2 py-2 flex items-center justify-center w-full">
+        {isLoggedIn ? (
+          <>
+            <div className="flex-[3]">
+              <NavMenu 
+                isLoggedIn={isLoggedIn} 
+                isAdmin={isAdmin} 
+                onHomeClick={onHomeClick} 
+                isMobile={true} 
+              />
+            </div>
+            <div className="flex-1 flex justify-center">
+              <MobileUserMenu onLocationChange={onLocationChange} />
+            </div>
+          </>
+        ) : (
+          <NavMenu 
+            isLoggedIn={isLoggedIn} 
+            isAdmin={isAdmin} 
+            onHomeClick={onHomeClick} 
+            isMobile={true} 
+          />
+        )}
       </div>
     </nav>
   );
