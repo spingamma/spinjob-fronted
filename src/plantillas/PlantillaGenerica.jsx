@@ -140,7 +140,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
             <button
                 onClick={handleCalificarClick}
                 data-testid="danos-tu-opinion-btn"
-                className="px-8 py-4 rounded-xl bg-secondary hover:bg-secondary/90 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 w-full max-w-sm border border-gray-200 cursor-pointer"
+                className="px-8 py-4 rounded-xl bg-btn-cta hover:bg-btn-cta/90 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 w-full max-w-sm border border-gray-200 cursor-pointer"
             >
                 <Star size={18} className="fill-white text-white" /> Danos tu opinión
             </button>

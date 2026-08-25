@@ -124,8 +124,8 @@ const Header = ({
             <input
               data-testid="search-input"
               type="text"
-              aria-label="Productos y negocios"
-              placeholder="Productos y negocios..."
+              aria-label="Buscar servicios o tarjetas"
+              placeholder="Buscar servicios o tarjetas"
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
               onKeyDown={(e) => {
@@ -138,11 +138,10 @@ const Header = ({
             <button
               onClick={() => setSearchTerm(localSearch)}
               data-testid="search-button"
-              className={`w-8 h-8 rounded-full transition-all duration-200 focus:outline-none shrink-0 shadow-sm flex items-center justify-center ${
-                localSearch.trim()
+              className={`w-8 h-8 rounded-full transition-all duration-200 focus:outline-none shrink-0 shadow-sm flex items-center justify-center ${localSearch.trim()
                   ? 'bg-secondary hover:bg-secondary/90 text-white'
                   : 'bg-gray-200 text-gray-400 hover:bg-gray-300'
-              }`}
+                }`}
               title="Buscar"
             >
               <Search size={16} />
@@ -201,7 +200,7 @@ const Header = ({
                 {isUserMenuOpen && (
                   <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
                     <div className="p-2 space-y-1">
-                      {(isAdmin || (localStorage.getItem('spingamma_user') && (() => { try { return JSON.parse(localStorage.getItem('spingamma_user')).is_vendedor; } catch(e) { return false; } })())) && (
+                      {(isAdmin || (localStorage.getItem('spingamma_user') && (() => { try { return JSON.parse(localStorage.getItem('spingamma_user')).is_vendedor; } catch (e) { return false; } })())) && (
                         <button
                           onClick={() => { navigate('/admin'); setIsUserMenuOpen(false); }}
                           className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-primary hover:bg-gray-50 rounded-xl transition-colors"

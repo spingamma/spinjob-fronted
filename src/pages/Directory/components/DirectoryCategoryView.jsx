@@ -13,10 +13,10 @@ export default function DirectoryCategoryView({
         <h2 className="text-base md:text-lg font-bold text-accent leading-tight">
           {isLoggedIn && userName ? (
             <>
-              <span className="text-primary">{userName}</span> qué visitaremos hoy?
+              ¡Hola <span className="text-primary">{userName.split(' ')[0]}</span>! 👋 qué visitaremos hoy?
             </>
           ) : (
-            "Qué visitaremos hoy?"
+            "¡Hola! 👋 qué visitaremos hoy?"
           )}
         </h2>
         {metadata && (
