@@ -125,11 +125,11 @@ export default function CategoryGrid({ categories, onSelectCategory }) {
                 className="group flex flex-col items-center text-center bg-primary rounded-2xl border border-primary shadow-sm hover:shadow-lg transition-all duration-300 p-4 py-6 hover:scale-[1.02] hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-secondary/40 active:scale-[0.98] cursor-pointer"
               >
                 {/* Icon Container without colored margins */}
-                <div className="w-[64px] h-[64px] md:w-[74px] md:h-[74px] rounded-2xl flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110 overflow-hidden bg-white">
+                <div className="w-[64px] h-[64px] md:w-[74px] md:h-[74px] rounded-2xl flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110 overflow-hidden bg-transparent">
                   <img
                     src="/icon-192.webp"
                     alt="Tarjetoso"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </div>
 
