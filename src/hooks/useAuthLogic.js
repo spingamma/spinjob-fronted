@@ -137,6 +137,10 @@ export default function useAuthLogic({ isOpen, onSuccess, onRequireVerification 
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Error al completar tu celular.');
 
+      // Persist the token to localStorage so that subsequent calls to login() and fetchAuth() 
+      // can read it properly and do not incorrectly log the user out due to a missing token (401).
+      localStorage.setItem('spingamma_token', tempToken);
+
       _completeSession({ 
         id: tempUserData.id,
         email: tempUserData.email,
