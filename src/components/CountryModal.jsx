@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Globe, Check, Loader2, X, ChevronDown } from 'lucide-react';
 import { API_URL } from '../config/api';
 
@@ -68,7 +69,7 @@ export default function CountryModal({ isOpen, isDismissable = false, onClose, o
     }
   };
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Overlay */}
       <div 
@@ -201,4 +202,6 @@ export default function CountryModal({ isOpen, isDismissable = false, onClose, o
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }
