@@ -40,7 +40,8 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     isLoggedIn: !!user,
-    isAdmin: !!(user?.is_admin || user?.is_vendedor),
+    isAdmin: !!user?.is_admin,
+    isSeller: !!user?.is_vendedor,
     isPremium: !!user?.is_premium,
     login,
     logout,
