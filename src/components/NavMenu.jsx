@@ -25,21 +25,9 @@ const TarjeteroIcon = ({ size = 22 }) => (
   </svg>
 );
 
-const NavMenu = ({ isLoggedIn, isAdmin, onHomeClick, isMobile = false }) => {
+const NavMenu = ({ isLoggedIn, onHomeClick, isMobile = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  
-  const labelMenuAdmin = React.useMemo(() => {
-    const stored = localStorage.getItem('spingamma_user');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed.is_admin) return 'Admin';
-        if (parsed.is_vendedor) return 'Ventas';
-      } catch { /* ignore */ }
-    }
-    return 'Admin';
-  }, []);
 
   const handleHomeClick = () => {
     if (onHomeClick) onHomeClick();

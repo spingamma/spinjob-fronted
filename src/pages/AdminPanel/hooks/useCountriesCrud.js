@@ -37,7 +37,7 @@ export function useCountriesCrud() {
     } finally {
       setLoading(false);
     }
-  }, [API_URL]);
+  }, []);
 
   useEffect(() => {
     fetchCountries();

@@ -41,7 +41,7 @@ export default function useAuthLogic({ isOpen, onSuccess, onRequireVerification 
       }
     };
     fetchSupportWhatsApp();
-  }, [API_URL]);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {

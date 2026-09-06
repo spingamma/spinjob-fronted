@@ -79,7 +79,7 @@ function Perfil() {
     return () => {
       isMounted = false;
     };
-  }, [slug, API_URL]);
+  }, [slug]);
 
   // ==========================================
   // 👁️ REGISTRO AUTOMÁTICO DE VISITA

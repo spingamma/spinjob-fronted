@@ -90,7 +90,7 @@ export const useOrderData = ({ slug, orderId, paymentQrImage, locationState }) =
     } else if (slug) {
       fetchQrIfMissing();
     }
-  }, [slug, orderId, locationState, paymentQrImage, API_URL]);
+  }, [slug, orderId, locationState, paymentQrImage]);
 
   return {
     order,

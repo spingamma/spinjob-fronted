@@ -52,7 +52,7 @@ export default function CountryModal({ isOpen, isDismissable = false, onClose, o
     }
     fetchCountries();
     return () => { isMounted = false; };
-  }, [isOpen, API_URL, setCountries, setError, setIsLoading, setSelectedCountry, selectedCountry]);
+  }, [isOpen, setCountries, setError, setIsLoading, setSelectedCountry, selectedCountry]);
 
   if (!isOpen) return null;
 

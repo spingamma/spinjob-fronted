@@ -4,6 +4,7 @@ import { Search, LogOut, ChevronDown, Download, ShoppingCart, Globe, Shield } fr
 import { useNavigate } from 'react-router-dom';
 import NavMenu from './NavMenu';
 import CountryModal from './CountryModal';
+import PushToggle from './PushToggle';
 import { API_URL } from '../config/api';
 
 const Header = ({
@@ -200,7 +201,7 @@ const Header = ({
                 {isUserMenuOpen && (
                   <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
                     <div className="p-2 space-y-1">
-                      {(isAdmin || (localStorage.getItem('spingamma_user') && (() => { try { return JSON.parse(localStorage.getItem('spingamma_user')).is_vendedor; } catch (e) { return false; } })())) && (
+                      {(isAdmin || (localStorage.getItem('spingamma_user') && (() => { try { return JSON.parse(localStorage.getItem('spingamma_user')).is_vendedor; } catch { return false; } })())) && (
                         <button
                           onClick={() => { navigate('/admin'); setIsUserMenuOpen(false); }}
                           className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-primary hover:bg-gray-50 rounded-xl transition-colors"
@@ -214,6 +215,8 @@ const Header = ({
                       >
                         <Globe size={18} /> País
                       </button>
+                      
+                      <PushToggle />
                       <button
                         onClick={() => { handleLogout(); setIsUserMenuOpen(false); }}
                         className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-50 hover:text-red-600 rounded-xl transition-colors"

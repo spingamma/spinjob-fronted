@@ -26,16 +26,16 @@ export function useDirectoryFilters(professionals = [], metadataOverride = null,
   const activeState = useMemo(() => matchSlugToName(estado, groupedLocations.map(g => g.state), 'Todas'), [estado, groupedLocations]);
 
   // We need groupedCategories first to compute activeCategory
-  const catsFromMetadata = metadataOverride?.groupedCategories || [];
   const activeCategory = useMemo(() => {
+    const catsFromMetadata = metadataOverride?.groupedCategories || [];
     let cats = catsFromMetadata.map(g => g.category);
     if (!metadataOverride) {
        cats = [...new Set(professionals.map(p => p.category))];
     }
     return matchSlugToName(categoria, cats, 'Todos');
-  }, [categoria, catsFromMetadata, professionals, metadataOverride]);
+  }, [categoria, professionals, metadataOverride]);
 
-  const { groupedCategories, filteredGroupedCategories, filteredSubcategories } = useCategoriesData(
+  const { filteredGroupedCategories, filteredSubcategories } = useCategoriesData(
     professionals, metadataOverride, catSearch, subSearch, activeCategory
   );
 
