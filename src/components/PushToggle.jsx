@@ -7,6 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
 function urlBase64ToUint8Array(base64String) {
+  if (!base64String) return new Uint8Array();
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding)
     .replace(/-/g, '+')
@@ -45,6 +46,10 @@ const PushToggle = ({ className }) => {
     if (isSubscribed) {
       await unsubscribe();
     } else {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window) || typeof Notification === 'undefined') {
+        alert("Tu dispositivo o navegador no soporta notificaciones Push.");
+        return;
+      }
       setShowSoftPrompt(true);
     }
   };
@@ -89,8 +94,10 @@ const PushToggle = ({ className }) => {
       setIsSubscribed(true);
     } catch (e) {
       console.error("Error subscribing", e);
-      if (Notification.permission === 'denied') {
+      if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
         alert("Las notificaciones están bloqueadas en tu navegador. Por favor, habilítalas en la configuración de permisos.");
+      } else {
+        alert("No se pudieron activar las notificaciones. Es posible que tu dispositivo no lo soporte.");
       }
     }
   };
