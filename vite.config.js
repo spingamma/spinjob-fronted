@@ -9,6 +9,9 @@ export default defineConfig({
     react(),
     tailwindcss(), // 🚀 2. AQUÍ VUELVE LA MAGIA DEL DISEÑO
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'public',
+      filename: 'sw.js',
       registerType: 'autoUpdate',
       injectRegister: 'script-defer', // 🚀 ¡LÍNEA MÁGICA PARA LIGHTHOUSE! (Antes estaba en 'auto')
       workbox: {
