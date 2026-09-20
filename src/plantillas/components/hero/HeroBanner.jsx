@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, Star, Edit3, Share2, QrCode, MapPin, Bookmark } from 'lucide-react';
+import { Camera, Star, Edit3, Share2, QrCode, Bookmark, ChevronLeft } from 'lucide-react';
 
 export default function HeroBanner({
   profesional,
@@ -11,8 +11,7 @@ export default function HeroBanner({
   handleShare,
   toggleQR,
   isCreateMode,
-  links,
-  handleLinkClick,
+  volverAtras,
   toggleSaveCard,
   isSaving,
   isSaved
@@ -35,7 +34,7 @@ export default function HeroBanner({
         )}
         
         {/* BADGES OVERLAY */}
-        <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 flex flex-col gap-1.5 items-end z-30">
+        <div className={`absolute ${(!isEditing && !isCreateMode) ? 'bottom-14 sm:bottom-16' : 'bottom-2.5 sm:bottom-3'} right-2.5 sm:right-4 flex flex-col gap-1.5 items-end z-30`}>
           {profesional.reviews_count > 0 && (
             <div className="bg-white/95 backdrop-blur-sm px-1.5 py-1 rounded-lg border border-gray-100 shadow-sm flex items-center gap-1">
               <Star size={12} className="text-secondary fill-secondary sm:w-[14px] sm:h-[14px]" />
@@ -60,7 +59,22 @@ export default function HeroBanner({
       {/* Fade para unir con el fondo */}
       <div className="absolute bottom-[-5px] left-[-5px] right-[-5px] h-20 sm:h-24 bg-gradient-to-t from-brand-bg via-brand-bg/80 to-brand-bg/0 pointer-events-none z-10"></div>
 
-      {/* BOTÓN EDITAR */}
+      {/* BOTÓN ATRÁS (ESQUINA SUPERIOR IZQUIERDA) */}
+      {volverAtras && (
+        <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 z-30">
+          <button
+            onClick={volverAtras}
+            data-testid="back-button"
+            aria-label="Volver atrás"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-primary hover:bg-white hover:text-accent"
+            title="Volver atrás"
+          >
+            <ChevronLeft size={22} />
+          </button>
+        </div>
+      )}
+
+      {/* BOTÓN EDITAR (ESQUINA INFERIOR IZQUIERDA) */}
       {isOwner && !isEditing && (
         <div className="absolute bottom-2.5 left-2.5 sm:bottom-4 sm:left-4 z-30">
           <button
@@ -74,9 +88,9 @@ export default function HeroBanner({
         </div>
       )}
 
-      {/* BOTONES COMPARTIR Y QR */}
+      {/* BOTONES COMPARTIR Y QR (ESQUINA SUPERIOR DERECHA) */}
       {!isEditing && !isCreateMode && (
-        <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 flex gap-2 z-30">
+        <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 flex gap-2 z-30">
           <button
             onClick={handleShare}
             data-testid="profile-share-btn"
@@ -96,19 +110,9 @@ export default function HeroBanner({
         </div>
       )}
 
-      {/* BOTONES UBICACIÓN Y GUARDAR */}
-      <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 flex gap-2 z-30">
-        {!isEditing && links?.ubicacion && (
-          <button
-            onClick={(e) => handleLinkClick(e, 'Ubicación', links.ubicacion)}
-            data-testid="profile-location-btn"
-            className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-secondary hover:bg-white hover:text-secondary/80"
-            title="Ver ubicación"
-          >
-            <MapPin size={18} />
-          </button>
-        )}
-        {!isEditing && !isCreateMode && (
+      {/* BOTÓN GUARDAR TARJETA (ESQUINA INFERIOR DERECHA) */}
+      {!isEditing && !isCreateMode && (
+        <div className="absolute bottom-2.5 right-2.5 sm:bottom-4 sm:right-4 z-30">
           <button
             onClick={toggleSaveCard}
             disabled={isSaving}
@@ -118,8 +122,8 @@ export default function HeroBanner({
           >
             <Bookmark size={20} className={isSaved ? 'fill-white' : ''} />
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

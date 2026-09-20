@@ -89,7 +89,7 @@ export default function OrderCard({
                     data-testid="download-receipt-btn"
                     className="flex items-center gap-1.5 px-3 py-2.5 bg-orange-100 hover:bg-orange-200 text-orange-800 text-xs font-bold rounded-xl shadow-sm border border-orange-200 transition-colors"
                   >
-                    <Download size={14} /> Descargar Comprobante
+                    <Download size={14} /> Verificar pago
                   </button>
                 )}
                 {rejectingOrder === order.id ? (

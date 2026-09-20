@@ -1,19 +1,19 @@
 import React from 'react';
-import { Phone, Globe, Facebook, Instagram, Linkedin, Github, Plus, Trash2 } from 'lucide-react';
+import { Phone, Globe, Facebook, Instagram, Linkedin, Github, Plus, Trash2, MapPin } from 'lucide-react';
 import { WhatsappIcon, TiktokIcon } from './ProfileIcons';
 import { cleanWhatsappNumber } from '../../utils/phone';
 
-// eslint-disable-next-line no-unused-vars
-const SocialButton = ({ icon: Icon, label, url, colorClass, onLinkClick }) => {
+const SocialButton = ({ icon, label, url, colorClass, onLinkClick, dataTestId }) => {
   if (!url) return null;
   return (
     <button 
+      data-testid={dataTestId || `button-${label.toLowerCase().replace(/\s+/g, '-')}`}
       onClick={(e) => onLinkClick(e, label, url)}
       aria-label={`Ir a ${label}`}
       title={label}
       className={`w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-sm hover:text-white transition-all active:scale-95 border border-gray-100 group ${colorClass}`}
     >
-      <Icon size={24} className="transition-transform group-hover:scale-110" />
+      {React.createElement(icon, { size: 24, className: "transition-transform group-hover:scale-110" })}
     </button>
   );
 };
@@ -148,7 +148,7 @@ export default function ProfileContact({
       </div>
 
       {/* 📱 REDES DE CONTACTO */}
-      {(links.website || links.facebook || links.instagram || links.linkedin || links.tiktok || links.github || isEditing) && (
+      {(links.website || links.facebook || links.instagram || links.linkedin || links.tiktok || links.github || links.ubicacion || isEditing) && (
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4 gap-4">
           <h3 className="text-lg font-bold text-primary flex items-center gap-2">
@@ -185,6 +185,7 @@ export default function ProfileContact({
           </div>
         ) : (
           <div className="flex flex-wrap justify-center items-center bg-gray-50 p-4 rounded-2xl border border-gray-200/60 gap-4">
+            <SocialButton icon={MapPin} label="Ubicación" url={links.ubicacion} colorClass="text-red-500 hover:bg-red-500" onLinkClick={handleLinkClick} dataTestId="profile-location-btn" />
             <SocialButton icon={Globe} label="Sitio Web" url={links.website} colorClass="text-purple-500 hover:bg-purple-500" onLinkClick={handleLinkClick} />
             <SocialButton icon={Facebook} label="Facebook" url={links.facebook} colorClass="text-blue-600 hover:bg-blue-600" onLinkClick={handleLinkClick} />
             <SocialButton icon={Instagram} label="Instagram" url={links.instagram} colorClass="text-pink-600 hover:bg-pink-600" onLinkClick={handleLinkClick} />

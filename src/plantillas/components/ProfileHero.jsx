@@ -2,7 +2,6 @@ import React from 'react';
 import MapSelectorModal from '../../components/MapSelectorModal';
 import useProfileLocation from '../hooks/useProfileLocation';
 
-import HeroTopNav from './hero/HeroTopNav';
 import HeroBanner from './hero/HeroBanner';
 import HeroInfoEdit from './hero/HeroInfoEdit';
 import HeroInfoView from './hero/HeroInfoView';
@@ -10,10 +9,6 @@ import HeroInfoView from './hero/HeroInfoView';
 export default function ProfileHero({
   profesional,
   volverAtras,
-  isLoggedIn,
-  userName,
-  handleLogout,
-  onProtectedAction,
   handleShare,
   toggleQR,
   isOwner,
@@ -24,8 +19,6 @@ export default function ProfileHero({
   isSaved,
   editFormData,
   handleEditChange,
-  handleLinkClick,
-  links,
   imagePreview,
   setEditFormData,
   isCreateMode,
@@ -42,15 +35,7 @@ export default function ProfileHero({
 
   return (
     <>
-      <HeroTopNav 
-        volverAtras={volverAtras}
-        isLoggedIn={isLoggedIn}
-        userName={userName}
-        handleLogout={handleLogout}
-        onProtectedAction={onProtectedAction}
-      />
-
-      <div className="relative overflow-hidden mb-6 pt-16 bg-brand-bg sm:bg-transparent">
+      <div className="relative overflow-hidden mb-6 pt-0 sm:pt-2 bg-brand-bg sm:bg-transparent">
         <div className="relative z-10 flex flex-col">
           
           <HeroBanner 
@@ -63,8 +48,7 @@ export default function ProfileHero({
             handleShare={handleShare}
             toggleQR={toggleQR}
             isCreateMode={isCreateMode}
-            links={links}
-            handleLinkClick={handleLinkClick}
+            volverAtras={volverAtras}
             toggleSaveCard={toggleSaveCard}
             isSaving={isSaving}
             isSaved={isSaved}

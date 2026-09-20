@@ -38,7 +38,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
     waNumbers,
     links,
     accionesPerfil: {
-      mostrarQR, toggleQR, handleDownloadQR, isLoggedIn, userName, handleLogout,
+      mostrarQR, toggleQR, handleDownloadQR, userName,
       handleShare, handleLinkClick, handleCalificarClick,
       mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview,
       mostrarModalVerificacion, setMostrarModalVerificacion,
@@ -53,10 +53,6 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       <ProfileHero 
         profesional={profesional}
         volverAtras={volverAtras}
-        isLoggedIn={isLoggedIn}
-        userName={userName}
-        handleLogout={handleLogout}
-        onProtectedAction={onProtectedAction}
         handleShare={handleShare}
         toggleQR={toggleQR}
         isOwner={isOwner}
@@ -67,8 +63,6 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         isSaved={isSaved}
         editFormData={editFormData}
         handleEditChange={handleEditChange}
-        handleLinkClick={handleLinkClick}
-        links={links}
         imagePreview={imagePreview}
         setEditFormData={setEditFormData}
         isCreateMode={isCreateMode}

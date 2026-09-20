@@ -40,8 +40,9 @@ export default function useProfileLocation(editFormData, setEditFormData) {
           const res = await fetch(`${API_URL}/businesses/resolve-url?url=${encodeURIComponent(url)}`);
           if (res.ok) {
             const data = await res.json();
-            if (data.resolved_url) {
-              const parsedResolved = parseGoogleMapsCoords(data.resolved_url);
+            const resolvedUrl = data.resolved_url || data.url;
+            if (resolvedUrl) {
+              const parsedResolved = parseGoogleMapsCoords(resolvedUrl);
               if (parsedResolved) {
                 setDetectedCoords(parsedResolved);
                 setEditFormData(prev => ({
