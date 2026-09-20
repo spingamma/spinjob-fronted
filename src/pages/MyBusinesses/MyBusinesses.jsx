@@ -8,6 +8,7 @@ import fetchAuth from '../../utils/fetchAuth';
 import PremiumModal from '../../components/PremiumModal';
 import { API_URL } from '../../config/api';
 import { useAuth } from '../../hooks/useAuth';
+import OwnerPushBanner from '../../components/OwnerPushBanner';
 
 export default function MisNegocios() {
   const { isLoggedIn, isAdmin, user, logout } = useAuth();
@@ -116,6 +117,8 @@ export default function MisNegocios() {
             <PlusCircle size={18} /> Nuevo
           </Link>
         </div>
+
+        {negocios.length > 0 && <OwnerPushBanner />}
 
         {error && <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6">{error}</div>}
 

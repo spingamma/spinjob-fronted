@@ -46,6 +46,12 @@ const PushToggle = ({ className }) => {
     if (isSubscribed) {
       await unsubscribe();
     } else {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+      if (isIOS && !isStandalone) {
+        alert("En iPhone/iPad, para activar notificaciones debes añadir Tarjetoso a tu pantalla de inicio:\n1. Toca el botón Compartir en Safari (icono de caja con flecha).\n2. Selecciona 'Añadir a pantalla de inicio'.\n3. Abre Tarjetoso desde tu pantalla de inicio y activa las notificaciones.");
+        return;
+      }
       if (!('serviceWorker' in navigator) || !('PushManager' in window) || typeof Notification === 'undefined') {
         alert("Tu dispositivo o navegador no soporta notificaciones Push.");
         return;
