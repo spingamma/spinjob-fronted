@@ -17,8 +17,8 @@ export default function HeroBanner({
   isSaved
 }) {
   return (
-    <div className="relative w-full max-w-5xl mx-auto mb-4 md:px-4 lg:px-6">
-      <div className="relative aspect-video overflow-hidden md:rounded-[2.5rem] bg-brand-bg">
+    <div className="relative w-full max-w-3xl mx-auto mb-4 md:px-4 lg:px-6">
+      <div className="relative aspect-[4/3] md:aspect-video overflow-hidden md:rounded-[2.5rem] bg-brand-bg">
         <img
           src={imagePreview || profesional.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name || 'Negocio')}&background=F8F9FA&color=1A535C&size=512`}
           onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name || 'Negocio')}&background=F8F9FA&color=1A535C&size=512`; }}
