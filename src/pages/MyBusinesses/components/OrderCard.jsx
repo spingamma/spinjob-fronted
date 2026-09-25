@@ -1,5 +1,5 @@
-import React from 'react';
-import { Download, XCircle, Loader2, CheckCircle2, PackageCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { Download, XCircle, Loader2, CheckCircle2, PackageCheck, Eye, X } from 'lucide-react';
 import { formatOrderCode } from '../../../utils/formatOrderCode';
 
 export default function OrderCard({ 
@@ -11,6 +11,7 @@ export default function OrderCard({
   handleDownloadReceipt,
   isPaqueteria
 }) {
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
   const isPendiente = order.status === "pendiente_de_pago" || order.status === "pendiente" || order.status === "pago_enviado";
   const isPagado = order.status === "pagado";
   const isEntregado = order.status === "entregado";
@@ -85,11 +86,11 @@ export default function OrderCard({
               <>
                 {order.receipt_url && (
                   <button 
-                    onClick={() => handleDownloadReceipt(order.receipt_url, order.order_number)}
+                    onClick={() => setShowReceiptModal(true)}
                     data-testid="download-receipt-btn"
                     className="flex items-center gap-1.5 px-3 py-2.5 bg-orange-100 hover:bg-orange-200 text-orange-800 text-xs font-bold rounded-xl shadow-sm border border-orange-200 transition-colors"
                   >
-                    <Download size={14} /> Verificar pago
+                    <Eye size={14} /> Verificar pago
                   </button>
                 )}
                 {rejectingOrder === order.id ? (
@@ -235,6 +236,61 @@ export default function OrderCard({
           </div>
         )}
       </div>
+
+      {/* Modal para verificar comprobante */}
+      {showReceiptModal && order.receipt_url && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setShowReceiptModal(false)}
+          data-testid="receipt-modal-preview"
+        >
+          <div 
+            className="relative max-w-lg w-full max-h-[90vh] flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-full flex justify-between items-center mb-3 text-white px-2">
+              <span className="text-sm font-bold tracking-wide">Comprobante - Pedido #{formatOrderCode(order.order_number, order.id)}</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleDownloadReceipt(order.receipt_url, order.order_number)}
+                  className="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
+                  title="Descargar comprobante"
+                >
+                  <Download size={18} />
+                </button>
+                <button 
+                  onClick={() => setShowReceiptModal(false)}
+                  className="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
+                  title="Cerrar"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+            <div className="bg-white/10 p-2 rounded-2xl backdrop-blur-md max-h-[75vh] overflow-auto flex items-center justify-center border border-white/10 w-full">
+              <img 
+                src={order.receipt_url} 
+                alt="Comprobante de Pago" 
+                className="max-h-[70vh] w-auto max-w-full object-contain rounded-xl shadow-2xl"
+              />
+            </div>
+            <div className="mt-3 flex gap-3 w-full">
+              <button
+                onClick={() => handleDownloadReceipt(order.receipt_url, order.order_number)}
+                className="flex-1 py-2.5 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <Download size={14} /> Descargar archivo
+              </button>
+              <button
+                onClick={() => setShowReceiptModal(false)}
+                className="flex-1 py-2.5 bg-white text-gray-800 hover:bg-gray-100 rounded-xl text-xs font-bold transition-colors"
+              >
+                Cerrar vista previa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

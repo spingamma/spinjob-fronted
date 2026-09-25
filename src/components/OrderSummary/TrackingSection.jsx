@@ -1,7 +1,5 @@
-// src/components/OrderSummary/TrackingSection.jsx
-
-import React from 'react';
-import { ArrowLeft, Download, Upload, ShieldAlert, CheckCircle2, Loader2, QrCode, Key, Send } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowLeft, Download, Upload, ShieldAlert, CheckCircle2, Loader2, QrCode, Key, Send, ZoomIn, X } from 'lucide-react';
 
 /**
  * Displays tracking (order status) view, QR download and receipt upload.
@@ -22,6 +20,7 @@ export default function TrackingSection({
   handleConfirmReceived,
   handleReportIssue,
 }) {
+  const [enlargedImage, setEnlargedImage] = useState(null);
   return (
     <div className="min-h-screen bg-brand-bg pb-24 font-sans text-primary">
       <div className="bg-white px-4 py-4 sticky top-0 z-50 shadow-sm flex items-center gap-4">
@@ -76,8 +75,16 @@ export default function TrackingSection({
             <h3 className="font-extrabold text-primary mb-4 flex items-center justify-center gap-2">
               <QrCode size={18} className="text-secondary" /> Realiza el pago
             </h3>
-            <div className="bg-gray-50 p-2 rounded-2xl inline-block border border-gray-100 shadow-inner mb-4">
-              <img src={displayQr} alt="QR de Pago" className="w-48 h-48 object-contain rounded-xl" />
+            <div 
+              className="bg-gray-50 p-2 rounded-2xl inline-block border border-gray-100 shadow-inner mb-3 relative group cursor-pointer hover:border-secondary/40 transition-all"
+              onClick={() => setEnlargedImage({ src: displayQr, title: "QR de Pago" })}
+              title="Haz clic para agrandar el QR"
+              data-testid="enlarge-qr-btn"
+            >
+              <img src={displayQr} alt="QR de Pago" className="w-48 h-48 object-contain rounded-xl transition-transform group-hover:scale-105" />
+              <div className="absolute bottom-2 right-2 bg-primary/75 hover:bg-primary text-white text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow transition-colors">
+                <ZoomIn size={13} /> Ampliar
+              </div>
             </div>
             <button
               type="button"
@@ -103,7 +110,13 @@ export default function TrackingSection({
               <div className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center bg-gray-50 hover:bg-orange-50/30 transition-colors relative">
                 {receiptPreview ? (
                   <div className="relative inline-block">
-                    <img src={receiptPreview} alt="Comprobante" className="max-h-48 rounded-xl shadow-sm border border-gray-200" />
+                    <img 
+                      src={receiptPreview} 
+                      alt="Comprobante" 
+                      className="max-h-48 rounded-xl shadow-sm border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity" 
+                      onClick={() => setEnlargedImage({ src: receiptPreview, title: "Comprobante de Pago" })}
+                      title="Haz clic para agrandar comprobante"
+                    />
                     <button type="button" onClick={() => setReceiptPreview(null)} className="absolute -top-3 -right-3 bg-red-100 text-red-600 rounded-full p-1 border border-red-200 shadow-sm hover:bg-red-200">✕</button>
                   </div>
                 ) : (
@@ -125,6 +138,32 @@ export default function TrackingSection({
                 </button>
               )}
             </form>
+          </div>
+        )}
+
+        {/* Receipt display when already uploaded */}
+        {order?.receipt_url && (
+          <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+            <h3 className="font-extrabold text-primary mb-3 flex items-center gap-2 text-sm">
+              <CheckCircle2 size={16} className="text-green-600" /> Comprobante enviado
+            </h3>
+            <div className="text-center">
+              <div 
+                className="relative inline-block cursor-pointer group"
+                onClick={() => setEnlargedImage({ src: order.receipt_url, title: "Comprobante de Pago" })}
+                title="Haz clic para agrandar comprobante"
+              >
+                <img 
+                  src={order.receipt_url} 
+                  alt="Comprobante enviado" 
+                  className="max-h-48 rounded-xl shadow-sm border border-gray-200 object-contain mx-auto transition-transform group-hover:scale-105" 
+                />
+                <div className="absolute bottom-2 right-2 bg-primary/75 hover:bg-primary text-white text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow transition-colors">
+                  <ZoomIn size={13} /> Ampliar
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 mt-2 font-medium">Toca la imagen para verla en pantalla completa.</p>
+            </div>
           </div>
         )}
 
@@ -159,6 +198,39 @@ export default function TrackingSection({
           </div>
         )}
       </div>
+
+      {/* Fullscreen Image Preview Modal */}
+      {enlargedImage && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setEnlargedImage(null)}
+          data-testid="enlarged-image-modal"
+        >
+          <div 
+            className="relative max-w-2xl w-full max-h-[90vh] flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-full flex justify-between items-center mb-3 text-white px-2">
+              <span className="text-sm font-bold tracking-wide">{enlargedImage.title}</span>
+              <button 
+                onClick={() => setEnlargedImage(null)}
+                className="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
+                data-testid="close-enlarged-image-btn"
+                title="Cerrar"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="bg-white/10 p-2 rounded-2xl backdrop-blur-md max-h-[80vh] overflow-auto flex items-center justify-center border border-white/10">
+              <img 
+                src={enlargedImage.src} 
+                alt={enlargedImage.title} 
+                className="max-h-[75vh] w-auto max-w-full object-contain rounded-xl shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
