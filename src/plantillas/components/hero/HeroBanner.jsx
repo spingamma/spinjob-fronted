@@ -1,5 +1,6 @@
 import React from 'react';
 import { Camera, Star, Edit3, Share2, QrCode, Bookmark, ChevronLeft } from 'lucide-react';
+import WoodenClosedSign from '../../../components/WoodenClosedSign';
 
 export default function HeroBanner({
   profesional,
@@ -14,7 +15,9 @@ export default function HeroBanner({
   volverAtras,
   toggleSaveCard,
   isSaving,
-  isSaved
+  isSaved,
+  handleToggleOpen,
+  isTogglingOpen
 }) {
   return (
     <div className="relative w-full max-w-3xl mx-auto mb-4 md:px-4 lg:px-6">
@@ -23,7 +26,9 @@ export default function HeroBanner({
           src={imagePreview || profesional.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name || 'Negocio')}&background=F8F9FA&color=1A535C&size=512`}
           onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profesional.name || 'Negocio')}&background=F8F9FA&color=1A535C&size=512`; }}
           alt={`Foto de perfil de ${profesional.name}`}
-          className="w-full h-full object-cover"
+          className={`w-full h-full object-cover transition-all duration-300 ${
+            profesional.is_open === false ? 'grayscale contrast-125' : ''
+          }`}
         />
         {isEditing && (
           <label className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center cursor-pointer hover:bg-black/50 transition-colors z-20">
@@ -88,9 +93,19 @@ export default function HeroBanner({
         </div>
       )}
 
-      {/* BOTONES COMPARTIR Y QR (ESQUINA SUPERIOR DERECHA) */}
+      {/* LETRERO DE MADERA CERRADO */}
+      {profesional.is_open === false && (
+        <div 
+          data-testid="hero-closed-badge"
+          className="absolute top-2.5 left-14 sm:top-4 sm:left-16 z-30"
+        >
+          <WoodenClosedSign />
+        </div>
+      )}
+
+      {/* BOTONES COMPARTIR, QR Y SWITCH ABIERTO/CERRADO (ESQUINA SUPERIOR DERECHA) */}
       {!isEditing && !isCreateMode && (
-        <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 flex gap-2 z-30">
+        <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 flex items-center gap-2 z-30">
           <button
             onClick={handleShare}
             data-testid="profile-share-btn"
@@ -107,6 +122,32 @@ export default function HeroBanner({
           >
             <QrCode size={20} />
           </button>
+
+          {/* SWITCH ABIERTO/CERRADO A LA DERECHA */}
+          {isOwner && handleToggleOpen && (
+            <button
+              onClick={handleToggleOpen}
+              disabled={isTogglingOpen}
+              data-testid="business-toggle-open-btn"
+              title={profesional.is_open !== false ? "Negocio Abierto (Click para cerrar)" : "Negocio Cerrado (Click para abrir)"}
+              className={`h-10 px-2.5 rounded-full flex items-center gap-1.5 transition-all shadow-md backdrop-blur-md border active:scale-95 cursor-pointer ${
+                profesional.is_open !== false
+                  ? 'bg-green-500/90 border-green-400 text-white hover:bg-green-600'
+                  : 'bg-gray-500/90 border-gray-400 text-white hover:bg-gray-600'
+              }`}
+            >
+              <span className="text-[11px] font-bold tracking-tight hidden sm:inline">
+                {profesional.is_open !== false ? 'Abierto' : 'Cerrado'}
+              </span>
+              <div className={`w-7 h-4 rounded-full p-0.5 transition-colors relative flex items-center ${
+                profesional.is_open !== false ? 'bg-green-800/80' : 'bg-gray-700/80'
+              }`}>
+                <div className={`w-3 h-3 rounded-full bg-white shadow-md transform transition-transform ${
+                  profesional.is_open !== false ? 'translate-x-3' : 'translate-x-0'
+                }`} />
+              </div>
+            </button>
+          )}
         </div>
       )}
 

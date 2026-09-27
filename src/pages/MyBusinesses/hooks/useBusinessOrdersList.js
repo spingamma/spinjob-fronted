@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import fetchAuth from '../../../utils/fetchAuth';
 import { API_URL } from '../../../config/api';
@@ -172,8 +172,19 @@ export function useBusinessOrdersList(slug) {
     }
   };
 
+  const summary = useMemo(() => {
+    const validStatuses = ['pagado', 'entregado', 'completado'];
+    const paidOrders = orders.filter(o => validStatuses.includes(o.status));
+    const totalSales = paidOrders.reduce((sum, o) => sum + (Number(o.total_price) || 0), 0);
+    return {
+      total_sales: totalSales,
+      orders_count: paidOrders.length
+    };
+  }, [orders]);
+
   return {
     orders,
+    summary,
     loading,
     isPremium,
     businessCategory,

@@ -8,6 +8,7 @@ import DirectoryFilterBar from '../../components/DirectoryFilterBar';
 import { useDirectoryFilters } from '../../hooks/useDirectoryFilters';
 import fetchAuth from '../../utils/fetchAuth';
 import { API_URL } from '../../config/api';
+import WoodenClosedSign from '../../components/WoodenClosedSign';
 
 export default function Tarjetero() {
   const [tarjetas, setTarjetas] = useState([]);
@@ -174,10 +175,12 @@ export default function Tarjetero() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filterHook.computed.filteredProfessionals.map(neg => (
-              <div key={neg.slug} className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex flex-col gap-4 transition-all hover:shadow-xl hover:border-secondary/20 relative group w-full overflow-hidden">
+              <div key={neg.slug} className={`bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex flex-col gap-4 transition-all hover:shadow-xl hover:border-secondary/20 relative group w-full overflow-hidden ${
+                neg.is_open === false ? 'grayscale opacity-85' : ''
+              }`}>
                 
                 <div className="flex items-start gap-3 sm:gap-4 w-full">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-gray-50 shrink-0 border border-gray-100">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-gray-50 shrink-0 border border-gray-100 relative">
                     <img 
                       src={neg.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(neg.name)}&background=F8F9FA&color=1A535C&size=256`} 
                       alt={neg.name}
@@ -187,6 +190,11 @@ export default function Tarjetero() {
                         e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(neg.name)}&background=F8F9FA&color=1A535C&size=256`;
                       }}
                     />
+                    {neg.is_open === false && (
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                        <WoodenClosedSign compact />
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-base sm:text-lg text-primary leading-tight line-clamp-1">{neg.name}</h3>
@@ -195,6 +203,11 @@ export default function Tarjetero() {
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-50 text-gray-500 border border-gray-100 uppercase tracking-tighter truncate max-w-full">
                         {neg.category}
                       </span>
+                      {neg.is_open === false && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-900/10 text-amber-900 border border-amber-900/20 uppercase tracking-tighter">
+                          Cerrado
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

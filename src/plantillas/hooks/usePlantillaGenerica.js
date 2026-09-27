@@ -4,6 +4,8 @@ import useProfileForm from '../../hooks/useProfileForm';
 import useFetchProfileData from './useFetchProfileData';
 import useProfileDraft from './useProfileDraft';
 import useProfileSubmit from './useProfileSubmit';
+import fetchAuth from '../../utils/fetchAuth';
+import { API_URL } from '../../config/api';
 
 // UTIL: Decodificar JWT para obtener el user ID
 function getUserIdFromToken() {
@@ -153,6 +155,27 @@ export function usePlantillaGenerica(profesional, onProtectedAction, onUpdate, i
     ubicacion: profesional?.ubicacion_url
   };
 
+  const [isTogglingOpen, setIsTogglingOpen] = useState(false);
+  const handleToggleOpen = async () => {
+    if (!profesional?.slug || isTogglingOpen) return;
+    setIsTogglingOpen(true);
+    try {
+      const res = await fetchAuth(`${API_URL}/businesses/${profesional.slug}/toggle-open`, {
+        method: 'PATCH'
+      });
+      if (res.ok) {
+        if (onUpdate) onUpdate();
+      } else {
+        const err = await res.json();
+        alert(err.detail || "Error al actualizar estado del negocio");
+      }
+    } catch (e) {
+      console.error("Error toggling open state:", e);
+    } finally {
+      setIsTogglingOpen(false);
+    }
+  };
+
   return {
     isOwner,
     isEditing,
@@ -170,6 +193,8 @@ export function usePlantillaGenerica(profesional, onProtectedAction, onUpdate, i
     getServerQr,
     waNumbers,
     links,
-    accionesPerfil
+    accionesPerfil,
+    isTogglingOpen,
+    handleToggleOpen
   };
 }

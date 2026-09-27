@@ -39,7 +39,9 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
       mostrarModalCalificando, setMostrarModalCalificando, calificacionPrevia, isSubmittingReview, handleSubmitReview,
       mostrarModalVerificacion, setMostrarModalVerificacion,
       isSaved, isSaving, toggleSaveCard
-    }
+    },
+    isTogglingOpen,
+    handleToggleOpen
   } = usePlantillaGenerica(profesional, onProtectedAction, onUpdate, isCreateMode, initialIsEditing, navigate);
 
   if (!profesional) return null;
@@ -64,6 +66,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         isCreateMode={isCreateMode}
         specialtiesData={specialtiesData}
         onOpenCatalogModal={() => setIsCatalogModalOpen(true)}
+        handleToggleOpen={handleToggleOpen}
+        isTogglingOpen={isTogglingOpen}
       />
 
       <div className="max-w-4xl mx-auto px-6 sm:px-8 md:px-6 lg:px-8 relative z-20">
@@ -78,7 +82,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               country={profesional.country || 'Bolivia'}
               theme="light"
               isPremium={profesional.premium === true}
-              ordersEnabled={profesional.orders_enabled !== false}
+              ordersEnabled={profesional.orders_enabled !== false && profesional.is_open !== false}
               carouselOrder={profesional.carousel_order}
               deliveryMethods={profesional.delivery_methods}
               paymentQrImage={getServerQr(profesional)}

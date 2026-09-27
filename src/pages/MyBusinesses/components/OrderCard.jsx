@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Download, XCircle, Loader2, CheckCircle2, PackageCheck, Eye, X } from 'lucide-react';
+import { XCircle, Loader2, CheckCircle2, PackageCheck, Eye, MessageCircle } from 'lucide-react';
 import { formatOrderCode } from '../../../utils/formatOrderCode';
+import { cleanWhatsappNumber } from '../../../utils/phone';
+import OrderReceiptModal from './OrderReceiptModal';
 
 export default function OrderCard({ 
   order, 
@@ -47,6 +49,11 @@ export default function OrderCard({
     ? 'PAGO ENVIADO'
     : 'PENDIENTE DE PAGO';
 
+  const canContactWhatsapp = !isCompletado && !isEntregado && !isCancelado;
+  const waUrl = (order.customer_phone && canContactWhatsapp)
+    ? `https://wa.me/${cleanWhatsappNumber(order.customer_phone)}?text=${encodeURIComponent(`Hola ${order.customer_name}, te escribimos desde ${order.business_name || 'el negocio'} respecto a tu pedido #${formatOrderCode(order.order_number, order.id)}.`)}`
+    : null;
+
   return (
     <div data-testid={`business-order-card-${order.id}`} className="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:shadow-md">
       <div className="space-y-1">
@@ -56,7 +63,22 @@ export default function OrderCard({
             {statusLabel}
           </span>
         </div>
-        <p className="text-xs text-gray-400 font-medium">Cliente: <span className="text-primary font-bold">{order.customer_name}</span></p>
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className="text-xs text-gray-400 font-medium">Cliente: <span className="text-primary font-bold">{order.customer_name}</span></p>
+          {waUrl && (
+            <a
+              href={waUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid={`whatsapp-customer-btn-${order.id}`}
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors border border-emerald-200 shadow-xs"
+              title={`Contactar por WhatsApp: ${order.customer_phone}`}
+            >
+              <MessageCircle size={12} className="text-emerald-600" />
+              WhatsApp
+            </a>
+          )}
+        </div>
         <p className="text-xs text-gray-400 font-medium">Fecha: <span className="font-semibold text-gray-600">{new Date(order.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></p>
         {order.delivered_at && (
           <p className="text-xs text-green-600 font-medium mt-0.5">Fecha de Entrega: <span className="font-semibold">{new Date(order.delivered_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></p>
@@ -257,59 +279,12 @@ export default function OrderCard({
         )}
       </div>
 
-      {/* Modal para verificar comprobante */}
-      {showReceiptModal && order.receipt_url && (
-        <div 
-          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-4 animate-in fade-in duration-200"
-          onClick={() => setShowReceiptModal(false)}
-          data-testid="receipt-modal-preview"
-        >
-          <div 
-            className="relative max-w-lg w-full max-h-[90vh] flex flex-col items-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-full flex justify-between items-center mb-3 text-white px-2">
-              <span className="text-sm font-bold tracking-wide">Comprobante - Pedido #{formatOrderCode(order.order_number, order.id)}</span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleDownloadReceipt(order.receipt_url, order.order_number)}
-                  className="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
-                  title="Descargar comprobante"
-                >
-                  <Download size={18} />
-                </button>
-                <button 
-                  onClick={() => setShowReceiptModal(false)}
-                  className="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
-                  title="Cerrar"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-            </div>
-            <div className="bg-white/10 p-2 rounded-2xl backdrop-blur-md max-h-[75vh] overflow-auto flex items-center justify-center border border-white/10 w-full">
-              <img 
-                src={order.receipt_url} 
-                alt="Comprobante de Pago" 
-                className="max-h-[70vh] w-auto max-w-full object-contain rounded-xl shadow-2xl"
-              />
-            </div>
-            <div className="mt-3 flex gap-3 w-full">
-              <button
-                onClick={() => handleDownloadReceipt(order.receipt_url, order.order_number)}
-                className="flex-1 py-2.5 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
-              >
-                <Download size={14} /> Descargar archivo
-              </button>
-              <button
-                onClick={() => setShowReceiptModal(false)}
-                className="flex-1 py-2.5 bg-white text-gray-800 hover:bg-gray-100 rounded-xl text-xs font-bold transition-colors"
-              >
-                Cerrar vista previa
-              </button>
-            </div>
-          </div>
-        </div>
+      {showReceiptModal && (
+        <OrderReceiptModal 
+          order={order}
+          onClose={() => setShowReceiptModal(false)}
+          onDownloadReceipt={handleDownloadReceipt}
+        />
       )}
     </div>
   );

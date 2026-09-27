@@ -1,6 +1,7 @@
 // Archivo: src/components/ProfessionalCard.jsx
 import { Link } from 'react-router-dom';
 import { Star, DoorOpen, CheckCircle2 } from 'lucide-react';
+import WoodenClosedSign from './WoodenClosedSign';
 
 export default function ProfessionalCard({ professional, isLoggedIn, onCardClick, userCoords }) {
   // Parsers coordinates from business URL
@@ -65,7 +66,9 @@ export default function ProfessionalCard({ professional, isLoggedIn, onCardClick
           onCardClick(professional.slug);
         }
       }}
-      className="group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 hover:border-secondary/30 overflow-hidden"
+      className={`group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 hover:border-secondary/30 overflow-hidden ${
+        professional.is_open === false ? 'grayscale opacity-85' : ''
+      }`}
     >
       <div className="relative aspect-square overflow-hidden bg-gray-50">
         <img
@@ -87,6 +90,14 @@ export default function ProfessionalCard({ professional, isLoggedIn, onCardClick
           <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/95 backdrop-blur-sm px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-lg flex items-center gap-1 shadow-sm border border-gray-100">
             <Star size={12} className="fill-secondary text-secondary sm:w-[14px] sm:h-[14px]" />
             <span className="text-xs sm:text-sm font-bold text-gray-900">{professional.rating}</span>
+          </div>
+        )}
+        {professional.is_open === false && (
+          <div 
+            data-testid="card-closed-badge"
+            className="absolute bottom-2 left-2 z-10"
+          >
+            <WoodenClosedSign compact />
           </div>
         )}
       </div>
@@ -139,8 +150,12 @@ export default function ProfessionalCard({ professional, isLoggedIn, onCardClick
         )}
 
         <div className="mt-auto pt-2 w-full">
-          <div className="w-full flex items-center justify-center gap-1.5 border-2 border-accent text-accent group-hover:bg-accent group-hover:text-white font-bold py-1.5 sm:py-2 px-3 rounded-full transition-colors text-xs sm:text-sm">
-            <DoorOpen size={14} /> Visitar
+          <div className={`w-full flex items-center justify-center gap-1.5 border-2 font-bold py-1.5 sm:py-2 px-3 rounded-full transition-colors text-xs sm:text-sm ${
+            professional.is_open === false
+              ? 'border-gray-300 text-gray-500 bg-gray-50 group-hover:bg-gray-100'
+              : 'border-accent text-accent group-hover:bg-accent group-hover:text-white'
+          }`}>
+            <DoorOpen size={14} /> {professional.is_open === false ? 'Cerrado' : 'Visitar'}
           </div>
         </div>
       </div>

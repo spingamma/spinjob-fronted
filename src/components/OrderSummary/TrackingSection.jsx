@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Download, Upload, ShieldAlert, CheckCircle2, Loader2, QrCode, Key, Send, ZoomIn, X } from 'lucide-react';
+import { ArrowLeft, Download, Upload, ShieldAlert, CheckCircle2, Loader2, QrCode, Key, Send, ZoomIn, X, Store, Eye } from 'lucide-react';
+import { getStatusText, getStatusColor } from './utils/orderStatusUtils';
 
 /**
  * Displays tracking (order status) view, QR download and receipt upload.
@@ -7,6 +8,7 @@ import { ArrowLeft, Download, Upload, ShieldAlert, CheckCircle2, Loader2, QrCode
  */
 export default function TrackingSection({
   navigate,
+  slug,
   order,
   displayQr,
   isPending,
@@ -41,6 +43,26 @@ export default function TrackingSection({
               <h2 className="text-xl font-extrabold text-primary">
                 Orden #{order?.order_number || String(order?.id || '').slice(0, 8)}
               </h2>
+              {order?.business_name && (
+                <div className="flex items-center gap-2 mt-1 mb-2 flex-wrap">
+                  <span className="text-xs font-semibold text-gray-600 flex items-center gap-1.5">
+                    <Store size={14} className="text-primary" />
+                    {order.business_name}
+                  </span>
+                  {(order.business_slug || slug) && (
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/perfil/${order.business_slug || slug}`)}
+                      data-testid="view-business-tracking-btn"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-secondary hover:text-secondary/80 bg-secondary/10 px-2 py-0.5 rounded-lg transition-colors cursor-pointer"
+                      title={`Ver perfil de ${order.business_name}`}
+                    >
+                      <Eye size={13} />
+                      Ver negocio
+                    </button>
+                  )}
+                </div>
+              )}
               <span className={`text-[11px] font-black uppercase px-2.5 py-1 rounded-md ${
                 getStatusColor(order)
               }`}>{getStatusText(order)}</span>
@@ -233,55 +255,4 @@ export default function TrackingSection({
       )}
     </div>
   );
-}
-
-// Helper functions
-function getStatusText(order) {
-  const status = order?.status;
-  const isPaqueteria = order?.delivery_method?.startsWith('PAQUETERIA|') || order?.delivery_method === 'paqueteria' || !!order?.pickup_business_id;
-  
-  switch (status) {
-    case 'pendiente':
-    case 'pendiente_de_pago':
-      return 'Pendiente de Pago';
-    case 'pago_enviado':
-      return 'Pago en Verificación';
-    case 'pagado':
-      return 'Pago Confirmado (Preparando)';
-    case 'entregado':
-      return isPaqueteria ? 'En Camino a Paquetería' : 'Enviado / Entregado';
-    case 'ready_for_pickup':
-      return 'Listo para Recojo';
-    case 'completado':
-      return 'Completado';
-    case 'cancelado':
-      return 'Cancelado';
-    default:
-      return 'Desconocido';
-  }
-}
-
-function getStatusColor(order) {
-  const status = order?.status;
-  const isPaqueteria = order?.delivery_method?.startsWith('PAQUETERIA|') || order?.delivery_method === 'paqueteria' || !!order?.pickup_business_id;
-
-  switch (status) {
-    case 'pendiente':
-    case 'pendiente_de_pago':
-      return 'bg-amber-100 text-amber-800';
-    case 'pago_enviado':
-      return 'bg-orange-100 text-orange-800';
-    case 'pagado':
-      return 'bg-blue-100 text-blue-800';
-    case 'entregado':
-      return isPaqueteria ? 'bg-indigo-100 text-indigo-800' : 'bg-green-100 text-green-800';
-    case 'ready_for_pickup':
-      return 'bg-secondary text-white';
-    case 'completado':
-      return 'bg-emerald-100 text-emerald-800';
-    case 'cancelado':
-      return 'bg-red-100 text-red-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
 }

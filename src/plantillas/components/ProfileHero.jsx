@@ -23,7 +23,9 @@ export default function ProfileHero({
   setEditFormData,
   isCreateMode,
   specialtiesData,
-  onOpenCatalogModal
+  onOpenCatalogModal,
+  handleToggleOpen,
+  isTogglingOpen
 }) {
   const {
     isMapOpen,
@@ -53,6 +55,8 @@ export default function ProfileHero({
             toggleSaveCard={toggleSaveCard}
             isSaving={isSaving}
             isSaved={isSaved}
+            handleToggleOpen={handleToggleOpen}
+            isTogglingOpen={isTogglingOpen}
           />
 
           <div className="flex justify-between items-start px-6 sm:px-8 md:px-6 lg:px-8 max-w-4xl mx-auto w-full gap-4">

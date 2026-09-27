@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2, QrCode, AlertCircle, CheckCircle2, PackageCheck, ShieldAlert } from 'lucide-react';
+import { Loader2, QrCode, AlertCircle, CheckCircle2, PackageCheck, ShieldAlert, Store, Eye } from 'lucide-react';
 import { formatOrderCode } from '../../../utils/formatOrderCode';
 
 export default function CustomerOrderCard({
@@ -62,7 +62,28 @@ export default function CustomerOrderCard({
           <p className="text-xs font-bold text-gray-400">{dateStr} • {timeStr}</p>
         </div>
         
-        <h3 className="font-extrabold text-lg mb-3">Pedido #{formatOrderCode(order.order_number, order.id)} ({order.customer_name})</h3>
+        <h3 className="font-extrabold text-lg mb-1">Pedido #{formatOrderCode(order.order_number, order.id)} ({order.customer_name})</h3>
+        
+        {order.business_name && (
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
+            <span className="text-xs font-semibold text-gray-600 flex items-center gap-1.5">
+              <Store size={14} className="text-primary" />
+              {order.business_name}
+            </span>
+            {order.business_slug && (
+              <button
+                type="button"
+                onClick={() => navigate(`/perfil/${order.business_slug}`)}
+                data-testid={`view-business-btn-${order.id}`}
+                className="inline-flex items-center gap-1 text-xs font-bold text-secondary hover:text-secondary/80 bg-secondary/10 px-2 py-0.5 rounded-lg transition-colors cursor-pointer"
+                title={`Ver perfil de ${order.business_name}`}
+              >
+                <Eye size={13} />
+                Ver negocio
+              </button>
+            )}
+          </div>
+        )}
         
         <div className="bg-gray-50 rounded-xl p-3 space-y-2">
           {order.items?.map((item, idx) => {

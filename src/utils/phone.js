@@ -21,9 +21,17 @@ export const getCountryByName = (name) => {
  * Limpia un número de WhatsApp (removiendo no-dígitos) para la API wa.me.
  * Dado que todos los números se guardan unificados con su prefijo, basta con limpiar de no-dígitos.
  */
-export const cleanWhatsappNumber = (number) => {
+export const cleanWhatsappNumber = (number, countryName = 'Bolivia') => {
   if (!number) return '';
-  return number.replace(/[^0-9]/g, '');
+  let cleaned = String(number).replace(/[^0-9]/g, '');
+  if (cleaned.startsWith('0')) {
+    cleaned = cleaned.substring(1);
+  }
+  const country = getCountryByName(countryName) || COUNTRIES.Bolivia;
+  if (country && cleaned.length === country.length) {
+    cleaned = `${country.cleanCode}${cleaned}`;
+  }
+  return cleaned;
 };
 
 /**

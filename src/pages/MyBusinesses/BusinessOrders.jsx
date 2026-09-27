@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, PackageOpen, X } from 'lucide-react';
 import { useBusinessOrdersList } from './hooks/useBusinessOrdersList';
 import OrdersFilterBar from './components/OrdersFilterBar';
 import OrderCard from './components/OrderCard';
+import OrdersSummaryCard from './components/OrdersSummaryCard';
 import PremiumLockScreen from './components/PremiumLockScreen';
 import { API_URL } from '../../config/api';
 
@@ -14,6 +15,7 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
   
   const {
     orders,
+    summary,
     loading,
     isPremium,
     businessCategory,
@@ -124,6 +126,10 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
                 </button>
               )}
             </div>
+
+            {!loading && orders.length > 0 && (
+              <OrdersSummaryCard summary={summary} />
+            )}
 
             {loading ? (
               <div className="flex flex-col items-center py-12">
