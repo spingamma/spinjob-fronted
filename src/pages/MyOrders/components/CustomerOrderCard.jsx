@@ -65,15 +65,33 @@ export default function CustomerOrderCard({
         <h3 className="font-extrabold text-lg mb-3">Pedido #{formatOrderCode(order.order_number, order.id)} ({order.customer_name})</h3>
         
         <div className="bg-gray-50 rounded-xl p-3 space-y-2">
-          {order.items?.map((item, idx) => (
-            <div key={idx} className="flex justify-between items-center text-sm">
-              <span className="font-medium text-gray-700">
-                <span className="font-bold text-primary mr-2">{item.quantity}x</span> 
-                {item.product_name}
-              </span>
-              <span className="text-gray-500 font-bold text-xs">Bs. {item.subtotal.toFixed(2)}</span>
-            </div>
-          ))}
+          {order.items?.map((item, idx) => {
+            let choicesList = [];
+            if (item.selected_choices) {
+              try {
+                choicesList = typeof item.selected_choices === 'string'
+                  ? JSON.parse(item.selected_choices)
+                  : item.selected_choices;
+                if (!Array.isArray(choicesList)) choicesList = [];
+              } catch {
+                choicesList = [];
+              }
+            }
+            return (
+              <div key={idx} className="flex justify-between items-start text-sm">
+                <div className="font-medium text-gray-700">
+                  <span className="font-bold text-primary mr-2">{item.quantity}x</span> 
+                  {item.product_name}
+                  {choicesList.length > 0 && (
+                    <span className="text-[11px] text-gray-400 block font-normal mt-0.5">
+                      Con: {choicesList.join(', ')}
+                    </span>
+                  )}
+                </div>
+                <span className="text-gray-500 font-bold text-xs shrink-0">Bs. {item.subtotal.toFixed(2)}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 

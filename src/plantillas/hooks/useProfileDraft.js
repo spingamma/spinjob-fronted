@@ -4,9 +4,7 @@ export default function useProfileDraft({
   isEditing,
   draftStorageKey,
   editFormData,
-  localProducts,
   imagePreview,
-  setLocalProducts,
   setImagePreview
 }) {
   // Load draft on mount/editing change
@@ -16,14 +14,13 @@ export default function useProfileDraft({
         const savedDraft = localStorage.getItem(draftStorageKey);
         if (savedDraft) {
           const parsed = JSON.parse(savedDraft);
-          if (parsed.localProducts) setLocalProducts(parsed.localProducts);
           if (parsed.imagePreview) setImagePreview(parsed.imagePreview);
         }
       } catch (err) {
-        console.error('Error loading draft for products or imagePreview:', err);
+        console.error('Error loading draft for imagePreview:', err);
       }
     }
-  }, [isEditing, draftStorageKey, setLocalProducts, setImagePreview]);
+  }, [isEditing, draftStorageKey, setImagePreview]);
 
   // Auto-save draft on changes
   useEffect(() => {
@@ -34,20 +31,15 @@ export default function useProfileDraft({
           const { new_image, payment_qr_file, ...cleanFormData } = editFormData;
           const draftPayload = {
             editFormData: cleanFormData,
-            localProducts: (localProducts || []).map(p => {
-              // eslint-disable-next-line no-unused-vars
-              const { imageFile, ...cleanP } = p;
-              return cleanP;
-            }),
             imagePreview,
             updatedAt: Date.now()
           };
           localStorage.setItem(draftStorageKey, JSON.stringify(draftPayload));
         } catch (err) {
-          console.error('Error guardando borrador en localStorage (products/image):', err);
+          console.error('Error guardando borrador en localStorage (image):', err);
         }
       }, 400);
       return () => clearTimeout(timer);
     }
-  }, [editFormData, localProducts, imagePreview, isEditing, draftStorageKey]);
+  }, [editFormData, imagePreview, isEditing, draftStorageKey]);
 }

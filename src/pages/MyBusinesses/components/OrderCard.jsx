@@ -65,12 +65,32 @@ export default function OrderCard({
       
       {/* Items Details */}
       <div className="border-t border-b sm:border-none border-gray-50 py-3 sm:py-0 flex-1 sm:max-w-xs">
-        <div className="space-y-1">
-          {order.items.map((item, idx) => (
-            <p key={idx} className="text-xs text-gray-500 font-medium line-clamp-1">
-              {item.quantity}x {item.product_name}
-            </p>
-          ))}
+        <div className="space-y-1.5">
+          {order.items.map((item, idx) => {
+            let choicesList = [];
+            if (item.selected_choices) {
+              try {
+                choicesList = typeof item.selected_choices === 'string'
+                  ? JSON.parse(item.selected_choices)
+                  : item.selected_choices;
+                if (!Array.isArray(choicesList)) choicesList = [];
+              } catch {
+                choicesList = [];
+              }
+            }
+            return (
+              <div key={idx} className="text-xs">
+                <p className="text-gray-700 font-medium">
+                  {item.quantity}x {item.product_name}
+                </p>
+                {choicesList.length > 0 && (
+                  <p className="text-[11px] text-gray-400 font-normal">
+                    Con: {choicesList.join(', ')}
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 

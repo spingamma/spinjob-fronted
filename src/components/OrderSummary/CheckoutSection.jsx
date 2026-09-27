@@ -60,11 +60,29 @@ export default function CheckoutSection({
               const rawMatch = (item.product.price || '0').replace(/[^\d.-]/g, '');
               const priceNum = parseFloat(rawMatch);
               const validPrice = isNaN(priceNum) ? 0 : priceNum;
+
+              let choicesList = [];
+              if (item.selected_choices) {
+                try {
+                  choicesList = typeof item.selected_choices === 'string'
+                    ? JSON.parse(item.selected_choices)
+                    : item.selected_choices;
+                  if (!Array.isArray(choicesList)) choicesList = [];
+                } catch {
+                  choicesList = [];
+                }
+              }
+
               return (
                 <div key={idx} className="flex justify-between items-center">
                   <div className="flex-1 pr-4">
                     <p className="font-bold text-sm">{item.product.name}</p>
                     <p className="text-xs text-gray-500">{item.quantity} x Bs. {validPrice.toFixed(2)}</p>
+                    {choicesList.length > 0 && (
+                      <p className="text-[11px] text-gray-500 mt-0.5 font-medium">
+                        Con: {choicesList.join(', ')}
+                      </p>
+                    )}
                   </div>
                   <p className="font-black">Bs. {(item.quantity * validPrice).toFixed(2)}</p>
                 </div>

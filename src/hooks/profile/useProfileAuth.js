@@ -16,6 +16,8 @@ export default function useProfileAuth() {
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem('spingamma_user');
+    localStorage.removeItem('spingamma_token');
+    localStorage.removeItem('spingamma_refresh_token');
     window.location.reload();
   }, []);
 

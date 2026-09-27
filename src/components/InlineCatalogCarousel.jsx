@@ -37,7 +37,22 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, theme = 'light
       alert("Para realizar un pedido necesitas iniciar sesión. Por favor ve a la página principal e ingresa a tu cuenta.");
       return;
     }
-    navigate(`/perfil/${slug}/orden`, { state: { cart, slug, deliveryMethods, paymentQrImage, ownerId } });
+
+    const cartItems = Object.values(cart || {});
+    const hasAnyChoices = cartItems.some(item => {
+      if (!item?.product?.choices) return false;
+      try {
+        const parsed = typeof item.product.choices === 'string'
+          ? JSON.parse(item.product.choices)
+          : item.product.choices;
+        return Array.isArray(parsed) && parsed.length > 0;
+      } catch {
+        return false;
+      }
+    });
+
+    const targetRoute = hasAnyChoices ? `/perfil/${slug}/complementos` : `/perfil/${slug}/orden`;
+    navigate(targetRoute, { state: { cart, slug, deliveryMethods, paymentQrImage, ownerId } });
   };
 
   if (loading) {

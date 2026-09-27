@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Save, Pencil, Image as ImageIcon, Package } from 'lucide-react';
+import { X, Save, Pencil, Image as ImageIcon, Package, Plus, Minus } from 'lucide-react';
 import CropModal from '../../components/CropModal';
 import useProductForm from '../hooks/useProductForm';
 
@@ -19,6 +19,10 @@ export default function ProductFormModal({
     formPrice, setFormPrice,
     formCarousel, setFormCarousel,
     formPreview,
+    formChoices,
+    addChoice,
+    removeChoice,
+    updateChoice,
     showCropModal, setShowCropModal,
     cropImageSrc, setCropImageSrc,
     textareaRef,
@@ -34,11 +38,21 @@ export default function ProductFormModal({
       <div 
         data-testid="product-modal-backdrop"
         className="fixed inset-0 z-[100] flex items-center justify-center bg-primary/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
-        onClick={onClose}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            onClose();
+          }
+        }}
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget) {
+            onClose();
+          }
+        }}
       >
         <div 
           data-testid="product-modal-content"
           className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh] animate-in zoom-in-95 duration-200"
+          onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
         >
         {/* Header */}
@@ -157,6 +171,58 @@ export default function ProductFormModal({
                 {formDesc.length}/400
               </div>
             </div>
+          </div>
+
+          {/* Opciones A Elección */}
+          <div className="border border-gray-100 bg-gray-50/50 rounded-2xl p-3.5">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <label className="text-xs font-bold text-primary block">
+                  A elección <span className="text-[10px] font-normal text-gray-400">(opcional)</span>
+                </label>
+                <p className="text-[11px] text-gray-400">
+                  Opciones que el cliente podrá elegir (ej: Ketchup, Cebollín).
+                </p>
+              </div>
+              {formChoices.length < 10 && (
+                <button
+                  data-testid="add-choice-btn"
+                  type="button"
+                  onClick={addChoice}
+                  className="flex items-center gap-1 text-xs font-bold text-secondary hover:text-secondary/80 bg-orange-50 hover:bg-orange-100/80 px-2.5 py-1.5 rounded-lg transition-colors border border-orange-200/60"
+                >
+                  <Plus size={14} />
+                  <span>Añadir</span>
+                </button>
+              )}
+            </div>
+
+            {formChoices.length > 0 && (
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                {formChoices.map((choice, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <button
+                      data-testid={`remove-choice-btn-${idx}`}
+                      type="button"
+                      onClick={() => removeChoice(idx)}
+                      aria-label="Quitar opción"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center bg-gray-200/70 hover:bg-red-50 hover:text-red-500 text-gray-600 transition-colors shrink-0"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <input
+                      data-testid={`choice-input-${idx}`}
+                      type="text"
+                      value={choice}
+                      onChange={(e) => updateChoice(idx, e.target.value)}
+                      placeholder={`Opción ${idx + 1} (ej. Ketchup, Cebollín)`}
+                      maxLength={50}
+                      className="flex-1 bg-white border border-gray-200 rounded-xl px-3.5 py-2 text-sm text-primary outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Action buttons */}

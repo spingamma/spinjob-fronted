@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import ReviewModal from '../components/ReviewModal';
@@ -8,12 +8,14 @@ import ProfileHero from './components/ProfileHero';
 import ProfileAbout from './components/ProfileAbout';
 import ProfileContact from './components/ProfileContact';
 import ProfileQRModal from './components/ProfileQRModal';
-import ProfileCatalogEdit from './components/ProfileCatalogEdit';
+import CatalogEditModal from './components/CatalogEditModal';
 import FloatingActionBar from './components/FloatingActionBar';
 import { usePlantillaGenerica } from './hooks/usePlantillaGenerica';
 
 export default function PlantillaGenerica({ profesional, volverAtras, onProtectedAction, onUpdate, isCreateMode = false, initialIsEditing = null }) {
   const navigate = useNavigate();
+  const [isCatalogModalOpen, setIsCatalogModalOpen] = useState(false);
+  const [catalogVersion, setCatalogVersion] = useState(0);
 
   const {
     isOwner,
@@ -22,15 +24,9 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
     imagePreview,
     setImagePreview,
     isSubModalOpen,
-    setIsSubModalOpen,
-    deletedProductsIds,
-    setDeletedProductsIds,
-    setHasUnsavedProduct,
     draftStorageKey,
     profileForm: { editFormData, setEditFormData, handleEditChange },
     specialtiesData,
-    localProducts,
-    setLocalProducts,
     saveError,
     isSavingEdit,
     handleSaveEdit,
@@ -67,32 +63,14 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         setEditFormData={setEditFormData}
         isCreateMode={isCreateMode}
         specialtiesData={specialtiesData}
+        onOpenCatalogModal={() => setIsCatalogModalOpen(true)}
       />
 
       <div className="max-w-4xl mx-auto px-6 sm:px-8 md:px-6 lg:px-8 relative z-20">
-        <div className="-mx-4 sm:mx-0 mb-2">
-          {isEditing ? (
-            <div className="px-4 sm:px-0">
-              <ProfileCatalogEdit 
-                localProducts={localProducts}
-                setLocalProducts={setLocalProducts}
-                deletedProductsIds={deletedProductsIds}
-                setDeletedProductsIds={setDeletedProductsIds}
-                isPremium={profesional.premium === true}
-                onHasUnsavedProduct={setHasUnsavedProduct}
-                ordersEnabled={editFormData.orders_enabled}
-                setOrdersEnabled={(val) => setEditFormData(prev => ({ ...prev, orders_enabled: val }))}
-                carouselOrder={editFormData.carousel_order}
-                setCarouselOrder={(val) => setEditFormData(prev => ({ ...prev, carousel_order: val }))}
-                deliveryMethods={editFormData.delivery_methods}
-                setDeliveryMethods={(val) => setEditFormData(prev => ({ ...prev, delivery_methods: val }))}
-                paymentQrImage={editFormData.payment_qr_image}
-                setPaymentQrImage={(val, fileObj) => setEditFormData(prev => ({ ...prev, payment_qr_image: val, payment_qr_file: fileObj || prev.payment_qr_file }))}
-                onModalOpenChange={setIsSubModalOpen}
-              />
-            </div>
-          ) : (
+        {!isCreateMode && profesional.slug && (
+          <div className="-mx-4 sm:mx-0 mb-2">
             <InlineCatalogCarousel 
+              key={`${profesional.slug}-${catalogVersion}`}
               slug={profesional.slug} 
               catalogUrl={profesional.catalog_url}
               whatsappNumber={waNumbers[0] || null}
@@ -106,8 +84,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               paymentQrImage={getServerQr(profesional)}
               ownerId={profesional.owner_id}
             />
-          )}
-        </div>
+          </div>
+        )}
 
         <ProfileAbout 
           profesional={profesional}
@@ -182,6 +160,18 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           }
         }}
         userName={userName}
+      />
+
+      <CatalogEditModal 
+        isOpen={isCatalogModalOpen}
+        onClose={() => setIsCatalogModalOpen(false)}
+        profesional={profesional}
+        isPremium={profesional.premium === true}
+        getServerQr={getServerQr}
+        onCatalogSaved={() => {
+          setCatalogVersion(v => v + 1);
+          if (onUpdate) onUpdate();
+        }}
       />
 
       <FloatingActionBar 

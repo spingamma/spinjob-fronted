@@ -14,6 +14,7 @@ const AdminPanel = lazy(() => import('./pages/AdminPanel/AdminPanel'));
 const BusinessCardHolder = lazy(() => import('./pages/BusinessCardHolder/BusinessCardHolder'));
 const MetricsDashboard = lazy(() => import('./pages/MetricsDashboard/MetricsDashboard'));
 const OrderSummary = lazy(() => import('./pages/OrderSummary/OrderSummary'));
+const ChoicesScreen = lazy(() => import('./pages/ChoicesScreen/ChoicesScreen'));
 const BusinessOrders = lazy(() => import('./pages/MyBusinesses/BusinessOrders'));
 const MyOrders = lazy(() => import('./pages/MyOrders/MyOrders'));
 
@@ -61,6 +62,7 @@ function App() {
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/tarjetero" element={<BusinessCardHolder />} />
           <Route path="/metricas/:slug" element={<MetricsDashboard />} />
+          <Route path="/perfil/:slug/complementos" element={<ChoicesScreen />} />
           <Route path="/perfil/:slug/orden/:orderId?" element={<OrderSummary />} />
           <Route path="/mis-pedidos/:slug" element={<BusinessOrders />} />
           <Route path="/mis-compras" element={<MyOrders />} />

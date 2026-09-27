@@ -29,6 +29,7 @@ const MobileUserMenu = ({ onLocationChange }) => {
 
   const handleLogout = () => {
     localStorage.removeItem('spingamma_token');
+    localStorage.removeItem('spingamma_refresh_token');
     localStorage.removeItem('spingamma_user');
     window.dispatchEvent(new Event('storage'));
     setIsOpen(false);

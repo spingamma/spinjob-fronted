@@ -104,6 +104,9 @@ export default function useAuthLogic({ isOpen, onSuccess, onRequireVerification 
       if (!res.ok) throw new Error(data.detail || 'Error en validación con Google.');
 
       localStorage.setItem('spingamma_token', data.access_token);
+      if (data.refresh_token) {
+        localStorage.setItem('spingamma_refresh_token', data.refresh_token);
+      }
 
       if (!data.celular) {
         setTempToken(data.access_token);

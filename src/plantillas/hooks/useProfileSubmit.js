@@ -7,15 +7,11 @@ export default function useProfileSubmit({
   isCreateMode,
   editFormData,
   setEditFormData,
-  localProducts,
-  deletedProductsIds,
-  hasUnsavedProduct,
   draftStorageKey,
   userObj,
   setMostrarModalVerificacion,
   setIsEditing,
   setImagePreview,
-  setDeletedProductsIds,
   onUpdate,
   navigate,
   getServerQr
@@ -25,26 +21,10 @@ export default function useProfileSubmit({
 
   const handleSaveEdit = async () => {
     setSaveError('');
-    if (hasUnsavedProduct) {
-      setSaveError("Tienes un producto a medio editar en el catálogo. Por favor completa su nombre y haz clic en 'Añadir' / 'Actualizar', o cancela la edición antes de guardar la tarjeta.");
-      return;
-    }
 
     if (!editFormData.name?.trim() || !editFormData.title?.trim() || !editFormData.description?.trim() || !editFormData.category?.trim() || !editFormData.state?.trim() || !editFormData.subcategories || editFormData.subcategories.length === 0) {
       setSaveError("Faltan campos obligatorios. Por favor completa: Nombre, Título, Descripción, Categoría, Subcategoría y Departamento/Estado.");
       return;
-    }
-
-    const isPremium = profesional?.premium === true;
-    if (isPremium && editFormData.orders_enabled) {
-      if (!editFormData.delivery_methods || editFormData.delivery_methods.length === 0) {
-        alert("Debes agregar al menos un método de entrega si habilitas los pedidos.");
-        return;
-      }
-      if (!editFormData.payment_qr_image) {
-        alert("Requisito Obligatorio: Debes subir la imagen de tu QR de Pago Bancario (QR Simple) para habilitar la recepción de pedidos.");
-        return;
-      }
     }
 
     if (isCreateMode) {
@@ -141,7 +121,6 @@ export default function useProfileSubmit({
       }
       
       const responseData = await res.json();
-      const currentSlug = isCreateMode ? responseData.slug : profesional.slug;
 
       if (responseData) {
         const savedQr = getServerQr(responseData) || payload.payment_qr_image;
@@ -167,75 +146,16 @@ export default function useProfileSubmit({
         }
       }
 
-      for (const prodId of deletedProductsIds) {
-        try {
-          const delRes = await fetchAuth(`${API_URL}/businesses/${currentSlug}/products/${prodId}`, {
-            method: 'DELETE'
-          });
-          if (!delRes.ok) {
-            const errData = await delRes.json().catch(() => ({}));
-            throw new Error(errData.detail || `Error al eliminar producto`);
-          }
-        } catch (e) {
-          if (e.message !== 'SESSION_EXPIRED') {
-            console.error("Error eliminando producto:", e);
-            throw e;
-          }
-        }
-      }
-
-      for (const prod of localProducts) {
-        if (!prod.id || prod.isModified) {
-          const pForm = new FormData();
-          pForm.append('name', prod.name.trim());
-          if (prod.description) pForm.append('description', prod.description.trim());
-          if (prod.price) pForm.append('price', prod.price.trim());
-          if (prod.carousel_name) pForm.append('carousel_name', prod.carousel_name.trim());
-          pForm.append('is_visible', prod.is_visible !== false ? 'true' : 'false');
-          if (prod.stock !== undefined && prod.stock !== '' && prod.stock !== null) pForm.append('stock', prod.stock);
-          if (prod.imageFile) pForm.append('image', prod.imageFile);
-
-          const url = prod.id 
-            ? `${API_URL}/businesses/${currentSlug}/products/${prod.id}`
-            : `${API_URL}/businesses/${currentSlug}/products`;
-
-          try {
-            const prodRes = await fetchAuth(url, {
-              method: prod.id ? 'PUT' : 'POST',
-              body: pForm
-            });
-            if (!prodRes.ok) {
-              const errData = await prodRes.json().catch(() => ({}));
-              let errMsg = `Error al guardar el producto "${prod.name}"`;
-              if (errData.detail) {
-                if (Array.isArray(errData.detail)) {
-                  errMsg = errData.detail.map(e => `${e.loc ? e.loc[e.loc.length-1] : 'Campo'}: ${e.msg}`).join('\n');
-                } else {
-                  errMsg = errData.detail;
-                }
-              }
-              throw new Error(errMsg);
-            }
-          } catch (e) {
-            if (e.message !== 'SESSION_EXPIRED') {
-              console.error("Error guardando producto:", e);
-              throw e;
-            }
-          }
-        }
-      }
-
       if (draftStorageKey) {
         localStorage.removeItem(draftStorageKey);
       }
 
       setIsEditing(false);
       setImagePreview(null);
-      setDeletedProductsIds([]);
       if (onUpdate) onUpdate();
 
-      if (isCreateMode && currentSlug) {
-        navigate(`/perfil/${currentSlug}`);
+      if (isCreateMode) {
+        navigate('/mis-negocios');
       }
     } catch (err) {
       console.error(err);

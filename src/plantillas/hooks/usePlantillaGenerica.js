@@ -45,8 +45,6 @@ export function usePlantillaGenerica(profesional, onProtectedAction, onUpdate, i
   const [isRestoredFromDraft, setIsRestoredFromDraft] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
-  const [deletedProductsIds, setDeletedProductsIds] = useState([]);
-  const [hasUnsavedProduct, setHasUnsavedProduct] = useState(false);
 
   const isEditingRef = useRef(isEditing);
   useEffect(() => {
@@ -64,19 +62,15 @@ export function usePlantillaGenerica(profesional, onProtectedAction, onUpdate, i
 
   const { editFormData, setEditFormData } = profileForm;
 
-  const { specialtiesData, localProducts, setLocalProducts } = useFetchProfileData({
-    isEditing,
-    isCreateMode,
-    slug: profesional?.slug
+  const { specialtiesData } = useFetchProfileData({
+    isEditing
   });
 
   useProfileDraft({
     isEditing,
     draftStorageKey,
     editFormData,
-    localProducts,
     imagePreview,
-    setLocalProducts,
     setImagePreview
   });
 
@@ -85,15 +79,11 @@ export function usePlantillaGenerica(profesional, onProtectedAction, onUpdate, i
     isCreateMode,
     editFormData,
     setEditFormData,
-    localProducts,
-    deletedProductsIds,
-    hasUnsavedProduct,
     draftStorageKey,
     userObj,
     setMostrarModalVerificacion,
     setIsEditing,
     setImagePreview,
-    setDeletedProductsIds,
     onUpdate,
     navigate,
     getServerQr
@@ -171,15 +161,9 @@ export function usePlantillaGenerica(profesional, onProtectedAction, onUpdate, i
     setImagePreview,
     isSubModalOpen,
     setIsSubModalOpen,
-    deletedProductsIds,
-    setDeletedProductsIds,
-    hasUnsavedProduct,
-    setHasUnsavedProduct,
     draftStorageKey,
     profileForm,
     specialtiesData,
-    localProducts,
-    setLocalProducts,
     saveError,
     isSavingEdit,
     handleSaveEdit,

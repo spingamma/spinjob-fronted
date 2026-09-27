@@ -68,6 +68,7 @@ export default function Tarjetero() {
   const handleLogout = () => {
     localStorage.removeItem('spingamma_user');
     localStorage.removeItem('spingamma_token');
+    localStorage.removeItem('spingamma_refresh_token');
     setIsLoggedIn(false);
     navigate('/');
   };

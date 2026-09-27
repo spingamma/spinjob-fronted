@@ -22,7 +22,8 @@ export default function ProfileHero({
   imagePreview,
   setEditFormData,
   isCreateMode,
-  specialtiesData
+  specialtiesData,
+  onOpenCatalogModal
 }) {
   const {
     isMapOpen,
@@ -71,6 +72,8 @@ export default function ProfileHero({
               ) : (
                 <HeroInfoView 
                   profesional={profesional}
+                  isOwner={isOwner && !isCreateMode}
+                  onOpenCatalogModal={onOpenCatalogModal}
                 />
               )}
             </div>

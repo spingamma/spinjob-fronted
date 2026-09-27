@@ -112,7 +112,10 @@ export function useCheckout({
           product_name: item.product.name,
           quantity: item.quantity,
           price_at_time: validPrice,
-          subtotal: validPrice * item.quantity
+          subtotal: validPrice * item.quantity,
+          selected_choices: item.selected_choices
+            ? (typeof item.selected_choices === 'string' ? item.selected_choices : JSON.stringify(item.selected_choices))
+            : null
         };
       })
     };

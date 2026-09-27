@@ -4,6 +4,7 @@
 
 import { useState, useCallback } from 'react';
 import { _AuthContext } from '../hooks/useAuth';
+import { API_URL } from '../config/api';
 
 function readUserFromStorage() {
   try {
@@ -17,15 +18,27 @@ function readUserFromStorage() {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(readUserFromStorage);
 
-  const login = useCallback((userData, token) => {
+  const login = useCallback((userData, token, refreshToken) => {
     if (token) localStorage.setItem('spingamma_token', token);
+    if (refreshToken) localStorage.setItem('spingamma_refresh_token', refreshToken);
     localStorage.setItem('spingamma_user', JSON.stringify(userData));
     setUser(userData);
   }, []);
 
   const logout = useCallback(() => {
+    const refreshToken = localStorage.getItem('spingamma_refresh_token');
+    if (refreshToken) {
+      try {
+        fetch(`${API_URL}/auth/logout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh_token: refreshToken })
+        }).catch(() => {});
+      } catch {}
+    }
     localStorage.removeItem('spingamma_user');
     localStorage.removeItem('spingamma_token');
+    localStorage.removeItem('spingamma_refresh_token');
     setUser(null);
   }, []);
 
