@@ -2,13 +2,18 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Loader2, PackageOpen, X } from 'lucide-react';
 import { useBusinessOrdersList } from './hooks/useBusinessOrdersList';
-import OrdersFilterBar from './components/OrdersFilterBar';
+import OrdersControlCard from './components/OrdersControlCard';
 import OrderCard from './components/OrderCard';
-import OrdersSummaryCard from './components/OrdersSummaryCard';
 import PremiumLockScreen from './components/PremiumLockScreen';
 import { API_URL } from '../../config/api';
 
-export default function BusinessOrders({ slugProp, hideHeader = false }) {
+export default function BusinessOrders({
+  slugProp,
+  hideHeader = false,
+  businesses = [],
+  selectedBusinessSlug,
+  onSelectBusiness
+}) {
   const params = useParams();
   const slug = slugProp || params.slug;
   const navigate = useNavigate();
@@ -108,28 +113,19 @@ export default function BusinessOrders({ slugProp, hideHeader = false }) {
       <div className="max-w-4xl mx-auto px-4 mt-6">
         {isPremium ? (
           <>
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-              <OrdersFilterBar 
-                startDate={startDate}
-                setStartDate={setStartDate}
-                endDate={endDate}
-                setEndDate={setEndDate}
-                todayStr={todayStr}
-              />
-              {isPaqueteria && (
-                <button
-                  onClick={handlePaqueteExterno}
-                  className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md flex items-center gap-2"
-                >
-                  <PackageOpen size={16} />
-                  Ingresar Paquete Externo
-                </button>
-              )}
-            </div>
-
-            {!loading && orders.length > 0 && (
-              <OrdersSummaryCard summary={summary} />
-            )}
+            <OrdersControlCard
+              businesses={businesses}
+              selectedBusinessSlug={selectedBusinessSlug}
+              onSelectBusiness={onSelectBusiness}
+              startDate={startDate}
+              setStartDate={setStartDate}
+              endDate={endDate}
+              setEndDate={setEndDate}
+              todayStr={todayStr}
+              summary={summary}
+              isPaqueteria={isPaqueteria}
+              handlePaqueteExterno={handlePaqueteExterno}
+            />
 
             {loading ? (
               <div className="flex flex-col items-center py-12">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2, Building } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import BottomNavbar from '../../components/BottomNavbar';
 import BusinessOrders from '../MyBusinesses/BusinessOrders';
 
@@ -85,26 +85,12 @@ export default function MyOrders() {
             <PremiumLockScreen setIsBusinessMode={setIsBusinessMode} />
           ) : (
             <div>
-              {premiumBusinesses.length > 1 && (
-                <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Building size={16} className="text-secondary shrink-0" /> Seleccionar Negocio:
-                  </span>
-                  <select 
-                    value={selectedBusinessSlug}
-                    onChange={(e) => setSelectedBusinessSlug(e.target.value)}
-                    data-testid="business-selector-dropdown"
-                    className="w-full sm:w-auto bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm font-bold text-primary outline-none focus:border-secondary truncate"
-                  >
-                    {premiumBusinesses.map(b => (
-                      <option key={b.id} value={b.slug}>{b.nombre_negocio || b.name}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
               <BusinessOrders 
-                slugProp={selectedBusinessSlug || premiumBusinesses[0].slug} 
-                hideHeader={true} 
+                slugProp={selectedBusinessSlug || premiumBusinesses[0]?.slug} 
+                hideHeader={true}
+                businesses={premiumBusinesses}
+                selectedBusinessSlug={selectedBusinessSlug || premiumBusinesses[0]?.slug}
+                onSelectBusiness={setSelectedBusinessSlug}
               />
             </div>
           )}
