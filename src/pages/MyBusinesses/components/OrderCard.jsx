@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { XCircle, Loader2, CheckCircle2, PackageCheck, Eye, MessageCircle } from 'lucide-react';
+import { XCircle, Loader2, CheckCircle2, PackageCheck, Eye } from 'lucide-react';
 import { formatOrderCode } from '../../../utils/formatOrderCode';
+import { WhatsappIcon } from '../../../plantillas/components/ProfileIcons';
 import { cleanWhatsappNumber } from '../../../utils/phone';
 import OrderReceiptModal from './OrderReceiptModal';
 
@@ -71,11 +72,11 @@ export default function OrderCard({
               target="_blank"
               rel="noopener noreferrer"
               data-testid={`whatsapp-customer-btn-${order.id}`}
-              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors border border-emerald-200 shadow-xs"
+              className="w-7 h-7 rounded-full flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm transition-all hover:scale-110 active:scale-95 shrink-0"
               title={`Contactar por WhatsApp: ${order.customer_phone}`}
+              aria-label={`Contactar por WhatsApp a ${order.customer_name}`}
             >
-              <MessageCircle size={12} className="text-emerald-600" />
-              WhatsApp
+              <WhatsappIcon size={15} className="text-white fill-current" />
             </a>
           )}
         </div>
