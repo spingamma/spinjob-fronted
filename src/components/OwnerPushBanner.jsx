@@ -102,7 +102,7 @@ export default function OwnerPushBanner() {
         <div className="flex items-center gap-2.5">
           <CheckCircle size={18} className="text-emerald-600 flex-shrink-0" />
           <p className="text-xs font-semibold text-emerald-900">
-            ¡Listo! Te avisaremos al instante cada vez que recibas un pedido.
+            ¡Listo! Te avisaremos al instante cada vez que recibas un pago.
           </p>
         </div>
         <button
@@ -130,9 +130,9 @@ export default function OwnerPushBanner() {
             <Bell size={18} />
           </div>
           <div>
-            <h4 className="font-bold text-sm text-primary">Recibe tus pedidos al instante</h4>
+            <h4 className="font-bold text-sm text-primary">Recibe tus pagos al instante</h4>
             <p className="text-xs text-gray-600 mt-0.5">
-              Activa las notificaciones para enterarte cuando alguien compre en tu negocio.
+              Activa las notificaciones para enterarte cuando un cliente te envíe un pago.
             </p>
           </div>
         </div>

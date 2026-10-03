@@ -9,6 +9,8 @@ export default function HeroBanner({
   setIsEditing,
   handleEditChange,
   isOwner,
+  isStaff = false,
+  canToggleOpen = false,
   handleShare,
   toggleQR,
   isCreateMode,
@@ -124,7 +126,7 @@ export default function HeroBanner({
           </button>
 
           {/* SWITCH ABIERTO/CERRADO A LA DERECHA */}
-          {isOwner && handleToggleOpen && (
+          {(isOwner || isStaff || canToggleOpen) && handleToggleOpen && (
             <button
               onClick={handleToggleOpen}
               disabled={isTogglingOpen}

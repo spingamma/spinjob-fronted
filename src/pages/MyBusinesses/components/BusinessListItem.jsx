@@ -12,6 +12,7 @@ export default function BusinessListItem({
   onOpenPremiumModal
 }) {
   const neg = negocio;
+  const isStaff = neg.user_role === 'staff';
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4 transition-all hover:shadow-md">
@@ -39,6 +40,11 @@ export default function BusinessListItem({
               ) : (
                 <div className="flex items-center gap-1 text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full text-xs font-semibold">
                   <span>Plan Gratuito</span>
+                </div>
+              )}
+              {neg.user_role === 'staff' && (
+                <div data-testid="colaborador-badge" className="flex items-center gap-1 text-purple-700 bg-purple-50 border border-purple-200/80 px-2.5 py-1 rounded-full text-xs font-bold shadow-xs">
+                  <span>👥 Colaborador</span>
                 </div>
               )}
               {/* Switch Abierto/Cerrado */}
@@ -93,8 +99,8 @@ export default function BusinessListItem({
           </Link>
         )}
 
-        {/* Botón Ver Métricas - Solo para negocios aprobados */}
-        {neg.status === 'aprobado' && (
+        {/* Botón Ver Métricas - Solo para dueños/admins en negocios aprobados */}
+        {neg.status === 'aprobado' && !isStaff && (
           neg.premium ? (
             <Link
               to={`/metricas/${neg.slug}`}
@@ -120,7 +126,7 @@ export default function BusinessListItem({
         )}
 
         {/* Botón de eliminar (para pendientes, rechazados o admin) */}
-        {(neg.status === 'pendiente' || neg.status === 'rechazado' || isAdmin) && (
+        {(neg.status === 'pendiente' || neg.status === 'rechazado' || isAdmin) && !isStaff && (
           <button
             onClick={() => onDelete(neg.slug)}
             disabled={isDeleting === neg.slug}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { API_URL } from '../../../config/api';
 
-export function useCatalogData(slug, isPremium, carouselOrder, ownerId) {
+export function useCatalogData(slug, isPremium, carouselOrder, ownerId, staffIds = [], userRole = null) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,6 +15,11 @@ export function useCatalogData(slug, isPremium, carouselOrder, ownerId) {
   const userStr = localStorage.getItem('spingamma_user');
   const currentUser = userStr ? JSON.parse(userStr) : null;
   const isOwner = currentUser && ownerId && String(currentUser.id) === String(ownerId);
+  const isStaff = currentUser && !isOwner && (
+    userRole === 'staff' ||
+    (Array.isArray(staffIds) && staffIds.map(String).includes(String(currentUser.id)))
+  );
+  const isBusinessManager = isOwner || isStaff;
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -90,6 +95,8 @@ export function useCatalogData(slug, isPremium, carouselOrder, ownerId) {
     filteredProducts,
     grouped,
     carouselKeys,
-    isOwner
+    isOwner,
+    isStaff,
+    isBusinessManager
   };
 }

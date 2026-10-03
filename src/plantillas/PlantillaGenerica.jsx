@@ -9,6 +9,7 @@ import ProfileAbout from './components/ProfileAbout';
 import ProfileContact from './components/ProfileContact';
 import ProfileQRModal from './components/ProfileQRModal';
 import CatalogEditModal from './components/CatalogEditModal';
+import TeamManagementModal from './components/TeamManagementModal';
 import FloatingActionBar from './components/FloatingActionBar';
 import { usePlantillaGenerica } from './hooks/usePlantillaGenerica';
 
@@ -19,6 +20,10 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
 
   const {
     isOwner,
+    isStaff,
+    canToggleOpen,
+    isTeamModalOpen,
+    setIsTeamModalOpen,
     isEditing,
     setIsEditing,
     imagePreview,
@@ -66,8 +71,11 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
         isCreateMode={isCreateMode}
         specialtiesData={specialtiesData}
         onOpenCatalogModal={() => setIsCatalogModalOpen(true)}
+        onOpenTeamModal={() => setIsTeamModalOpen(true)}
         handleToggleOpen={handleToggleOpen}
         isTogglingOpen={isTogglingOpen}
+        isStaff={isStaff}
+        canToggleOpen={canToggleOpen}
       />
 
       <div className="max-w-4xl mx-auto px-6 sm:px-8 md:px-6 lg:px-8 relative z-20">
@@ -87,6 +95,8 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               deliveryMethods={profesional.delivery_methods}
               paymentQrImage={getServerQr(profesional)}
               ownerId={profesional.owner_id}
+              staffIds={profesional.staff_ids}
+              userRole={profesional.user_role}
             />
           </div>
         )}
@@ -176,6 +186,13 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           setCatalogVersion(v => v + 1);
           if (onUpdate) onUpdate();
         }}
+      />
+
+      <TeamManagementModal 
+        isOpen={isTeamModalOpen}
+        onClose={() => setIsTeamModalOpen(false)}
+        slug={profesional.slug}
+        businessName={profesional.name}
       />
 
       <FloatingActionBar 

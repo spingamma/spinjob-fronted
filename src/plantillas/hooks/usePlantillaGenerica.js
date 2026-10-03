@@ -37,6 +37,12 @@ export function usePlantillaGenerica(profesional, onProtectedAction, onUpdate, i
   const userObj = JSON.parse(localStorage.getItem('spingamma_user') || '{}');
   const isAdmin = userObj.is_admin === true;
   const isOwner = accionesPerfil.isLoggedIn && (isAdmin || profesional?.owner_id === userId);
+  const isStaff = accionesPerfil.isLoggedIn && !isOwner && (
+    profesional?.user_role === 'staff' ||
+    (Array.isArray(profesional?.staff_ids) && profesional.staff_ids.map(String).includes(String(userId)))
+  );
+  const canToggleOpen = isOwner || isStaff;
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
 
   const draftStorageKey = isCreateMode 
     ? 'spingamma_draft_business_create' 
@@ -178,6 +184,10 @@ export function usePlantillaGenerica(profesional, onProtectedAction, onUpdate, i
 
   return {
     isOwner,
+    isStaff,
+    canToggleOpen,
+    isTeamModalOpen,
+    setIsTeamModalOpen,
     isEditing,
     setIsEditing,
     imagePreview,

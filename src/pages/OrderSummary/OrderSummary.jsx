@@ -17,13 +17,18 @@ export default function OrderSummary() {
   const { slug, orderId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { cart, deliveryMethods, paymentQrImage, ownerId } = location.state || {};
+  const { cart, deliveryMethods, paymentQrImage, ownerId, staffIds, userRole } = location.state || {};
 
   const userStr = localStorage.getItem('spingamma_user');
   const user = userStr ? JSON.parse(userStr) : null;
   const token = localStorage.getItem('spingamma_token');
 
   const isOwner = user && ownerId && String(user.id) === String(ownerId);
+  const isStaff = user && !isOwner && (
+    userRole === 'staff' ||
+    (Array.isArray(staffIds) && staffIds.map(String).includes(String(user.id)))
+  );
+  const isDirectSaleAuthorized = isOwner || isStaff;
 
   // Use custom hook for order data & QR handling
   const {
@@ -83,7 +88,7 @@ export default function OrderSummary() {
     // Render checkout UI
     return (
       <CheckoutSection
-        isOwner={isOwner}
+        isOwner={isDirectSaleAuthorized}
         // For brevity, passing minimal required props. The component contains its own state handling.
         slug={slug}
         navigate={navigate}

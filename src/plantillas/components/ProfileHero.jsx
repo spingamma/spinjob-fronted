@@ -24,8 +24,11 @@ export default function ProfileHero({
   isCreateMode,
   specialtiesData,
   onOpenCatalogModal,
+  onOpenTeamModal,
   handleToggleOpen,
-  isTogglingOpen
+  isTogglingOpen,
+  isStaff,
+  canToggleOpen
 }) {
   const {
     isMapOpen,
@@ -48,6 +51,8 @@ export default function ProfileHero({
             setIsEditing={setIsEditing}
             handleEditChange={handleEditChange}
             isOwner={isOwner}
+            isStaff={isStaff}
+            canToggleOpen={canToggleOpen}
             handleShare={handleShare}
             toggleQR={toggleQR}
             isCreateMode={isCreateMode}
@@ -77,7 +82,9 @@ export default function ProfileHero({
                 <HeroInfoView 
                   profesional={profesional}
                   isOwner={isOwner && !isCreateMode}
+                  isStaff={isStaff}
                   onOpenCatalogModal={onOpenCatalogModal}
+                  onOpenTeamModal={onOpenTeamModal}
                 />
               )}
             </div>

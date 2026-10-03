@@ -84,6 +84,9 @@ export default function OrderCard({
         {order.delivered_at && (
           <p className="text-xs text-green-600 font-medium mt-0.5">Fecha de Entrega: <span className="font-semibold">{new Date(order.delivered_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></p>
         )}
+        {order.handled_by_name && (
+          <p className="text-xs text-blue-600 font-medium mt-0.5">Atendido por: <span className="font-semibold">{order.handled_by_name}</span></p>
+        )}
       </div>
       
       {/* Items Details */}

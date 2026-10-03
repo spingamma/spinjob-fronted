@@ -8,7 +8,19 @@ import CatalogSearchBar from './Catalog/CatalogSearchBar';
 import CarouselBlock from './Catalog/CarouselBlock';
 import FloatingOrderButton from './Catalog/FloatingOrderButton';
 
-export default function InlineCatalogCarousel({ slug, catalogUrl, theme = 'light', isPremium = false, ordersEnabled = true, carouselOrder, deliveryMethods, paymentQrImage, ownerId }) {
+export default function InlineCatalogCarousel({
+  slug,
+  catalogUrl,
+  theme = 'light',
+  isPremium = false,
+  ordersEnabled = true,
+  carouselOrder,
+  deliveryMethods,
+  paymentQrImage,
+  ownerId,
+  staffIds = [],
+  userRole = null
+}) {
   const navigate = useNavigate();
   const isDark = theme === 'dark';
 
@@ -20,8 +32,9 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, theme = 'light
     filteredProducts,
     grouped,
     carouselKeys,
-    isOwner
-  } = useCatalogData(slug, isPremium, carouselOrder, ownerId);
+    isOwner,
+    isBusinessManager
+  } = useCatalogData(slug, isPremium, carouselOrder, ownerId, staffIds, userRole);
 
   const {
     cart,
@@ -52,7 +65,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, theme = 'light
     });
 
     const targetRoute = hasAnyChoices ? `/perfil/${slug}/complementos` : `/perfil/${slug}/orden`;
-    navigate(targetRoute, { state: { cart, slug, deliveryMethods, paymentQrImage, ownerId } });
+    navigate(targetRoute, { state: { cart, slug, deliveryMethods, paymentQrImage, ownerId, staffIds, userRole } });
   };
 
   if (loading) {
@@ -127,7 +140,7 @@ export default function InlineCatalogCarousel({ slug, catalogUrl, theme = 'light
         ordersEnabled={ordersEnabled}
         totalItems={totalItems}
         totalPrice={totalPrice}
-        isOwner={isOwner}
+        isOwner={isBusinessManager}
         handleOrder={handleOrder}
       />
     </div>
