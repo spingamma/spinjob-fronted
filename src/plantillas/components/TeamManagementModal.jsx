@@ -10,6 +10,8 @@ export default function TeamManagementModal({ isOpen, onClose, slug, businessNam
     searchQuery,
     setSearchQuery,
     isSearching,
+    candidates,
+    setCandidates,
     candidateUser,
     setCandidateUser,
     isAdding,
@@ -106,9 +108,10 @@ export default function TeamManagementModal({ isOpen, onClose, slug, businessNam
                       value={searchQuery}
                       onChange={(e) => {
                         setSearchQuery(e.target.value);
+                        if (candidates.length > 0) setCandidates([]);
                         if (candidateUser) setCandidateUser(null);
                       }}
-                      placeholder="Correo o teléfono registrado..."
+                      placeholder="Buscar por nombre, usuario o teléfono..."
                       className="w-full pl-9 pr-3 py-2.5 text-xs bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-primary text-primary"
                     />
                     <Search size={15} className="absolute left-3 top-3 text-gray-400" />
@@ -124,27 +127,39 @@ export default function TeamManagementModal({ isOpen, onClose, slug, businessNam
                   </button>
                 </div>
 
-                {candidateUser && (
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between gap-3 animate-in fade-in">
-                    <div>
-                      <p className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
-                        <CheckCircle2 size={14} className="text-emerald-600" />
-                        {candidateUser.name}
-                      </p>
-                      <p className="text-[11px] text-emerald-700">
-                        {candidateUser.email || candidateUser.phone}
-                      </p>
+                {candidates && candidates.length > 0 && (
+                  <div className="space-y-2 animate-in fade-in">
+                    <p className="text-[11px] font-semibold text-gray-500">
+                      {candidates.length === 1 ? '1 resultado más cercano:' : `${candidates.length} resultados más cercanos:`}
+                    </p>
+                    <div className="space-y-2">
+                      {candidates.map((c, idx) => (
+                        <div
+                          key={c.id || idx}
+                          className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between gap-3 animate-in fade-in"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-bold text-emerald-950 flex items-center gap-1.5 truncate">
+                              <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
+                              <span className="truncate">{c.name}</span>
+                            </p>
+                            <p className="text-[11px] text-emerald-700 truncate">
+                              {c.email || c.phone}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleAddStaff(c)}
+                            disabled={isAdding}
+                            data-testid="confirm-add-staff-btn"
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50 shrink-0"
+                          >
+                            {isAdding ? <Loader2 size={12} className="animate-spin" /> : null}
+                            Confirmar y Agregar
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleAddStaff}
-                      disabled={isAdding}
-                      data-testid="confirm-add-staff-btn"
-                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                    >
-                      {isAdding ? <Loader2 size={12} className="animate-spin" /> : null}
-                      Confirmar y Agregar
-                    </button>
                   </div>
                 )}
               </form>

@@ -8,6 +8,7 @@ export function useTeamManagement(slug, isOpen) {
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [candidates, setCandidates] = useState([]);
   const [candidateUser, setCandidateUser] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   const [removingId, setRemovingId] = useState(null);
@@ -37,6 +38,7 @@ export function useTeamManagement(slug, isOpen) {
     if (isOpen) {
       fetchStaff();
       setSearchQuery('');
+      setCandidates([]);
       setCandidateUser(null);
       setError('');
     }
@@ -46,18 +48,21 @@ export function useTeamManagement(slug, isOpen) {
     if (e) e.preventDefault();
     const query = searchQuery.trim();
     if (!query) {
-      setError('Ingresa un correo o celular para buscar');
+      setError('Ingresa un nombre, usuario o teléfono para buscar');
       return;
     }
     setIsSearching(true);
     setError('');
+    setCandidates([]);
     setCandidateUser(null);
 
     try {
       const res = await fetchAuth(`${API_URL}/businesses/${slug}/staff/search-user?query=${encodeURIComponent(query)}`);
       if (res.ok) {
         const data = await res.json();
-        setCandidateUser(data);
+        const list = Array.isArray(data) ? data : [data];
+        setCandidates(list);
+        setCandidateUser(list[0] || null);
       } else {
         const err = await res.json();
         setError(err.detail || 'Usuario no encontrado en Tarjetoso.');
@@ -69,12 +74,13 @@ export function useTeamManagement(slug, isOpen) {
     }
   };
 
-  const handleAddStaff = async () => {
-    if (!candidateUser && !searchQuery.trim()) return;
+  const handleAddStaff = async (targetCandidate = null) => {
+    const selected = targetCandidate || candidateUser;
+    if (!selected && !searchQuery.trim()) return;
     setIsAdding(true);
     setError('');
 
-    const query = candidateUser ? (candidateUser.email || candidateUser.phone) : searchQuery.trim();
+    const query = selected ? (selected.id || selected.email || selected.phone) : searchQuery.trim();
 
     try {
       const res = await fetchAuth(`${API_URL}/businesses/${slug}/staff`, {
@@ -84,6 +90,7 @@ export function useTeamManagement(slug, isOpen) {
       });
       if (res.ok) {
         setSearchQuery('');
+        setCandidates([]);
         setCandidateUser(null);
         await fetchStaff();
       } else {
@@ -149,6 +156,8 @@ export function useTeamManagement(slug, isOpen) {
     searchQuery,
     setSearchQuery,
     isSearching,
+    candidates,
+    setCandidates,
     candidateUser,
     setCandidateUser,
     isAdding,
