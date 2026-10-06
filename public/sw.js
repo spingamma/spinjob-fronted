@@ -2,12 +2,12 @@ import { precacheAndRoute } from 'workbox-precaching';
 
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-self.addEventListener("install", function(event) {
+self.addEventListener("install", function() {
     self.skipWaiting();
 });
 
 self.addEventListener("activate", function(event) {
-    event.waitUntil(clients.claim());
+    event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener("push", function (event) {
@@ -35,6 +35,6 @@ self.addEventListener("push", function (event) {
 self.addEventListener("notificationclick", function (event) {
     event.notification.close();
     if (event.notification.data && event.notification.data.url) {
-        event.waitUntil(clients.openWindow(event.notification.data.url));
+        event.waitUntil(self.clients.openWindow(event.notification.data.url));
     }
 });

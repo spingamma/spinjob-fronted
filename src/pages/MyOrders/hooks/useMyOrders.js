@@ -8,12 +8,6 @@ export default function useMyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Estado del Switch Modo Negocio / Modo Cliente
-  const [isBusinessMode, setIsBusinessMode] = useState(null); // null = aún no determinado
-  const [myBusinesses, setMyBusinesses] = useState([]);
-  const [loadingBusinesses, setLoadingBusinesses] = useState(false);
-  const [selectedBusinessSlug, setSelectedBusinessSlug] = useState('');
-
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   const [startDate, setStartDate] = useState(todayStr);
@@ -73,75 +67,9 @@ export default function useMyOrders() {
     }
   }, [navigate, startDate, endDate]);
 
-  const fetchUserBusinesses = useCallback(async () => {
-    setLoadingBusinesses(true);
-    try {
-      const res = await fetchAuth(`${API_URL}/usuarios/mis-negocios`);
-      if (res.ok) {
-        const data = await res.json();
-        setMyBusinesses(data);
-        const premiumList = data.filter(b => b.premium && b.status === 'aprobado');
-        if (premiumList.length > 0 && !selectedBusinessSlug) {
-          setSelectedBusinessSlug(premiumList[0].slug);
-        }
-      }
-    } catch (err) {
-      if (err.message !== 'SESSION_EXPIRED') {
-        console.error("Error al cargar negocios del usuario", err);
-      }
-    } finally {
-      setLoadingBusinesses(false);
-    }
-  }, [selectedBusinessSlug]);
-
   useEffect(() => {
-    const detectInitialMode = async () => {
-      try {
-        const storedMode = localStorage.getItem('spingamma_last_mode');
-        const storedSlug = localStorage.getItem('spingamma_last_business_slug');
-        
-        const res = await fetchAuth(`${API_URL}/usuarios/mis-negocios`);
-        if (res.ok) {
-          const data = await res.json();
-          setMyBusinesses(data);
-          const premiumList = data.filter(b => b.premium && b.status === 'aprobado');
-          if (premiumList.length > 0) {
-            // Restore slug or pick first
-            if (storedSlug && premiumList.some(b => b.slug === storedSlug)) {
-              setSelectedBusinessSlug(storedSlug);
-            } else {
-              setSelectedBusinessSlug(premiumList[0].slug);
-            }
-            // Restore mode or default true
-            if (storedMode !== null) {
-              setIsBusinessMode(storedMode === 'business');
-            } else {
-              setIsBusinessMode(true);
-            }
-          } else {
-            setIsBusinessMode(false);
-          }
-        } else {
-          setIsBusinessMode(false);
-        }
-      } catch (err) {
-        if (err.message !== 'SESSION_EXPIRED') {
-          console.error("Error al cargar negocios del usuario", err);
-        }
-        setIsBusinessMode(false);
-      }
-    };
-    detectInitialMode();
-  }, []);
-
-  useEffect(() => {
-    if (isBusinessMode === null) return;
-    if (!isBusinessMode) {
-      fetchOrders();
-    } else {
-      fetchUserBusinesses();
-    }
-  }, [fetchOrders, fetchUserBusinesses, isBusinessMode]);
+    fetchOrders();
+  }, [fetchOrders]);
 
   const handleMarkReceived = async (orderId) => {
     setUpdatingOrderId(orderId);
@@ -162,27 +90,9 @@ export default function useMyOrders() {
     }
   };
 
-  const premiumBusinesses = myBusinesses.filter(b => b.premium && b.status === 'aprobado');
-
-  const handleSetIsBusinessMode = useCallback((val) => {
-    setIsBusinessMode(val);
-    localStorage.setItem('spingamma_last_mode', val ? 'business' : 'customer');
-  }, []);
-
-  const handleSetSelectedBusinessSlug = useCallback((val) => {
-    setSelectedBusinessSlug(val);
-    localStorage.setItem('spingamma_last_business_slug', val);
-  }, []);
-
   return {
     orders,
     loading,
-    isBusinessMode,
-    setIsBusinessMode: handleSetIsBusinessMode,
-    premiumBusinesses,
-    loadingBusinesses,
-    selectedBusinessSlug,
-    setSelectedBusinessSlug: handleSetSelectedBusinessSlug,
     startDate,
     setStartDate,
     endDate,

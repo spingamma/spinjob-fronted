@@ -198,7 +198,6 @@ export default function Tarjetero() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-base sm:text-lg text-primary leading-tight line-clamp-1">{neg.name}</h3>
-                    <p className="text-secondary text-xs sm:text-sm font-bold line-clamp-1 mt-0.5">{neg.title}</p>
                     <div className="flex items-center flex-wrap gap-2 mt-2">
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-50 text-gray-500 border border-gray-100 uppercase tracking-tighter truncate max-w-full">
                         {neg.category}

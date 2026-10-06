@@ -22,8 +22,8 @@ export default function useProfileSubmit({
   const handleSaveEdit = async () => {
     setSaveError('');
 
-    if (!editFormData.name?.trim() || !editFormData.title?.trim() || !editFormData.description?.trim() || !editFormData.category?.trim() || !editFormData.state?.trim() || !editFormData.subcategories || editFormData.subcategories.length === 0) {
-      setSaveError("Faltan campos obligatorios. Por favor completa: Nombre, Título, Descripción, Categoría, Subcategoría y Departamento/Estado.");
+    if (!editFormData.name?.trim() || !editFormData.description?.trim() || !editFormData.category?.trim() || !editFormData.state?.trim() || !editFormData.subcategories || editFormData.subcategories.length === 0) {
+      setSaveError("Faltan campos obligatorios. Por favor completa: Nombre, Descripción, Categoría, Subcategoría y Departamento/Estado.");
       return;
     }
 

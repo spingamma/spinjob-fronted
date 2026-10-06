@@ -20,7 +20,7 @@ export default function BusinessCard({
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-primary truncate" title={b.name}>{b.name}</h3>
-          <p className="text-xs text-gray-500 truncate">{b.title || 'Sin título'}</p>
+          <p className="text-xs text-gray-500 truncate">{b.category || 'Sin categoría'}</p>
         </div>
       </div>
       

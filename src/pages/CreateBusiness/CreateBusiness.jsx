@@ -7,7 +7,6 @@ import { API_URL } from '../../config/api';
 // Objeto vacío para que PlantillaGenerica funcione como lienzo en blanco
 const blankProfesional = {
   name: '',
-  title: '',
   category: '',
   subcategories: '',
   description: '',

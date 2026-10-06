@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Clock, XCircle, Eye, BarChart2, Loader2, Trash2 } from 'lucide-react';
+import { CheckCircle2, Clock, XCircle, Eye, BarChart2, Loader2, Trash2, Users, ShoppingBag } from 'lucide-react';
 
 export default function BusinessListItem({
   negocio,
@@ -9,7 +9,8 @@ export default function BusinessListItem({
   togglingSlug,
   onToggleOpen,
   onDelete,
-  onOpenPremiumModal
+  onOpenPremiumModal,
+  onOpenTeamModal
 }) {
   const neg = negocio;
   const isStaff = neg.user_role === 'staff';
@@ -19,7 +20,7 @@ export default function BusinessListItem({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h3 className="font-bold text-xl text-primary">{neg.name}</h3>
-          <p className="text-gray-500 text-sm">{neg.title} • {neg.category}</p>
+          <p className="text-gray-500 text-sm">{neg.category}</p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
@@ -95,34 +96,97 @@ export default function BusinessListItem({
             to={`/perfil/${neg.slug}`}
             className="flex items-center gap-2 text-sm font-bold text-primary/80 hover:text-secondary transition-colors"
           >
-            <Eye size={18} /> Ver Tarjeta Pública
+            <Eye size={18} /> Ver Tarjeta
           </Link>
         )}
 
-        {/* Botón Ver Métricas - Solo para dueños/admins en negocios aprobados */}
-        {neg.status === 'aprobado' && !isStaff && (
-          neg.premium ? (
-            <Link
-              to={`/metricas/${neg.slug}`}
-              className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-50/50 hover:bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100"
-            >
-              <span className="flex items-center gap-1.5">
-                <BarChart2 size={16} /> Métricas
-              </span>
-            </Link>
-          ) : (
-            <button
-              onClick={() => onOpenPremiumModal('Métricas')}
-              className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-50/50 hover:bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100 text-left cursor-pointer"
-            >
-              <span className="flex items-center gap-1.5">
-                <BarChart2 size={16} /> Métricas
-              </span>
-              <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md font-extrabold flex items-center gap-0.5" title="Característica Premium">
-                🔒 Premium
-              </span>
-            </button>
-          )
+        {/* Ordenes, Métricas y Gestión de Equipo */}
+        {neg.status === 'aprobado' && (
+          <div className="flex flex-col gap-2 w-full sm:w-auto">
+            {/* Botón Ver Ordenes (Arriba de Métricas) */}
+            {neg.premium ? (
+              <Link
+                to={`/mis-pedidos/${neg.slug}`}
+                data-testid={`orders-btn-${neg.slug}`}
+                className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-secondary hover:text-secondary/80 transition-colors bg-orange-50/50 hover:bg-orange-50 px-3 py-1.5 rounded-xl border border-orange-100"
+              >
+                <span className="flex items-center gap-1.5">
+                  <ShoppingBag size={16} /> Ordenes
+                </span>
+              </Link>
+            ) : (
+              <button
+                onClick={() => onOpenPremiumModal('Gestión de Pedidos')}
+                data-testid={`orders-btn-${neg.slug}`}
+                className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-secondary hover:text-secondary/80 transition-colors bg-orange-50/50 hover:bg-orange-50 px-3 py-1.5 rounded-xl border border-orange-100 text-left cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5">
+                  <ShoppingBag size={16} /> Ordenes
+                </span>
+                <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md font-extrabold flex items-center gap-0.5" title="Característica Premium">
+                  🔒 Premium
+                </span>
+              </button>
+            )}
+
+            {!isStaff && (
+              <>
+                {/* Botón Ver Métricas */}
+            {neg.premium ? (
+              <Link
+                to={`/metricas/${neg.slug}`}
+                className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-50/50 hover:bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100"
+              >
+                <span className="flex items-center gap-1.5">
+                  <BarChart2 size={16} /> Métricas
+                </span>
+              </Link>
+            ) : (
+              <button
+                onClick={() => onOpenPremiumModal('Métricas')}
+                className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-50/50 hover:bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100 text-left cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5">
+                  <BarChart2 size={16} /> Métricas
+                </span>
+                <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md font-extrabold flex items-center gap-0.5" title="Característica Premium">
+                  🔒 Premium
+                </span>
+              </button>
+            )}
+
+            {/* Botón Gestionar Equipo (Abajo de Métricas) */}
+            {neg.premium ? (
+              <button
+                type="button"
+                data-testid="open-team-modal-btn"
+                onClick={() => onOpenTeamModal(neg)}
+                className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-primary hover:text-secondary transition-colors bg-gray-50 hover:bg-gray-100 px-3 py-1.5 rounded-xl border border-gray-200 cursor-pointer"
+                title="Gestionar equipo"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Users size={16} /> Gestionar equipo
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                data-testid="open-team-modal-btn"
+                onClick={() => onOpenPremiumModal('Gestión de Equipo')}
+                className="flex items-center justify-between w-full sm:w-auto gap-2 text-sm font-bold text-primary hover:text-secondary transition-colors bg-gray-50 hover:bg-gray-100 px-3 py-1.5 rounded-xl border border-gray-200 text-left cursor-pointer"
+                title="Gestionar equipo"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Users size={16} /> Gestionar equipo
+                </span>
+                <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-md font-extrabold flex items-center gap-0.5" title="Característica Premium">
+                  🔒 Premium
+                </span>
+              </button>
+            )}
+              </>
+            )}
+          </div>
         )}
 
         {/* Botón de eliminar (para pendientes, rechazados o admin) */}

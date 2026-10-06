@@ -21,6 +21,8 @@ export default function HeroBanner({
   handleToggleOpen,
   isTogglingOpen
 }) {
+  const canManageOpen = (isOwner || isStaff || canToggleOpen) && !!handleToggleOpen;
+
   return (
     <div className="relative w-full max-w-3xl mx-auto mb-4 md:px-4 lg:px-6">
       <div className="relative aspect-[4/3] md:aspect-video overflow-hidden md:rounded-[2.5rem] bg-brand-bg">
@@ -40,27 +42,15 @@ export default function HeroBanner({
           </label>
         )}
         
-        {/* BADGES OVERLAY */}
-        <div className={`absolute ${(!isEditing && !isCreateMode) ? 'bottom-14 sm:bottom-16' : 'bottom-2.5 sm:bottom-3'} right-2.5 sm:right-4 flex flex-col gap-1.5 items-end z-30`}>
-          {profesional.reviews_count > 0 && (
+        {/* RATING BADGE OVERLAY (ESQUINA INFERIOR DERECHA, SOBRE CONTROLES) */}
+        {profesional.reviews_count > 0 && (
+          <div className={`absolute ${(!isEditing && !isCreateMode) ? 'bottom-14 sm:bottom-16' : 'bottom-2.5 sm:bottom-3'} right-2.5 sm:right-4 flex flex-col gap-1.5 items-end z-30`}>
             <div className="bg-white/95 backdrop-blur-sm px-1.5 py-1 rounded-lg border border-gray-100 shadow-sm flex items-center gap-1">
               <Star size={12} className="text-secondary fill-secondary sm:w-[14px] sm:h-[14px]" />
               <span className="font-bold text-primary text-[10px] sm:text-xs">{profesional.rating}</span>
             </div>
-          )}
-          {profesional.home_delivery && (
-            <span className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-primary text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left">
-              <span className="shrink-0">📦</span>
-              <span>Entrega Domicilio</span>
-            </span>
-          )}
-          {profesional.national_delivery && (
-            <span className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-primary text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left">
-              <span className="shrink-0">✈️</span>
-              <span>Delivery Nacional</span>
-            </span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
       
       {/* Fade para unir con el fondo */}
@@ -81,19 +71,38 @@ export default function HeroBanner({
         </div>
       )}
 
-      {/* BOTÓN EDITAR (ESQUINA INFERIOR IZQUIERDA) */}
-      {isOwner && !isEditing && (
-        <div className="absolute bottom-2.5 left-2.5 sm:bottom-4 sm:left-4 z-30">
+      {/* BOTÓN EDITAR Y BADGES DE ENTREGA (ESQUINA INFERIOR IZQUIERDA) */}
+      <div className="absolute bottom-2.5 left-2.5 sm:bottom-4 sm:left-4 flex items-end gap-2 z-30">
+        {/* BOTÓN EDITAR (SOLO DUEÑO Y NO EDITANDO) */}
+        {isOwner && !isEditing && (
           <button
             onClick={() => setIsEditing(true)}
             data-testid="edit-profile-btn"
-            className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-md border border-white/50 active:scale-95 bg-secondary text-white hover:bg-secondary/90 animate-bounce-short"
+            className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-md border border-white/50 active:scale-95 bg-secondary text-white hover:bg-secondary/90 animate-bounce-short"
             title="Editar Perfil"
           >
             <Edit3 size={18} />
           </button>
-        </div>
-      )}
+        )}
+
+        {/* BADGES DE ENTREGA (A LA DERECHA DEL LÁPIZ O EN LA ESQUINA INFERIOR IZQUIERDA) */}
+        {(profesional.home_delivery || profesional.national_delivery) && (
+          <div className="flex flex-col gap-1.5 items-start">
+            {profesional.home_delivery && (
+              <span className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-primary text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left">
+                <span className="shrink-0">📦</span>
+                <span>Entrega Domicilio</span>
+              </span>
+            )}
+            {profesional.national_delivery && (
+              <span className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-primary text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left">
+                <span className="shrink-0">✈️</span>
+                <span>Delivery Nacional</span>
+              </span>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* LETRERO DE MADERA CERRADO */}
       {profesional.is_open === false && (
@@ -105,7 +114,7 @@ export default function HeroBanner({
         </div>
       )}
 
-      {/* BOTONES COMPARTIR, QR Y SWITCH ABIERTO/CERRADO (ESQUINA SUPERIOR DERECHA) */}
+      {/* BOTONES COMPARTIR, QR Y (EN MODO DUEÑO/ADMIN) GUARDAR TARJETA (ESQUINA SUPERIOR DERECHA) */}
       {!isEditing && !isCreateMode && (
         <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 flex items-center gap-2 z-30">
           <button
@@ -125,8 +134,29 @@ export default function HeroBanner({
             <QrCode size={20} />
           </button>
 
-          {/* SWITCH ABIERTO/CERRADO A LA DERECHA */}
-          {(isOwner || isStaff || canToggleOpen) && handleToggleOpen && (
+          {/* EN MODO DUEÑO O ADMIN, EL BOTÓN GUARDAR TARJETA ESTÁ AQUÍ EN LA BARRA SUPERIOR */}
+          {canManageOpen && (
+            <button
+              onClick={toggleSaveCard}
+              disabled={isSaving}
+              data-testid="profile-bookmark-btn"
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 ${
+                isSaved
+                  ? 'bg-accent border-accent text-white hover:bg-accent/90'
+                  : 'bg-white/80 border-white/50 text-primary hover:bg-white hover:text-accent'
+              }`}
+              title={isSaved ? "Quitar del tarjetero" : "Guardar en mi tarjetero"}
+            >
+              <Bookmark size={20} className={isSaved ? 'fill-white' : ''} />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* BOTÓN INFERIOR DERECHO: SWITCH ABIERTO/CERRADO EN MODO DUEÑO/ADMIN, O GUARDAR TARJETA EN MODO VISITANTE */}
+      {!isEditing && !isCreateMode && (
+        <div className="absolute bottom-2.5 right-2.5 sm:bottom-4 sm:right-4 z-30">
+          {canManageOpen ? (
             <button
               onClick={handleToggleOpen}
               disabled={isTogglingOpen}
@@ -149,22 +179,21 @@ export default function HeroBanner({
                 }`} />
               </div>
             </button>
+          ) : (
+            <button
+              onClick={toggleSaveCard}
+              disabled={isSaving}
+              data-testid="profile-bookmark-btn"
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 ${
+                isSaved
+                  ? 'bg-accent border-accent text-white hover:bg-accent/90'
+                  : 'bg-white/80 border-white/50 text-primary hover:bg-white hover:text-accent'
+              }`}
+              title={isSaved ? "Quitar del tarjetero" : "Guardar en mi tarjetero"}
+            >
+              <Bookmark size={20} className={isSaved ? 'fill-white' : ''} />
+            </button>
           )}
-        </div>
-      )}
-
-      {/* BOTÓN GUARDAR TARJETA (ESQUINA INFERIOR DERECHA) */}
-      {!isEditing && !isCreateMode && (
-        <div className="absolute bottom-2.5 right-2.5 sm:bottom-4 sm:right-4 z-30">
-          <button
-            onClick={toggleSaveCard}
-            disabled={isSaving}
-            data-testid="profile-bookmark-btn"
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 ${isSaved ? 'bg-accent border-accent text-white hover:bg-accent/90' : 'bg-white/80 border-white/50 text-primary hover:bg-white hover:text-accent'}`}
-            title={isSaved ? "Quitar del tarjetero" : "Guardar en mi tarjetero"}
-          >
-            <Bookmark size={20} className={isSaved ? 'fill-white' : ''} />
-          </button>
         </div>
       )}
     </div>

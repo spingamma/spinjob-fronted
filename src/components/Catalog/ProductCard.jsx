@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Minus } from 'lucide-react';
+import { Plus, Minus, Eye, EyeOff } from 'lucide-react';
 
 export default function ProductCard({
   product,
@@ -13,7 +13,9 @@ export default function ProductCard({
   limitMsg,
   expanded,
   toggleExpand,
-  handleCardClick
+  handleCardClick,
+  isOwner,
+  onToggleVisibility
 }) {
   return (
     <div
@@ -25,9 +27,41 @@ export default function ProductCard({
       onClick={() => handleCardClick(idx, isActive, product)}
     >
       {/* Imagen/Icono en la parte superior */}
-      {product.image_url && (
+      {(product.image_url || isOwner) && (
         <div className="relative w-full flex flex-col justify-start">
-          <img src={product.image_url} alt={product.name} className="w-full h-auto max-h-[240px] sm:max-h-[280px] md:max-h-[320px] object-contain transition-transform duration-500 hover:scale-105 drop-shadow-sm" />
+          {product.image_url ? (
+            <img src={product.image_url} alt={product.name} className="w-full h-auto max-h-[240px] sm:max-h-[280px] md:max-h-[320px] object-contain transition-transform duration-500 hover:scale-105 drop-shadow-sm" />
+          ) : (
+            <div className="w-full h-24 bg-gray-50 flex items-center justify-center text-gray-300 font-bold text-xs uppercase">
+              Sin imagen
+            </div>
+          )}
+          {isOwner && (
+            <button
+              type="button"
+              data-testid={`toggle-visibility-${product.id}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleVisibility?.(product.id);
+              }}
+              title={product.is_visible !== false ? "Visible para clientes (Click para ocultar)" : "Oculto para clientes (Click para mostrar)"}
+              className={`absolute top-2 right-2 z-20 p-2 rounded-full backdrop-blur-md transition-all shadow-md active:scale-90 ${
+                product.is_visible !== false
+                  ? 'bg-white/90 text-secondary hover:bg-white hover:scale-110 border border-secondary/20'
+                  : 'bg-gray-900/80 text-white/70 hover:text-white hover:bg-gray-900 hover:scale-110 border border-white/20'
+              }`}
+            >
+              {product.is_visible !== false ? <Eye size={16} /> : <EyeOff size={16} />}
+            </button>
+          )}
+          {isOwner && product.is_visible === false && (
+            <span
+              data-testid={`badge-hidden-${product.id}`}
+              className="absolute top-2 left-2 z-20 bg-gray-900/80 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 backdrop-blur-sm"
+            >
+              <EyeOff size={10} /> Oculto
+            </span>
+          )}
         </div>
       )}
 

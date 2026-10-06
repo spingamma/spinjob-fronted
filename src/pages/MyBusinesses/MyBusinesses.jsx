@@ -1,11 +1,11 @@
-// Archivo: src/MisNegocios.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Clock, CheckCircle2, XCircle, PlusCircle, Building, Eye, FileText, X, Trash2, Loader2, ShoppingBag, Edit3, BarChart2 } from 'lucide-react';
+import { ChevronLeft, Clock, CheckCircle2, XCircle, PlusCircle, Eye, FileText, X, Trash2, Loader2, ShoppingBag, Edit3, BarChart2 } from 'lucide-react';
 import BottomNavbar from '../../components/BottomNavbar';
 import Header from '../../components/Header';
 import fetchAuth from '../../utils/fetchAuth';
 import PremiumModal from '../../components/PremiumModal';
+import TeamManagementModal from '../../plantillas/components/TeamManagementModal';
 import { API_URL } from '../../config/api';
 import { useAuth } from '../../hooks/useAuth';
 import OwnerPushBanner from '../../components/OwnerPushBanner';
@@ -18,6 +18,7 @@ export default function MisNegocios() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [premiumModalData, setPremiumModalData] = useState({ isOpen: false, featureName: '' });
+  const [teamModalData, setTeamModalData] = useState({ isOpen: false, slug: '', businessName: '' });
   const [searchTerm, setSearchTerm] = useState('');
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(null);
@@ -123,20 +124,30 @@ export default function MisNegocios() {
         setAuthModalOpen={() => navigate('/')}
         onHomeClick={handleCleanFilters}
         isMobile={window.innerWidth < 768}
+        showSearch={false}
+        showCart={false}
       />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative">
-        <button onClick={() => navigate(-1)} className="flex items-center text-accent hover:text-secondary font-bold mb-6 transition-colors group">
-          <ArrowLeft size={20} className="mr-2 transition-transform group-hover:-translate-x-1" /> Volver
+        <button
+          onClick={() => navigate(-1)}
+          data-testid="back-button"
+          aria-label="Volver atrás"
+          className="w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-md border active:scale-95 bg-white/80 border-white/50 text-primary hover:bg-white hover:text-accent mb-6 cursor-pointer"
+          title="Volver atrás"
+        >
+          <ChevronLeft size={22} />
         </button>
 
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-extrabold text-primary flex items-center gap-3">
-            <Building className="text-secondary" /> Mis Negocios
+          <h1 className="text-3xl font-extrabold text-primary">
+            Mis Negocios
           </h1>
-          <Link to="/crear-negocio" onClick={handleNuevoNegocioClick} className="bg-btn-cta hover:bg-btn-cta/90 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-transform hover:-translate-y-0.5">
-            <PlusCircle size={18} /> Nuevo
-          </Link>
+          {(isAdmin || negocios.length === 0) && (
+            <Link to="/crear-negocio" onClick={handleNuevoNegocioClick} className="bg-btn-cta hover:bg-btn-cta/90 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-transform hover:-translate-y-0.5">
+              <PlusCircle size={18} /> Nuevo
+            </Link>
+          )}
         </div>
 
         {negocios.length > 0 && <OwnerPushBanner />}
@@ -160,6 +171,7 @@ export default function MisNegocios() {
                 onToggleOpen={handleToggleOpen}
                 onDelete={handleEliminarNegocio}
                 onOpenPremiumModal={(featureName) => setPremiumModalData({ isOpen: true, featureName })}
+                onOpenTeamModal={(negocioData) => setTeamModalData({ isOpen: true, slug: negocioData.slug, businessName: negocioData.name })}
               />
             ))}
           </div>
@@ -181,6 +193,13 @@ export default function MisNegocios() {
         isOpen={premiumModalData.isOpen}
         onClose={() => setPremiumModalData({ isOpen: false, featureName: '' })}
         featureName={premiumModalData.featureName}
+      />
+
+      <TeamManagementModal
+        isOpen={teamModalData.isOpen}
+        onClose={() => setTeamModalData({ isOpen: false, slug: '', businessName: '' })}
+        slug={teamModalData.slug}
+        businessName={teamModalData.businessName}
       />
     </div>
   );

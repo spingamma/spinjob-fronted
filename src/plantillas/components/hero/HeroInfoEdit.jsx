@@ -25,16 +25,6 @@ export default function HeroInfoEdit({
         />
         <span className="absolute right-2 text-red-500 font-bold text-xl" title="Campo obligatorio">*</span>
       </div>
-      <div className="flex items-center gap-1 mt-1 w-full relative">
-        <input
-          name="title"
-          value={editFormData.title || ''}
-          onChange={handleEditChange}
-          className="w-full text-accent text-sm font-bold uppercase tracking-widest bg-white/60 border border-dashed border-gray-400 focus:border-secondary focus:bg-white rounded px-2 outline-none transition-all pr-6"
-          placeholder="Título o Especialidad"
-        />
-        <span className="absolute right-2 text-red-500 font-bold text-lg" title="Campo obligatorio">*</span>
-      </div>
 
       <div className="mt-3 flex flex-col sm:flex-row gap-2">
         <div className="flex-1 flex flex-col">

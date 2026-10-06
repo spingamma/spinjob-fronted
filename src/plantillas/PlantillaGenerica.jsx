@@ -121,7 +121,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
           setEditFormData={setEditFormData}
         />
 
-        {!isEditing && !isCreateMode && (
+        {!isEditing && !isCreateMode && !isOwner && (
           <div className="mt-8 flex justify-center w-full z-10 relative px-4">
             <button
                 onClick={handleCalificarClick}

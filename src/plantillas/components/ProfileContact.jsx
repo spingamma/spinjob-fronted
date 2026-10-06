@@ -113,7 +113,7 @@ export default function ProfileContact({
             </div>
           </div>
         ) : (
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-4 justify-start">
             {waNumbers.map((num, idx) => {
               const clean = cleanWhatsappNumber(num, profesional?.country || 'Bolivia');
               if (!clean) return null;
@@ -122,12 +122,12 @@ export default function ProfileContact({
                   data-testid={`button-whatsapp-${idx}`}
                   key={`wa-${idx}`}
                   onClick={(e) => handleLinkClick(e, `WhatsApp ${idx + 1}`, `https://wa.me/${clean}`)}
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white text-primary font-bold flex items-center justify-center shadow-sm hover:bg-green-500 hover:text-white border border-gray-200 hover:border-green-500 hover:shadow-lg active:scale-[0.98] transition-all group relative"
+                  className="w-12 h-12 rounded-xl bg-white text-primary font-bold flex items-center justify-center shadow-sm hover:bg-green-500 hover:text-white border border-gray-100 hover:border-green-500 hover:shadow-md active:scale-95 transition-all group relative"
                   title={`WhatsApp ${idx + 1}`}
                 >
-                  <WhatsappIcon size={32} className="text-green-500 group-hover:text-white transition-colors" />
+                  <WhatsappIcon size={24} className="text-green-500 group-hover:text-white transition-colors" />
                   {waNumbers.length > 1 && (
-                    <span className="absolute -bottom-2 -right-2 bg-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs border-2 border-white shadow-sm">{idx + 1}</span>
+                    <span className="absolute -bottom-1 -right-1 bg-green-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] border border-white shadow-sm">{idx + 1}</span>
                   )}
                 </button>
               );
@@ -137,10 +137,10 @@ export default function ProfileContact({
               <button 
                 data-testid="button-phone"
                 onClick={(e) => handleLinkClick(e, 'Llamar', links.phone)}
-                className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-2xl bg-white text-primary font-bold hover:bg-primary hover:text-white transition-colors border border-gray-200 hover:border-primary hover:shadow-lg shadow-sm group"
+                className="w-12 h-12 rounded-xl bg-white text-primary font-bold flex items-center justify-center shadow-sm hover:bg-primary hover:text-white transition-colors border border-gray-100 hover:border-primary hover:shadow-md active:scale-95 group"
                 title="Llamar"
               >
-                <Phone size={32} className="text-primary group-hover:text-white transition-colors" />
+                <Phone size={24} className="text-primary group-hover:text-white transition-colors" />
               </button>
             )}
           </div>
@@ -184,7 +184,7 @@ export default function ProfileContact({
             </div>
           </div>
         ) : (
-          <div className="flex flex-wrap justify-center items-center bg-gray-50 p-4 rounded-2xl border border-gray-200/60 gap-4">
+          <div className="flex flex-wrap justify-start items-center gap-4">
             <SocialButton icon={MapPin} label="Ubicación" url={links.ubicacion} colorClass="text-red-500 hover:bg-red-500" onLinkClick={handleLinkClick} dataTestId="profile-location-btn" />
             <SocialButton icon={Globe} label="Sitio Web" url={links.website} colorClass="text-purple-500 hover:bg-purple-500" onLinkClick={handleLinkClick} />
             <SocialButton icon={Facebook} label="Facebook" url={links.facebook} colorClass="text-blue-600 hover:bg-blue-600" onLinkClick={handleLinkClick} />

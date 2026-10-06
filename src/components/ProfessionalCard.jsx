@@ -107,7 +107,7 @@ export default function ProfessionalCard({ professional, isLoggedIn, onCardClick
             {professional.name}
           </h3>
           <p className="text-accent font-semibold text-xs sm:text-sm mb-1.5 break-words leading-snug">
-            {professional.title}
+            {professional.category}
           </p>
         </div>
 

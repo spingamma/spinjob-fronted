@@ -33,7 +33,8 @@ export default function InlineCatalogCarousel({
     grouped,
     carouselKeys,
     isOwner,
-    isBusinessManager
+    isBusinessManager,
+    toggleProductVisibility
   } = useCatalogData(slug, isPremium, carouselOrder, ownerId, staffIds, userRole);
 
   const {
@@ -100,6 +101,7 @@ export default function InlineCatalogCarousel({
           cart={cart}
           updateCart={updateCart}
           limitMsg={limitMsg}
+          onToggleVisibility={toggleProductVisibility}
         />
       ) : carouselKeys.length > 0 ? (
         <div className="flex flex-col gap-4">
@@ -114,6 +116,8 @@ export default function InlineCatalogCarousel({
               cart={cart}
               updateCart={updateCart}
               limitMsg={limitMsg}
+              isOwner={isOwner}
+              onToggleVisibility={toggleProductVisibility}
             />
           ))}
 

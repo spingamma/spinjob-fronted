@@ -177,8 +177,7 @@ export function useAdminVendedorTab(API_URL) {
   };
 
   const filteredBusinesses = businesses.filter(b => {
-    const matchesSearch = b.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          b.title?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = b.name.toLowerCase().includes(searchTerm.toLowerCase());
     
     if (!matchesSearch) return false;
     

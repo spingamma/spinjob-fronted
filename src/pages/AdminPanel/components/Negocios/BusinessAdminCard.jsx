@@ -53,7 +53,7 @@ export default function BusinessAdminCard({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mb-2.5">
           <div className="flex items-center gap-1.5 text-xs font-bold text-gray-500">
             <ShieldCheck size={16} className="text-primary" />
-            {neg.title} • {neg.category}
+            {neg.category}
           </div>
           <div className="flex items-center gap-1.5 text-xs font-bold text-gray-500">
             <Clock size={16} className="text-primary" />

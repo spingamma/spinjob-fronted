@@ -87,6 +87,25 @@ export function useCatalogData(slug, isPremium, carouselOrder, ownerId, staffIds
   }
   carouselKeys = carouselKeys.slice(0, maxCarousels);
 
+  const toggleProductVisibility = async (productId) => {
+    const token = localStorage.getItem('spingamma_token');
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_URL}/businesses/${slug}/products/${productId}/toggle-visibility`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setProducts(prev => prev.map(p => p.id === productId ? { ...p, is_visible: updated.is_visible } : p));
+      }
+    } catch (err) {
+      console.error("Error toggling product visibility:", err);
+    }
+  };
+
   return {
     products,
     loading,
@@ -97,6 +116,7 @@ export function useCatalogData(slug, isPremium, carouselOrder, ownerId, staffIds
     carouselKeys,
     isOwner,
     isStaff,
-    isBusinessManager
+    isBusinessManager,
+    toggleProductVisibility
   };
 }

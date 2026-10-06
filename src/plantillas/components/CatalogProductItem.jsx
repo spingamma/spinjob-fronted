@@ -1,14 +1,11 @@
 import React from 'react';
-import { Pencil, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 
 export default function CatalogProductItem({
   product,
   isPremium,
-  limitVisible,
-  localProductsCountVisible,
   handleStockChange,
   handleOpenEdit,
-  toggleVisibility,
   handleDelete
 }) {
   return (
@@ -63,21 +60,6 @@ export default function CatalogProductItem({
           >
             <Pencil size={14} />
           </button>
-          {isPremium && (
-            <div className="flex items-center gap-1">
-              <button
-                data-testid={`visibility-btn-${product.id || product.tempId}`}
-                onClick={() => toggleVisibility(product)}
-                className={`p-1.5 rounded-lg transition-colors border ${product.is_visible !== false ? 'text-secondary bg-orange-50 border-orange-100 hover:bg-orange-100' : 'text-gray-400 bg-gray-50 border-gray-100 hover:bg-gray-100'}`}
-                title={product.is_visible !== false ? "Ocultar elemento" : (localProductsCountVisible >= limitVisible ? "Límite alcanzado" : "Hacer visible")}
-              >
-                {product.is_visible !== false ? <Eye size={14} /> : <EyeOff size={14} />}
-              </button>
-              <span className="text-[10px] font-bold text-gray-400 w-7 text-center" title="Productos visibles / Límite">
-                {localProductsCountVisible}/{limitVisible}
-              </span>
-            </div>
-          )}
           <button
             data-testid={`delete-btn-${product.id || product.tempId}`}
             onClick={() => handleDelete(product)}

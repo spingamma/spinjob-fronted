@@ -99,7 +99,7 @@ export default async function fetchAuth(url, options = {}) {
       }
 
       return retryRes;
-    } catch (err) {
+    } catch {
       handleSessionExpired();
       throw new Error('SESSION_EXPIRED');
     }

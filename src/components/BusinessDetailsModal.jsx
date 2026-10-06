@@ -55,7 +55,6 @@ export default function BusinessDetailsModal({ business, onClose, actions, banne
             <h3 className="font-bold text-sm sm:text-base text-secondary border-b border-gray-200 pb-1.5 mb-2.5">Información Principal</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <CampoLectura label="Nombre / Marca" valor={business.name} />
-              <CampoLectura label="Especialidad" valor={business.title} />
               <CampoLectura label="Categoría" valor={business.category} />
               <CampoLectura label="Sub-especialidades" valor={(() => { try { const s = JSON.parse(business.subcategories || '[]'); return s.length > 0 ? s.join(', ') : null; } catch { return business.subcategories; } })()} />
               <CampoLectura label="País" valor={business.country} />

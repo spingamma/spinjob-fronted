@@ -34,7 +34,9 @@ export function AuthProvider({ children }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refresh_token: refreshToken })
         }).catch(() => {});
-      } catch {}
+      } catch {
+        // Silently ignore network errors during logout
+      }
     }
     localStorage.removeItem('spingamma_user');
     localStorage.removeItem('spingamma_token');

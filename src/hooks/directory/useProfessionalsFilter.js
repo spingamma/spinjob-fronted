@@ -47,8 +47,7 @@ export function useProfessionalsFilter({
         const searchNormalized = normalizeText(searchTerm);
         const matchSearch = serverFiltered ||
                             !searchTerm ||
-                            normalizeText(p.name).includes(searchNormalized) || 
-                            normalizeText(p.title).includes(searchNormalized);
+                            normalizeText(p.name).includes(searchNormalized);
         const matchState = activeState === 'Todas' || p.state === activeState;
         const matchNeighborhood = activeNeighborhood === 'Todas' || p.neighborhood === activeNeighborhood;
         const matchSubcategory = activeSubcategory === 'Todas' || (() => {

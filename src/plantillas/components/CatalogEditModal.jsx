@@ -132,7 +132,6 @@ export default function CatalogEditModal({
       // 1. Guardar configuración del catálogo en el negocio preservando datos base
       const formDataObj = new FormData();
       formDataObj.append('name', profesional.name || '');
-      formDataObj.append('title', profesional.title || '');
       formDataObj.append('category', profesional.category || '');
       formDataObj.append('description', profesional.description || '');
       formDataObj.append('state', profesional.state || '');

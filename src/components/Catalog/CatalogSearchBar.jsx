@@ -13,7 +13,7 @@ export default function CatalogSearchBar({ searchTerm, setSearchTerm, isDark }) 
           data-testid="catalog-search-input"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Buscar producto por nombre o descripción..."
+          placeholder="Buscar producto"
           className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-gray-400"
         />
         {searchTerm && (

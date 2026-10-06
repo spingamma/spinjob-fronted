@@ -25,7 +25,6 @@ export default function useProfileForm({ profesional, isEditing, draftStorageKey
 
     return {
       name: profesional?.name || '',
-      title: profesional?.title || '',
       description: profesional?.description || '',
       experience_years: profesional?.experience_years || '',
       credentials: profesional?.credentials || '',

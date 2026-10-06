@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import ProductCard from './ProductCard';
 import { useCarouselScroll } from './hooks/useCarouselScroll';
 
-export default function CarouselBlock({ title, products, isDark, isPremium, ordersEnabled, cart, updateCart, limitMsg }) {
+export default function CarouselBlock({ title, products, isDark, isPremium, ordersEnabled, cart, updateCart, limitMsg, isOwner, onToggleVisibility }) {
   const displayProducts = products.length > 0 ? Array(20).fill(products).flat() : [];
   const [expandedProducts, setExpandedProducts] = useState({});
 
@@ -53,6 +53,8 @@ export default function CarouselBlock({ title, products, isDark, isPremium, orde
               expanded={expandedProducts[idx]}
               toggleExpand={toggleExpand}
               handleCardClick={(index, active, prod) => handleCardClick(index, active, prod, handleProductClick)}
+              isOwner={isOwner}
+              onToggleVisibility={onToggleVisibility}
             />
           );
         })}

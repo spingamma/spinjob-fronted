@@ -1,8 +1,8 @@
 import React from 'react';
-import { EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import CartQuantityControl from './CartQuantityControl';
 
-export default function CatalogSearchGrid({ products, isDark, isOwner, isPremium, ordersEnabled, cart, updateCart }) {
+export default function CatalogSearchGrid({ products, isDark, isOwner, isPremium, ordersEnabled, cart, updateCart, onToggleVisibility }) {
   if (!products || products.length === 0) {
     return (
       <div data-testid="catalog-search-empty" className="py-12 text-center text-gray-400">
@@ -46,8 +46,26 @@ export default function CatalogSearchGrid({ products, isDark, isOwner, isPremium
                   <EyeOff size={10} /> Oculto
                 </span>
               )}
+              {isOwner && (
+                <button
+                  type="button"
+                  data-testid={`toggle-visibility-grid-${product.id}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleVisibility?.(product.id);
+                  }}
+                  title={product.is_visible !== false ? "Visible para clientes (Click para ocultar)" : "Oculto para clientes (Click para mostrar)"}
+                  className={`absolute top-2 right-2 z-20 p-1.5 rounded-full backdrop-blur-md transition-all shadow-md active:scale-90 ${
+                    product.is_visible !== false
+                      ? 'bg-white/90 text-secondary hover:bg-white hover:scale-110 border border-secondary/20'
+                      : 'bg-gray-900/80 text-white/70 hover:text-white hover:bg-gray-900 hover:scale-110 border border-white/20'
+                  }`}
+                >
+                  {product.is_visible !== false ? <Eye size={14} /> : <EyeOff size={14} />}
+                </button>
+              )}
               {product.stock === 0 && (
-                <span className="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">
+                <span className={`absolute ${isOwner ? 'top-2 right-10' : 'top-2 right-2'} bg-red-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase`}>
                   Agotado
                 </span>
               )}

@@ -19,7 +19,9 @@ const Header = ({
   setAuthModalOpen,
   onHomeClick,
   isMobile,
-  onLocationChange
+  onLocationChange,
+  showSearch = true,
+  showCart = true
 }) => {
   const navigate = useNavigate();
   const [deferredPrompt, setDeferredPrompt] = useState(window.deferredPromptEvent || null);
@@ -120,34 +122,36 @@ const Header = ({
         </div>
 
         {/* BUSCADOR Y NAV */}
-        <div className="flex-1 max-w-5xl px-1 sm:px-0 flex items-center justify-end md:justify-center gap-3 md:gap-8">
-          <div className="flex-1 max-w-3xl flex items-center bg-gray-50 border border-gray-200 rounded-full shadow-inner py-1.5 pl-4 pr-1.5 focus-within:ring-2 focus-within:ring-secondary transition-all gap-1 sm:gap-2">
-            <input
-              data-testid="search-input"
-              type="text"
-              aria-label="Buscar servicios o tarjetas"
-              placeholder="Buscar servicios o tarjetas"
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  setSearchTerm(localSearch);
-                }
-              }}
-              className="w-full bg-transparent text-primary placeholder-gray-400 outline-none text-sm sm:text-base mr-1"
-            />
-            <button
-              onClick={() => setSearchTerm(localSearch)}
-              data-testid="search-button"
-              className={`w-8 h-8 rounded-full transition-all duration-200 focus:outline-none shrink-0 shadow-sm flex items-center justify-center ${localSearch.trim()
-                  ? 'bg-secondary hover:bg-secondary/90 text-white'
-                  : 'bg-gray-200 text-gray-400 hover:bg-gray-300'
-                }`}
-              title="Buscar"
-            >
-              <Search size={16} />
-            </button>
-          </div>
+        <div className={`flex-1 max-w-5xl px-1 sm:px-0 flex items-center ${showSearch ? 'justify-end md:justify-center' : 'justify-end'} gap-3 md:gap-8`}>
+          {showSearch && (
+            <div className="flex-1 max-w-3xl flex items-center bg-gray-50 border border-gray-200 rounded-full shadow-inner py-1.5 pl-4 pr-1.5 focus-within:ring-2 focus-within:ring-secondary transition-all gap-1 sm:gap-2">
+              <input
+                data-testid="search-input"
+                type="text"
+                aria-label="Buscar servicios o tarjetas"
+                placeholder="Buscar servicios o tarjetas"
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setSearchTerm(localSearch);
+                  }
+                }}
+                className="w-full bg-transparent text-primary placeholder-gray-400 outline-none text-sm sm:text-base mr-1"
+              />
+              <button
+                onClick={() => setSearchTerm(localSearch)}
+                data-testid="search-button"
+                className={`w-8 h-8 rounded-full transition-all duration-200 focus:outline-none shrink-0 shadow-sm flex items-center justify-center ${localSearch.trim()
+                    ? 'bg-secondary hover:bg-secondary/90 text-white'
+                    : 'bg-gray-200 text-gray-400 hover:bg-gray-300'
+                  }`}
+                title="Buscar"
+              >
+                <Search size={16} />
+              </button>
+            </div>
+          )}
 
           {!isMobile && (
             <div className="flex-shrink-0">
@@ -159,7 +163,7 @@ const Header = ({
             </div>
           )}
 
-          {isLoggedIn && (
+          {showCart && isLoggedIn && (
             <button
               onClick={() => navigate('/mis-compras')}
               className="flex flex-col items-center justify-center p-1.5 hover:bg-gray-100 rounded-xl transition-all duration-200 group min-w-[60px]"

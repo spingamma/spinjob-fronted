@@ -43,7 +43,7 @@ export default function useProfileQRAndShare(profesional) {
     if (!profesional) return;
     const shareData = {
       title: `Perfil de ${profesional.name}`,
-      text: `Conoce el perfil profesional de ${profesional.name} - ${profesional.title} en Tarjetoso.`,
+      text: `Conoce el perfil profesional de ${profesional.name} en Tarjetoso.`,
       url: window.location.href,
     };
 
