@@ -1,18 +1,29 @@
 import React from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
 
 export default function CatalogProductItem({
   product,
   isPremium,
   handleStockChange,
   handleOpenEdit,
+  toggleVisibility,
   handleDelete
 }) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-hover hover:border-gray-200">
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <div className="flex-1 min-w-0 flex items-center justify-between gap-2 pr-2">
-          <h4 className="font-bold text-gray-800 text-sm truncate" title={product.name}>{product.name}</h4>
+          <div className="flex items-center gap-2 truncate">
+            <h4 className="font-bold text-gray-800 text-sm truncate" title={product.name}>{product.name}</h4>
+            {product.is_visible === false && (
+              <span
+                data-testid={`badge-hidden-item-${product.id || product.tempId}`}
+                className="text-[10px] bg-gray-100 text-gray-500 font-bold px-1.5 py-0.5 rounded flex items-center gap-1 shrink-0"
+              >
+                <EyeOff size={10} /> Oculto
+              </span>
+            )}
+          </div>
           <span className="text-xs text-teal-600 font-semibold flex-shrink-0 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100">{product.price || 'Sin precio'}</span>
         </div>
       </div>
@@ -51,7 +62,7 @@ export default function CatalogProductItem({
           </div>
         )}
 
-        <div className="flex gap-1.5">
+        <div className="flex gap-1.5 items-center">
           <button
             data-testid={`edit-btn-${product.id || product.tempId}`}
             onClick={() => handleOpenEdit(product)}
@@ -59,6 +70,18 @@ export default function CatalogProductItem({
             title="Editar"
           >
             <Pencil size={14} />
+          </button>
+          <button
+            data-testid={`visibility-btn-${product.id || product.tempId}`}
+            onClick={() => toggleVisibility?.(product)}
+            className={`p-1.5 rounded-lg transition-colors border ${
+              product.is_visible !== false
+                ? 'text-secondary bg-orange-50 border-orange-100 hover:bg-orange-100'
+                : 'text-gray-400 bg-gray-50 border-gray-100 hover:bg-gray-100'
+            }`}
+            title={product.is_visible !== false ? "Visible para clientes (Click para ocultar)" : "Oculto para clientes (Click para mostrar)"}
+          >
+            {product.is_visible !== false ? <Eye size={14} /> : <EyeOff size={14} />}
           </button>
           <button
             data-testid={`delete-btn-${product.id || product.tempId}`}

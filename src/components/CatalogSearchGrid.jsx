@@ -23,9 +23,11 @@ export default function CatalogSearchGrid({ products, isDark, isOwner, isPremium
             key={product.id}
             data-testid={`catalog-search-item-${product.id}`}
             className={`flex flex-col rounded-2xl overflow-hidden border transition-all ${
-              isDark
-                ? 'bg-gray-900 border-white/10 text-white'
-                : 'bg-white border-gray-200 text-primary shadow-sm'
+              isHidden ? 'opacity-75 border-dashed border-gray-400 bg-gray-50/50' : (
+                isDark
+                  ? 'bg-gray-900 border-white/10 text-white'
+                  : 'bg-white border-gray-200 text-primary shadow-sm'
+              )
             }`}
           >
             <div className="relative w-full h-36 bg-gray-50 flex items-center justify-center overflow-hidden">

@@ -32,7 +32,6 @@ export default function InlineCatalogCarousel({
     filteredProducts,
     grouped,
     carouselKeys,
-    isOwner,
     isBusinessManager,
     toggleProductVisibility
   } = useCatalogData(slug, isPremium, carouselOrder, ownerId, staffIds, userRole);
@@ -95,7 +94,7 @@ export default function InlineCatalogCarousel({
         <CatalogSearchGrid
           products={filteredProducts}
           isDark={isDark}
-          isOwner={isOwner}
+          isOwner={isBusinessManager}
           isPremium={isPremium}
           ordersEnabled={ordersEnabled}
           cart={cart}
@@ -116,7 +115,7 @@ export default function InlineCatalogCarousel({
               cart={cart}
               updateCart={updateCart}
               limitMsg={limitMsg}
-              isOwner={isOwner}
+              isOwner={isBusinessManager}
               onToggleVisibility={toggleProductVisibility}
             />
           ))}

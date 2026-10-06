@@ -55,7 +55,7 @@ export default function CatalogEditModal({
 
     if (profesional.slug) {
       setIsLoadingProducts(true);
-      fetch(`${API_URL}/businesses/${profesional.slug}/products`)
+      fetchAuth(`${API_URL}/businesses/${profesional.slug}/products`)
         .then(res => res.ok ? res.json() : [])
         .then(data => {
           setLocalProducts(data);

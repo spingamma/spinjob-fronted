@@ -20,7 +20,9 @@ export default function ProductCard({
   return (
     <div
       data-product-idx={idx}
-      className={`snap-center shrink-0 h-fit w-[195px] sm:w-[235px] md:w-[270px] transition-all duration-300 ease-out flex flex-col rounded-[1.25rem] overflow-hidden border cursor-pointer ${isActive
+      className={`snap-center shrink-0 h-fit w-[195px] sm:w-[235px] md:w-[270px] transition-all duration-300 ease-out flex flex-col rounded-[1.25rem] overflow-hidden border cursor-pointer ${
+        product.is_visible === false ? 'opacity-75 border-dashed border-gray-400 bg-gray-50/50' : ''
+      } ${isActive
           ? (isDark ? 'bg-gray-900 border-white/10 shadow-[0_15px_30px_-10px] shadow-black/50 scale-100 z-10' : 'bg-white border-transparent shadow-[0_15px_30px_-10px] shadow-primary/15 scale-100 z-10')
           : (isDark ? 'bg-gray-900/50 border-white/5 scale-90 opacity-100 z-0' : 'bg-white border-gray-200 scale-90 opacity-100 z-0 hover:bg-gray-50')
         }`}

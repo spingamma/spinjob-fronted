@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { API_URL } from '../../../config/api';
+import fetchAuth from '../../../utils/fetchAuth';
 
 export function useCatalogData(slug, isPremium, carouselOrder, ownerId, staffIds = [], userRole = null) {
   const [products, setProducts] = useState([]);
@@ -14,7 +15,8 @@ export function useCatalogData(slug, isPremium, carouselOrder, ownerId, staffIds
 
   const userStr = localStorage.getItem('spingamma_user');
   const currentUser = userStr ? JSON.parse(userStr) : null;
-  const isOwner = currentUser && ownerId && String(currentUser.id) === String(ownerId);
+  const isAdmin = currentUser && (currentUser.is_admin === true || currentUser.role === 'admin');
+  const isOwner = currentUser && ((ownerId && String(currentUser.id) === String(ownerId)) || isAdmin);
   const isStaff = currentUser && !isOwner && (
     userRole === 'staff' ||
     (Array.isArray(staffIds) && staffIds.map(String).includes(String(currentUser.id)))
@@ -35,10 +37,10 @@ export function useCatalogData(slug, isPremium, carouselOrder, ownerId, staffIds
     if (!slug) {
       return;
     }
-    fetch(`${API_URL}/businesses/${slug}/products`)
+    fetchAuth(`${API_URL}/businesses/${slug}/products`)
       .then(res => res.ok ? res.json() : Promise.reject())
       .then(data => {
-        if (isOwner) {
+        if (isBusinessManager) {
           setProducts(data);
         } else {
           setProducts(data.filter(p => p.is_visible !== false));
@@ -46,9 +48,9 @@ export function useCatalogData(slug, isPremium, carouselOrder, ownerId, staffIds
       })
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
-  }, [slug, isOwner]);
+  }, [slug, isBusinessManager]);
 
-  const visibleProducts = isOwner ? products : products.filter(p => p.is_visible !== false);
+  const visibleProducts = isBusinessManager ? products : products.filter(p => p.is_visible !== false);
   const filteredProducts = visibleProducts.filter(p => 
     (p.name && p.name.toLowerCase().includes(searchTerm.toLowerCase())) || 
     (p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -88,14 +90,9 @@ export function useCatalogData(slug, isPremium, carouselOrder, ownerId, staffIds
   carouselKeys = carouselKeys.slice(0, maxCarousels);
 
   const toggleProductVisibility = async (productId) => {
-    const token = localStorage.getItem('spingamma_token');
-    if (!token) return;
     try {
-      const res = await fetch(`${API_URL}/businesses/${slug}/products/${productId}/toggle-visibility`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const res = await fetchAuth(`${API_URL}/businesses/${slug}/products/${productId}/toggle-visibility`, {
+        method: 'PATCH'
       });
       if (res.ok) {
         const updated = await res.json();
