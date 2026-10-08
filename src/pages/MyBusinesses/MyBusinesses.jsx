@@ -27,7 +27,9 @@ export default function MisNegocios() {
   useEffect(() => {
     const fetchMisNegocios = async () => {
       const token = localStorage.getItem('spingamma_token');
-      if (!token) {
+      const refreshToken = localStorage.getItem('spingamma_refresh_token');
+      if (!token && !refreshToken) {
+        sessionStorage.setItem('redirect_after_login', '/mis-negocios');
         navigate('/');
         return;
       }

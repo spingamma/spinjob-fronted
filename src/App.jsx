@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 import ReloadPrompt from './components/ReloadPrompt';
 import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './pages/NotFound';
+import { usePaymentNotificationListener } from './hooks/usePaymentNotificationListener';
 
 // Lazy load de Vistas
 const Directory = lazy(() => import('./pages/Directory/Directory'));
@@ -19,6 +20,9 @@ const BusinessOrders = lazy(() => import('./pages/MyBusinesses/BusinessOrders'))
 const MyOrders = lazy(() => import('./pages/MyOrders/MyOrders'));
 
 function App() {
+  // Listen for background web push payment notifications and play cash register sound
+  usePaymentNotificationListener();
+
   // Dismiss the HTML splash screen once React mounts
   useEffect(() => {
     const splash = document.getElementById('splash-screen');

@@ -44,7 +44,9 @@ export function useBusinessOrdersList(slug) {
     if (!slug) return;
     setLoading(true);
     const token = localStorage.getItem('spingamma_token');
-    if (!token) {
+    const refreshToken = localStorage.getItem('spingamma_refresh_token');
+    if (!token && !refreshToken) {
+      sessionStorage.setItem('redirect_after_login', `/mis-pedidos/${slug}`);
       navigate('/');
       return;
     }
@@ -113,6 +115,16 @@ export function useBusinessOrdersList(slug) {
   useEffect(() => {
     fetchOrders(startDate, endDate);
   }, [slug, startDate, endDate, fetchOrders]);
+
+  useEffect(() => {
+    const handlePaymentReceived = () => {
+      fetchOrders(startDate, endDate);
+    };
+    window.addEventListener('tarjetoso:payment-received', handlePaymentReceived);
+    return () => {
+      window.removeEventListener('tarjetoso:payment-received', handlePaymentReceived);
+    };
+  }, [startDate, endDate, fetchOrders]);
 
   const handleStatusChange = async (orderId, newStatus, reason = null) => {
     setUpdatingOrder({ id: orderId, status: newStatus });

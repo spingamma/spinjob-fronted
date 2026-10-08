@@ -8,6 +8,17 @@ let refreshPromise = null;
 
 function handleSessionExpired() {
   console.warn('[fetchAuth] Sesión expirada o refresh token inválido. Cerrando sesión.');
+  
+  // Guardar la URL actual para redirigir al usuario tras volver a iniciar sesión
+  try {
+    const currentPath = window.location.pathname + window.location.search;
+    if (currentPath && currentPath !== '/' && !currentPath.includes('/login')) {
+      sessionStorage.setItem('redirect_after_login', currentPath);
+    }
+  } catch {
+    // ignore
+  }
+
   localStorage.removeItem('spingamma_user');
   localStorage.removeItem('spingamma_token');
   localStorage.removeItem('spingamma_refresh_token');
@@ -23,7 +34,9 @@ function handleSessionExpired() {
 async function refreshAccessToken() {
   const refreshToken = localStorage.getItem('spingamma_refresh_token');
   if (!refreshToken) {
-    throw new Error('NO_REFRESH_TOKEN');
+    const err = new Error('NO_REFRESH_TOKEN');
+    err.status = 401;
+    throw err;
   }
 
   // Mutex para peticiones concurrentes: si ya hay un refresh en curso, esperamos a que termine
@@ -37,12 +50,16 @@ async function refreshAccessToken() {
         });
 
         if (!res.ok) {
-          throw new Error(`REFRESH_FAILED_${res.status}`);
+          const err = new Error(`REFRESH_FAILED_${res.status}`);
+          err.status = res.status;
+          throw err;
         }
 
         const data = await res.json();
         if (!data.access_token) {
-          throw new Error('INVALID_REFRESH_RESPONSE');
+          const err = new Error('INVALID_REFRESH_RESPONSE');
+          err.status = 500;
+          throw err;
         }
 
         localStorage.setItem('spingamma_token', data.access_token);
@@ -92,16 +109,25 @@ export default async function fetchAuth(url, options = {}) {
       requestOptions.headers['Authorization'] = `Bearer ${newAccessToken}`;
       const retryRes = await fetch(url, requestOptions);
 
-      // Si aún tras refrescar responde 401, entonces la sesión expiró definitivamente
+      // Si aún tras refrescar responde 401, el token nuevo no tiene acceso
       if (retryRes.status === 401) {
         handleSessionExpired();
         throw new Error('SESSION_EXPIRED');
       }
 
       return retryRes;
-    } catch {
-      handleSessionExpired();
-      throw new Error('SESSION_EXPIRED');
+    } catch (err) {
+      // 🚨 BLINDAJE CONTRA DESLOGUEOS EN DEPLOYS / REINICIOS DEL SERVIDOR:
+      // Solo deslogueamos si el refresh endpoint respondió 401 explícito o no existe refresh token.
+      if (err?.status === 401 || err?.message === 'NO_REFRESH_TOKEN') {
+        handleSessionExpired();
+        throw new Error('SESSION_EXPIRED');
+      }
+
+      // Si fue una falla de red (Failed to fetch), 502 Bad Gateway o 503 (servidor reiniciándose):
+      // ¡NO cerrar sesión! Preservamos el refresh token de 15 días para no expulsar al usuario.
+      console.warn('[fetchAuth] Servidor temporalmente no disponible (posible deploy en curso). Preservando sesión del usuario:', err?.message || err);
+      return res;
     }
   }
 

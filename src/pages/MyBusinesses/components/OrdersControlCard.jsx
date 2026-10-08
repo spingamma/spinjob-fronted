@@ -1,5 +1,6 @@
 import React from 'react';
-import { Building, DollarSign, ShoppingBag, PackageOpen } from 'lucide-react';
+import { Building, DollarSign, ShoppingBag, PackageOpen, Volume2 } from 'lucide-react';
+import { playCashRegisterSound } from '../../../utils/soundEffects';
 
 export default function OrdersControlCard({
   businesses = [],
@@ -78,6 +79,17 @@ export default function OrdersControlCard({
             className="px-3 py-1.5 bg-secondary/10 hover:bg-secondary/20 text-secondary text-xs font-bold rounded-xl transition-colors cursor-pointer"
           >
             Hoy
+          </button>
+
+          <button
+            type="button"
+            onClick={playCashRegisterSound}
+            data-testid="test-cash-sound-btn"
+            title="Probar sonido de caja registradora"
+            className="px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <Volume2 size={13} className="text-secondary" />
+            <span className="hidden sm:inline">Probar timbre</span>
           </button>
 
           {isPaqueteria && handlePaqueteExterno && (

@@ -31,7 +31,9 @@ export default function useMyOrders() {
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     const token = localStorage.getItem('spingamma_token');
-    if (!token) {
+    const refreshToken = localStorage.getItem('spingamma_refresh_token');
+    if (!token && !refreshToken) {
+      sessionStorage.setItem('redirect_after_login', '/mis-compras');
       navigate('/');
       return;
     }

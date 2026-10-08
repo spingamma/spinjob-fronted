@@ -33,6 +33,14 @@ export function useDirectoryAuth({ onLocationChange }) {
       localStorage.setItem('spingamma_selected_country', formData.country);
     }
     
+    // Si el usuario intentó acceder a una URL específica (ej. desde una notificación push)
+    const redirectUrl = sessionStorage.getItem('redirect_after_login');
+    if (redirectUrl) {
+      sessionStorage.removeItem('redirect_after_login');
+      navigate(redirectUrl);
+      return;
+    }
+
     if (pendingSlug) {
       navigate(`/perfil/${pendingSlug}`);
       setPendingSlug(null);
