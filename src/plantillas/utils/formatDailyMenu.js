@@ -1,0 +1,41 @@
+/**
+ * Formats the daily menu message for WhatsApp sharing.
+ *
+ * @param {string} businessName - Name of the business.
+ * @param {Array} products - List of products from the catalog.
+ * @param {string} profileUrl - Direct URL to the business profile.
+ * @returns {string} Formatted WhatsApp message with markdown and emojis.
+ */
+export function formatDailyMenuMessage(businessName, products = [], profileUrl = '') {
+  // 1. Filtrar productos visibles
+  const visibleProducts = (products || []).filter(p => p.is_visible !== false);
+
+  // 2. Si existe un carrusel/sección con nombre alusivo a "Menú del día" o "Almuerzo", priorizarlo
+  const menuKeywords = ['menú del día', 'menu del dia', 'menú', 'menu', 'almuerzo', 'almuerzos', 'plato del día'];
+  const menuSpecificProducts = visibleProducts.filter(p => {
+    const cName = (p.carousel_name || '').toLowerCase().trim();
+    return menuKeywords.some(keyword => cName.includes(keyword));
+  });
+
+  const selectedProducts = menuSpecificProducts.length > 0 ? menuSpecificProducts : visibleProducts;
+
+  // 3. Formatear la lista de platos
+  const dishesList = selectedProducts.map(p => {
+    const name = p.name ? p.name.trim() : 'Plato';
+    const price = p.price ? p.price.trim() : null;
+    return price ? `• *${name}* — ${price}` : `• *${name}*`;
+  }).join('\n');
+
+  const nameHeader = businessName ? businessName.trim() : 'Nuestro Negocio';
+
+  const dishesSection = dishesList
+    ? `✨ *Nuestros platos de hoy:*\n${dishesList}`
+    : `✨ *Consulta nuestros platos disponibles en la tarjeta.*`;
+
+  return `🍽️ *MENÚ DEL DÍA — ${nameHeader.toUpperCase()}*
+
+${dishesSection}
+
+📲 _Haz tus pedidos y reservas directamente desde nuestra tarjeta:_
+👉 ${profileUrl}`;
+}

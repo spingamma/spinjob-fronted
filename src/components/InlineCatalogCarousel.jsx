@@ -19,7 +19,8 @@ export default function InlineCatalogCarousel({
   paymentQrImage,
   ownerId,
   staffIds = [],
-  userRole = null
+  userRole = null,
+  onProductsLoaded = null
 }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -37,6 +38,12 @@ export default function InlineCatalogCarousel({
     isBusinessManager,
     toggleProductVisibility
   } = useCatalogData(slug, isPremium, carouselOrder, ownerId, staffIds, userRole);
+
+  useEffect(() => {
+    if (typeof onProductsLoaded === 'function') {
+      onProductsLoaded(products);
+    }
+  }, [products, onProductsLoaded]);
 
   const {
     cart,

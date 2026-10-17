@@ -11,12 +11,14 @@ import ProfileQRModal from './components/ProfileQRModal';
 import CatalogEditModal from './components/CatalogEditModal';
 import TeamManagementModal from './components/TeamManagementModal';
 import FloatingActionBar from './components/FloatingActionBar';
+import SendDailyMenuButton from './components/SendDailyMenuButton';
 import { usePlantillaGenerica } from './hooks/usePlantillaGenerica';
 
 export default function PlantillaGenerica({ profesional, volverAtras, onProtectedAction, onUpdate, isCreateMode = false, initialIsEditing = null }) {
   const navigate = useNavigate();
   const [isCatalogModalOpen, setIsCatalogModalOpen] = useState(false);
   const [catalogVersion, setCatalogVersion] = useState(0);
+  const [catalogProducts, setCatalogProducts] = useState([]);
 
   const {
     isOwner,
@@ -97,8 +99,16 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               ownerId={profesional.owner_id}
               staffIds={profesional.staff_ids}
               userRole={profesional.user_role}
+              onProductsLoaded={setCatalogProducts}
             />
           </div>
+        )}
+
+        {!isEditing && !isCreateMode && isOwner && (
+          <SendDailyMenuButton
+            profesional={profesional}
+            products={catalogProducts}
+          />
         )}
 
         <ProfileAbout 
