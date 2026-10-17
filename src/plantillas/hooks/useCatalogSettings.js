@@ -9,9 +9,6 @@ export function useCatalogSettings({
   const [newDeliveryMethod, setNewDeliveryMethod] = useState('');
   const [editingDeliveryIndex, setEditingDeliveryIndex] = useState(null);
   const [editingDeliveryText, setEditingDeliveryText] = useState('');
-  const [isSelectingPickupPoint, setIsSelectingPickupPoint] = useState(false);
-  
-  const enablePaqueterias = true;
 
   const handleOrdersEnabledChange = (e) => {
     const isChecked = e.target.checked;
@@ -49,15 +46,6 @@ export function useCatalogSettings({
     setEditingDeliveryText('');
   };
 
-  const handleSelectPickupPoint = (point) => {
-    const fee = (point.pickup_fee !== null && point.pickup_fee !== undefined) ? point.pickup_fee : 0;
-    const methodStr = `PAQUETERIA|${point.id}|${point.name}|${fee}`;
-    if (setDeliveryMethods && !deliveryMethods.includes(methodStr)) {
-      setDeliveryMethods([...deliveryMethods, methodStr]);
-    }
-    setIsSelectingPickupPoint(false);
-  };
-
   return {
     isDeliveryOpen,
     setIsDeliveryOpen,
@@ -67,15 +55,11 @@ export function useCatalogSettings({
     setEditingDeliveryIndex,
     editingDeliveryText,
     setEditingDeliveryText,
-    isSelectingPickupPoint,
-    setIsSelectingPickupPoint,
-    enablePaqueterias,
     
     handleOrdersEnabledChange,
     handleAddDeliveryMethod,
     handleRemoveDeliveryMethod,
     handleStartEditDelivery,
-    handleSaveEditDelivery,
-    handleSelectPickupPoint
+    handleSaveEditDelivery
   };
 }

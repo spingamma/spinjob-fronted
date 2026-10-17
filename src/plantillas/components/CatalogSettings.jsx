@@ -1,6 +1,5 @@
 import React from 'react';
-import { Settings2, QrCode, X, Upload, ChevronUp, ChevronDown, Check, Pencil, Trash2 } from 'lucide-react';
-import PickupPointSelector from './PickupPointSelector';
+import { Settings2, X, ChevronUp, ChevronDown, Check, Pencil, Trash2 } from 'lucide-react';
 import PaymentQrUploader from './PaymentQrUploader';
 import { useCatalogSettings } from '../hooks/useCatalogSettings';
 
@@ -22,15 +21,11 @@ export default function CatalogSettings({
     setEditingDeliveryIndex,
     editingDeliveryText,
     setEditingDeliveryText,
-    isSelectingPickupPoint,
-    setIsSelectingPickupPoint,
-    enablePaqueterias,
     handleOrdersEnabledChange,
     handleAddDeliveryMethod,
     handleRemoveDeliveryMethod,
     handleStartEditDelivery,
-    handleSaveEditDelivery,
-    handleSelectPickupPoint
+    handleSaveEditDelivery
   } = useCatalogSettings({
     deliveryMethods,
     setDeliveryMethods,
@@ -95,23 +90,7 @@ export default function CatalogSettings({
                         Añadir
                       </button>
                     </form>
-                    {enablePaqueterias && (
-                      <button
-                        type="button"
-                        onClick={() => setIsSelectingPickupPoint(true)}
-                        className="shrink-0 bg-primary hover:bg-primary/90 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap sm:w-auto w-full"
-                      >
-                        Añadir Paquetería
-                      </button>
-                    )}
                   </div>
-                  
-                  {isSelectingPickupPoint && (
-                    <PickupPointSelector 
-                      onCancel={() => setIsSelectingPickupPoint(false)}
-                      onSelect={handleSelectPickupPoint}
-                    />
-                  )}
 
                   <div className="space-y-2">
                     {deliveryMethods.map((method, idx) => (
@@ -145,21 +124,17 @@ export default function CatalogSettings({
                         ) : (
                           <>
                             <span className="text-xs font-semibold text-gray-700">
-                              {method.startsWith('PAQUETERIA|') 
-                                ? `📦 Paquetería: ${method.split('|')[2]} (Tarifa: ${method.split('|')[3]} Bs)`
-                                : method}
+                              {method}
                             </span>
                             <div className="flex gap-2 ml-2">
-                              {!method.startsWith('PAQUETERIA|') && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleStartEditDelivery(idx, method)}
-                                  data-testid={`edit-delivery-${idx}`}
-                                  className="text-gray-400 hover:text-accent transition-colors"
-                                >
-                                  <Pencil size={14} />
-                                </button>
-                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleStartEditDelivery(idx, method)}
+                                data-testid={`edit-delivery-${idx}`}
+                                className="text-gray-400 hover:text-accent transition-colors"
+                              >
+                                <Pencil size={14} />
+                              </button>
                               <button
                                 type="button"
                                 onClick={() => handleRemoveDeliveryMethod(idx)}

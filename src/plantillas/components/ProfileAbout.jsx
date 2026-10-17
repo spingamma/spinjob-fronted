@@ -37,12 +37,6 @@ export default function ProfileAbout({
             </div>
           </div>
 
-          {editFormData.category === 'Logística' && (
-            <div className="flex flex-wrap items-center gap-1.5 bg-primary/5 text-primary px-3 py-1.5 rounded-lg text-sm font-medium border border-primary/20 mb-4">
-              <span>Tarifa de Recojo (Bs):</span>
-              <input name="pickup_fee" value={editFormData.pickup_fee || ''} onChange={handleEditChange} type="number" className="w-16 font-bold bg-white border border-dashed border-gray-400 rounded px-1.5 py-0.5 outline-none focus:border-secondary" placeholder="Ej. 5" />
-            </div>
-          )}
 
           <div className="relative">
             <textarea
@@ -75,12 +69,6 @@ export default function ProfileAbout({
             </div>
           )}
 
-          {profesional.category === 'Logística' && profesional.pickup_fee !== null && profesional.pickup_fee !== undefined && (
-            <div className="flex flex-wrap items-center gap-1.5 bg-primary/5 text-primary px-3 py-1.5 rounded-lg text-sm font-medium border border-primary/20 mb-4">
-              <span>Tarifa de Recojo:</span>
-              <span className="font-bold">{profesional.pickup_fee} Bs</span>
-            </div>
-          )}
 
           {profesional.description && (
             <div className="relative">

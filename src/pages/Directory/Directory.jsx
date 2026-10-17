@@ -63,12 +63,13 @@ export default function Directory() {
   }
 
   // Interacción: Seleccionar Categoría desde la Grilla
-  const handleSelectCategory = (categoryName) => {
-    if (categoryName?.toLowerCase() === 'tarjetoso') {
+  const handleSelectCategory = (categoryName, targetSlug) => {
+    if (categoryName?.toLowerCase() === 'tarjetoso' || categoryName?.toLowerCase() === 'servicio al cliente') {
+      const slug = targetSlug || data.metadata?.admin_business?.slug || 'spingamma';
       if (auth.isLoggedIn) {
-        navigate('/perfil/spingamma');
+        navigate(`/perfil/${slug}`);
       } else {
-        auth.handleCardClick('spingamma');
+        auth.handleCardClick(slug);
       }
       return;
     }

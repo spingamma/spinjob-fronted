@@ -1,6 +1,5 @@
 export function getStatusText(order) {
   const status = order?.status;
-  const isPaqueteria = order?.delivery_method?.startsWith('PAQUETERIA|') || order?.delivery_method === 'paqueteria' || !!order?.pickup_business_id;
   
   switch (status) {
     case 'pendiente':
@@ -11,9 +10,7 @@ export function getStatusText(order) {
     case 'pagado':
       return 'Pago Confirmado (Preparando)';
     case 'entregado':
-      return isPaqueteria ? 'En Camino a Paquetería' : 'Enviado / Entregado';
-    case 'ready_for_pickup':
-      return 'Listo para Recojo';
+      return 'Enviado / Entregado';
     case 'completado':
       return 'Completado';
     case 'cancelado':
@@ -25,7 +22,6 @@ export function getStatusText(order) {
 
 export function getStatusColor(order) {
   const status = order?.status;
-  const isPaqueteria = order?.delivery_method?.startsWith('PAQUETERIA|') || order?.delivery_method === 'paqueteria' || !!order?.pickup_business_id;
 
   switch (status) {
     case 'pendiente':
@@ -36,9 +32,7 @@ export function getStatusColor(order) {
     case 'pagado':
       return 'bg-blue-100 text-blue-800';
     case 'entregado':
-      return isPaqueteria ? 'bg-indigo-100 text-indigo-800' : 'bg-green-100 text-green-800';
-    case 'ready_for_pickup':
-      return 'bg-secondary text-white';
+      return 'bg-green-100 text-green-800';
     case 'completado':
       return 'bg-emerald-100 text-emerald-800';
     case 'cancelado':

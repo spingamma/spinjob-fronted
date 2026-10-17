@@ -38,8 +38,6 @@ export function useBusinessOrdersList(slug) {
     });
   };
 
-  const [businessCategory, setBusinessCategory] = useState(null);
-
   const fetchOrders = useCallback(async (sDate, eDate) => {
     if (!slug) return;
     setLoading(true);
@@ -52,30 +50,10 @@ export function useBusinessOrdersList(slug) {
     }
     
     try {
-      // First, get business details to know its category
-      const bizRes = await fetchAuth(`${API_URL}/businesses/${slug}`);
-      let category = null;
-      if (bizRes.ok) {
-        const bizData = await bizRes.json();
-        category = bizData.category;
-        setBusinessCategory(category);
-      }
-
-      let isLogistica = false;
-      if (category) {
-        const catNorm = category.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        if (catNorm.includes('logistica') || catNorm.includes('paqueteria')) {
-          isLogistica = true;
-        }
-      }
-
-      let url = isLogistica 
-        ? `${API_URL}/businesses/${slug}/pickup-orders`
-        : `${API_URL}/businesses/${slug}/orders`;
-        
+      let url = `${API_URL}/businesses/${slug}/orders`;
       const paramsList = [];
-      if (sDate && !isLogistica) paramsList.push(`start_date=${sDate}`);
-      if (eDate && !isLogistica) paramsList.push(`end_date=${eDate}`);
+      if (sDate) paramsList.push(`start_date=${sDate}`);
+      if (eDate) paramsList.push(`end_date=${eDate}`);
       if (paramsList.length > 0) {
         url += `?${paramsList.join('&')}`;
       }
@@ -199,7 +177,6 @@ export function useBusinessOrdersList(slug) {
     summary,
     loading,
     isPremium,
-    businessCategory,
     startDate,
     setStartDate,
     endDate,

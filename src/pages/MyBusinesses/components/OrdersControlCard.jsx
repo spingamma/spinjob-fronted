@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building, DollarSign, ShoppingBag, PackageOpen, Volume2 } from 'lucide-react';
+import { Building, DollarSign, ShoppingBag, Volume2 } from 'lucide-react';
 import { playCashRegisterSound } from '../../../utils/soundEffects';
 
 export default function OrdersControlCard({
@@ -11,9 +11,7 @@ export default function OrdersControlCard({
   endDate,
   setEndDate,
   todayStr,
-  summary,
-  isPaqueteria = false,
-  handlePaqueteExterno
+  summary
 }) {
   const hasMultipleBusinesses = Array.isArray(businesses) && businesses.length > 1;
   const totalSales = Number(summary?.total_sales || 0);
@@ -91,18 +89,6 @@ export default function OrdersControlCard({
             <Volume2 size={13} className="text-secondary" />
             <span className="hidden sm:inline">Probar timbre</span>
           </button>
-
-          {isPaqueteria && handlePaqueteExterno && (
-            <button
-              type="button"
-              onClick={handlePaqueteExterno}
-              data-testid="ingresar-paquete-externo-btn"
-              className="bg-primary hover:bg-primary/90 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 ml-auto lg:ml-2 transition-transform hover:-translate-y-0.5 active:scale-95 cursor-pointer"
-            >
-              <PackageOpen size={14} />
-              <span>Ingresar Paquete Externo</span>
-            </button>
-          )}
         </div>
       </div>
 

@@ -20,8 +20,6 @@ export default function CheckoutSection({
     setPresencialPayment,
     loading,
     liveDeliveryMethods,
-    isPaqueteriaSelected,
-    pickupFee,
     itemsList,
     totalPrice,
     handleSubmit
@@ -90,28 +88,10 @@ export default function CheckoutSection({
             })}
           </div>
           <div className="mt-6 pt-4 border-t border-gray-100 flex flex-col gap-2">
-            {isPaqueteriaSelected && (
-              <>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-500 font-medium text-sm">Total QR (Productos)</span>
-                  <span className="font-bold text-gray-700">Bs. {(totalPrice ?? 0).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between items-center text-red-500">
-                  <span className="font-medium text-sm">A Pagar en Efectivo (Recojo)</span>
-                  <span className="font-bold">Bs. {pickupFee.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between items-end mt-2 pt-2 border-t border-gray-100">
-                  <span className="text-gray-500 font-bold">Costo Total</span>
-                  <span className="text-xl font-black text-secondary">Bs. {(totalPrice + pickupFee).toFixed(2)}</span>
-                </div>
-              </>
-            )}
-            {!isPaqueteriaSelected && (
-              <div className="flex justify-between items-end">
-                <span className="text-gray-500 font-bold">Total a pagar</span>
-                <span className="text-2xl font-black text-secondary">Bs. {(totalPrice ?? 0).toFixed(2)}</span>
-              </div>
-            )}
+            <div className="flex justify-between items-end">
+              <span className="text-gray-500 font-bold">Total a pagar</span>
+              <span className="text-2xl font-black text-secondary">Bs. {(totalPrice ?? 0).toFixed(2)}</span>
+            </div>
           </div>
         </div>
 
@@ -147,9 +127,7 @@ export default function CheckoutSection({
                 <select value={selectedDeliveryMethodRaw} onChange={e => setSelectedDeliveryMethodRaw(e.target.value)} className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 font-bold text-gray-700 outline-none" data-testid="delivery-method-select">
                   {liveDeliveryMethods.map((method, i) => (
                     <option key={i} value={method}>
-                      {typeof method === 'string' && method.startsWith('PAQUETERIA|') 
-                        ? `📦 Paquetería: ${method.split('|')[2]} (Recojo: ${method.split('|')[3]} Bs)`
-                        : method}
+                      {method}
                     </option>
                   ))}
                 </select>

@@ -38,6 +38,7 @@ export default function DirectoryCategoryView({
       ) : (
         <CategoryGrid
           categories={metadata.groupedCategories}
+          adminBusiness={metadata.admin_business}
           onSelectCategory={handleSelectCategory}
         />
       )}

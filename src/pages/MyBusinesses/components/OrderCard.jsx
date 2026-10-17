@@ -11,14 +11,12 @@ export default function OrderCard({
   rejectingOrder, 
   setRejectingOrder, 
   handleStatusChange, 
-  handleDownloadReceipt,
-  isPaqueteria
+  handleDownloadReceipt
 }) {
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const isPendiente = order.status === "pendiente_de_pago" || order.status === "pendiente" || order.status === "pago_enviado";
   const isPagado = order.status === "pagado";
   const isEntregado = order.status === "entregado";
-  const isReadyForPickup = order.status === "ready_for_pickup";
   const isCompletado = order.status === "completado";
   const isCancelado = order.status === "cancelado";
 
@@ -26,8 +24,6 @@ export default function OrderCard({
     ? 'bg-red-100 text-red-700 border border-red-200'
     : isCompletado
     ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-    : isReadyForPickup
-    ? 'bg-secondary text-white border border-secondary'
     : isEntregado
     ? 'bg-green-100 text-green-700 border border-green-200'
     : isPagado
@@ -40,8 +36,6 @@ export default function OrderCard({
     ? 'CANCELADO'
     : isCompletado
     ? 'COMPLETADO'
-    : isReadyForPickup
-    ? 'LISTO PARA RECOJO'
     : isEntregado
     ? 'ENTREGADO'
     : isPagado
@@ -128,7 +122,7 @@ export default function OrderCard({
         
         {!isCancelado && (
           <div className="flex gap-2 flex-wrap">
-            {isPendiente && !isPaqueteria && (
+            {isPendiente && (
               <>
                 {order.receipt_url && (
                   <button 
@@ -189,6 +183,7 @@ export default function OrderCard({
                   <button 
                     onClick={() => setRejectingOrder(order.id)}
                     disabled={updatingOrder?.id === order.id}
+                    data-testid="reject-payment-btn"
                     className="flex items-center gap-1.5 px-3 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <XCircle size={14} />
@@ -211,7 +206,7 @@ export default function OrderCard({
               </>
             )}
 
-            {isPagado && !isPaqueteria && (
+            {isPagado && (
               <button 
                 onClick={() => handleStatusChange(order.id, 'entregado')}
                 disabled={updatingOrder?.id === order.id}
@@ -227,50 +222,12 @@ export default function OrderCard({
               </button>
             )}
 
-            {isEntregado && !isPaqueteria && (
+            {isEntregado && (
               <div className="flex flex-col gap-1 w-full text-right sm:text-left sm:w-auto mt-2 sm:mt-0">
                 <div className="flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-3 py-2 rounded-xl border border-green-200">
                   <PackageCheck size={14} /> Entregado
                 </div>
                 <span className="text-[10px] text-gray-400 font-medium">Esperando confirmación del cliente</span>
-              </div>
-            )}
-
-            {isEntregado && isPaqueteria && (
-              <button 
-                onClick={() => handleStatusChange(order.id, 'ready_for_pickup')}
-                disabled={updatingOrder?.id === order.id}
-                data-testid="mark-ready-btn"
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-secondary hover:bg-secondary/90 text-white text-xs font-bold rounded-xl shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {updatingOrder?.id === order.id && updatingOrder?.status === 'ready_for_pickup' ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <PackageCheck size={14} />
-                )}
-                Recibir Paquete
-              </button>
-            )}
-
-            {isReadyForPickup && isPaqueteria && (
-              <button 
-                onClick={() => handleStatusChange(order.id, 'completado')}
-                disabled={updatingOrder?.id === order.id}
-                data-testid="mark-completed-btn"
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {updatingOrder?.id === order.id && updatingOrder?.status === 'completado' ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <CheckCircle2 size={14} />
-                )}
-                Entregar al Cliente
-              </button>
-            )}
-
-            {isReadyForPickup && !isPaqueteria && (
-              <div className="flex items-center gap-1 text-secondary text-xs font-bold bg-orange-50 px-3 py-2 rounded-xl border border-orange-200">
-                <PackageCheck size={14} /> Listo para Recojo
               </div>
             )}
 

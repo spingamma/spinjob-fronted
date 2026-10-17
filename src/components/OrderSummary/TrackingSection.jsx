@@ -68,25 +68,8 @@ export default function TrackingSection({
               }`}>{getStatusText(order)}</span>
             </div>
             <div className="text-right">
-              {(order?.delivery_method?.startsWith('PAQUETERIA|') || order?.delivery_method === 'paqueteria' || !!order?.pickup_business_id) ? (
-                <div className="flex flex-col items-end gap-1">
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="text-gray-500 font-medium">Productos:</span>
-                    <span className="font-bold text-primary">Bs. {parseFloat(order?.total_price || 0).toFixed(2)}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-secondary">
-                    <span className="font-medium">
-                      {order?.status === 'completado' ? 'Recojo:' : 'A pagar (recojo):'}
-                    </span>
-                    <span className="font-bold">Bs. {parseFloat((order?.delivery_method?.startsWith('PAQUETERIA|') ? order?.delivery_method.split('|')[3] : order?.pickup_fee) || 0).toFixed(2)}</span>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <span className="text-xs text-gray-500 font-bold block mb-1">Total</span>
-                  <span className="text-xl font-black text-primary">Bs. {parseFloat(order?.total_price || 0).toFixed(2)}</span>
-                </>
-              )}
+              <span className="text-xs text-gray-500 font-bold block mb-1">Total</span>
+              <span className="text-xl font-black text-primary">Bs. {parseFloat(order?.total_price || 0).toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -189,31 +172,12 @@ export default function TrackingSection({
           </div>
         )}
 
-        {/* Pickup Code (when ready for pickup) */}
-        {order?.status === 'ready_for_pickup' && (
-          <div className="bg-primary rounded-3xl p-6 shadow-md text-center text-white relative overflow-hidden">
-            <h3 className="font-extrabold mb-2 text-sm flex items-center justify-center gap-2">
-              <Key size={18} className="text-secondary" /> Listo para Recojo
-            </h3>
-            <p className="text-white/80 text-xs mb-4">
-              Tu paquete ya está en la paquetería. Pasa a recogerlo con el siguiente código y tu carnet de identidad.
-            </p>
-            <div className="bg-white/10 rounded-2xl p-4 inline-block mb-4 border border-white/20">
-              <span className="text-4xl font-black tracking-widest text-secondary">
-                #TRJ-{order?.order_number || String(order?.id || '').slice(0, 4).toUpperCase()}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Confirmation and Issue actions (when order is paid or ready) */}
-        {(order?.status === 'pagado' || order?.status === 'entregado' || order?.status === 'pago_enviado' || order?.status === 'ready_for_pickup') && (
+        {/* Confirmation and Issue actions (when order is paid or delivered) */}
+        {(order?.status === 'pagado' || order?.status === 'entregado' || order?.status === 'pago_enviado') && (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-3">
-            {(! (order?.delivery_method?.startsWith('PAQUETERIA|') || order?.delivery_method === 'paqueteria' || !!order?.pickup_business_id) || order?.status === 'ready_for_pickup') && (
-              <button type="button" data-testid="confirm-received-btn" onClick={handleConfirmReceived} className="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
-                <CheckCircle2 size={18} /> {order?.status === 'ready_for_pickup' ? 'Confirmar Recojo' : 'Confirmar Producto Recibido'}
-              </button>
-            )}
+            <button type="button" data-testid="confirm-received-btn" onClick={handleConfirmReceived} className="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
+              <CheckCircle2 size={18} /> Confirmar Producto Recibido
+            </button>
             <button type="button" data-testid="report-issue-btn" onClick={handleReportIssue} className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 border border-red-200/60">
               <ShieldAlert size={16} /> Hacer Reclamo
             </button>

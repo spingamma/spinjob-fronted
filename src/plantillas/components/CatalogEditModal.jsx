@@ -145,7 +145,6 @@ export default function CatalogEditModal({
       if (profesional.national_delivery !== undefined) formDataObj.append('national_delivery', profesional.national_delivery);
       if (profesional.experience_years) formDataObj.append('experience_years', profesional.experience_years);
       if (profesional.credentials) formDataObj.append('credentials', profesional.credentials);
-      if (profesional.pickup_fee !== undefined && profesional.pickup_fee !== null) formDataObj.append('pickup_fee', profesional.pickup_fee);
 
       if (profesional.subcategories) {
         const subs = typeof profesional.subcategories === 'string' ? profesional.subcategories : JSON.stringify(profesional.subcategories);

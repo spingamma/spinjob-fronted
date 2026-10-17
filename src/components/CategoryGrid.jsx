@@ -1,70 +1,37 @@
 import { useMemo } from 'react';
 import {
-  ShoppingBag, HeartPulse, Wrench, Building2, UtensilsCrossed,
-  Sofa, BarChart3, Briefcase, Palette, Monitor, Car, Cpu,
-  GraduationCap, Scale, Camera, Scissors, Music, Dumbbell,
-  Leaf, PawPrint, Plane, Sparkles, LayoutGrid, Coffee,
-  Users, Shirt, BookOpen, Hammer, Paintbrush
+  Sandwich, Pizza, Coffee, Soup, Flame, IceCream,
+  Cookie, Salad, Globe, UtensilsCrossed, LayoutGrid
 } from 'lucide-react';
 import { slugify } from '../utils/slugs';
-
-// Import WebP assets
-import BellezaIcon from '../assets/BELLEZA.webp';
 import ComidaIcon from '../assets/COMIDA.webp';
-import ComunidadIcon from '../assets/COMUNIDAD.webp';
-import ConstruccionIcon from '../assets/CONSTRUCCION.webp';
-import DisenoIcon from '../assets/DISEÑO.webp';
-import EntretenimientoIcon from '../assets/ENTRETENIMIENTO.webp';
-import InmuebleIcon from '../assets/INMUEBLE.webp';
-import ModaIcon from '../assets/MODA.webp';
-import MueblesIcon from '../assets/MUEBLES.webp';
-import ProfesionalesIcon from '../assets/PROFESIONALES.webp';
-import SaludIcon from '../assets/SALUD.webp';
-import TransporteIcon from '../assets/TRANSPORTE.webp';
 
-// --- Icon Mapping (keyword → Lucide icon or SVG asset URL) ---
+// --- Icon Mapping para las 9 categorías gastronómicas oficiales ---
 const ICON_MAP = [
   { keywords: ['tarjetoso'], icon: '/icon-192.webp' },
-  { keywords: ['comercio', 'retail', 'tienda', 'venta'], icon: ShoppingBag },
-  { keywords: ['salud', 'medicina', 'medic', 'doctor', 'clinic', 'farma'], icon: SaludIcon },
-  { keywords: ['mantenimiento', 'reparacion', 'plomero', 'electric'], icon: Wrench },
-  { keywords: ['inmobiliaria', 'bienes raices', 'propiedad', 'inmueble', 'inmuebles'], icon: InmuebleIcon },
-  { keywords: ['gastronomia', 'cafeteria', 'restaurante', 'comida', 'alimento'], icon: ComidaIcon },
-  { keywords: ['hogar', 'casa', 'mueble', 'decoracion', 'muebles'], icon: MueblesIcon },
-  { keywords: ['data', 'ciencia de datos', 'analisis'], icon: BarChart3 },
-  { keywords: ['servicios profesionales', 'consultoria', 'asesoria', 'profesionales'], icon: ProfesionalesIcon },
-  { keywords: ['cultural', 'familiar', 'arte', 'evento', 'cultura', 'comunidad', 'social'], icon: ComunidadIcon },
-  { keywords: ['tecnologia', 'digital', 'software', 'programacion', 'ti ', 'sistemas'], icon: Monitor },
-  { keywords: ['transporte', 'movilidad', 'logistica', 'envio'], icon: TransporteIcon },
-  { keywords: ['educacion', 'capacitacion', 'formacion', 'academia', 'colegio'], icon: GraduationCap },
-  { keywords: ['legal', 'abogado', 'juridico', 'derecho', 'leyes'], icon: Scale },
-  { keywords: ['fotografia', 'video', 'audiovisual', 'produccion'], icon: Camera },
-  { keywords: ['belleza', 'estetica', 'peluqueria', 'spa', 'cosmetica'], icon: BellezaIcon },
-  { keywords: ['musica', 'entretenimiento', 'espectaculo', 'dj'], icon: EntretenimientoIcon },
-  { keywords: ['deporte', 'fitness', 'gym', 'entrenamiento'], icon: Dumbbell },
-  { keywords: ['ecologia', 'ambiente', 'natural', 'organico', 'agro'], icon: Leaf },
-  { keywords: ['mascota', 'veterinaria', 'animal', 'pet'], icon: PawPrint },
-  { keywords: ['turismo', 'viaje', 'tour', 'hotel', 'hospedaje'], icon: Plane },
-  { keywords: ['moda', 'ropa', 'textil', 'confeccion'], icon: ModaIcon },
-  { keywords: ['construccion', 'arquitectura', 'ingenier', 'obra'], icon: ConstruccionIcon },
-  { keywords: ['diseño', 'creativo', 'publicidad', 'marketing'], icon: DisenoIcon },
+  { keywords: ['rapida', 'burger', 'hamburguesa', 'alita', 'broaster', 'salchipapa', 'hot dog'], icon: Sandwich },
+  { keywords: ['pizza', 'pasta', 'lasagna', 'calzone'], icon: Pizza },
+  { keywords: ['cafe', 'cafeteria', 'brunch', 'desayuno', 'te y masita', 'masita', 'sandwich'], icon: Coffee },
+  { keywords: ['tradicional', 'almuerzo', 'tipico', 'criolla', 'sopa', 'pension'], icon: Soup },
+  { keywords: ['parrilla', 'carne', 'churrasqueria', 'asado', 'corte', 'brasa', 'leña'], icon: Flame },
+  { keywords: ['postre', 'helado', 'heladeria', 'torta', 'pastel', 'waffle', 'crepa'], icon: IceCream },
+  { keywords: ['street food', 'saltena', 'tucumana', 'chola', 'silpancho', 'callejera', 'snack'], icon: Cookie },
+  { keywords: ['saludable', 'bebida', 'jugo', 'veggie', 'vegan', 'ensalada', 'bowl', 'fitness'], icon: Salad },
+  { keywords: ['internacional', 'sushi', 'nikkei', 'taco', 'mexicana', 'shawarma', 'arabe', 'asiatica', 'chifa'], icon: Globe },
+  { keywords: ['gastronomia', 'restaurante', 'comida', 'alimento'], icon: ComidaIcon },
 ];
 
-// --- Color Palette (rotating backgrounds) ---
+// --- Gastronomy Color Palette (tonos cálidos, apetecibles y modernos) ---
 const COLOR_PALETTE = [
-  { bg: '#FFF4EC', icon: 'var(--color-secondary)' },  // Tarjetoso Warm Tint
-  { bg: '#E0F2F1', icon: '#00897B' },  // Teal
-  { bg: '#FFF3E0', icon: '#E65100' },  // Orange
-  { bg: '#F3E5F5', icon: '#7B1FA2' },  // Purple
-  { bg: '#E8F5E9', icon: '#2E7D32' },  // Green
-  { bg: '#E3F2FD', icon: '#1565C0' },  // Blue
-  { bg: '#FCE4EC', icon: '#C62828' },  // Rose
-  { bg: '#FFF8E1', icon: '#F57F17' },  // Amber
-  { bg: '#E0F7FA', icon: '#00838F' },  // Cyan
-  { bg: '#EDE7F6', icon: '#4527A0' },  // Deep Purple
-  { bg: '#F1F8E9', icon: '#558B2F' },  // Light Green
-  { bg: '#FBE9E7', icon: '#BF360C' },  // Deep Orange
-  { bg: '#E8EAF6', icon: '#283593' },  // Indigo
+  { bg: '#FFF4EC', icon: 'var(--color-secondary)' },  // Warm Peach / Secondary
+  { bg: '#FFF0F0', icon: '#E03131' },  // Pizza / Coral Red
+  { bg: '#FFF9DB', icon: '#E67700' },  // Warm Amber / Mustard
+  { bg: '#F4ECE4', icon: '#795548' },  // Coffee / Espresso Brown
+  { bg: '#F8F9FA', icon: '#D9480F' },  // Flame / Terracotta
+  { bg: '#FFF0F6', icon: '#D6336C' },  // Sweet Berry / Postres
+  { bg: '#EBFBEE', icon: '#2B8A3E' },  // Fresh Mint / Veggie Green
+  { bg: '#E3FAFC', icon: '#0C8599' },  // International Ocean Teal
+  { bg: '#FFF3BF', icon: '#F59F00' },  // Golden Crust
 ];
 
 /**
@@ -83,7 +50,7 @@ function getCategoryConfig(categoryName, index) {
     };
   }
 
-  let IconComponent = LayoutGrid; // fallback
+  let IconComponent = UtensilsCrossed; // fallback gastronómico
   for (const entry of ICON_MAP) {
     if (entry.keywords.some(kw => normalized.includes(kw))) {
       IconComponent = entry.icon;
@@ -95,17 +62,20 @@ function getCategoryConfig(categoryName, index) {
   return { IconComponent, colors };
 }
 
-export default function CategoryGrid({ categories, onSelectCategory }) {
+export default function CategoryGrid({ categories, onSelectCategory, adminBusiness }) {
   const allCategories = useMemo(() => {
-    if (!categories) return [{ category: 'Tarjetoso', subtitle: 'Servicio al cliente' }];
-    const list = [...categories];
-    const existingIndex = list.findIndex(c => c.category?.toLowerCase() === 'tarjetoso');
-    if (existingIndex !== -1) {
-      const [tarjetosoItem] = list.splice(existingIndex, 1);
-      return [{ ...tarjetosoItem, category: 'Tarjetoso', subtitle: 'Servicio al cliente' }, ...list];
-    }
-    return [{ category: 'Tarjetoso', subtitle: 'Servicio al cliente' }, ...list];
-  }, [categories]);
+    const list = (categories || []).filter(
+      c => c.category?.toLowerCase() !== 'tarjetoso' && c.category?.toLowerCase() !== 'servicio al cliente'
+    );
+    const adminItem = {
+      category: adminBusiness?.name || 'Tarjetoso',
+      subtitle: adminBusiness?.title || 'Servicio al cliente',
+      isAdmin: true,
+      slug: adminBusiness?.slug || 'spingamma',
+      image: adminBusiness?.image || '/icon-192.webp'
+    };
+    return [adminItem, ...list];
+  }, [categories, adminBusiness]);
 
   if (!allCategories || allCategories.length === 0) return null;
 
@@ -113,7 +83,7 @@ export default function CategoryGrid({ categories, onSelectCategory }) {
     <section id="categories-section" data-testid="category-grid" className="mb-8">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
         {allCategories.map((cat, index) => {
-          const isTarjetoso = cat.category?.toLowerCase() === 'tarjetoso';
+          const isTarjetoso = cat.isAdmin || cat.category?.toLowerCase() === 'tarjetoso';
           const { IconComponent, colors } = getCategoryConfig(cat.category, index);
 
           if (isTarjetoso) {
@@ -121,26 +91,26 @@ export default function CategoryGrid({ categories, onSelectCategory }) {
               <button
                 key="Tarjetoso"
                 data-testid="category-card-tarjetoso"
-                onClick={() => onSelectCategory('Tarjetoso')}
+                onClick={() => onSelectCategory('Tarjetoso', cat.slug)}
                 className="group flex flex-col items-center text-center bg-primary rounded-2xl border border-primary shadow-sm hover:shadow-lg transition-all duration-300 p-4 py-6 hover:scale-[1.02] hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-secondary/40 active:scale-[0.98] cursor-pointer"
               >
                 {/* Icon Container without colored margins */}
                 <div className="w-[64px] h-[64px] md:w-[74px] md:h-[74px] rounded-2xl flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110 overflow-hidden bg-transparent">
                   <img
-                    src="/icon-192.webp"
-                    alt="Tarjetoso"
+                    src={cat.image || "/icon-192.webp"}
+                    alt={cat.category}
                     className="w-full h-full object-contain"
                   />
                 </div>
 
                 {/* Category Name */}
                 <h4 className="text-xs sm:text-sm font-bold text-white mb-1 leading-tight min-w-0 w-full whitespace-normal">
-                  Tarjetoso
+                  {cat.category}
                 </h4>
 
                 {/* Subtitle */}
                 <p className="text-[11px] text-white/90 font-medium tracking-wide">
-                  Servicio al cliente
+                  {cat.subtitle || 'Servicio al cliente'}
                 </p>
               </button>
             );
@@ -181,7 +151,7 @@ export default function CategoryGrid({ categories, onSelectCategory }) {
               {/* Count */}
               {(cat.count ?? 0) > 0 && (
                 <p className="text-[11px] text-gray-400 font-medium">
-                  {cat.count} profesionales
+                  {cat.count === 1 ? '1 negocio' : `${cat.count} negocios`}
                 </p>
               )}
             </button>
