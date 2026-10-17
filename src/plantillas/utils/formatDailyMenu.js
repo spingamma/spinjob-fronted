@@ -1,4 +1,21 @@
 /**
+ * Returns today's date formatted in Spanish text (e.g. "17 de Octubre del 2026").
+ *
+ * @param {Date} [date=new Date()]
+ * @returns {string}
+ */
+export function getFormattedTodayDate(date = new Date()) {
+  const months = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  return `${day} de ${month} del ${year}`;
+}
+
+/**
  * Formats the daily menu message for WhatsApp sharing.
  *
  * @param {string} businessName - Name of the business.
@@ -27,10 +44,11 @@ export function formatDailyMenuMessage(businessName, products = [], profileUrl =
   }).join('\n');
 
   const nameHeader = businessName ? businessName.trim() : 'Nuestro Negocio';
+  const todayDateText = getFormattedTodayDate();
 
   const dishesSection = dishesList
-    ? `✨ *Nuestros platos de hoy:*\n${dishesList}`
-    : `✨ *Consulta nuestros platos disponibles en la tarjeta.*`;
+    ? `*${todayDateText}*\n${dishesList}`
+    : `*${todayDateText}*\n_Consulta nuestros platos disponibles en la tarjeta._`;
 
   return `🍽️ *MENÚ DEL DÍA — ${nameHeader.toUpperCase()}*
 
@@ -39,3 +57,4 @@ ${dishesSection}
 📲 _Haz tus pedidos y reservas directamente desde nuestra tarjeta:_
 👉 ${profileUrl}`;
 }
+

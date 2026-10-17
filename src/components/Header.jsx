@@ -1,6 +1,5 @@
-// Archivo: src/components/Header.jsx
-import React, { useState, useEffect } from 'react';
-import { Search, LogOut, ChevronDown, Download, ShoppingCart, Globe, Shield } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, LogOut, ChevronDown, ShoppingCart, Globe, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NavMenu from './NavMenu';
 import CountryModal from './CountryModal';
@@ -24,9 +23,6 @@ const Header = ({
   showCart = true
 }) => {
   const navigate = useNavigate();
-  const [deferredPrompt, setDeferredPrompt] = useState(window.deferredPromptEvent || null);
-  const isIOS = typeof window !== 'undefined' && /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-  const isStandalone = typeof window !== 'undefined' && (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
   const [isCountryModalOpen, setIsCountryModalOpen] = useState(false);
 
   const [localSearch, setLocalSearch] = useState(searchTerm || '');
@@ -70,55 +66,16 @@ const Header = ({
     }
   };
 
-  useEffect(() => {
-    if (isStandalone) {
-      return;
-    }
-
-
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault();
-      window.deferredPromptEvent = e;
-      setDeferredPrompt(e);
-    };
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-  }, [isStandalone]);
-
-  const handleInstallClick = async () => {
-    if (isIOS) {
-      alert("Para instalar en iPhone/iPad: Toca el ícono 'Compartir' en Safari y selecciona 'Agregar a inicio'.");
-      return;
-    }
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      window.deferredPromptEvent = null;
-      setDeferredPrompt(null);
-    }
-  };
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm h-16 md:h-20 flex items-center">
       <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
 
-        {/* LOGO E INSTALAR */}
+        {/* LOGO */}
         <div className="flex-shrink-0 flex items-center">
           <div className="flex items-center cursor-pointer" data-testid="header-logo-link" onClick={() => navigate('/')}>
             <span className="font-extrabold text-xl lg:text-2xl tracking-tight text-primary uppercase hidden md:block ml-3">TARJETOSO</span>
           </div>
-
-          {(!isStandalone && (deferredPrompt || isIOS)) && (
-            <button
-              onClick={handleInstallClick}
-              data-testid="header-install-btn"
-              className="flex items-center justify-center bg-secondary hover:bg-secondary/90 text-white rounded-xl shadow-sm transition-all w-10 h-10 shrink-0 ml-2"
-              title="Descargar App"
-            >
-              <Download size={18} />
-            </button>
-          )}
         </div>
 
         {/* BUSCADOR Y NAV */}
