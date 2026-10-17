@@ -1,66 +1,6 @@
 import { useMemo } from 'react';
-import {
-  Sandwich, Pizza, Coffee, Soup, Flame, IceCream,
-  Cookie, Salad, Globe, UtensilsCrossed, LayoutGrid
-} from 'lucide-react';
 import { slugify } from '../utils/slugs';
-import ComidaIcon from '../assets/COMIDA.webp';
-
-// --- Icon Mapping para las 9 categorías gastronómicas oficiales ---
-const ICON_MAP = [
-  { keywords: ['tarjetoso'], icon: '/icon-192.webp' },
-  { keywords: ['rapida', 'burger', 'hamburguesa', 'alita', 'broaster', 'salchipapa', 'hot dog'], icon: Sandwich },
-  { keywords: ['pizza', 'pasta', 'lasagna', 'calzone'], icon: Pizza },
-  { keywords: ['cafe', 'cafeteria', 'brunch', 'desayuno', 'te y masita', 'masita', 'sandwich'], icon: Coffee },
-  { keywords: ['tradicional', 'almuerzo', 'tipico', 'criolla', 'sopa', 'pension'], icon: Soup },
-  { keywords: ['parrilla', 'carne', 'churrasqueria', 'asado', 'corte', 'brasa', 'leña'], icon: Flame },
-  { keywords: ['postre', 'helado', 'heladeria', 'torta', 'pastel', 'waffle', 'crepa'], icon: IceCream },
-  { keywords: ['street food', 'saltena', 'tucumana', 'chola', 'silpancho', 'callejera', 'snack'], icon: Cookie },
-  { keywords: ['saludable', 'bebida', 'jugo', 'veggie', 'vegan', 'ensalada', 'bowl', 'fitness'], icon: Salad },
-  { keywords: ['internacional', 'sushi', 'nikkei', 'taco', 'mexicana', 'shawarma', 'arabe', 'asiatica', 'chifa'], icon: Globe },
-  { keywords: ['gastronomia', 'restaurante', 'comida', 'alimento'], icon: ComidaIcon },
-];
-
-// --- Gastronomy Color Palette (tonos cálidos, apetecibles y modernos) ---
-const COLOR_PALETTE = [
-  { bg: '#FFF4EC', icon: 'var(--color-secondary)' },  // Warm Peach / Secondary
-  { bg: '#FFF0F0', icon: '#E03131' },  // Pizza / Coral Red
-  { bg: '#FFF9DB', icon: '#E67700' },  // Warm Amber / Mustard
-  { bg: '#F4ECE4', icon: '#795548' },  // Coffee / Espresso Brown
-  { bg: '#F8F9FA', icon: '#D9480F' },  // Flame / Terracotta
-  { bg: '#FFF0F6', icon: '#D6336C' },  // Sweet Berry / Postres
-  { bg: '#EBFBEE', icon: '#2B8A3E' },  // Fresh Mint / Veggie Green
-  { bg: '#E3FAFC', icon: '#0C8599' },  // International Ocean Teal
-  { bg: '#FFF3BF', icon: '#F59F00' },  // Golden Crust
-];
-
-/**
- * Resolves icon + color for a category name using keyword matching.
- */
-function getCategoryConfig(categoryName, index) {
-  const normalized = categoryName
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
-
-  if (normalized === 'tarjetoso') {
-    return {
-      IconComponent: '/icon-192.webp',
-      colors: { bg: '#FFF4EC', icon: 'var(--color-secondary)' }
-    };
-  }
-
-  let IconComponent = UtensilsCrossed; // fallback gastronómico
-  for (const entry of ICON_MAP) {
-    if (entry.keywords.some(kw => normalized.includes(kw))) {
-      IconComponent = entry.icon;
-      break;
-    }
-  }
-
-  const colors = COLOR_PALETTE[index % COLOR_PALETTE.length];
-  return { IconComponent, colors };
-}
+import { getCategoryConfig } from '../utils/categoryIcons';
 
 export default function CategoryGrid({ categories, onSelectCategory, adminBusiness }) {
   const allCategories = useMemo(() => {
@@ -72,7 +12,7 @@ export default function CategoryGrid({ categories, onSelectCategory, adminBusine
       subtitle: adminBusiness?.title || 'Servicio al cliente',
       isAdmin: true,
       slug: adminBusiness?.slug || 'spingamma',
-      image: adminBusiness?.image || '/icon-192.webp'
+      image: adminBusiness?.image || '/icon-512.webp'
     };
     return [adminItem, ...list];
   }, [categories, adminBusiness]);
@@ -97,7 +37,7 @@ export default function CategoryGrid({ categories, onSelectCategory, adminBusine
                 {/* Icon Container without colored margins */}
                 <div className="w-[64px] h-[64px] md:w-[74px] md:h-[74px] rounded-2xl flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110 overflow-hidden bg-transparent">
                   <img
-                    src={cat.image || "/icon-192.webp"}
+                    src={cat.image || "/icon-512.webp"}
                     alt={cat.category}
                     className="w-full h-full object-contain"
                   />
@@ -132,7 +72,7 @@ export default function CategoryGrid({ categories, onSelectCategory, adminBusine
                   <img
                     src={IconComponent}
                     alt={cat.category}
-                    className="w-full h-full object-cover rounded-2xl"
+                    className="w-full h-full object-contain rounded-2xl"
                   />
                 ) : (
                   <IconComponent

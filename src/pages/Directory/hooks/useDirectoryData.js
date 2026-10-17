@@ -110,7 +110,7 @@ export function useDirectoryData({
     async function cargarDirectorio() {
       setCargandoLista(true);
       try {
-        let url = `${API_URL}/businesses/?skip=0&limit=10&country=${encodeURIComponent(selectedCountry)}`;
+        let url = `${API_URL}/businesses/feed?skip=0&limit=10&country=${encodeURIComponent(selectedCountry)}`;
         if (resolvedCategory && resolvedCategory !== 'Todos') url += `&category=${encodeURIComponent(resolvedCategory)}`;
         if (resolvedState && resolvedState !== 'Todas') url += `&state=${encodeURIComponent(resolvedState)}`;
         if (activeNeighborhood && activeNeighborhood !== 'Todas') url += `&neighborhood=${encodeURIComponent(activeNeighborhood)}`;
@@ -147,7 +147,7 @@ export function useDirectoryData({
     setCargandoMas(true);
     try {
       const currentSkip = profesionales.length;
-      let url = `${API_URL}/businesses/?skip=${currentSkip}&limit=10&country=${encodeURIComponent(selectedCountry)}`;
+      let url = `${API_URL}/businesses/feed?skip=${currentSkip}&limit=10&country=${encodeURIComponent(selectedCountry)}`;
       if (resolvedCategory && resolvedCategory !== 'Todos') url += `&category=${encodeURIComponent(resolvedCategory)}`;
       if (resolvedState && resolvedState !== 'Todas') url += `&state=${encodeURIComponent(resolvedState)}`;
       if (activeNeighborhood && activeNeighborhood !== 'Todas') url += `&neighborhood=${encodeURIComponent(activeNeighborhood)}`;

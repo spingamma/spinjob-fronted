@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Loader2, ExternalLink } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import CatalogSearchGrid from './CatalogSearchGrid';
 import { useCatalogData } from './Catalog/hooks/useCatalogData';
 import { useCart } from './Catalog/hooks/useCart';
@@ -22,6 +22,8 @@ export default function InlineCatalogCarousel({
   userRole = null
 }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const targetProductId = searchParams.get('product');
   const isDark = theme === 'dark';
 
   const {
@@ -43,6 +45,17 @@ export default function InlineCatalogCarousel({
     totalItems,
     totalPrice
   } = useCart();
+
+  useEffect(() => {
+    if (!targetProductId || loading || products.length === 0) return;
+    const timer = setTimeout(() => {
+      const el = document.querySelector(`[data-product-id="${targetProductId}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      }
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [targetProductId, loading, products.length]);
 
   const handleOrder = () => {
     const token = localStorage.getItem('spingamma_token');

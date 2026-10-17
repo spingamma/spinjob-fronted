@@ -20,6 +20,8 @@ export default function ProductCard({
   return (
     <div
       data-product-idx={idx}
+      data-product-id={product.id}
+      id={`product-card-${product.id}`}
       className={`snap-center shrink-0 h-fit w-[195px] sm:w-[235px] md:w-[270px] transition-all duration-300 ease-out flex flex-col rounded-[1.25rem] overflow-hidden border cursor-pointer ${
         product.is_visible === false ? 'opacity-75 border-dashed border-gray-400 bg-gray-50/50' : ''
       } ${isActive
