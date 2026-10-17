@@ -124,9 +124,25 @@ export default function useProductForm(isOpen, product, availableCarousels, onHa
     setCropImageSrc(null);
   };
 
+  const handlePriceChange = (e) => {
+    let val = e.target.value.replace(',', '.');
+    if (val === '' || /^\d+(\.\d{0,2})?$/.test(val)) {
+      setFormPrice(val);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formName.trim()) return;
+
+    let cleanPrice = formPrice.trim().replace(',', '.');
+    if (cleanPrice.endsWith('.')) {
+      cleanPrice = cleanPrice.slice(0, -1);
+    }
+    if (cleanPrice && !/^\d+(\.\d{1,2})?$/.test(cleanPrice)) {
+      alert('El precio debe ser un número válido con un máximo de 2 dígitos decimales (ej. 25 o 25.50).');
+      return;
+    }
 
     const cleanChoices = formChoices.map(c => c.trim()).filter(Boolean);
 
@@ -135,7 +151,7 @@ export default function useProductForm(isOpen, product, availableCarousels, onHa
       tempId: product?.tempId,
       name: formName.trim(),
       description: formDesc.trim(),
-      price: formPrice.trim(),
+      price: cleanPrice || '',
       carousel_name: formCarousel.trim() || 'Catálogo',
       image_url: formPreview,
       imageFile: formImage,
@@ -149,6 +165,7 @@ export default function useProductForm(isOpen, product, availableCarousels, onHa
     formName, setFormName,
     formDesc, setFormDesc,
     formPrice, setFormPrice,
+    handlePriceChange,
     formCarousel, setFormCarousel,
     formPreview,
     formChoices,

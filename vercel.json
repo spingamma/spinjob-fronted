@@ -17,6 +17,17 @@
       "destination": "http://129.80.108.184:8000/$1"
     },
     {
+      "source": "/perfil/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|WhatsApp|whatsapp|Twitterbot|twitterbot|TelegramBot|telegrambot|Slackbot|slackbot|LinkedInBot|linkedinbot|Discordbot|discordbot|Pinterest|SkypeUriPreview).*"
+        }
+      ],
+      "destination": "http://129.80.108.184:8000/og/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

@@ -20,7 +20,8 @@ export default function InlineCatalogCarousel({
   ownerId,
   staffIds = [],
   userRole = null,
-  onProductsLoaded = null
+  onProductsLoaded = null,
+  currency = '$'
 }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -85,7 +86,7 @@ export default function InlineCatalogCarousel({
     });
 
     const targetRoute = hasAnyChoices ? `/perfil/${slug}/complementos` : `/perfil/${slug}/orden`;
-    navigate(targetRoute, { state: { cart, slug, deliveryMethods, paymentQrImage, ownerId, staffIds, userRole } });
+    navigate(targetRoute, { state: { cart, slug, deliveryMethods, paymentQrImage, ownerId, staffIds, userRole, currency } });
   };
 
   if (loading) {
@@ -121,6 +122,7 @@ export default function InlineCatalogCarousel({
           updateCart={updateCart}
           limitMsg={limitMsg}
           onToggleVisibility={toggleProductVisibility}
+          currency={currency}
         />
       ) : carouselKeys.length > 0 ? (
         <div className="flex flex-col gap-4">
@@ -137,6 +139,7 @@ export default function InlineCatalogCarousel({
               limitMsg={limitMsg}
               isOwner={isBusinessManager}
               onToggleVisibility={toggleProductVisibility}
+              currency={currency}
             />
           ))}
 
@@ -165,6 +168,7 @@ export default function InlineCatalogCarousel({
         totalPrice={totalPrice}
         isOwner={isBusinessManager}
         handleOrder={handleOrder}
+        currency={currency}
       />
     </div>
   );

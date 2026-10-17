@@ -9,7 +9,8 @@ export default function CheckoutSection({
   cart,
   navigate,
   slug,
-  fetchedQrImage
+  fetchedQrImage,
+  currency = 'Bs'
 }) {
   const {
     customerName,
@@ -75,14 +76,14 @@ export default function CheckoutSection({
                 <div key={idx} className="flex justify-between items-center">
                   <div className="flex-1 pr-4">
                     <p className="font-bold text-sm">{item.product.name}</p>
-                    <p className="text-xs text-gray-500">{item.quantity} x Bs. {validPrice.toFixed(2)}</p>
+                    <p className="text-xs text-gray-500">{item.quantity} x {currency} {validPrice.toFixed(2)}</p>
                     {choicesList.length > 0 && (
                       <p className="text-[11px] text-gray-500 mt-0.5 font-medium">
                         Con: {choicesList.join(', ')}
                       </p>
                     )}
                   </div>
-                  <p className="font-black">Bs. {(item.quantity * validPrice).toFixed(2)}</p>
+                  <p className="font-black">{currency} {(item.quantity * validPrice).toFixed(2)}</p>
                 </div>
               );
             })}
@@ -90,7 +91,7 @@ export default function CheckoutSection({
           <div className="mt-6 pt-4 border-t border-gray-100 flex flex-col gap-2">
             <div className="flex justify-between items-end">
               <span className="text-gray-500 font-bold">Total a pagar</span>
-              <span className="text-2xl font-black text-secondary">Bs. {(totalPrice ?? 0).toFixed(2)}</span>
+              <span className="text-2xl font-black text-secondary">{currency} {(totalPrice ?? 0).toFixed(2)}</span>
             </div>
           </div>
         </div>

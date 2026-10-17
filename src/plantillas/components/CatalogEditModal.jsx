@@ -350,6 +350,7 @@ export default function CatalogEditModal({
                 limitVisible={limitVisible}
                 setPremiumModalData={setPremiumModalData}
                 onAddSection={handleAddSection}
+                currency={profesional?.currency || '$'}
               />
             </>
           )}
@@ -397,6 +398,7 @@ export default function CatalogEditModal({
         isPremium={isPremium}
         availableCarousels={availableCarousels}
         onHasUnsavedProduct={setHasUnsavedProduct}
+        currency={profesional?.currency || '$'}
       />
 
       <PremiumModal

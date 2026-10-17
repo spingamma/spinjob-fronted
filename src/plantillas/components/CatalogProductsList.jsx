@@ -18,7 +18,8 @@ export default function CatalogProductsList({
   limitRegistered,
   limitVisible,
   setPremiumModalData,
-  onAddSection
+  onAddSection,
+  currency = '$'
 }) {
   const [newSectionName, setNewSectionName] = useState('');
   const [sectionError, setSectionError] = useState('');
@@ -153,6 +154,7 @@ export default function CatalogProductsList({
                           handleOpenEdit={handleOpenEdit}
                           toggleVisibility={toggleVisibility}
                           handleDelete={handleDelete}
+                          currency={currency}
                         />
                       ))}
                     </div>

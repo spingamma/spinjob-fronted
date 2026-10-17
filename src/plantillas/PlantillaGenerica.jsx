@@ -100,6 +100,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               staffIds={profesional.staff_ids}
               userRole={profesional.user_role}
               onProductsLoaded={setCatalogProducts}
+              currency={profesional.currency || '$'}
             />
           </div>
         )}

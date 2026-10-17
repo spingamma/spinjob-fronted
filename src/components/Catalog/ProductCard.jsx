@@ -15,7 +15,8 @@ export default function ProductCard({
   toggleExpand,
   handleCardClick,
   isOwner,
-  onToggleVisibility
+  onToggleVisibility,
+  currency = '$'
 }) {
   return (
     <div
@@ -94,7 +95,7 @@ export default function ProductCard({
         <div className="flex items-end justify-between mt-1">
           {product.price ? (
             <p className={`font-black text-base sm:text-lg ${isDark ? 'text-yellow-500' : 'text-primary'}`}>
-              {product.price}
+              {currency} {product.price}
             </p>
           ) : (
             <p className="font-bold text-base sm:text-lg text-transparent select-none">-</p>

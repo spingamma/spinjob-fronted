@@ -11,12 +11,14 @@ export default function ProductFormModal({
   // eslint-disable-next-line no-unused-vars
   isPremium,
   availableCarousels = ['Catálogo'],
-  onHasUnsavedProduct
+  onHasUnsavedProduct,
+  currency = '$'
 }) {
   const {
     formName, setFormName,
     formDesc, setFormDesc,
-    formPrice, setFormPrice,
+    formPrice,
+    handlePriceChange,
     formCarousel, setFormCarousel,
     formPreview,
     formChoices,
@@ -129,14 +131,21 @@ export default function ProductFormModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-bold text-primary block mb-1">Precio</label>
-              <input
-                data-testid="product-price-input"
-                type="text" 
-                value={formPrice} 
-                onChange={(e) => setFormPrice(e.target.value)}
-                placeholder="Precio (ej. Bs. 120 o Consultar)"
-                className="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-primary outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
-              />
+              <div className="relative flex items-center">
+                <span className="absolute left-2.5 z-10 font-black text-xs text-secondary bg-orange-50 px-2 py-1 rounded-lg border border-orange-200/60 pointer-events-none select-none">
+                  {currency}
+                </span>
+                <input
+                  data-testid="product-price-input"
+                  type="text" 
+                  inputMode="decimal"
+                  value={formPrice} 
+                  onChange={handlePriceChange}
+                  placeholder="0.00"
+                  className="w-full bg-white border border-gray-200 rounded-xl pl-13 pr-3.5 py-2.5 text-sm text-primary font-bold outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
+                />
+              </div>
+              <p className="text-[10px] text-gray-400 mt-1">Solo números, máx. 2 decimales (ej. 25.50)</p>
             </div>
 
             <div>

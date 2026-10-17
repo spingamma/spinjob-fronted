@@ -1,7 +1,7 @@
 import React from 'react';
 import miCarrito from '../../assets/oso-carrito.webp';
 
-export default function FloatingOrderButton({ isPremium, ordersEnabled, totalItems, totalPrice, isOwner, handleOrder }) {
+export default function FloatingOrderButton({ isPremium, ordersEnabled, totalItems, totalPrice, isOwner, handleOrder, currency = 'Bs' }) {
   if (!isPremium || !ordersEnabled || totalItems <= 0) {
     return null;
   }
@@ -19,7 +19,7 @@ export default function FloatingOrderButton({ isPremium, ordersEnabled, totalIte
           </div>
           <span className="text-lg">{isOwner ? 'Ingresar Venta' : 'Ordenar'} ({totalItems})</span>
         </div>
-        <span className="text-lg">Bs. {totalPrice.toFixed(2)}</span>
+        <span className="text-lg">{currency} {totalPrice.toFixed(2)}</span>
       </button>
     </div>
   );

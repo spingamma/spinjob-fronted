@@ -7,6 +7,8 @@ export default function CountryCard({
   setEditingCountry,
   editCountryName,
   setEditCountryName,
+  editCountryCurrency,
+  setEditCountryCurrency,
   handleUpdateCountry,
   handleDeleteCountry,
   editingDept,
@@ -33,7 +35,16 @@ export default function CountryCard({
                 type="text"
                 value={editCountryName}
                 onChange={(e) => setEditCountryName(e.target.value)}
-                className="text-base font-bold text-primary bg-white border border-gray-200 px-2 py-1 rounded-lg outline-none focus:border-secondary w-full"
+                placeholder="Nombre del País"
+                className="text-base font-bold text-primary bg-white border border-gray-200 px-2 py-1 rounded-lg outline-none focus:border-secondary flex-1 min-w-0"
+              />
+              <input
+                type="text"
+                value={editCountryCurrency}
+                onChange={(e) => setEditCountryCurrency(e.target.value)}
+                placeholder="Moneda"
+                title="Moneda del país (ej. $, USD, Bs)"
+                className="w-20 text-base font-bold text-secondary bg-white border border-gray-200 px-2 py-1 rounded-lg outline-none focus:border-secondary text-center"
               />
               <button
                 onClick={() => handleUpdateCountry(c.country)}
@@ -52,7 +63,10 @@ export default function CountryCard({
           ) : (
             <h3 className="font-extrabold text-primary text-lg flex items-center gap-2">
               <Globe size={18} className="text-primary/60" />
-              {c.country}
+              <span>{c.country}</span>
+              <span className="text-xs bg-orange-50 text-secondary border border-orange-200/60 font-black px-2.5 py-0.5 rounded-full">
+                {c.currency || '$'}
+              </span>
             </h3>
           )}
         </div>
@@ -63,8 +77,10 @@ export default function CountryCard({
               onClick={() => {
                 setEditingCountry(c.country);
                 setEditCountryName(c.country);
+                setEditCountryCurrency(c.currency || '$');
               }}
               className="p-2 text-gray-400 hover:text-primary hover:bg-gray-100 rounded-xl transition-all"
+              title="Editar país y moneda"
             >
               <Edit2 size={16} />
             </button>

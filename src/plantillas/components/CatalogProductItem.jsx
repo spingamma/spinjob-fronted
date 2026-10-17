@@ -7,7 +7,8 @@ export default function CatalogProductItem({
   handleStockChange,
   handleOpenEdit,
   toggleVisibility,
-  handleDelete
+  handleDelete,
+  currency = '$'
 }) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-hover hover:border-gray-200">
@@ -24,7 +25,9 @@ export default function CatalogProductItem({
               </span>
             )}
           </div>
-          <span className="text-xs text-teal-600 font-semibold flex-shrink-0 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100">{product.price || 'Sin precio'}</span>
+          <span className="text-xs text-teal-600 font-semibold flex-shrink-0 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100">
+            {product.price ? `${currency} ${product.price}` : 'Sin precio'}
+          </span>
         </div>
       </div>
 

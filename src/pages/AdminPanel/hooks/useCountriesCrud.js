@@ -10,9 +10,11 @@ export function useCountriesCrud() {
   const [isAddingCountry, setIsAddingCountry] = useState(false);
   const [newCountryName, setNewCountryName] = useState('');
   const [newCountryDept, setNewCountryDept] = useState('');
+  const [newCountryCurrency, setNewCountryCurrency] = useState('$');
 
   const [editingCountry, setEditingCountry] = useState(null);
   const [editCountryName, setEditCountryName] = useState('');
+  const [editCountryCurrency, setEditCountryCurrency] = useState('$');
 
   const [addingDeptToCountry, setAddingDeptToCountry] = useState(null);
   const [newDeptName, setNewDeptName] = useState('');
@@ -62,7 +64,8 @@ export function useCountriesCrud() {
         headers: getHeaders(),
         body: JSON.stringify({
           country: newCountryName.trim(),
-          state: newCountryDept.trim()
+          state: newCountryDept.trim(),
+          currency: newCountryCurrency.trim() || '$'
         })
       });
 
@@ -73,6 +76,7 @@ export function useCountriesCrud() {
 
       setNewCountryName('');
       setNewCountryDept('');
+      setNewCountryCurrency('$');
       setIsAddingCountry(false);
       await fetchCountries();
     } catch (err) {
@@ -83,7 +87,7 @@ export function useCountriesCrud() {
   };
 
   const handleUpdateCountry = async (oldName) => {
-    if (!editCountryName.trim() || editCountryName.trim() === oldName) {
+    if (!editCountryName.trim()) {
       setEditingCountry(null);
       return;
     }
@@ -93,7 +97,10 @@ export function useCountriesCrud() {
       const res = await fetch(`${API_URL}/admin/countries/${encodeURIComponent(oldName)}`, {
         method: 'PUT',
         headers: getHeaders(),
-        body: JSON.stringify({ name: editCountryName.trim() })
+        body: JSON.stringify({
+          name: editCountryName.trim(),
+          currency: editCountryCurrency.trim() || '$'
+        })
       });
 
       if (!res.ok) {
@@ -203,10 +210,14 @@ export function useCountriesCrud() {
     setNewCountryName,
     newCountryDept,
     setNewCountryDept,
+    newCountryCurrency,
+    setNewCountryCurrency,
     editingCountry,
     setEditingCountry,
     editCountryName,
     setEditCountryName,
+    editCountryCurrency,
+    setEditCountryCurrency,
     addingDeptToCountry,
     setAddingDeptToCountry,
     newDeptName,

@@ -6,6 +6,8 @@ export default function AddCountryForm({
   setNewCountryName,
   newCountryDept,
   setNewCountryDept,
+  newCountryCurrency,
+  setNewCountryCurrency,
   handleCreateCountry,
   submitting,
   setIsAddingCountry
@@ -18,7 +20,7 @@ export default function AddCountryForm({
           <X size={18} />
         </button>
       </div>
-      <form onSubmit={handleCreateCountry} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <form onSubmit={handleCreateCountry} className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <label className="block text-xs font-bold text-gray-500 mb-1">Nombre del País</label>
           <input
@@ -27,6 +29,17 @@ export default function AddCountryForm({
             onChange={(e) => setNewCountryName(e.target.value)}
             placeholder="Ej. Colombia"
             className="w-full text-sm bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-secondary transition-all"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-bold text-gray-500 mb-1">Moneda / Símbolo</label>
+          <input
+            type="text"
+            value={newCountryCurrency}
+            onChange={(e) => setNewCountryCurrency(e.target.value)}
+            placeholder="Ej. $, USD, Bs"
+            className="w-full text-sm bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-secondary transition-all font-bold"
             required
           />
         </div>

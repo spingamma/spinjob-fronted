@@ -36,6 +36,8 @@ export default function AdminCountriesTab() {
           setNewCountryName={crud.setNewCountryName}
           newCountryDept={crud.newCountryDept}
           setNewCountryDept={crud.setNewCountryDept}
+          newCountryCurrency={crud.newCountryCurrency}
+          setNewCountryCurrency={crud.setNewCountryCurrency}
           handleCreateCountry={crud.handleCreateCountry}
           submitting={crud.submitting}
           setIsAddingCountry={crud.setIsAddingCountry}
@@ -51,6 +53,8 @@ export default function AdminCountriesTab() {
             setEditingCountry={crud.setEditingCountry}
             editCountryName={crud.editCountryName}
             setEditCountryName={crud.setEditCountryName}
+            editCountryCurrency={crud.editCountryCurrency}
+            setEditCountryCurrency={crud.setEditCountryCurrency}
             handleUpdateCountry={crud.handleUpdateCountry}
             handleDeleteCountry={crud.handleDeleteCountry}
             editingDept={crud.editingDept}

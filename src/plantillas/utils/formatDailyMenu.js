@@ -6,7 +6,7 @@
  * @param {string} profileUrl - Direct URL to the business profile.
  * @returns {string} Formatted WhatsApp message with markdown and emojis.
  */
-export function formatDailyMenuMessage(businessName, products = [], profileUrl = '') {
+export function formatDailyMenuMessage(businessName, products = [], profileUrl = '', currency = '$') {
   // 1. Filtrar productos visibles
   const visibleProducts = (products || []).filter(p => p.is_visible !== false);
 
@@ -23,7 +23,7 @@ export function formatDailyMenuMessage(businessName, products = [], profileUrl =
   const dishesList = selectedProducts.map(p => {
     const name = p.name ? p.name.trim() : 'Plato';
     const price = p.price ? p.price.trim() : null;
-    return price ? `• *${name}* — ${price}` : `• *${name}*`;
+    return price ? `• *${name}* — ${currency} ${price}` : `• *${name}*`;
   }).join('\n');
 
   const nameHeader = businessName ? businessName.trim() : 'Nuestro Negocio';

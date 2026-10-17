@@ -4,7 +4,7 @@ import { X, ShoppingBag, ExternalLink, Loader2, Package, MessageCircle } from 'l
 import { cleanWhatsappNumber } from '../utils/phone';
 import { API_URL } from '../config/api';
 
-export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia' }) {
+export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsappNumber, businessName, country = 'Bolivia', currency = '$' }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
@@ -73,7 +73,7 @@ export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsa
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-3">
               {products.map(product => (
-                <ProductCard key={product.id} product={product} whatsappNumber={whatsappNumber} businessName={businessName} country={country} />
+                <ProductCard key={product.id} product={product} whatsappNumber={whatsappNumber} businessName={businessName} country={country} currency={currency} />
               ))}
             </div>
           )}
@@ -90,7 +90,7 @@ export default function CatalogModal({ isOpen, onClose, slug, catalogUrl, whatsa
   );
 }
 
-const ProductCard = ({ product, whatsappNumber, businessName, country }) => {
+const ProductCard = ({ product, whatsappNumber, businessName, country, currency = '$' }) => {
   const [expanded, setExpanded] = useState(false);
   const isLong = product.description && product.description.length > 70;
 
@@ -129,7 +129,7 @@ const ProductCard = ({ product, whatsappNumber, businessName, country }) => {
         )}
 
         <div className="mt-auto pt-2">
-          {product.price && <p className="text-teal-600 font-bold text-sm">{product.price}</p>}
+          {product.price && <p className="text-teal-600 font-bold text-sm">{currency} {product.price}</p>}
         </div>
 
         {/* Botón "Me interesa" → redirige a WhatsApp */}

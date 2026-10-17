@@ -55,7 +55,7 @@ export default function FeedProductCard({ product, businessSlug, onProductClick 
 
         <div className="mt-2.5 flex items-center justify-between pt-1.5 border-t border-gray-50">
           <span className="text-xs sm:text-sm font-black text-primary">
-            {product.price || '-'}
+            {product.price ? `${product.currency || '$'} ${product.price}` : '-'}
           </span>
           <span className="text-[10px] sm:text-[11px] font-bold text-secondary group-hover:underline">
             Pedir →

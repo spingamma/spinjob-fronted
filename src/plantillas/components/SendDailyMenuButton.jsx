@@ -36,7 +36,8 @@ export default function SendDailyMenuButton({ profesional, products = [] }) {
       }
 
       const profileUrl = `${window.location.origin}/perfil/${profesional.slug}`;
-      const message = formatDailyMenuMessage(profesional.name, activeProducts, profileUrl);
+      const currency = profesional.currency || '$';
+      const message = formatDailyMenuMessage(profesional.name, activeProducts, profileUrl, currency);
 
       // Web Share API nativa (dispositivos móviles: abre hoja nativa con WhatsApp como opción predeterminada)
       if (navigator.share) {

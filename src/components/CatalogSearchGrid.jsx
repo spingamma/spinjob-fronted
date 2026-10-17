@@ -2,7 +2,7 @@ import React from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import CartQuantityControl from './CartQuantityControl';
 
-export default function CatalogSearchGrid({ products, isDark, isOwner, isPremium, ordersEnabled, cart, updateCart, onToggleVisibility }) {
+export default function CatalogSearchGrid({ products, isDark, isOwner, isPremium, ordersEnabled, cart, updateCart, onToggleVisibility, currency = '$' }) {
   if (!products || products.length === 0) {
     return (
       <div data-testid="catalog-search-empty" className="py-12 text-center text-gray-400">
@@ -15,8 +15,6 @@ export default function CatalogSearchGrid({ products, isDark, isOwner, isPremium
     <div data-testid="catalog-search-grid" className="px-4 py-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
       {products.map((product) => {
         const isHidden = product.is_visible === false;
-        const rawMatch = (product.price || "0").replace(/[^\d.-]/g, '');
-        const priceNum = parseFloat(rawMatch);
 
         return (
           <div
@@ -85,7 +83,7 @@ export default function CatalogSearchGrid({ products, isDark, isOwner, isPremium
 
               <div className="flex items-end justify-between mt-2 pt-2 border-t border-gray-100/10">
                 <span className="font-black text-sm text-secondary">
-                  {product.price ? product.price : `Bs. ${(priceNum || 0).toFixed(2)}`}
+                  {product.price ? `${currency} ${product.price}` : 'Sin precio'}
                 </span>
 
           {isPremium && ordersEnabled && product.stock !== 0 && (
