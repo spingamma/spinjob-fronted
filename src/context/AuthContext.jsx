@@ -57,6 +57,7 @@ export function AuthProvider({ children }) {
     isLoggedIn: !!user,
     isAdmin: !!user?.is_admin,
     isSeller: !!user?.is_vendedor,
+    isDelivery: !!user?.is_delivery,
     isPremium: !!user?.is_premium,
     login,
     logout,

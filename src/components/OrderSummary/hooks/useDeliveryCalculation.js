@@ -7,6 +7,7 @@ import {
   calculateRoadDistanceKm, 
   calculateDeliveryFee, 
   formatGoogleMapsUrl, 
+  DELIVERY_BASE_FEE,
   DELIVERY_RATE_PER_KM,
   URBAN_CIRCUITY_FACTOR 
 } from '../../../utils/deliveryCalculator';
@@ -68,17 +69,25 @@ export function useDeliveryCalculation({
 
   // Coordenadas parseadas o resueltas del negocio
   useEffect(() => {
+    let isMounted = true;
     if (!businessLocationUrl) {
-      setResolvedBusinessCoords(null);
-      return;
+      Promise.resolve().then(() => {
+        if (isMounted) setResolvedBusinessCoords(null);
+      });
+      return () => {
+        isMounted = false;
+      };
     }
 
     const direct = parseGoogleMapsCoords(businessLocationUrl);
     if (direct) {
-      setResolvedBusinessCoords(direct);
+      Promise.resolve().then(() => {
+        if (isMounted) setResolvedBusinessCoords(direct);
+      });
     } else if (businessLocationUrl.includes('maps.app.goo.gl') || businessLocationUrl.includes('goo.gl/maps')) {
-      let isMounted = true;
-      setIsResolvingBusiness(true);
+      Promise.resolve().then(() => {
+        if (isMounted) setIsResolvingBusiness(true);
+      });
       fetch(`${API_URL}/businesses/resolve-url?url=${encodeURIComponent(businessLocationUrl)}`)
         .then(res => (res.ok ? res.json() : null))
         .then(data => {
@@ -101,8 +110,14 @@ export function useDeliveryCalculation({
         isMounted = false;
       };
     } else {
-      setResolvedBusinessCoords(null);
+      Promise.resolve().then(() => {
+        if (isMounted) setResolvedBusinessCoords(null);
+      });
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [businessLocationUrl]);
 
   const businessCoords = resolvedBusinessCoords;
@@ -110,14 +125,22 @@ export function useDeliveryCalculation({
 
   // Cálculo de distancia vial real (asíncrono con feedback inmediato)
   useEffect(() => {
+    let isMounted = true;
     if (!isCourierSelected || !businessCoords || !customerCoords) {
-      setDistanceKm(0);
-      setIsCalculatingDistance(false);
-      return;
+      Promise.resolve().then(() => {
+        if (isMounted) {
+          setDistanceKm(0);
+          setIsCalculatingDistance(false);
+        }
+      });
+      return () => {
+        isMounted = false;
+      };
     }
 
-    let isMounted = true;
-    setIsCalculatingDistance(true);
+    Promise.resolve().then(() => {
+      if (isMounted) setIsCalculatingDistance(true);
+    });
 
     // 1. Estimación inmediata basada en factor de sinuosidad urbana vial (1.8x)
     const initialEstimate = calculateDistanceKm(
@@ -126,7 +149,9 @@ export function useDeliveryCalculation({
       customerCoords.lat,
       customerCoords.lng
     );
-    setDistanceKm(initialEstimate);
+    Promise.resolve().then(() => {
+      if (isMounted) setDistanceKm(initialEstimate);
+    });
 
     // 2. Consulta de ruteo vehicular real en calles (OSRM)
     calculateRoadDistanceKm(
@@ -154,7 +179,7 @@ export function useDeliveryCalculation({
 
   const deliveryFee = useMemo(() => {
     if (!isCourierSelected) return 0;
-    return calculateDeliveryFee(distanceKm, DELIVERY_RATE_PER_KM);
+    return calculateDeliveryFee(distanceKm, DELIVERY_RATE_PER_KM, DELIVERY_BASE_FEE);
   }, [isCourierSelected, distanceKm]);
 
   const customerLocationUrl = useMemo(() => {
@@ -201,6 +226,7 @@ export function useDeliveryCalculation({
     distanceKm,
     isCalculatingDistance,
     deliveryFee,
+    deliveryBaseFee: DELIVERY_BASE_FEE,
     deliveryRatePerKm: DELIVERY_RATE_PER_KM,
     customerLocationUrl,
     isDeliveryReady,

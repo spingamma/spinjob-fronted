@@ -1,7 +1,12 @@
 // src/utils/deliveryCalculator.js
 
 /**
- * Tarifa base de delivery por kilómetro (en Bolivianos Bs)
+ * Tarifa base de arranque de delivery (en Bolivianos Bs, equivalente al costo de 1 km)
+ */
+export const DELIVERY_BASE_FEE = 4.5;
+
+/**
+ * Tarifa de delivery por kilómetro recorrido (en Bolivianos Bs)
  */
 export const DELIVERY_RATE_PER_KM = 4.5;
 
@@ -115,16 +120,21 @@ export async function calculateRoadDistanceKm(lat1, lon1, lat2, lon2) {
 }
 
 /**
- * Calcula la tarifa de envío en base a la distancia recorrida.
+ * Calcula la tarifa de envío en base a la tarifa base fija más la distancia recorrida.
  * 
  * @param {number} distanceKm - Distancia en kilómetros
  * @param {number} ratePerKm - Tarifa por km (por defecto 4.5 Bs)
+ * @param {number} baseFee - Tarifa base inicial (por defecto 4.5 Bs)
  * @returns {number} Costo de envío redondeado a 2 decimales
  */
-export function calculateDeliveryFee(distanceKm, ratePerKm = DELIVERY_RATE_PER_KM) {
+export function calculateDeliveryFee(
+  distanceKm, 
+  ratePerKm = DELIVERY_RATE_PER_KM, 
+  baseFee = DELIVERY_BASE_FEE
+) {
   const dist = parseFloat(distanceKm);
   if (isNaN(dist) || dist <= 0) return 0;
-  return Math.round(dist * ratePerKm * 100) / 100;
+  return Math.round((baseFee + (dist * ratePerKm)) * 100) / 100;
 }
 
 /**

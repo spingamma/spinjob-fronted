@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, LogOut, ChevronDown, ShoppingCart, Globe, Shield } from 'lucide-react';
+import { Search, LogOut, ChevronDown, ShoppingCart, Globe, Shield, Bike } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NavMenu from './NavMenu';
 import CountryModal from './CountryModal';
@@ -168,6 +168,14 @@ const Header = ({
                           className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-primary hover:bg-gray-50 rounded-xl transition-colors"
                         >
                           <Shield size={18} /> {isAdmin ? 'Panel Admin' : 'Panel Ventas'}
+                        </button>
+                      )}
+                      {(localStorage.getItem('spingamma_user') && (() => { try { return JSON.parse(localStorage.getItem('spingamma_user')).is_delivery; } catch { return false; } })()) && (
+                        <button
+                          onClick={() => { navigate('/tablero-delivery'); setIsUserMenuOpen(false); }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-primary hover:bg-gray-50 rounded-xl transition-colors"
+                        >
+                          <Bike size={18} /> Tablero Delivery
                         </button>
                       )}
                       <button

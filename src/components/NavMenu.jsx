@@ -1,7 +1,7 @@
-// Archivo: src/components/NavMenu.jsx
 import React from 'react';
 import { Home, Building, Shield } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 // Icono personalizado: Billetera/Tarjetero (según última imagen de usuario)
 const TarjeteroIcon = ({ size = 22 }) => (
@@ -25,9 +25,37 @@ const TarjeteroIcon = ({ size = 22 }) => (
   </svg>
 );
 
-const NavMenu = ({ isLoggedIn, onHomeClick, isMobile = false }) => {
+// Icono personalizado: Moto de Delivery con caja de reparto
+const MotoDeliveryIcon = ({ size = 22 }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    {/* Rueda trasera */}
+    <circle cx="5.5" cy="17.5" r="3.5" />
+    {/* Rueda delantera */}
+    <circle cx="18.5" cy="17.5" r="3.5" />
+    {/* Chasis y manubrio */}
+    <path d="M15 6h2l2 4-2.5 7.5" />
+    <path d="M8.5 17.5l3.5-6h4" />
+    {/* Caja / Mochila de delivery trasera */}
+    <rect x="3" y="8" width="5" height="5" rx="1" />
+  </svg>
+);
+
+const NavMenu = ({ isLoggedIn: propIsLoggedIn, isDelivery: propIsDelivery, onHomeClick, isMobile = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const auth = useAuth();
+
+  const isLoggedIn = propIsLoggedIn !== undefined ? propIsLoggedIn : auth.isLoggedIn;
+  const isDelivery = propIsDelivery !== undefined ? propIsDelivery : auth.isDelivery;
 
   const handleHomeClick = () => {
     if (onHomeClick) onHomeClick();
@@ -53,7 +81,14 @@ const NavMenu = ({ isLoggedIn, onHomeClick, isMobile = false }) => {
       show: isLoggedIn,
       active: location.pathname === '/tarjetero'
     },
-    {
+    isDelivery ? {
+      id: 'delivery',
+      icon: <MotoDeliveryIcon size={22} />,
+      label: 'Delivery',
+      onClick: () => navigate('/tablero-delivery'),
+      show: isLoggedIn,
+      active: location.pathname === '/tablero-delivery'
+    } : {
       id: 'negocios',
       icon: <Building size={22} />,
       label: 'Mis negocios',

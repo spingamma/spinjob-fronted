@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, LogOut, Globe, Shield } from 'lucide-react';
+import { User, LogOut, Globe, Shield, Bike } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CountryModal from './CountryModal';
 import PushToggle from './PushToggle';
@@ -16,12 +16,14 @@ const MobileUserMenu = ({ onLocationChange }) => {
   let user = null;
   let isAdmin = false;
   let isVendedor = false;
+  let isDelivery = false;
   
   if (isLoggedIn) {
     try {
       user = JSON.parse(userStr);
       isAdmin = user.is_admin;
       isVendedor = user.is_vendedor;
+      isDelivery = !!user.is_delivery;
     } catch (e) {
       console.error(e);
     }
@@ -88,6 +90,14 @@ const MobileUserMenu = ({ onLocationChange }) => {
                   className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-primary hover:bg-gray-50 rounded-xl transition-colors"
                 >
                   <Shield size={18} /> {isAdmin ? 'Panel Admin' : 'Panel Ventas'}
+                </button>
+              )}
+              {isDelivery && (
+                <button
+                  onClick={() => { setIsOpen(false); navigate('/tablero-delivery'); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-primary hover:bg-gray-50 rounded-xl transition-colors"
+                >
+                  <Bike size={18} /> Tablero Delivery
                 </button>
               )}
               <button

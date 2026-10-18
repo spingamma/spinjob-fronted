@@ -18,6 +18,7 @@ const OrderSummary = lazy(() => import('./pages/OrderSummary/OrderSummary'));
 const ChoicesScreen = lazy(() => import('./pages/ChoicesScreen/ChoicesScreen'));
 const BusinessOrders = lazy(() => import('./pages/MyBusinesses/BusinessOrders'));
 const MyOrders = lazy(() => import('./pages/MyOrders/MyOrders'));
+const DeliveryDashboard = lazy(() => import('./pages/DeliveryDashboard/DeliveryDashboard'));
 
 function App() {
   // Listen for background web push payment notifications and play cash register sound
@@ -70,6 +71,7 @@ function App() {
           <Route path="/perfil/:slug/orden/:orderId?" element={<OrderSummary />} />
           <Route path="/mis-pedidos/:slug" element={<BusinessOrders />} />
           <Route path="/mis-compras" element={<MyOrders />} />
+          <Route path="/tablero-delivery" element={<DeliveryDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

@@ -18,6 +18,7 @@ export default function DeliveryLocationSection({
   distanceKm,
   isCalculatingDistance,
   deliveryFee,
+  deliveryBaseFee = 4.5,
   deliveryRatePerKm,
   openMap,
   closeMap,
@@ -59,7 +60,7 @@ export default function DeliveryLocationSection({
       ) : !isLocationConfirmed ? (
         <div className="space-y-2">
           <p className="text-xs text-gray-600">
-            Para calcular el costo de envío exacto (<strong>{deliveryRatePerKm} {currency}/km</strong>), indica dónde deseas recibir tu pedido.
+            Para calcular el costo de envío exacto (<strong>Base {deliveryBaseFee} {currency} + {deliveryRatePerKm} {currency}/km</strong>), indica dónde deseas recibir tu pedido.
           </p>
           <button
             type="button"

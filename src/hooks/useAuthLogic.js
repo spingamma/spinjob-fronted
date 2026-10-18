@@ -110,10 +110,10 @@ export default function useAuthLogic({ isOpen, onSuccess, onRequireVerification 
 
       if (!data.celular) {
         setTempToken(data.access_token);
-        setTempUserData({ id: data.id, email: data.email, nombre: data.nombre, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false, is_verified: data.is_verified || false });
+        setTempUserData({ id: data.id, email: data.email, nombre: data.nombre, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false, is_delivery: data.is_delivery || false, is_verified: data.is_verified || false });
         setIsCompletingPhone(true);
       } else {
-        _completeSession({ id: data.id, email: data.email, nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false, is_verified: data.is_verified || false });
+        _completeSession({ id: data.id, email: data.email, nombre: data.nombre, celular: data.celular, is_admin: data.is_admin || false, is_vendedor: data.is_vendedor || false, is_delivery: data.is_delivery || false, is_verified: data.is_verified || false });
       }
     } catch (err) {
       setApiError(err.message);
@@ -152,6 +152,7 @@ export default function useAuthLogic({ isOpen, onSuccess, onRequireVerification 
         country: formData.country || tempUserData.country,
         is_admin: tempUserData.is_admin, 
         is_vendedor: tempUserData.is_vendedor, 
+        is_delivery: tempUserData.is_delivery || false,
         is_verified: tempUserData.is_verified || false 
       }, true);
     } catch (error) {

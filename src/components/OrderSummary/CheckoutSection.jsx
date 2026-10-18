@@ -165,6 +165,7 @@ export default function CheckoutSection({
                   distanceKm={deliveryCalc.distanceKm}
                   isCalculatingDistance={deliveryCalc.isCalculatingDistance}
                   deliveryFee={deliveryCalc.deliveryFee}
+                  deliveryBaseFee={deliveryCalc.deliveryBaseFee}
                   deliveryRatePerKm={deliveryCalc.deliveryRatePerKm}
                   openMap={deliveryCalc.openMap}
                   closeMap={deliveryCalc.closeMap}

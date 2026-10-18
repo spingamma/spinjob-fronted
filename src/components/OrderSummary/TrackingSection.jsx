@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Download, Upload, ShieldAlert, CheckCircle2, Loader2, QrCode, Key, Send, ZoomIn, X, Store, Eye } from 'lucide-react';
 import { getStatusText, getStatusColor } from './utils/orderStatusUtils';
+import LiveDriverMap from './LiveDriverMap';
 
 /**
  * Displays tracking (order status) view, QR download and receipt upload.
@@ -90,6 +91,11 @@ export default function TrackingSection({
             </div>
           </div>
         </div>
+
+        {/* Live GPS Tracking map when driver is on the way */}
+        {order?.status === 'en_camino' && (
+          <LiveDriverMap order={order} />
+        )}
 
         {/* QR payment */}
         {isPending && displayQr && (
