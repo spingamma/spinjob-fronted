@@ -2,6 +2,7 @@
 
 import React from "react";
 import { CheckCircle2 } from "lucide-react";
+import { normalizeDeliveryMethods } from '../../utils/deliveryConstants';
 
 /**
  * Form for entering customer name, selecting delivery method and payment method.
@@ -17,15 +18,7 @@ export const CustomerForm = ({
   setPresencialPayment,
   deliveryMethods,
 }) => {
-  const parsedDeliveryMethods = (() => {
-    if (!deliveryMethods) return ["Entrega en el local"];
-    try {
-      const parsed = typeof deliveryMethods === "string" ? JSON.parse(deliveryMethods) : deliveryMethods;
-      return Array.isArray(parsed) && parsed.length > 0 ? parsed : ["Entrega en el local"];
-    } catch {
-      return ["Entrega en el local"];
-    }
-  })();
+  const parsedDeliveryMethods = normalizeDeliveryMethods(deliveryMethods);
 
   return (
     <form className="space-y-4">

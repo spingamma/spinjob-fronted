@@ -101,6 +101,7 @@ export default function PlantillaGenerica({ profesional, volverAtras, onProtecte
               userRole={profesional.user_role}
               onProductsLoaded={setCatalogProducts}
               currency={profesional.currency || '$'}
+              businessLocationUrl={profesional.ubicacion_url}
             />
           </div>
         )}

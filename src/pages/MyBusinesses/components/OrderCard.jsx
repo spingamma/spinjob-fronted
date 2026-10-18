@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { XCircle, Loader2, CheckCircle2, PackageCheck, Eye } from 'lucide-react';
+import { XCircle, Loader2, CheckCircle2, PackageCheck, Eye, MapPin } from 'lucide-react';
 import { formatOrderCode } from '../../../utils/formatOrderCode';
 import { WhatsappIcon } from '../../../plantillas/components/ProfileIcons';
 import { cleanWhatsappNumber } from '../../../utils/phone';
@@ -81,6 +81,31 @@ export default function OrderCard({
         {order.handled_by_name && (
           <p className="text-xs text-blue-600 font-medium mt-0.5">Atendido por: <span className="font-semibold">{order.handled_by_name}</span></p>
         )}
+        {order.delivery_method && (
+          <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+            <span className="text-[11px] font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md">
+              {order.delivery_method}
+            </span>
+            {order.delivery_cost > 0 && (
+              <span className="text-[10px] font-bold text-secondary">
+                (+Bs. {order.delivery_cost.toFixed(2)}{order.distance_km ? ` - ${order.distance_km} km` : ''})
+              </span>
+            )}
+            {order.delivery_location_url && (
+              <a
+                href={order.delivery_location_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid={`delivery-map-btn-${order.id}`}
+                className="flex items-center gap-1 text-[11px] font-bold text-secondary hover:underline ml-1"
+                title="Ver ubicación de entrega en Google Maps"
+              >
+                <MapPin size={12} />
+                <span>Ver en Maps</span>
+              </a>
+            )}
+          </div>
+        )}
       </div>
       
       {/* Items Details */}
@@ -118,6 +143,9 @@ export default function OrderCard({
         <div>
           <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider text-right">Total</p>
           <p className="font-black text-lg text-primary">Bs. {order.total_price.toFixed(2)}</p>
+          {order.delivery_cost > 0 && (
+            <p className="text-[10px] text-gray-400 text-right">Inc. envío: Bs. {order.delivery_cost.toFixed(2)}</p>
+          )}
         </div>
         
         {!isCancelado && (

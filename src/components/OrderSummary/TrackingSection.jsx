@@ -63,13 +63,30 @@ export default function TrackingSection({
                   )}
                 </div>
               )}
-              <span className={`text-[11px] font-black uppercase px-2.5 py-1 rounded-md ${
-                getStatusColor(order)
-              }`}>{getStatusText(order)}</span>
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <span className={`text-[11px] font-black uppercase px-2.5 py-1 rounded-md ${
+                  getStatusColor(order)
+                }`}>{getStatusText(order)}</span>
+                {order?.delivery_method && (
+                  <span className="text-[11px] font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md">
+                    {order.delivery_method}
+                  </span>
+                )}
+                {order?.delivery_cost > 0 && (
+                  <span className="text-[10px] font-bold text-secondary">
+                    (+Bs. {parseFloat(order.delivery_cost).toFixed(2)}{order?.distance_km ? ` - ${order.distance_km} km` : ''})
+                  </span>
+                )}
+              </div>
             </div>
             <div className="text-right">
               <span className="text-xs text-gray-500 font-bold block mb-1">Total</span>
-              <span className="text-xl font-black text-primary">Bs. {parseFloat(order?.total_price || 0).toFixed(2)}</span>
+              <span className="text-xl font-black text-primary" data-testid="tracking-total-price">Bs. {parseFloat(order?.total_price || 0).toFixed(2)}</span>
+              {order?.delivery_cost > 0 && (
+                <span className="text-[10px] text-gray-400 block font-medium">
+                  Inc. envío Bs. {parseFloat(order.delivery_cost).toFixed(2)}
+                </span>
+              )}
             </div>
           </div>
         </div>

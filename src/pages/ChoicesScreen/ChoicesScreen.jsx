@@ -6,7 +6,7 @@ export default function ChoicesScreen() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { cart, deliveryMethods, paymentQrImage, ownerId } = location.state || {};
+  const { cart, deliveryMethods, paymentQrImage, ownerId, staffIds, userRole, currency, businessLocationUrl } = location.state || {};
 
   const token = localStorage.getItem('spingamma_token');
 
@@ -115,7 +115,11 @@ export default function ChoicesScreen() {
         slug,
         deliveryMethods,
         paymentQrImage,
-        ownerId
+        ownerId,
+        staffIds,
+        userRole,
+        currency,
+        businessLocationUrl
       }
     });
   };

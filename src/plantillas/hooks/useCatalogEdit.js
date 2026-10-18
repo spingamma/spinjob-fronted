@@ -171,7 +171,7 @@ export function useCatalogEdit({
   const handleCloseInventory = () => {
     if (isPremium && ordersEnabled) {
       if (!deliveryMethods || deliveryMethods.length === 0) {
-        alert("Debes agregar al menos un método de entrega antes de salir, o desmarcar la casilla de pedidos.");
+        alert("Debes seleccionar al menos un método de entrega antes de salir, o desmarcar la casilla de pedidos.");
         return;
       }
       if (!paymentQrImage) {

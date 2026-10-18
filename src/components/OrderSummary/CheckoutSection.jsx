@@ -2,6 +2,7 @@
 import React from 'react';
 import { Send, ShoppingBag, ArrowLeft, Store } from 'lucide-react';
 import { useCheckout } from './hooks/useCheckout';
+import DeliveryLocationSection from './DeliveryLocationSection';
 
 export default function CheckoutSection({
   isOwner,
@@ -10,7 +11,8 @@ export default function CheckoutSection({
   navigate,
   slug,
   fetchedQrImage,
-  currency = 'Bs'
+  currency = 'Bs',
+  businessLocationUrl
 }) {
   const {
     customerName,
@@ -22,7 +24,11 @@ export default function CheckoutSection({
     loading,
     liveDeliveryMethods,
     itemsList,
+    itemsPrice,
     totalPrice,
+    deliveryFee,
+    deliveryCalc,
+    isDeliveryBlocked,
     handleSubmit
   } = useCheckout({
     isOwner,
@@ -30,7 +36,8 @@ export default function CheckoutSection({
     cart,
     navigate,
     slug,
-    fetchedQrImage
+    fetchedQrImage,
+    businessLocationUrl
   });
 
   return (
@@ -89,9 +96,23 @@ export default function CheckoutSection({
             })}
           </div>
           <div className="mt-6 pt-4 border-t border-gray-100 flex flex-col gap-2">
-            <div className="flex justify-between items-end">
+            {deliveryCalc.isCourierSelected && deliveryFee > 0 && (
+              <>
+                <div className="flex justify-between items-center text-xs text-gray-500 font-bold">
+                  <span>Subtotal productos</span>
+                  <span data-testid="checkout-subtotal-price">{currency} {(itemsPrice ?? 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-secondary font-bold">
+                  <span>Envío a domicilio ({deliveryCalc.distanceKm} km)</span>
+                  <span data-testid="checkout-delivery-fee">{currency} {(deliveryFee ?? 0).toFixed(2)}</span>
+                </div>
+              </>
+            )}
+            <div className="flex justify-between items-end pt-1">
               <span className="text-gray-500 font-bold">Total a pagar</span>
-              <span className="text-2xl font-black text-secondary">{currency} {(totalPrice ?? 0).toFixed(2)}</span>
+              <span className="text-2xl font-black text-secondary" data-testid="checkout-total-price">
+                {currency} {(totalPrice ?? 0).toFixed(2)}
+              </span>
             </div>
           </div>
         </div>
@@ -132,13 +153,45 @@ export default function CheckoutSection({
                     </option>
                   ))}
                 </select>
+
+                {/* Subflujo Modular de Delivery con Mapa */}
+                <DeliveryLocationSection
+                  isCourierSelected={deliveryCalc.isCourierSelected}
+                  businessHasLocation={deliveryCalc.businessHasLocation}
+                  isResolvingBusiness={deliveryCalc.isResolvingBusiness}
+                  customerCoords={deliveryCalc.customerCoords}
+                  isLocationConfirmed={deliveryCalc.isLocationConfirmed}
+                  isMapOpen={deliveryCalc.isMapOpen}
+                  distanceKm={deliveryCalc.distanceKm}
+                  deliveryFee={deliveryCalc.deliveryFee}
+                  deliveryRatePerKm={deliveryCalc.deliveryRatePerKm}
+                  openMap={deliveryCalc.openMap}
+                  closeMap={deliveryCalc.closeMap}
+                  confirmCustomerLocation={deliveryCalc.confirmCustomerLocation}
+                  businessCoords={deliveryCalc.businessCoords}
+                  currency={currency}
+                />
               </div>
             )}
             {!isOwner && (
-              <button type="submit" disabled={loading} data-testid="confirm-order-btn" className="w-full bg-secondary hover:bg-secondary/90 text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 mt-4 disabled:opacity-60">
-                {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Send size={18} />}
-                Confirmar Pedido (Pagar con QR)
-              </button>
+              <div className="space-y-2 mt-4">
+                <button
+                  type="submit"
+                  disabled={loading || isDeliveryBlocked}
+                  data-testid="confirm-order-btn"
+                  className="w-full bg-secondary hover:bg-secondary/90 text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Send size={18} />}
+                  Confirmar Pedido (Pagar con QR)
+                </button>
+                {isDeliveryBlocked && (
+                  <p data-testid="delivery-blocked-hint" className="text-center text-[11px] font-semibold text-amber-600">
+                    {!deliveryCalc.businessHasLocation
+                      ? "Selecciona 'Entrega en el local' para continuar"
+                      : "Debes confirmar tu ubicación en el mapa para continuar"}
+                  </p>
+                )}
+              </div>
             )}
             {isOwner && (
               <button
@@ -146,7 +199,7 @@ export default function CheckoutSection({
                 disabled={loading}
                 data-testid="ingresar-venta-realizada-btn"
                 onClick={handleSubmit}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 mt-2 disabled:opacity-60"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 mt-2 disabled:opacity-60 cursor-pointer"
               >
                 {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <ShoppingBag size={18} />}
                 Ingresar Venta Realizada

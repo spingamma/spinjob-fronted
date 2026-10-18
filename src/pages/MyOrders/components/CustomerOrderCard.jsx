@@ -110,8 +110,13 @@ export default function CustomerOrderCard({
 
       <div className="md:w-56 flex flex-col justify-between items-end md:items-end border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-4 w-full">
         <div className="text-right w-full flex flex-row md:flex-col justify-between md:justify-start items-center md:items-end">
-          <p className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Total</p>
+          <p className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">
+            {order.delivery_method || 'Total'}
+          </p>
           <p className="text-xl font-black text-primary">Bs. {order.total_price.toFixed(2)}</p>
+          {order.delivery_cost > 0 && (
+            <p className="text-[10px] text-gray-400 font-medium">Inc. envío: Bs. {order.delivery_cost.toFixed(2)}</p>
+          )}
         </div>
 
         {order.status === 'pendiente' || order.status === 'pendiente_de_pago' ? (

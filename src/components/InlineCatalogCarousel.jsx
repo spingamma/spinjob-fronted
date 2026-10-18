@@ -21,7 +21,8 @@ export default function InlineCatalogCarousel({
   staffIds = [],
   userRole = null,
   onProductsLoaded = null,
-  currency = '$'
+  currency = '$',
+  businessLocationUrl = null
 }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -86,7 +87,7 @@ export default function InlineCatalogCarousel({
     });
 
     const targetRoute = hasAnyChoices ? `/perfil/${slug}/complementos` : `/perfil/${slug}/orden`;
-    navigate(targetRoute, { state: { cart, slug, deliveryMethods, paymentQrImage, ownerId, staffIds, userRole, currency } });
+    navigate(targetRoute, { state: { cart, slug, deliveryMethods, paymentQrImage, ownerId, staffIds, userRole, currency, businessLocationUrl } });
   };
 
   if (loading) {

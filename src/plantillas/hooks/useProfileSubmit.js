@@ -38,6 +38,13 @@ export default function useProfileSubmit({
     setIsSavingEdit(true);
     try {
       const payload = { ...editFormData };
+      const deliveryMethodsList = Array.isArray(payload.delivery_methods) ? payload.delivery_methods : [];
+      if (deliveryMethodsList.includes('Delivery') && !payload.ubicacion_url?.trim()) {
+        alert("Para habilitar la opción de Delivery, es obligatorio registrar la ubicación exacta de tu negocio.");
+        setIsSavingEdit(false);
+        return;
+      }
+
       const formDataObj = new FormData();
       Object.keys(payload).forEach(key => {
         if (key === 'new_image') {

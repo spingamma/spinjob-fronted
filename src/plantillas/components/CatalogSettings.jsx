@@ -1,7 +1,13 @@
+// src/plantillas/components/CatalogSettings.jsx
+
 import React from 'react';
-import { Settings2, X, ChevronUp, ChevronDown, Check, Pencil, Trash2 } from 'lucide-react';
+import { Settings2, Store, Bike, AlertCircle } from 'lucide-react';
 import PaymentQrUploader from './PaymentQrUploader';
 import { useCatalogSettings } from '../hooks/useCatalogSettings';
+import {
+  DELIVERY_METHOD_PICKUP,
+  DELIVERY_METHOD_COURIER
+} from '../../utils/deliveryConstants';
 
 export default function CatalogSettings({
   isPremium,
@@ -13,19 +19,11 @@ export default function CatalogSettings({
   setDeliveryMethods
 }) {
   const {
-    isDeliveryOpen,
-    setIsDeliveryOpen,
-    newDeliveryMethod,
-    setNewDeliveryMethod,
-    editingDeliveryIndex,
-    setEditingDeliveryIndex,
-    editingDeliveryText,
-    setEditingDeliveryText,
+    hasPickup,
+    hasCourier,
+    warningMessage,
     handleOrdersEnabledChange,
-    handleAddDeliveryMethod,
-    handleRemoveDeliveryMethod,
-    handleStartEditDelivery,
-    handleSaveEditDelivery
+    handleToggleDeliveryMethod
   } = useCatalogSettings({
     deliveryMethods,
     setDeliveryMethods,
@@ -56,104 +54,85 @@ export default function CatalogSettings({
 
           {ordersEnabled && (
             <div className="mt-4 border-t border-gray-100 pt-4 space-y-4">
-              {/* Rediseño UX Premium: Carga de QR Bancario */}
+              {/* Carga de QR Bancario */}
               <PaymentQrUploader paymentQrImage={paymentQrImage} setPaymentQrImage={setPaymentQrImage} />
 
-              <div 
-                className="flex justify-between items-center cursor-pointer mb-2"
-                onClick={() => setIsDeliveryOpen(!isDeliveryOpen)}
-              >
-                <label className="text-xs font-bold text-primary cursor-pointer">Métodos de entrega</label>
-                <div className="text-gray-400">
-                  {isDeliveryOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              {/* Selección de Métodos de Entrega */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold text-primary">
+                    Métodos de entrega disponibles para tus clientes *
+                  </label>
                 </div>
-              </div>
+                <p className="text-[11px] text-gray-500">
+                  Selecciona uno o ambos métodos para que el cliente elija en su compra:
+                </p>
 
-              {isDeliveryOpen && (
-                <div className="space-y-3 mt-3 animate-in fade-in zoom-in-95 duration-200">
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <form onSubmit={handleAddDeliveryMethod} className="flex flex-1 gap-2">
-                      <input
-                        data-testid="delivery-method-input"
-                        type="text"
-                        value={newDeliveryMethod}
-                        onChange={(e) => setNewDeliveryMethod(e.target.value)}
-                        placeholder="Añadir opción (ej. Envío a domicilio)"
-                        className="flex-1 min-w-0 text-xs border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-secondary"
-                      />
-                      <button
-                        data-testid="add-delivery-btn"
-                        type="submit"
-                        disabled={!newDeliveryMethod.trim()}
-                        className="shrink-0 bg-secondary hover:bg-secondary/90 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
-                      >
-                        Añadir
-                      </button>
-                    </form>
-                  </div>
-
-                  <div className="space-y-2">
-                    {deliveryMethods.map((method, idx) => (
-                      <div key={idx} className="flex justify-between items-center bg-gray-50 border border-gray-100 rounded-lg p-2 px-3">
-                        {editingDeliveryIndex === idx ? (
-                          <div className="flex flex-1 gap-2">
-                            <input
-                              type="text"
-                              value={editingDeliveryText}
-                              onChange={(e) => setEditingDeliveryText(e.target.value)}
-                              className="flex-1 text-xs border border-gray-200 rounded px-2 py-1 outline-none focus:border-secondary"
-                              autoFocus
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleSaveEditDelivery(idx)}
-                              data-testid={`save-delivery-${idx}`}
-                              className="text-green-600 bg-green-50 p-1 rounded hover:bg-green-100 transition-colors"
-                            >
-                              <Check size={14} />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setEditingDeliveryIndex(null)}
-                              data-testid={`cancel-delivery-${idx}`}
-                              className="text-gray-400 bg-gray-100 p-1 rounded hover:bg-gray-200 transition-colors"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        ) : (
-                          <>
-                            <span className="text-xs font-semibold text-gray-700">
-                              {method}
-                            </span>
-                            <div className="flex gap-2 ml-2">
-                              <button
-                                type="button"
-                                onClick={() => handleStartEditDelivery(idx, method)}
-                                data-testid={`edit-delivery-${idx}`}
-                                className="text-gray-400 hover:text-accent transition-colors"
-                              >
-                                <Pencil size={14} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveDeliveryMethod(idx)}
-                                data-testid={`remove-delivery-btn-${idx}`}
-                                className="text-gray-400 hover:text-red-500 transition-colors"
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
-                          </>
-                        )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                  {/* Opción 1: Entrega en local */}
+                  <label
+                    htmlFor="delivery-pickup-checkbox"
+                    className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                      hasPickup
+                        ? 'border-secondary bg-orange-50/40 text-primary font-bold shadow-xs'
+                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      id="delivery-pickup-checkbox"
+                      data-testid="delivery-method-pickup-checkbox"
+                      checked={hasPickup}
+                      onChange={() => handleToggleDeliveryMethod(DELIVERY_METHOD_PICKUP)}
+                      className="mt-0.5 w-4 h-4 text-secondary focus:ring-secondary border-gray-300 rounded cursor-pointer"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <Store size={15} className={hasPickup ? "text-secondary" : "text-gray-400"} />
+                        <span className="text-xs font-bold">Entrega en local</span>
                       </div>
-                    ))}
-                    {deliveryMethods.length === 0 && (
-                      <p className="text-[10px] text-red-500 font-bold bg-red-50 p-2 rounded-lg text-center">Debes agregar al menos una opción de entrega</p>
-                    )}
-                  </div>
+                      <p className="text-[10px] text-gray-400 font-normal mt-0.5">
+                        El cliente retira en tu dirección
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* Opción 2: Delivery */}
+                  <label
+                    htmlFor="delivery-courier-checkbox"
+                    className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                      hasCourier
+                        ? 'border-secondary bg-orange-50/40 text-primary font-bold shadow-xs'
+                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      id="delivery-courier-checkbox"
+                      data-testid="delivery-method-delivery-checkbox"
+                      checked={hasCourier}
+                      onChange={() => handleToggleDeliveryMethod(DELIVERY_METHOD_COURIER)}
+                      className="mt-0.5 w-4 h-4 text-secondary focus:ring-secondary border-gray-300 rounded cursor-pointer"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <Bike size={15} className={hasCourier ? "text-secondary" : "text-gray-400"} />
+                        <span className="text-xs font-bold">Delivery</span>
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-normal mt-0.5">
+                        Envío motorizado a domicilio
+                      </p>
+                    </div>
+                  </label>
                 </div>
-              )}
+
+                {warningMessage && (
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-50 text-amber-700 text-[11px] font-semibold border border-amber-200 animate-in fade-in">
+                    <AlertCircle size={14} className="shrink-0 text-amber-600" />
+                    <span>{warningMessage}</span>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

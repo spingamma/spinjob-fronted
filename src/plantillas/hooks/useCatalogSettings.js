@@ -1,65 +1,60 @@
+// src/plantillas/hooks/useCatalogSettings.js
+
 import { useState } from 'react';
+import {
+  DELIVERY_METHOD_PICKUP,
+  DELIVERY_METHOD_COURIER,
+  DEFAULT_DELIVERY_METHODS
+} from '../../utils/deliveryConstants';
 
 export function useCatalogSettings({
-  deliveryMethods,
+  deliveryMethods = [],
   setDeliveryMethods,
   setOrdersEnabled
 }) {
-  const [isDeliveryOpen, setIsDeliveryOpen] = useState(false);
-  const [newDeliveryMethod, setNewDeliveryMethod] = useState('');
-  const [editingDeliveryIndex, setEditingDeliveryIndex] = useState(null);
-  const [editingDeliveryText, setEditingDeliveryText] = useState('');
+  const [warningMessage, setWarningMessage] = useState('');
+
+  const currentMethods = Array.isArray(deliveryMethods) ? deliveryMethods : [];
+  const hasPickup = currentMethods.includes(DELIVERY_METHOD_PICKUP);
+  const hasCourier = currentMethods.includes(DELIVERY_METHOD_COURIER);
 
   const handleOrdersEnabledChange = (e) => {
     const isChecked = e.target.checked;
-    setOrdersEnabled(isChecked);
-    if (isChecked && (!deliveryMethods || deliveryMethods.length === 0)) {
+    if (setOrdersEnabled) {
+      setOrdersEnabled(isChecked);
+    }
+    if (isChecked && currentMethods.length === 0) {
       if (setDeliveryMethods) {
-        setDeliveryMethods(["Entrega en el local"]);
+        setDeliveryMethods(DEFAULT_DELIVERY_METHODS);
       }
+    }
+    setWarningMessage('');
+  };
+
+  const handleToggleDeliveryMethod = (method) => {
+    if (!setDeliveryMethods) return;
+
+    const isCurrentlySelected = currentMethods.includes(method);
+
+    if (isCurrentlySelected) {
+      // Invariante de negocio: No permitir dejar 0 opciones si los pedidos están activos
+      if (currentMethods.length <= 1) {
+        setWarningMessage('Debes mantener al menos una opción de entrega activa.');
+        return;
+      }
+      setWarningMessage('');
+      setDeliveryMethods(currentMethods.filter(m => m !== method));
+    } else {
+      setWarningMessage('');
+      setDeliveryMethods([...currentMethods, method]);
     }
   };
 
-  const handleAddDeliveryMethod = (e) => {
-    e.preventDefault();
-    if (!newDeliveryMethod.trim() || !setDeliveryMethods) return;
-    setDeliveryMethods([...deliveryMethods, newDeliveryMethod.trim()]);
-    setNewDeliveryMethod('');
-  };
-
-  const handleRemoveDeliveryMethod = (index) => {
-    if (!setDeliveryMethods) return;
-    setDeliveryMethods(deliveryMethods.filter((_, idx) => idx !== index));
-  };
-
-  const handleStartEditDelivery = (index, text) => {
-    setEditingDeliveryIndex(index);
-    setEditingDeliveryText(text);
-  };
-
-  const handleSaveEditDelivery = (index) => {
-    if (!setDeliveryMethods || !editingDeliveryText.trim()) return;
-    const newMethods = [...deliveryMethods];
-    newMethods[index] = editingDeliveryText.trim();
-    setDeliveryMethods(newMethods);
-    setEditingDeliveryIndex(null);
-    setEditingDeliveryText('');
-  };
-
   return {
-    isDeliveryOpen,
-    setIsDeliveryOpen,
-    newDeliveryMethod,
-    setNewDeliveryMethod,
-    editingDeliveryIndex,
-    setEditingDeliveryIndex,
-    editingDeliveryText,
-    setEditingDeliveryText,
-    
+    hasPickup,
+    hasCourier,
+    warningMessage,
     handleOrdersEnabledChange,
-    handleAddDeliveryMethod,
-    handleRemoveDeliveryMethod,
-    handleStartEditDelivery,
-    handleSaveEditDelivery
+    handleToggleDeliveryMethod
   };
 }

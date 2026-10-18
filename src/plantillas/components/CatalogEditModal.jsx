@@ -8,6 +8,8 @@ import { useCatalogEdit } from '../hooks/useCatalogEdit';
 import fetchAuth from '../../utils/fetchAuth';
 import { API_URL } from '../../config/api';
 
+import { normalizeDeliveryMethods } from '../../utils/deliveryConstants';
+
 export default function CatalogEditModal({
   isOpen,
   onClose,
@@ -35,16 +37,7 @@ export default function CatalogEditModal({
 
     setOrdersEnabled(profesional.orders_enabled !== false);
     setCarouselOrder(profesional.carousel_order || '');
-
-    let methods = [];
-    try {
-      methods = typeof profesional.delivery_methods === 'string'
-        ? JSON.parse(profesional.delivery_methods)
-        : (profesional.delivery_methods || []);
-    } catch {
-      methods = [];
-    }
-    setDeliveryMethods(Array.isArray(methods) ? methods : []);
+    setDeliveryMethods(normalizeDeliveryMethods(profesional.delivery_methods));
 
     const qr = getServerQr ? getServerQr(profesional) : (profesional.payment_qr_image || profesional.qr_payment_url || '');
     setPaymentQrImage(qr);
@@ -118,13 +111,18 @@ export default function CatalogEditModal({
 
     if (isPremium && ordersEnabled) {
       if (!deliveryMethods || deliveryMethods.length === 0) {
-        setSaveError("Debes agregar al menos un método de entrega si habilitas los pedidos.");
+        setSaveError("Debes seleccionar al menos un método de entrega si habilitas los pedidos.");
         return;
       }
       if (!paymentQrImage) {
         setSaveError("Requisito Obligatorio: Debes subir la imagen de tu QR de Pago Bancario (QR Simple) para habilitar la recepción de pedidos.");
         return;
       }
+    }
+
+    if (Array.isArray(deliveryMethods) && deliveryMethods.includes('Delivery') && !profesional.ubicacion_url?.trim()) {
+      alert("Para habilitar la opción de Delivery, es obligatorio registrar la ubicación exacta de tu negocio.");
+      return;
     }
 
     setIsSaving(true);

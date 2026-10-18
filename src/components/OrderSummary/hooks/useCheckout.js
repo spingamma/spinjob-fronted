@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import fetchAuth from '../../../utils/fetchAuth';
 import { API_URL } from '../../../config/api';
+import { normalizeDeliveryMethods, DELIVERY_METHOD_COURIER } from '../../../utils/deliveryConstants';
+import { useDeliveryCalculation } from './useDeliveryCalculation';
 
 export function useCheckout({
   isOwner,
@@ -8,19 +10,14 @@ export function useCheckout({
   cart,
   navigate,
   slug,
-  fetchedQrImage
+  fetchedQrImage,
+  businessLocationUrl
 }) {
   const userStr = localStorage.getItem('spingamma_user');
   const user = userStr ? JSON.parse(userStr) : null;
 
   const parsedDeliveryMethods = useMemo(() => {
-    if (!deliveryMethods) return ['Entrega en el local'];
-    try {
-      const parsed = typeof deliveryMethods === 'string' ? JSON.parse(deliveryMethods) : deliveryMethods;
-      return Array.isArray(parsed) && parsed.length > 0 ? parsed : ['Entrega en el local'];
-    } catch {
-      return ['Entrega en el local'];
-    }
+    return normalizeDeliveryMethods(deliveryMethods);
   }, [deliveryMethods]);
 
   const [customerName, setCustomerName] = useState(isOwner ? 'Venta Presencial' : (user?.nombre || ''));
@@ -32,20 +29,44 @@ export function useCheckout({
     if (isOwner) {
       setCustomerName('Venta Presencial');
       setSelectedDeliveryMethodRaw('presencial');
+    } else if (parsedDeliveryMethods.length > 0 && !parsedDeliveryMethods.includes(selectedDeliveryMethodRaw)) {
+      setSelectedDeliveryMethodRaw(parsedDeliveryMethods[0]);
     }
-  }, [isOwner]);
+  }, [isOwner, parsedDeliveryMethods, selectedDeliveryMethodRaw]);
+
+  // Hook desacoplado de cálculo de delivery
+  const deliveryCalc = useDeliveryCalculation({
+    slug,
+    businessLocationUrl,
+    selectedDeliveryMethod: selectedDeliveryMethodRaw
+  });
+
+  const isDelivery = selectedDeliveryMethodRaw === DELIVERY_METHOD_COURIER;
+  const currentDeliveryFee = isDelivery ? deliveryCalc.deliveryFee : 0;
 
   const itemsList = Object.values(cart || {});
-  const totalPrice = itemsList.reduce((acc, item) => {
+  const itemsPrice = itemsList.reduce((acc, item) => {
     const rawMatch = (item.product.price || '0').replace(/[^\d.-]/g, '');
     const priceNum = parseFloat(rawMatch);
     const validPrice = isNaN(priceNum) ? 0 : priceNum;
     return acc + validPrice * item.quantity;
   }, 0);
 
+  const finalTotalPrice = Math.round((itemsPrice + currentDeliveryFee) * 100) / 100;
+  const isDeliveryBlocked = !isOwner && isDelivery && !deliveryCalc.isDeliveryReady;
+
   const handleSubmit = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (!isOwner && !customerName.trim()) return;
+
+    if (isDeliveryBlocked) {
+      if (!deliveryCalc.businessHasLocation) {
+        alert("Este comercio no tiene configurada su ubicación para calcular envíos. Por favor selecciona 'Entrega en el local'.");
+      } else {
+        alert("Por favor ingresa y confirma la ubicación de tu pedido en el mapa antes de continuar.");
+      }
+      return;
+    }
 
     setLoading(true);
     const finalDeliveryMethod = isOwner ? "presencial" : selectedDeliveryMethodRaw;
@@ -53,10 +74,13 @@ export function useCheckout({
     const orderData = {
       customer_name: customerName.trim() || (isOwner ? "Venta Presencial" : "Cliente"),
       delivery_method: finalDeliveryMethod,
+      delivery_cost: isDelivery ? deliveryCalc.deliveryFee : 0,
+      delivery_location_url: isDelivery ? deliveryCalc.customerLocationUrl : null,
+      distance_km: isDelivery ? deliveryCalc.distanceKm : null,
       payment_method: isOwner ? presencialPayment : "qr_simple",
       status: isOwner ? "entregado" : "pendiente",
       is_direct_sale: !!isOwner,
-      total_price: totalPrice,
+      total_price: finalTotalPrice,
       items: itemsList.map(item => {
         const rawMatch = (item.product.price || "0").replace(/[^\d.-]/g, '');
         const priceNum = parseFloat(rawMatch);
@@ -103,7 +127,11 @@ export function useCheckout({
     loading,
     liveDeliveryMethods: parsedDeliveryMethods,
     itemsList,
-    totalPrice,
+    itemsPrice,
+    totalPrice: finalTotalPrice,
+    deliveryFee: currentDeliveryFee,
+    deliveryCalc,
+    isDeliveryBlocked,
     handleSubmit
   };
 }

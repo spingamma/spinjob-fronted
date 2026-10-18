@@ -17,7 +17,7 @@ export default function OrderSummary() {
   const { slug, orderId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { cart, deliveryMethods, paymentQrImage, ownerId, staffIds, userRole, currency } = location.state || {};
+  const { cart, deliveryMethods, paymentQrImage, ownerId, staffIds, userRole, currency, businessLocationUrl } = location.state || {};
 
   const userStr = localStorage.getItem('spingamma_user');
   const user = userStr ? JSON.parse(userStr) : null;
@@ -96,6 +96,7 @@ export default function OrderSummary() {
         deliveryMethods={deliveryMethods}
         fetchedQrImage={fetchedQrImage}
         currency={currency || '$'}
+        businessLocationUrl={businessLocationUrl}
       />
     );
   }
