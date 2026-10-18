@@ -2,7 +2,14 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { parseGoogleMapsCoords } from '../../../plantillas/utils/parseGoogleMapsCoords';
-import { calculateDistanceKm, calculateDeliveryFee, formatGoogleMapsUrl, DELIVERY_RATE_PER_KM } from '../../../utils/deliveryCalculator';
+import { 
+  calculateDistanceKm, 
+  calculateRoadDistanceKm, 
+  calculateDeliveryFee, 
+  formatGoogleMapsUrl, 
+  DELIVERY_RATE_PER_KM,
+  URBAN_CIRCUITY_FACTOR 
+} from '../../../utils/deliveryCalculator';
 import fetchAuth from '../../../utils/fetchAuth';
 import { API_URL } from '../../../config/api';
 import { DELIVERY_METHOD_COURIER } from '../../../utils/deliveryConstants';
@@ -10,7 +17,7 @@ import { DELIVERY_METHOD_COURIER } from '../../../utils/deliveryConstants';
 /**
  * Hook modular para aislar toda la lógica de cotización de delivery,
  * obtención de coordenadas del negocio, confirmación de ubicación del cliente
- * y cálculo de tarifa por kilómetro.
+ * y cálculo de tarifa por kilómetro en ruta vial real.
  */
 export function useDeliveryCalculation({
   slug,
@@ -21,6 +28,9 @@ export function useDeliveryCalculation({
   const [isResolvingBusiness, setIsResolvingBusiness] = useState(false);
   const [customerCoords, setCustomerCoords] = useState(null);
   const [isMapOpen, setIsMapOpen] = useState(false);
+  const [resolvedBusinessCoords, setResolvedBusinessCoords] = useState(null);
+  const [distanceKm, setDistanceKm] = useState(0);
+  const [isCalculatingDistance, setIsCalculatingDistance] = useState(false);
 
   const businessLocationUrl = initialBusinessLocationUrl || fetchedBusinessLocationUrl;
   const isCourierSelected = selectedDeliveryMethod === DELIVERY_METHOD_COURIER;
@@ -56,22 +66,90 @@ export function useDeliveryCalculation({
     }
   }, [isCourierSelected, businessLocationUrl, slug]);
 
-  // Coordenadas parseadas del negocio
-  const businessCoords = useMemo(() => {
-    return parseGoogleMapsCoords(businessLocationUrl);
+  // Coordenadas parseadas o resueltas del negocio
+  useEffect(() => {
+    if (!businessLocationUrl) {
+      setResolvedBusinessCoords(null);
+      return;
+    }
+
+    const direct = parseGoogleMapsCoords(businessLocationUrl);
+    if (direct) {
+      setResolvedBusinessCoords(direct);
+    } else if (businessLocationUrl.includes('maps.app.goo.gl') || businessLocationUrl.includes('goo.gl/maps')) {
+      let isMounted = true;
+      setIsResolvingBusiness(true);
+      fetch(`${API_URL}/businesses/resolve-url?url=${encodeURIComponent(businessLocationUrl)}`)
+        .then(res => (res.ok ? res.json() : null))
+        .then(data => {
+          if (isMounted && data) {
+            const resolvedStr = data.resolved_url || data.url;
+            const parsed = parseGoogleMapsCoords(resolvedStr);
+            if (parsed) {
+              setResolvedBusinessCoords(parsed);
+            }
+          }
+        })
+        .catch(err => {
+          console.warn('Error resolving business short url:', err);
+        })
+        .finally(() => {
+          if (isMounted) setIsResolvingBusiness(false);
+        });
+
+      return () => {
+        isMounted = false;
+      };
+    } else {
+      setResolvedBusinessCoords(null);
+    }
   }, [businessLocationUrl]);
 
+  const businessCoords = resolvedBusinessCoords;
   const businessHasLocation = !!businessCoords;
 
-  // Cálculo de distancia y costo
-  const distanceKm = useMemo(() => {
-    if (!isCourierSelected || !businessCoords || !customerCoords) return 0;
-    return calculateDistanceKm(
+  // Cálculo de distancia vial real (asíncrono con feedback inmediato)
+  useEffect(() => {
+    if (!isCourierSelected || !businessCoords || !customerCoords) {
+      setDistanceKm(0);
+      setIsCalculatingDistance(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsCalculatingDistance(true);
+
+    // 1. Estimación inmediata basada en factor de sinuosidad urbana vial (1.8x)
+    const initialEstimate = calculateDistanceKm(
       businessCoords.lat,
       businessCoords.lng,
       customerCoords.lat,
       customerCoords.lng
     );
+    setDistanceKm(initialEstimate);
+
+    // 2. Consulta de ruteo vehicular real en calles (OSRM)
+    calculateRoadDistanceKm(
+      businessCoords.lat,
+      businessCoords.lng,
+      customerCoords.lat,
+      customerCoords.lng
+    )
+      .then(roadKm => {
+        if (isMounted && roadKm > 0) {
+          setDistanceKm(roadKm);
+        }
+      })
+      .catch(err => {
+        console.warn('Error fetching road distance, keeping estimate:', err);
+      })
+      .finally(() => {
+        if (isMounted) setIsCalculatingDistance(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [isCourierSelected, businessCoords, customerCoords]);
 
   const deliveryFee = useMemo(() => {
@@ -121,6 +199,7 @@ export function useDeliveryCalculation({
     isLocationConfirmed: customerCoords !== null,
     isMapOpen,
     distanceKm,
+    isCalculatingDistance,
     deliveryFee,
     deliveryRatePerKm: DELIVERY_RATE_PER_KM,
     customerLocationUrl,

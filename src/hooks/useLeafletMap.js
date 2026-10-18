@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { parseGoogleMapsCoords } from '../plantillas/utils/parseGoogleMapsCoords';
+import { API_URL } from '../config/api';
 
 const DEPARTAMENTOS_BO = {
   "la paz": [-16.5000, -68.1500],
@@ -164,14 +166,41 @@ export function useLeafletMap({ isOpen, initialCoords, selectedState }) {
     };
   }, [leafletLoaded, isOpen, getInitialCenter, getInitialZoom]);
 
-  // Handle address lookup using Nominatim
+  // Handle address lookup using direct coordinates, Google Maps URLs, or Nominatim
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!searchQuery.trim() || !mapInstance.current) return;
+    const query = searchQuery.trim();
+    if (!query || !mapInstance.current) return;
 
     setSearching(true);
     try {
-      const q = encodeURIComponent(searchQuery.trim());
+      // 1. Coordenadas directas o enlace completo de Google Maps
+      const directCoords = parseGoogleMapsCoords(query);
+      if (directCoords) {
+        mapInstance.current.setView([directCoords.lat, directCoords.lng], 16);
+        markerInstance.current.setLatLng([directCoords.lat, directCoords.lng]);
+        setCoords(directCoords);
+        return;
+      }
+
+      // 2. Enlace acortado de Google Maps (maps.app.goo.gl)
+      if (query.includes('maps.app.goo.gl') || query.includes('goo.gl/maps')) {
+        const res = await fetch(`${API_URL}/businesses/resolve-url?url=${encodeURIComponent(query)}`);
+        if (res.ok) {
+          const data = await res.json();
+          const resolvedUrl = data.resolved_url || data.url;
+          const parsed = parseGoogleMapsCoords(resolvedUrl);
+          if (parsed) {
+            mapInstance.current.setView([parsed.lat, parsed.lng], 16);
+            markerInstance.current.setLatLng([parsed.lat, parsed.lng]);
+            setCoords(parsed);
+            return;
+          }
+        }
+      }
+
+      // 3. Búsqueda de dirección con Nominatim
+      const q = encodeURIComponent(query);
       // Nominatim search restricted to Bolivia for precision
       const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&countrycodes=bo&limit=1`);
       const data = await response.json();
@@ -185,7 +214,7 @@ export function useLeafletMap({ isOpen, initialCoords, selectedState }) {
         markerInstance.current.setLatLng([newLat, newLng]);
         setCoords({ lat: newLat, lng: newLng });
       } else {
-        alert("No se encontraron resultados para la dirección en Bolivia. Intenta con otra búsqueda.");
+        alert("No se encontraron resultados para la dirección en Bolivia. Intenta con otra búsqueda o pega un enlace de Google Maps.");
       }
     } catch (err) {
       console.error("Search error:", err);

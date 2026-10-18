@@ -5,8 +5,8 @@ export const parseGoogleMapsCoords = (url) => {
   if (match) {
     return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
   }
-  // 2. Query parameter: q=lat,lng
-  match = url.match(/[?&](q|query)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  // 2. Query parameter: q=lat,lng or query=lat,lng or ll=lat,lng
+  match = url.match(/[?&](q|query|ll)=(-?\d+\.\d+),(-?\d+\.\d+)/);
   if (match) {
     return { lat: parseFloat(match[2]), lng: parseFloat(match[3]) };
   }

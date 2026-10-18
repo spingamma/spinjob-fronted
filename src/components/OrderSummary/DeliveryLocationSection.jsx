@@ -16,6 +16,7 @@ export default function DeliveryLocationSection({
   isLocationConfirmed,
   isMapOpen,
   distanceKm,
+  isCalculatingDistance,
   deliveryFee,
   deliveryRatePerKm,
   openMap,
@@ -94,8 +95,9 @@ export default function DeliveryLocationSection({
           <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 text-xs">
             <div>
               <span className="text-[10px] uppercase font-bold text-gray-400 block">Distancia</span>
-              <span data-testid="delivery-distance-info" className="font-extrabold text-primary">
+              <span data-testid="delivery-distance-info" className="font-extrabold text-primary flex items-center gap-1">
                 {distanceKm} km
+                {isCalculatingDistance && <Loader2 size={11} className="animate-spin text-secondary inline" />}
               </span>
             </div>
             <div>
