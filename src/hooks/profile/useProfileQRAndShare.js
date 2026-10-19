@@ -5,7 +5,7 @@ export default function useProfileQRAndShare(profesional) {
 
   const toggleQR = useCallback(() => setMostrarQR(prev => !prev), []);
 
-  const handleDownloadQR = useCallback(async (colorHex = '1A535C', bgColorHex = 'FFFFFF') => {
+  const handleDownloadQR = useCallback(async (colorHex = '000000', bgColorHex = 'F8F9FA') => {
     if (!profesional) return;
     try {
       const canvas = document.getElementById('qr-canvas');

@@ -28,19 +28,19 @@ export default function ProfileQRModal({
         <h3 className="text-xl font-bold text-primary mb-1 text-center">Compartir Perfil</h3>
         <p className="text-gray-500 text-sm mb-6 text-center">Escanea este código para ver mi tarjeta digital en cualquier dispositivo.</p>
         
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex justify-center items-center">
+        <div className="bg-brand-bg p-4 rounded-2xl shadow-sm border border-gray-200 flex justify-center items-center">
           <QRCodeCanvas 
             id="qr-canvas"
             value={url}
             size={1024}
             className="w-48 h-48"
             style={{ width: "100%", height: "100%" }}
-            bgColor={"#ffffff"}
-            fgColor={"#1A535C"}
+            bgColor={"#F8F9FA"}
+            fgColor={"#000000"}
             level={"H"}
             includeMargin={true}
             imageSettings={{
-              src: "/paw.webp",
+              src: "/qr-base.webp",
               height: 256,
               width: 256,
               excavate: true,
@@ -50,7 +50,7 @@ export default function ProfileQRModal({
         
         <div className="mt-8 w-full flex flex-col gap-3">
           <button 
-            onClick={() => handleDownloadQR('1D565F')}
+            onClick={() => handleDownloadQR('000000', 'F8F9FA')}
             aria-label="Descargar código QR"
             data-testid="profile-qr-download-btn"
             className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
