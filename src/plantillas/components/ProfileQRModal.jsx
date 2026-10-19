@@ -43,7 +43,7 @@ export default function ProfileQRModal({
               src: "/qr-base.webp",
               height: 256,
               width: 256,
-              excavate: true,
+              excavate: false,
             }}
           />
         </div>
