@@ -168,7 +168,8 @@ export function useLeafletMap({ isOpen, initialCoords, selectedState }) {
 
   // Handle address lookup using direct coordinates, Google Maps URLs, or Nominatim
   const handleSearch = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     const query = searchQuery.trim();
     if (!query || !mapInstance.current) return;
 

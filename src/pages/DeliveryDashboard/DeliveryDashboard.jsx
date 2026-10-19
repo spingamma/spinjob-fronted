@@ -11,7 +11,8 @@ import {
   Navigation,
   CheckCircle2,
   TrendingUp,
-  PackageCheck
+  PackageCheck,
+  ChevronDown
 } from 'lucide-react';
 import { useDeliveryOrders } from './hooks/useDeliveryOrders';
 import DeliveryOrderCard from './components/DeliveryOrderCard';
@@ -37,13 +38,19 @@ export default function DeliveryDashboard() {
     setToast,
     claimingId,
     deliveringId,
-    userDepartment,
+    selectedDepartment,
+    changeDepartment,
+    availableDepartments,
+    userCountry,
     driverCoords,
     startDate,
     setStartDate,
     endDate,
     setEndDate,
     todayStr,
+    isWorkMode,
+    isLocating,
+    toggleWorkMode,
     refreshOrders,
     claimOrder,
     deliverOrder
@@ -111,19 +118,75 @@ export default function DeliveryDashboard() {
           </button>
         </div>
 
-        {/* ── BANNER DE ZONA / DEPARTAMENTO DEL MOTORIZADO ── */}
-        <div className="max-w-4xl mx-auto px-4 pb-3 flex items-center justify-between text-xs text-white/90">
-          <div className="flex items-center gap-1.5 font-bold">
-            <MapPin size={15} className="text-secondary shrink-0" />
-            <span>Zona asignada: <strong className="text-secondary underline">{userDepartment}</strong></span>
+        {/* ── BANNER DE ZONA / DEPARTAMENTO DEL MOTORIZADO Y MODO TRABAJO ── */}
+        <div className="max-w-4xl mx-auto px-4 pb-3 flex items-center justify-between text-xs text-white/90 gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 font-bold text-secondary">
+              <MapPin size={16} className="shrink-0" />
+              <span className="text-white/80 text-[11px] sm:text-xs">Zona ({userCountry}):</span>
+            </div>
+
+            <div className="relative">
+              <select
+                id="delivery-zone-selector"
+                data-testid="delivery-zone-select"
+                value={selectedDepartment}
+                onChange={(e) => changeDepartment(e.target.value)}
+                className="appearance-none bg-white/15 hover:bg-white/20 text-white font-extrabold text-xs pl-2.5 pr-7 py-1 rounded-xl border border-white/25 focus:border-secondary focus:ring-1 focus:ring-secondary outline-none cursor-pointer transition-all shadow-xs"
+              >
+                {availableDepartments.map((dept) => (
+                  <option key={dept} value={dept} className="bg-primary text-white font-semibold">
+                    {dept === 'Todos' ? `📍 Todos (${userCountry})` : dept}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-white/70 pointer-events-none" />
+            </div>
           </div>
 
-          {driverCoords && (
-            <div className="flex items-center gap-1 text-[11px] text-emerald-400 font-bold">
-              <Navigation size={12} className="animate-pulse" />
-              <span>GPS Activo</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Toggle Modo Trabajo */}
+            <button
+              type="button"
+              onClick={toggleWorkMode}
+              disabled={isLocating}
+              data-testid="delivery-work-mode-toggle"
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-extrabold text-[11px] transition-all cursor-pointer shadow-xs disabled:opacity-60 ${
+                isLocating
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
+                  : isWorkMode
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 hover:bg-emerald-500/30'
+                  : 'bg-white/10 text-white/60 border border-white/20 hover:bg-white/20'
+              }`}
+              title={
+                isLocating
+                  ? 'Obteniendo GPS...'
+                  : isWorkMode
+                  ? 'Pausar turno de trabajo'
+                  : 'Activar turno de trabajo (requiere GPS)'
+              }
+            >
+              {isLocating ? (
+                <Loader2 size={12} className="animate-spin text-amber-300" />
+              ) : (
+                <span className={`w-2 h-2 rounded-full ${isWorkMode ? 'bg-emerald-400 animate-ping' : 'bg-gray-400'}`} />
+              )}
+              <span>
+                {isLocating
+                  ? 'Conectando GPS...'
+                  : isWorkMode
+                  ? 'Modo Trabajo: ACTIVO'
+                  : 'Modo Trabajo: EN PAUSA'}
+              </span>
+            </button>
+
+            {isWorkMode && driverCoords && (
+              <div className="flex items-center gap-1 text-[11px] text-emerald-400 font-bold hidden sm:flex">
+                <Navigation size={12} className="animate-pulse" />
+                <span>GPS Activo</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ── PESTAÑAS PRINCIPALES: DISPONIBLES VS MIS ENTREGAS ── */}
@@ -211,11 +274,34 @@ export default function DeliveryDashboard() {
         {/* ── VISTA 1: PEDIDOS DISPONIBLES PARA TOMAR ── */}
         {activeTab === 'disponibles' && (
           <div className="space-y-4">
+            {!isWorkMode && (
+              <div className="bg-amber-50 border border-amber-200 rounded-3xl p-5 text-center space-y-2 shadow-xs">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-amber-100 text-amber-800 text-lg font-bold mb-1">
+                  ⏸️
+                </div>
+                <h3 className="font-extrabold text-amber-900 text-sm sm:text-base">
+                  Turno en Pausa (Modo Descanso)
+                </h3>
+                <p className="text-xs text-amber-700 max-w-sm mx-auto">
+                  El GPS y las alertas de pedidos están apagados para no consumir tu batería. Activa tu turno cuando estés listo para salir a repartir.
+                </p>
+                <button
+                  type="button"
+                  onClick={toggleWorkMode}
+                  disabled={isLocating}
+                  className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs active:scale-95 disabled:opacity-60"
+                >
+                  {isLocating && <Loader2 size={13} className="animate-spin text-white" />}
+                  <span>{isLocating ? 'Conectando GPS...' : '🟢 Conectar y Activar Turno'}</span>
+                </button>
+              </div>
+            )}
+
             {/* LEYENDA DEL SEMÁFORO DE DISTANCIA */}
             <div className="bg-white rounded-3xl p-4 shadow-xs border border-gray-100 flex items-center justify-between gap-3 flex-wrap">
               <div>
                 <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">
-                  Restaurantes en {userDepartment}
+                  Restaurantes en {selectedDepartment === 'Todos' ? `${userCountry} (Todos)` : selectedDepartment}
                 </span>
                 <p className="text-base font-black text-primary">
                   {loading ? 'Buscando pedidos...' : `${availableOrders.length} listos para entrega`}
@@ -239,7 +325,7 @@ export default function DeliveryDashboard() {
               <div className="flex flex-col items-center justify-center py-16">
                 <Loader2 className="animate-spin text-secondary mb-3" size={36} />
                 <p className="font-extrabold text-gray-400 text-sm">
-                  Ordenando pedidos por cercanía en {userDepartment}...
+                  Ordenando pedidos por cercanía en {selectedDepartment === 'Todos' ? userCountry : selectedDepartment}...
                 </p>
               </div>
             ) : availableOrders.length === 0 ? (
@@ -248,7 +334,7 @@ export default function DeliveryDashboard() {
                   <PackageOpen size={36} />
                 </div>
                 <h3 className="font-black text-lg text-primary mb-1">
-                  No hay pedidos pendientes en {userDepartment}
+                  No hay pedidos pendientes en {selectedDepartment === 'Todos' ? userCountry : selectedDepartment}
                 </h3>
                 <p className="text-gray-400 text-xs sm:text-sm max-w-sm mx-auto mb-4">
                   En cuanto un comercio confirme el pago de una orden, se ordenará aquí por distancia al local al instante.
@@ -269,6 +355,7 @@ export default function DeliveryDashboard() {
                     driverCoords={driverCoords}
                     onClaimOrder={claimOrder}
                     isClaiming={claimingId === order.id}
+                    hasActiveDelivery={activeDeliveries.length > 0}
                   />
                 ))}
               </div>

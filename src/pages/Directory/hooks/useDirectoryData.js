@@ -105,7 +105,7 @@ export function useDirectoryData({
       return;
     }
 
-    let isMounted = true;
+    const controller = new AbortController();
 
     async function cargarDirectorio() {
       setCargandoLista(true);
@@ -118,20 +118,19 @@ export function useDirectoryData({
         if (activeRating && activeRating !== 'Todos') url += `&rating=${encodeURIComponent(activeRating)}`;
         if (searchTerm) url += `&search=${encodeURIComponent(searchTerm)}`;
 
-        const res = await fetch(url);
+        const res = await fetch(url, { signal: controller.signal });
         if (!res.ok) throw new Error("Error en red");
 
         const data = await res.json();
-        if (isMounted) {
-          setProfesionales(data);
-          setHayMas(data.length === 10);
-          setCargandoLista(false);
+        setProfesionales(data);
+        setHayMas(data.length === 10);
+        setCargandoLista(false);
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          return;
         }
-      } catch {
-        if (isMounted) {
-          setProfesionales([]);
-          setCargandoLista(false);
-        }
+        setProfesionales([]);
+        setCargandoLista(false);
       }
     }
 
@@ -139,7 +138,9 @@ export function useDirectoryData({
       cargarDirectorio();
     }
 
-    return () => { isMounted = false; };
+    return () => {
+      controller.abort();
+    };
   }, [selectedCountry, metadata, resolvedCategory, resolvedState, searchTerm, activeNeighborhood, activeRating, activeSubcategory, categoria, estado, showCategoryGrid]);
 
   const cargarMas = useCallback(async () => {

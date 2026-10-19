@@ -34,7 +34,9 @@ export default function OrderSummary() {
   const {
     order,
     isTrackingLoading,
+    isRefreshingTracking,
     fetchedQrImage,
+    refetchOrder
   } = useOrderData({ slug, orderId, paymentQrImage, locationState: location.state });
 
   // Receipt uploader hook (used only in tracking view)
@@ -156,6 +158,8 @@ export default function OrderSummary() {
       handleUploadReceipt={handleUploadReceipt}
       handleConfirmReceived={handleConfirmReceived}
       handleReportIssue={handleReportIssue}
+      onRefreshLocation={refetchOrder}
+      isRefreshingLocation={isRefreshingTracking}
     />
   );
 }

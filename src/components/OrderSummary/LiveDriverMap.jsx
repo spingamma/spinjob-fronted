@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Bike, MapPin, Store, Navigation } from 'lucide-react';
+import { Bike, MapPin, Store, Navigation, RefreshCw } from 'lucide-react';
 import { parseGoogleMapsCoords } from '../../plantillas/utils/parseGoogleMapsCoords';
 
 const loadLeaflet = () => {
@@ -21,7 +21,7 @@ const loadLeaflet = () => {
   });
 };
 
-export default function LiveDriverMap({ order }) {
+export default function LiveDriverMap({ order, onRefreshLocation, isRefreshingLocation }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const driverMarkerRef = useRef(null);
@@ -159,11 +159,27 @@ export default function LiveDriverMap({ order }) {
           </div>
         </div>
 
-        {hasDriverCoords && (
-          <span className="text-[10px] bg-blue-50 text-blue-800 font-extrabold px-2.5 py-1 rounded-full border border-blue-200">
-            📡 Posición en tiempo real
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {hasDriverCoords && (
+            <span className="text-[10px] bg-blue-50 text-blue-800 font-extrabold px-2.5 py-1 rounded-full border border-blue-200">
+              📡 Posición en tiempo real
+            </span>
+          )}
+
+          {onRefreshLocation && (
+            <button
+              type="button"
+              onClick={onRefreshLocation}
+              disabled={isRefreshingLocation}
+              data-testid="refresh-driver-location-btn"
+              title="Actualizar posición del repartidor"
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 active:scale-95 px-2.5 py-1 rounded-full border border-blue-200 transition-all cursor-pointer disabled:opacity-50"
+            >
+              <RefreshCw size={12} className={isRefreshingLocation ? "animate-spin" : ""} />
+              <span>Actualizar</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Contenedor del mapa Leaflet */}

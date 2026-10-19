@@ -54,17 +54,29 @@ export default function MapSelectorModal({ isOpen, onClose, onConfirm, initialCo
             <>
               {/* Search & Actions Bar */}
               <div className="flex flex-col sm:flex-row gap-2">
-                <form onSubmit={handleSearch} className="flex-1 flex gap-1.5">
+                <div className="flex-1 flex gap-1.5">
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleSearch(e);
+                      }
+                    }}
                     placeholder="Buscar zona, calle, plaza en Bolivia..."
                     data-testid="map-search-input"
                     className="flex-1 text-sm bg-gray-50 border border-gray-200 focus:border-secondary focus:bg-white rounded-xl px-3 py-2.5 outline-none transition-all"
                   />
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleSearch(e);
+                    }}
                     disabled={searching}
                     data-testid="map-search-button"
                     className="bg-primary hover:bg-primary/90 text-white p-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center shrink-0 cursor-pointer disabled:opacity-50"
@@ -72,7 +84,7 @@ export default function MapSelectorModal({ isOpen, onClose, onConfirm, initialCo
                   >
                     {searching ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
                   </button>
-                </form>
+                </div>
                 
                 <button
                   type="button"

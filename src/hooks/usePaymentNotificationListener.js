@@ -27,6 +27,12 @@ export function usePaymentNotificationListener() {
             detail: event.data.data
           })
         );
+      } else if (event.data.type === 'PUSH_NOTIFICATION_RECEIVED') {
+        window.dispatchEvent(
+          new CustomEvent('tarjetoso:notification-received', {
+            detail: event.data.data
+          })
+        );
       }
     };
 

@@ -22,6 +22,8 @@ export default function TrackingSection({
   handleUploadReceipt,
   handleConfirmReceived,
   handleReportIssue,
+  onRefreshLocation,
+  isRefreshingLocation,
 }) {
   const [enlargedImage, setEnlargedImage] = useState(null);
   return (
@@ -94,7 +96,11 @@ export default function TrackingSection({
 
         {/* Live GPS Tracking map when driver is on the way */}
         {order?.status === 'en_camino' && (
-          <LiveDriverMap order={order} />
+          <LiveDriverMap
+            order={order}
+            onRefreshLocation={onRefreshLocation}
+            isRefreshingLocation={isRefreshingLocation}
+          />
         )}
 
         {/* QR payment */}

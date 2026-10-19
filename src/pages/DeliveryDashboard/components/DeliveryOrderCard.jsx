@@ -39,7 +39,8 @@ export default function DeliveryOrderCard({
   order, 
   driverCoords, 
   onClaimOrder, 
-  isClaiming = false 
+  isClaiming = false,
+  hasActiveDelivery = false
 }) {
   const [showItems, setShowItems] = useState(false);
   const orderCode = formatOrderCode(order.order_number, order.id);
@@ -330,9 +331,24 @@ export default function DeliveryOrderCard({
           </span>
         </div>
 
-        {/* BOTÓN DE ACCIÓN CON VALIDACIÓN DE DISTANCIA (< 8km) */}
+        {/* BOTÓN DE ACCIÓN CON VALIDACIÓN DE PEDIDO ACTIVO (< 1 activo) Y DISTANCIA (< 8km) */}
         <div className="flex flex-col items-stretch sm:items-end gap-1">
-          {distanceInfo.canAccept ? (
+          {hasActiveDelivery ? (
+            <div className="flex flex-col items-stretch sm:items-end">
+              <button
+                disabled={true}
+                data-testid={`active-delivery-limit-btn-${order.id}`}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-amber-50 border border-amber-200 text-amber-800 font-extrabold text-xs rounded-2xl cursor-not-allowed opacity-90"
+                title="Ya tienes una entrega en curso"
+              >
+                <Clock size={16} className="text-amber-600" />
+                <span>Entrega en curso (Máx. 1)</span>
+              </button>
+              <span className="text-[11px] font-bold text-amber-700 text-center sm:text-right mt-1">
+                Completa tu pedido actual antes de tomar otro
+              </span>
+            </div>
+          ) : distanceInfo.canAccept ? (
             <button
               onClick={() => onClaimOrder(order.id)}
               disabled={isClaiming}

@@ -35,6 +35,7 @@ function Perfil() {
 
   useEffect(() => {
     let isMounted = true;
+    let retryTimeoutId = null;
 
     async function obtenerPerfil(intentos = 0) {
       try {
@@ -66,7 +67,7 @@ function Perfil() {
           if (intentos === 3) setMensajeCarga("Preparando la tarjeta digital...");
           if (intentos === 6) setMensajeCarga("Casi listo, el servidor está iniciando...");
 
-          setTimeout(() => obtenerPerfil(intentos + 1), 3500);
+          retryTimeoutId = setTimeout(() => obtenerPerfil(intentos + 1), 3500);
         } else if (isMounted) {
           console.error("Error definitivo cargando perfil:", error);
           setCargando(false);
@@ -78,6 +79,9 @@ function Perfil() {
 
     return () => {
       isMounted = false;
+      if (retryTimeoutId) {
+        clearTimeout(retryTimeoutId);
+      }
     };
   }, [slug]);
 

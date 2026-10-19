@@ -73,6 +73,18 @@ export default function useMyOrders() {
     fetchOrders();
   }, [fetchOrders]);
 
+  useEffect(() => {
+    const handleNotification = () => {
+      fetchOrders();
+    };
+    window.addEventListener('tarjetoso:notification-received', handleNotification);
+    window.addEventListener('tarjetoso:payment-received', handleNotification);
+    return () => {
+      window.removeEventListener('tarjetoso:notification-received', handleNotification);
+      window.removeEventListener('tarjetoso:payment-received', handleNotification);
+    };
+  }, [fetchOrders]);
+
   const handleMarkReceived = async (orderId) => {
     setUpdatingOrderId(orderId);
     try {

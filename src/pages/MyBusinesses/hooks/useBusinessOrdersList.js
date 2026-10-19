@@ -95,12 +95,14 @@ export function useBusinessOrdersList(slug) {
   }, [slug, startDate, endDate, fetchOrders]);
 
   useEffect(() => {
-    const handlePaymentReceived = () => {
+    const handleNotification = () => {
       fetchOrders(startDate, endDate);
     };
-    window.addEventListener('tarjetoso:payment-received', handlePaymentReceived);
+    window.addEventListener('tarjetoso:payment-received', handleNotification);
+    window.addEventListener('tarjetoso:notification-received', handleNotification);
     return () => {
-      window.removeEventListener('tarjetoso:payment-received', handlePaymentReceived);
+      window.removeEventListener('tarjetoso:payment-received', handleNotification);
+      window.removeEventListener('tarjetoso:notification-received', handleNotification);
     };
   }, [startDate, endDate, fetchOrders]);
 

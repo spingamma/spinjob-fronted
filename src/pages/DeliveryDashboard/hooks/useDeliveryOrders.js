@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import fetchAuth from '../../../utils/fetchAuth';
 import { API_URL } from '../../../config/api';
+import { calculateStraightDistanceKm } from '../../../utils/deliveryCalculator';
 
 export function useDeliveryOrders() {
   const [activeTab, setActiveTab] = useState('disponibles'); // 'disponibles' | 'mis_entregas'
@@ -20,60 +22,250 @@ export function useDeliveryOrders() {
   const [claimingId, setClaimingId] = useState(null);
   const [deliveringId, setDeliveringId] = useState(null);
   const [driverCoords, setDriverCoords] = useState(null);
+  const [isLocating, setIsLocating] = useState(false);
+
+  // País configurado del usuario (del perfil, fallback a 'Bolivia')
+  const userCountry = (() => {
+    try {
+      const raw = localStorage.getItem('spingamma_user');
+      const u = raw ? JSON.parse(raw) : null;
+      return u?.country || 'Bolivia';
+    } catch {
+      return 'Bolivia';
+    }
+  })();
+
+  // Departamentos dinámicos cargados según el país del usuario
+  const [availableDepartments, setAvailableDepartments] = useState(['Todos']);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadCountryDepartments() {
+      try {
+        const res = await fetch(`${API_URL}/countries/`);
+        if (res.ok) {
+          const countries = await res.json();
+          const match = Array.isArray(countries)
+            ? countries.find((c) => c.country?.toLowerCase() === userCountry.toLowerCase()) || countries[0]
+            : null;
+
+          if (match && Array.isArray(match.departments) && isMounted) {
+            const deptNames = match.departments.map((d) => d.name);
+            setAvailableDepartments(['Todos', ...deptNames]);
+          }
+        }
+      } catch (err) {
+        console.error('Error cargando departamentos del país:', err);
+      }
+    }
+    loadCountryDepartments();
+    return () => {
+      isMounted = false;
+    };
+  }, [userCountry]);
+
+  // Departamento del repartidor: configurable vía dropdown (persistido, fallback a 'Todos')
+  const [selectedDepartment, setSelectedDepartment] = useState(() => {
+    try {
+      const stored = localStorage.getItem('tarjetoso_delivery_department');
+      if (stored) return stored;
+      const raw = localStorage.getItem('spingamma_user');
+      const u = raw ? JSON.parse(raw) : null;
+      return u?.state || 'Todos';
+    } catch {
+      return 'Todos';
+    }
+  });
+
+  const changeDepartment = useCallback((newDept) => {
+    setSelectedDepartment(newDept);
+    try {
+      localStorage.setItem('tarjetoso_delivery_department', newDept);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Modo Trabajo / Turno del repartidor (persistido, requiere GPS para encender)
+  const [isWorkMode, setIsWorkMode] = useState(() => {
+    try {
+      const stored = localStorage.getItem('tarjetoso_delivery_work_mode');
+      return stored === 'true'; // Solo activo si fue explícitamente encendido
+    } catch {
+      return false;
+    }
+  });
+
+  const driverCoordsRef = useRef(null);
+  const lastEmittedCoordsRef = useRef(null);
+  const isInitialLoadDisponibles = useRef(true);
+  const isInitialLoadMyOrders = useRef(true);
+
+  // Referencia viva a entregas en camino para la emisión reactiva de GPS sin re-suscribir el watch
+  const activeDeliveries = myOrders.filter(o => o.status === 'en_camino');
+  const activeDeliveriesRef = useRef(activeDeliveries);
+  useEffect(() => {
+    activeDeliveriesRef.current = activeDeliveries;
+  }, [activeDeliveries]);
 
   const todayStr = new Date().toISOString().split('T')[0];
   const [startDate, setStartDate] = useState(todayStr);
   const [endDate, setEndDate] = useState(todayStr);
 
-  // Departamento fijo del usuario (del perfil o Santa Cruz por defecto)
-  const userDepartment = (() => {
-    try {
-      const raw = localStorage.getItem('spingamma_user');
-      const u = raw ? JSON.parse(raw) : null;
-      return u?.state || 'Santa Cruz';
-    } catch {
-      return 'Santa Cruz';
-    }
-  })();
+  // Función de actualización de posición GPS
+  const handlePositionUpdate = useCallback((pos) => {
+    const newCoords = {
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude
+    };
+    driverCoordsRef.current = newCoords;
 
-  // Obtener geolocalización del repartidor en tiempo real
-  useEffect(() => {
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setDriverCoords({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude
-          });
-        },
-        (err) => {
-          console.warn('Geolocalización no disponible:', err.message);
-        },
-        { enableHighAccuracy: true, timeout: 6000 }
-      );
+    // Actualizar estado React solo si el desplazamiento es >= 100 metros (0.10 km)
+    setDriverCoords((prev) => {
+      if (!prev) return newCoords;
+      const distKm = calculateStraightDistanceKm(prev.lat, prev.lng, newCoords.lat, newCoords.lng);
+      return distKm >= 0.10 ? newCoords : prev;
+    });
 
-      // Vigilar posición si se desplaza en la moto
-      const watchId = navigator.geolocation.watchPosition(
-        (pos) => {
-          setDriverCoords({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude
-          });
-        },
-        null,
-        { enableHighAccuracy: true, maximumAge: 10000 }
-      );
+    // Emisión reactiva al único pedido 'en_camino' guiada puramente por desplazamiento (>= 100m)
+    const currentActive = activeDeliveriesRef.current;
+    if (currentActive && currentActive.length > 0) {
+      const last = lastEmittedCoordsRef.current;
+      const distEmittedKm = last
+        ? calculateStraightDistanceKm(last.lat, last.lng, newCoords.lat, newCoords.lng)
+        : 999;
 
-      return () => {
-        navigator.geolocation.clearWatch(watchId);
-      };
+      if (distEmittedKm >= 0.10) {
+        lastEmittedCoordsRef.current = newCoords;
+        const activeOrder = currentActive[0];
+        fetchAuth(`${API_URL}/delivery/orders/${activeOrder.id}/location`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            lat: newCoords.lat,
+            lng: newCoords.lng
+          })
+        }).catch((e) => console.warn('Error emitiendo ubicación GPS:', e));
+      }
     }
   }, []);
 
-  // Consultar pedidos disponibles para tomar
+  // Encender o apagar Modo Trabajo (OBLIGATORIO compartir ubicación al encender)
+  const toggleWorkMode = useCallback(() => {
+    if (isWorkMode) {
+      // Apagar Modo Trabajo
+      setIsWorkMode(false);
+      setDriverCoords(null);
+      driverCoordsRef.current = null;
+      try {
+        localStorage.setItem('tarjetoso_delivery_work_mode', 'false');
+      } catch (err) {
+        console.warn('Error saving work mode:', err);
+      }
+      setToast({
+        type: 'warning',
+        message: 'Modo Trabajo pausado. Turno detenido.'
+      });
+      return;
+    }
+
+    // Encender Modo Trabajo: Requiere obtener ubicación actual en el primer click
+    if (!('geolocation' in navigator)) {
+      setToast({
+        type: 'error',
+        message: 'Tu dispositivo o navegador no soporta geolocalización GPS.'
+      });
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setIsLocating(false);
+        handlePositionUpdate(pos);
+        setIsWorkMode(true);
+        try {
+          localStorage.setItem('tarjetoso_delivery_work_mode', 'true');
+        } catch (storageErr) {
+          console.warn('Error saving work mode:', storageErr);
+        }
+        setToast({
+          type: 'success',
+          message: '📍 Modo Trabajo activado. Ubicación GPS sincronizada.'
+        });
+      },
+      (err) => {
+        setIsLocating(false);
+        setIsWorkMode(false);
+        try {
+          localStorage.setItem('tarjetoso_delivery_work_mode', 'false');
+        } catch (storageErr) {
+          console.warn('Error saving work mode:', storageErr);
+        }
+        let msg = 'Debes permitir el acceso a tu ubicación GPS para activar el Modo Trabajo.';
+        if (err?.code === 1) {
+          msg = 'Permiso de ubicación denegado. Activa el GPS y permite el acceso para iniciar turno.';
+        } else if (err?.code === 2) {
+          msg = 'Ubicación no disponible. Revisa que tu GPS esté activado.';
+        } else if (err?.code === 3) {
+          msg = 'Tiempo de espera agotado al consultar GPS. Intenta de nuevo.';
+        }
+        setToast({
+          type: 'warning',
+          message: msg
+        });
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  }, [isWorkMode, handlePositionUpdate]);
+
+  // Vigilar geolocalización continua del repartidor (solo si Modo Trabajo está activo)
+  useEffect(() => {
+    if (!isWorkMode || !('geolocation' in navigator)) {
+      setDriverCoords(null);
+      driverCoordsRef.current = null;
+      return;
+    }
+
+    // Al montar o si ya estaba activo, sincronizar ubicación inicial
+    navigator.geolocation.getCurrentPosition(
+      handlePositionUpdate,
+      (err) => {
+        console.warn('Geolocalización no disponible al iniciar:', err.message);
+        setIsWorkMode(false);
+        try {
+          localStorage.setItem('tarjetoso_delivery_work_mode', 'false');
+        } catch (storageErr) {
+          console.warn('Error saving work mode:', storageErr);
+        }
+        setToast({
+          type: 'warning',
+          message: 'Se requiere GPS activo para el Modo Trabajo. Actívalo para iniciar turno.'
+        });
+      },
+      { enableHighAccuracy: true, timeout: 6000 }
+    );
+
+    const watchId = navigator.geolocation.watchPosition(
+      handlePositionUpdate,
+      null,
+      { enableHighAccuracy: true, maximumAge: 10000 }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, [isWorkMode, handlePositionUpdate]);
+
+  // Consultar pedidos disponibles para tomar (silencioso tras la carga inicial)
   const fetchAvailableOrders = useCallback(async (isBackground = false) => {
-    if (!isBackground) setLoading(true);
-    else setRefreshing(true);
+    if (!isBackground && isInitialLoadDisponibles.current) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
     setError(null);
 
     const token = localStorage.getItem('spingamma_token');
@@ -86,21 +278,16 @@ export function useDeliveryOrders() {
 
     try {
       const params = new URLSearchParams();
-      if (userDepartment) {
-        params.append('state', userDepartment);
+      if (selectedDepartment) {
+        params.append('state', selectedDepartment);
       }
-      if (driverCoords?.lat && driverCoords?.lng) {
-        params.append('lat', driverCoords.lat);
-        params.append('lng', driverCoords.lng);
+      const coords = driverCoordsRef.current;
+      if (coords?.lat && coords?.lng) {
+        params.append('lat', coords.lat);
+        params.append('lng', coords.lng);
       }
 
-      const res = await fetch(`${API_URL}/delivery/orders?${params.toString()}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const res = await fetchAuth(`${API_URL}/delivery/orders?${params.toString()}`);
 
       if (!res.ok) {
         if (res.status === 403) {
@@ -111,51 +298,59 @@ export function useDeliveryOrders() {
 
       const data = await res.json();
       setAvailableOrders(Array.isArray(data) ? data : []);
+      isInitialLoadDisponibles.current = false;
     } catch (err) {
       console.error('Error fetching available orders:', err);
-      setError(err.message);
+      if (err.message !== 'SESSION_EXPIRED') {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [userDepartment, driverCoords]);
+  }, [selectedDepartment]);
 
   // Consultar entregas asignadas al motorizado ('en_camino' y 'entregado')
   const fetchMyOrders = useCallback(async (isBackground = false) => {
-    if (!isBackground) setLoading(true);
-    else setRefreshing(true);
+    if (!isBackground && isInitialLoadMyOrders.current) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
 
     const token = localStorage.getItem('spingamma_token');
-    if (!token) return;
+    if (!token) {
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
 
     try {
       const params = new URLSearchParams();
-      if (driverCoords?.lat && driverCoords?.lng) {
-        params.append('lat', driverCoords.lat);
-        params.append('lng', driverCoords.lng);
+      const coords = driverCoordsRef.current;
+      if (coords?.lat && coords?.lng) {
+        params.append('lat', coords.lat);
+        params.append('lng', coords.lng);
       }
       if (startDate) params.append('start_date', startDate);
       if (endDate) params.append('end_date', endDate);
 
-      const res = await fetch(`${API_URL}/delivery/my-orders?${params.toString()}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const res = await fetchAuth(`${API_URL}/delivery/my-orders?${params.toString()}`);
 
       if (res.ok) {
         const data = await res.json();
         setMyOrders(Array.isArray(data) ? data : []);
+        isInitialLoadMyOrders.current = false;
       }
     } catch (err) {
-      console.error('Error fetching my deliveries:', err);
+      if (err.message !== 'SESSION_EXPIRED') {
+        console.error('Error fetching my deliveries:', err);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [driverCoords, startDate, endDate]);
+  }, [startDate, endDate]);
 
   // Consultar resumen de ganancias y contadores por rango de fechas
   const fetchSummary = useCallback(async () => {
@@ -167,19 +362,15 @@ export function useDeliveryOrders() {
       if (startDate) params.append('start_date', startDate);
       if (endDate) params.append('end_date', endDate);
 
-      const res = await fetch(`${API_URL}/delivery/my-summary?${params.toString()}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const res = await fetchAuth(`${API_URL}/delivery/my-summary?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
         setSummary(data);
       }
     } catch (err) {
-      console.error('Error fetching delivery summary:', err);
+      if (err.message !== 'SESSION_EXPIRED') {
+        console.error('Error fetching delivery summary:', err);
+      }
     }
   }, [startDate, endDate]);
 
@@ -193,63 +384,44 @@ export function useDeliveryOrders() {
     fetchSummary();
   }, [activeTab, startDate, endDate, fetchAvailableOrders, fetchMyOrders, fetchSummary]);
 
-  // Sondeo en vivo en segundo plano
+  // Actualización reactiva por eventos y notificaciones push (sin timers de sondeo ciego de fondo)
   useEffect(() => {
-    const interval = setInterval(() => {
+    const handleNotification = () => {
+      if (!isWorkMode) return; // Si está desconectado, ignora notificaciones
       if (activeTab === 'disponibles') {
         fetchAvailableOrders(true);
       } else {
         fetchMyOrders(true);
       }
       fetchSummary();
-    }, 7000);
-
-    return () => clearInterval(interval);
-  }, [activeTab, fetchAvailableOrders, fetchMyOrders, fetchSummary]);
-
-  // Transmisión periódica de coordenadas GPS mientras el repartidor tiene pedidos 'en_camino'
-  useEffect(() => {
-    const activeOnTheWay = myOrders.filter(o => o.status === 'en_camino');
-    if (activeOnTheWay.length === 0 || !driverCoords) return;
-
-    const emitLocation = async () => {
-      const token = localStorage.getItem('spingamma_token');
-      if (!token) return;
-
-      for (const order of activeOnTheWay) {
-        try {
-          await fetch(`${API_URL}/delivery/orders/${order.id}/location`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              lat: driverCoords.lat,
-              lng: driverCoords.lng
-            })
-          });
-        } catch (e) {
-          console.warn('Error emitiendo ubicación GPS:', e);
-        }
-      }
     };
 
-    emitLocation();
-    const locInterval = setInterval(emitLocation, 8000);
-    return () => clearInterval(locInterval);
-  }, [myOrders, driverCoords]);
+    window.addEventListener('tarjetoso:notification-received', handleNotification);
+    window.addEventListener('tarjetoso:payment-received', handleNotification);
+
+    return () => {
+      window.removeEventListener('tarjetoso:notification-received', handleNotification);
+      window.removeEventListener('tarjetoso:payment-received', handleNotification);
+    };
+  }, [isWorkMode, activeTab, fetchAvailableOrders, fetchMyOrders, fetchSummary]);
 
   // Tomar pedido (Fase 1 + Fase 2: Redirigir a Mis Entregas)
   const claimOrder = async (orderId) => {
+    if (activeDeliveries.length > 0) {
+      setToast({
+        type: 'warning',
+        message: '⚠️ Ya tienes una entrega en curso. Debes completarla antes de tomar otro pedido.'
+      });
+      setTimeout(() => setToast(null), 4000);
+      return;
+    }
+
     setClaimingId(orderId);
-    const token = localStorage.getItem('spingamma_token');
 
     try {
-      const res = await fetch(`${API_URL}/delivery/orders/${orderId}/claim`, {
+      const res = await fetchAuth(`${API_URL}/delivery/orders/${orderId}/claim`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -286,10 +458,12 @@ export function useDeliveryOrders() {
       // Actualizar métricas
       fetchSummary();
     } catch (err) {
-      setToast({
-        type: 'error',
-        message: err.message || 'Error al aceptar el pedido.'
-      });
+      if (err.message !== 'SESSION_EXPIRED') {
+        setToast({
+          type: 'error',
+          message: err.message || 'Error al aceptar el pedido.'
+        });
+      }
     } finally {
       setClaimingId(null);
       setTimeout(() => setToast(null), 4000);
@@ -299,13 +473,11 @@ export function useDeliveryOrders() {
   // Marcar pedido como entregado (Fase 2)
   const deliverOrder = async (orderId) => {
     setDeliveringId(orderId);
-    const token = localStorage.getItem('spingamma_token');
 
     try {
-      const res = await fetch(`${API_URL}/delivery/orders/${orderId}/deliver`, {
+      const res = await fetchAuth(`${API_URL}/delivery/orders/${orderId}/deliver`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -326,17 +498,18 @@ export function useDeliveryOrders() {
       setMyOrders(prev => prev.map(o => o.id === orderId ? updatedOrder : o));
       fetchSummary();
     } catch (err) {
-      setToast({
-        type: 'error',
-        message: err.message || 'Error al confirmar entrega.'
-      });
+      if (err.message !== 'SESSION_EXPIRED') {
+        setToast({
+          type: 'error',
+          message: err.message || 'Error al confirmar entrega.'
+        });
+      }
     } finally {
       setDeliveringId(null);
       setTimeout(() => setToast(null), 4000);
     }
   };
 
-  const activeDeliveries = myOrders.filter(o => o.status === 'en_camino');
   const completedDeliveries = myOrders.filter(o => o.status === 'entregado');
 
   return {
@@ -356,13 +529,21 @@ export function useDeliveryOrders() {
     setToast,
     claimingId,
     deliveringId,
-    userDepartment,
+    selectedDepartment,
+    userDepartment: selectedDepartment,
+    changeDepartment,
+    setSelectedDepartment: changeDepartment,
+    availableDepartments,
+    userCountry,
     driverCoords,
     startDate,
     setStartDate,
     endDate,
     setEndDate,
     todayStr,
+    isWorkMode,
+    isLocating,
+    toggleWorkMode,
     refreshOrders: () => {
       if (activeTab === 'disponibles') fetchAvailableOrders(false);
       else fetchMyOrders(false);
