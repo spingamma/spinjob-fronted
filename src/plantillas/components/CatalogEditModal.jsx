@@ -139,8 +139,6 @@ export default function CatalogEditModal({
       if (profesional.whatsapp_numbers) formDataObj.append('whatsapp_numbers', profesional.whatsapp_numbers);
       if (profesional.ubicacion_url) formDataObj.append('ubicacion_url', profesional.ubicacion_url);
       if (profesional.catalog_url) formDataObj.append('catalog_url', profesional.catalog_url);
-      if (profesional.home_delivery !== undefined) formDataObj.append('home_delivery', profesional.home_delivery);
-      if (profesional.national_delivery !== undefined) formDataObj.append('national_delivery', profesional.national_delivery);
       if (profesional.experience_years) formDataObj.append('experience_years', profesional.experience_years);
       if (profesional.credentials) formDataObj.append('credentials', profesional.credentials);
 

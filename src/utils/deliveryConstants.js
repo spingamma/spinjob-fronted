@@ -35,3 +35,26 @@ export function normalizeDeliveryMethods(rawMethods) {
 
   return normalized.size > 0 ? Array.from(normalized) : [DELIVERY_METHOD_PICKUP];
 }
+
+/**
+ * Determina si un comercio ofrece la opción de delivery según su configuración
+ * de catálogo y órdenes activas.
+ *
+ * @param {string|string[]|null|undefined} rawMethods
+ * @param {boolean} [ordersEnabled=true]
+ * @returns {boolean}
+ */
+export function hasDeliveryOption(rawMethods, ordersEnabled = true) {
+  if (ordersEnabled === false) return false;
+  if (!rawMethods) return false;
+  try {
+    const list = typeof rawMethods === 'string' ? JSON.parse(rawMethods) : rawMethods;
+    if (!Array.isArray(list)) return false;
+    return list.some(item => {
+      const str = String(item).trim().toLowerCase();
+      return str.includes('delivery') || str.includes('domicilio') || str.includes('envio') || str.includes('envío');
+    });
+  } catch {
+    return false;
+  }
+}

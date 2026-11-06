@@ -10,7 +10,8 @@ import {
   Bike,
   Loader2,
   AlertOctagon,
-  ShieldAlert
+  ShieldAlert,
+  Pause
 } from 'lucide-react';
 import { formatOrderCode } from '../../../utils/formatOrderCode';
 import { WhatsappIcon } from '../../../plantillas/components/ProfileIcons';
@@ -40,7 +41,8 @@ export default function DeliveryOrderCard({
   driverCoords, 
   onClaimOrder, 
   isClaiming = false,
-  hasActiveDelivery = false
+  hasActiveDelivery = false,
+  isWorkMode = true
 }) {
   const [showItems, setShowItems] = useState(false);
   const orderCode = formatOrderCode(order.order_number, order.id);
@@ -331,9 +333,24 @@ export default function DeliveryOrderCard({
           </span>
         </div>
 
-        {/* BOTÓN DE ACCIÓN CON VALIDACIÓN DE PEDIDO ACTIVO (< 1 activo) Y DISTANCIA (< 8km) */}
+        {/* BOTÓN DE ACCIÓN CON VALIDACIÓN DE TURNO ACTIVO, PEDIDO ACTIVO (< 1 activo) Y DISTANCIA (< 8km) */}
         <div className="flex flex-col items-stretch sm:items-end gap-1">
-          {hasActiveDelivery ? (
+          {!isWorkMode ? (
+            <div className="flex flex-col items-stretch sm:items-end">
+              <button
+                disabled={true}
+                data-testid={`paused-shift-btn-${order.id}`}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 border border-gray-200 text-gray-500 font-extrabold text-xs rounded-2xl cursor-not-allowed opacity-90"
+                title="Tu turno está en pausa. Actívalo para tomar pedidos."
+              >
+                <Pause size={15} className="text-gray-400" />
+                <span>Turno en Pausa</span>
+              </button>
+              <span className="text-[11px] font-bold text-gray-500 text-center sm:text-right mt-1">
+                Activa tu turno para aceptar pedidos
+              </span>
+            </div>
+          ) : hasActiveDelivery ? (
             <div className="flex flex-col items-stretch sm:items-end">
               <button
                 disabled={true}

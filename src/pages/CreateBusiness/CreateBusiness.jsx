@@ -23,8 +23,6 @@ const blankProfesional = {
   website: '',
   country: 'Bolivia',
   state: '',
-  home_delivery: false,
-  national_delivery: false,
   ubicacion_url: '',
   image: null,
   owner_id: null

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { normalizeText } from '../../utils/slugs';
+import { hasDeliveryOption } from '../../utils/deliveryConstants';
 
 const parseGoogleMapsCoords = (url) => {
   if (!url) return null;
@@ -65,7 +66,7 @@ export function useProfessionalsFilter({
 
         let matchDistance = true;
         if (activeDistance !== 'Todos' && userCoords) {
-          if (p.home_delivery || p.national_delivery) {
+          if (hasDeliveryOption(p.delivery_methods, p.orders_enabled)) {
             matchDistance = true;
           } else {
             const bizCoords = parseGoogleMapsCoords(p.ubicacion_url);

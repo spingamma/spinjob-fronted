@@ -1,6 +1,7 @@
 import React from 'react';
 import { Camera, Star, Edit3, Share2, QrCode, Bookmark, ChevronLeft } from 'lucide-react';
 import WoodenClosedSign from '../../../components/WoodenClosedSign';
+import { hasDeliveryOption } from '../../../utils/deliveryConstants';
 
 export default function HeroBanner({
   profesional,
@@ -85,21 +86,16 @@ export default function HeroBanner({
           </button>
         )}
 
-        {/* BADGES DE ENTREGA (A LA DERECHA DEL LÁPIZ O EN LA ESQUINA INFERIOR IZQUIERDA) */}
-        {(profesional.home_delivery || profesional.national_delivery) && (
+        {/* BADGE DE DELIVERY (DESDE MÉTODOS DE ENTREGA DEL CATÁLOGO) */}
+        {hasDeliveryOption(profesional.delivery_methods, profesional.orders_enabled) && (
           <div className="flex flex-col gap-1.5 items-start">
-            {profesional.home_delivery && (
-              <span className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-primary text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left">
-                <span className="shrink-0">📦</span>
-                <span>Entrega Domicilio</span>
-              </span>
-            )}
-            {profesional.national_delivery && (
-              <span className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-primary text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left">
-                <span className="shrink-0">✈️</span>
-                <span>Delivery Nacional</span>
-              </span>
-            )}
+            <span 
+              data-testid="hero-delivery-badge"
+              className="inline-flex items-start gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-100 text-primary text-[9px] sm:text-[10px] font-extrabold px-1.5 py-1 rounded-lg shadow-sm w-[75px] sm:w-[85px] leading-tight text-left"
+            >
+              <span className="shrink-0">📦</span>
+              <span>Delivery</span>
+            </span>
           </div>
         )}
       </div>

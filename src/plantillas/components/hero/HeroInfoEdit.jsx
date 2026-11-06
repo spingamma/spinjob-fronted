@@ -145,26 +145,6 @@ export default function HeroInfoEdit({
           </select>
         </div>
 
-        <div className="flex flex-col col-span-2">
-          <label className="text-xs font-bold text-gray-500 mb-1">¿Realiza entregas a domicilio?</label>
-          <select
-            value={editFormData.national_delivery ? "national" : (editFormData.home_delivery ? "local" : "no")}
-            onChange={(e) => {
-              const val = e.target.value;
-              setEditFormData(prev => ({
-                ...prev,
-                home_delivery: val === 'local',
-                national_delivery: val === 'national'
-              }));
-            }}
-            className="w-full text-sm bg-white/80 border border-dashed border-gray-400 focus:border-secondary rounded p-2 outline-none cursor-pointer"
-          >
-            <option value="no">No realizo envíos / entregas</option>
-            <option value="local">Sí, realizo entregas a domicilio (Departamental)</option>
-            <option value="national">Sí, realizo envíos nacionales ✈️</option>
-          </select>
-        </div>
-
         <div className="flex flex-col col-span-2 gap-2">
           <div className="flex justify-between items-center">
             <label className="text-xs font-bold text-gray-500">Enlace de Google Maps</label>

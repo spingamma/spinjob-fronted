@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { Star, ChevronLeft, ChevronRight, CheckCircle2, Utensils, ArrowRight } from 'lucide-react';
 import FeedProductCard from './FeedProductCard';
 import WoodenClosedSign from '../WoodenClosedSign';
+import { hasDeliveryOption } from '../../utils/deliveryConstants';
 
 export default function BusinessFeedCard({ business, onBusinessClick, onProductClick }) {
   const scrollContainerRef = useRef(null);
@@ -77,15 +78,9 @@ export default function BusinessFeedCard({ business, onBusinessClick, onProductC
                 </span>
               )}
 
-              {business.home_delivery && (
+              {hasDeliveryOption(business.delivery_methods, business.orders_enabled) && (
                 <span className="text-[11px] font-semibold text-primary/80 bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10">
                   📦 Delivery
-                </span>
-              )}
-
-              {business.national_delivery && (
-                <span className="text-[11px] font-semibold text-primary/80 bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10">
-                  ✈️ Nacional
                 </span>
               )}
             </div>

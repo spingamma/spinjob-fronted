@@ -125,8 +125,6 @@ export function usePlantillaGenerica(profesional, onProtectedAction, onUpdate, i
           website: profesional.website || '',
           country: profesional.country || 'Bolivia',
           state: profesional.state || '',
-          home_delivery: profesional.home_delivery || false,
-          national_delivery: profesional.national_delivery || false,
           ubicacion_url: profesional.ubicacion_url || '',
           category: profesional.category || '',
           subcategories: (() => {

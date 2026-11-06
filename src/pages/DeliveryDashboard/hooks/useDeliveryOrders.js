@@ -407,6 +407,15 @@ export function useDeliveryOrders() {
 
   // Tomar pedido (Fase 1 + Fase 2: Redirigir a Mis Entregas)
   const claimOrder = async (orderId) => {
+    if (!isWorkMode) {
+      setToast({
+        type: 'warning',
+        message: '⚠️ Tu turno está en pausa. Activa tu turno para poder aceptar pedidos.'
+      });
+      setTimeout(() => setToast(null), 4000);
+      return;
+    }
+
     if (activeDeliveries.length > 0) {
       setToast({
         type: 'warning',

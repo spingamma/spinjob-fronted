@@ -12,7 +12,9 @@ import {
   CheckCircle2,
   TrendingUp,
   PackageCheck,
-  ChevronDown
+  ChevronDown,
+  Play,
+  Pause
 } from 'lucide-react';
 import { useDeliveryOrders } from './hooks/useDeliveryOrders';
 import DeliveryOrderCard from './components/DeliveryOrderCard';
@@ -145,26 +147,15 @@ export default function DeliveryDashboard() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Toggle Modo Trabajo */}
-            <button
-              type="button"
-              onClick={toggleWorkMode}
-              disabled={isLocating}
-              data-testid="delivery-work-mode-toggle"
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-extrabold text-[11px] transition-all cursor-pointer shadow-xs disabled:opacity-60 ${
+            {/* Indicador Píldora de Estado */}
+            <div
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-extrabold text-[11px] transition-all shadow-xs ${
                 isLocating
                   ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
                   : isWorkMode
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 hover:bg-emerald-500/30'
-                  : 'bg-white/10 text-white/60 border border-white/20 hover:bg-white/20'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40'
+                  : 'bg-white/10 text-white/60 border border-white/20'
               }`}
-              title={
-                isLocating
-                  ? 'Obteniendo GPS...'
-                  : isWorkMode
-                  ? 'Pausar turno de trabajo'
-                  : 'Activar turno de trabajo (requiere GPS)'
-              }
             >
               {isLocating ? (
                 <Loader2 size={12} className="animate-spin text-amber-300" />
@@ -175,9 +166,39 @@ export default function DeliveryDashboard() {
                 {isLocating
                   ? 'Conectando GPS...'
                   : isWorkMode
-                  ? 'Modo Trabajo: ACTIVO'
-                  : 'Modo Trabajo: EN PAUSA'}
+                  ? 'Turno: ACTIVO'
+                  : 'Turno: EN PAUSA'}
               </span>
+            </div>
+
+            {/* Botón Redondo Play / Pausa (II) */}
+            <button
+              type="button"
+              onClick={toggleWorkMode}
+              disabled={isLocating}
+              data-testid="delivery-work-mode-toggle"
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-md active:scale-90 disabled:opacity-60 ${
+                isLocating
+                  ? 'bg-amber-500/30 text-amber-300 border border-amber-400/50'
+                  : isWorkMode
+                  ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40'
+                  : 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/30'
+              }`}
+              title={
+                isLocating
+                  ? 'Obteniendo GPS...'
+                  : isWorkMode
+                  ? 'Pausar turno de trabajo (⏸️)'
+                  : 'Iniciar turno de trabajo (▶️)'
+              }
+            >
+              {isLocating ? (
+                <Loader2 size={14} className="animate-spin text-amber-300" />
+              ) : isWorkMode ? (
+                <Pause size={14} className="fill-amber-300 text-amber-300" />
+              ) : (
+                <Play size={14} className="fill-white text-white translate-x-0.5" />
+              )}
             </button>
 
             {isWorkMode && driverCoords && (
@@ -356,6 +377,7 @@ export default function DeliveryDashboard() {
                     onClaimOrder={claimOrder}
                     isClaiming={claimingId === order.id}
                     hasActiveDelivery={activeDeliveries.length > 0}
+                    isWorkMode={isWorkMode}
                   />
                 ))}
               </div>
